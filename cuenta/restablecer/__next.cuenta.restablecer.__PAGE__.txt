@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[89451,["/atelier-lumiere-demo/_next/static/chunks/0gtkr9k4farey.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js","/atelier-lumiere-demo/_next/static/chunks/44ki77vqt4b15.js","/atelier-lumiere-demo/_next/static/chunks/3ouhimspcy2zm.js"],"ResetPasswordForm"]
+3:I[97367,["/atelier-lumiere-demo/_next/static/chunks/0gtkr9k4farey.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","main",null,{"className":"inner-page page-shell account-reset-page","children":[["$","p",null,{"className":"eyebrow","children":"Seguridad de la cuenta"}],["$","h1",null,{"children":"Crea una nueva contraseña"}],["$","p",null,{"children":"Utiliza al menos 12 caracteres y evita repetir una contraseña que uses en otros servicios."}],["$","$L2",null,{}]]}],[["$","script","script-0",{"src":"/atelier-lumiere-demo/_next/static/chunks/44ki77vqt4b15.js","async":true}],["$","script","script-1",{"src":"/atelier-lumiere-demo/_next/static/chunks/3ouhimspcy2zm.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"github-pages"}
+5:null
