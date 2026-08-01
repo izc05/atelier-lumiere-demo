@@ -1,6 +1,6 @@
 1:"$Sreact.fragment"
-2:I[62612,["/atelier-lumiere-demo/_next/static/chunks/0gtkr9k4farey.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js","/atelier-lumiere-demo/_next/static/chunks/2tsojvyt_2cle.js"],"CheckoutFlow"]
-3:I[97367,["/atelier-lumiere-demo/_next/static/chunks/0gtkr9k4farey.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+2:I[62612,["/atelier-lumiere-demo/_next/static/chunks/1g7ahfqon4j3y.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js","/atelier-lumiere-demo/_next/static/chunks/3kg9pjlr6g_pr.js"],"CheckoutFlow"]
+3:I[97367,["/atelier-lumiere-demo/_next/static/chunks/1g7ahfqon4j3y.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/atelier-lumiere-demo/_next/static/chunks/2tsojvyt_2cle.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"github-pages"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/atelier-lumiere-demo/_next/static/chunks/3kg9pjlr6g_pr.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"github-pages"}
 5:null

@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:"$Sreact.suspense"
+3:I[34462,["/atelier-lumiere-demo/_next/static/chunks/1g7ahfqon4j3y.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js","/atelier-lumiere-demo/_next/static/chunks/07mhfx1cnsd32.js","/atelier-lumiere-demo/_next/static/chunks/22nbhwar8pqwj.js"],"ProviderInvitationAccept"]
+4:I[97367,["/atelier-lumiere-demo/_next/static/chunks/1g7ahfqon4j3y.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+0:{"rsc":["$","$1","c",{"children":[["$","$2",null,{"fallback":["$","div",null,{"className":"store-loading","children":"Comprobando invitación…"}],"children":["$","$L3",null,{}]}],[["$","script","script-0",{"src":"/atelier-lumiere-demo/_next/static/chunks/07mhfx1cnsd32.js","async":true}],["$","script","script-1",{"src":"/atelier-lumiere-demo/_next/static/chunks/22nbhwar8pqwj.js","async":true}]],["$","$L4",null,{"children":["$","$2",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"github-pages"}
+5:null
