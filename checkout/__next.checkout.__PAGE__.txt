@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[62612,["/atelier-lumiere-demo/_next/static/chunks/3txo9noexks3y.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js","/atelier-lumiere-demo/_next/static/chunks/3rhirauuguoo1.js"],"CheckoutFlow"]
+3:I[97367,["/atelier-lumiere-demo/_next/static/chunks/3txo9noexks3y.js","/atelier-lumiere-demo/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/atelier-lumiere-demo/_next/static/chunks/3rhirauuguoo1.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"FFeKvhO_lgWXa3mms5g_K"}
+5:null

@@ -4,7 +4,7 @@ Marketplace curado de artesanía para bodas, comuniones y celebraciones.
 
 ## Estado
 
-La primera versión ejecutable ya está disponible. Incluye Inicio, Tienda con filtros, fichas de producto, carrito separado por proveedor, Blog, cuenta de demostración, solicitudes personalizadas y un panel de administración navegable. El panel permite gestionar proveedores cerrados; crear, editar y publicar artículos; controlar pedidos separados por taller y envío; y tramitar encargos personalizados desde la solicitud hasta la elaboración. Los cambios son temporales y no envían correos reales; la conexión a PostgreSQL, autenticación y Bizum/Redsys corresponde a la siguiente fase.
+La primera versión ejecutable ya está disponible. Incluye Inicio, Tienda con filtros, fichas de producto, carrito separado por proveedor, checkout de demostración, Blog, cuenta con historial de pedidos y encargos, solicitudes personalizadas y un panel de administración navegable. El panel permite gestionar proveedores cerrados; crear, editar y publicar artículos; controlar pedidos separados por taller y envío; y tramitar encargos personalizados desde la solicitud hasta la elaboración. Los cambios son temporales, se guardan solo en el navegador y no envían correos ni pagos reales; la conexión a PostgreSQL, autenticación y Bizum/Redsys corresponde a la siguiente fase.
 
 ## Ejecutar en local
 
