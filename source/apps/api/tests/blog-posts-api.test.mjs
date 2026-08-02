@@ -252,7 +252,7 @@ test("el proveedor crea, relaciona y envía una entrada sin acceder a otro talle
     const audits = await transaction.query(
       `SELECT action FROM audit_events
        WHERE entity_type = 'blog_post' AND entity_id = $1
-       ORDER BY occurred_at`,
+       ORDER BY created_at`,
       [postId]
     );
     return audits.rows.map((item) => item.action);
