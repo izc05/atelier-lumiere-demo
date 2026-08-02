@@ -17,4 +17,4 @@ e:I[97367,["/atelier-lumiere-demo/_next/static/chunks/1g7ahfqon4j3y.js","/atelie
 b:"$W11"
 d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
 a:null
-f:[["$","title","0",{"children":"Restablecer contraseña · Alma de Fiesta"}],["$","meta","1",{"name":"description","content":"Piezas hechas a mano para bodas, comuniones, bautizos y celebraciones."}]]
+f:[["$","title","0",{"children":"Restablecer contraseña · Atelier Lumière"}],["$","meta","1",{"name":"description","content":"Piezas artesanales para bodas, comuniones y celebraciones. Detalles hechos despacio para momentos que merecen ser recordados."}]]

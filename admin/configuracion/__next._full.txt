@@ -19,4 +19,4 @@ c:"$W12"
 8:[["$","header",null,{"className":"admin-page-heading admin-page-heading-compact","children":["$","div",null,{"children":[["$","p",null,{"className":"eyebrow","children":"Plataforma"}],["$","h1",null,{"children":"Configuración"}],["$","p",null,{"children":"Credenciales comerciales y activación controlada de los cobros de cada taller."}]]}]}],["$","$L13",null,{}]]
 e:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
 b:null
-10:[["$","title","0",{"children":"Administración · Alma de Fiesta"}],["$","meta","1",{"name":"description","content":"Piezas hechas a mano para bodas, comuniones, bautizos y celebraciones."}]]
+10:[["$","title","0",{"children":"Administración · Atelier Lumière"}],["$","meta","1",{"name":"description","content":"Piezas artesanales para bodas, comuniones y celebraciones. Detalles hechos despacio para momentos que merecen ser recordados."}]]
