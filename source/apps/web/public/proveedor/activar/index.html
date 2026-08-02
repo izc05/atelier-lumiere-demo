@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Activa tu cuenta · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/onboarding.css">
+  <script defer src="/proveedor/onboarding.js"></script>
+</head>
+<body data-page="activation">
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Atelier Lumière">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <span class="secure-badge">Activación protegida</span>
+    </header>
+
+    <section class="layout">
+      <div class="story">
+        <p class="eyebrow">Bienvenido al taller</p>
+        <h1>Crea tu acceso privado.</h1>
+        <p>Esta invitación vincula tu cuenta únicamente con tu taller. Después verificaremos tu correo y activaremos el doble factor antes de permitir el acceso.</p>
+        <div class="progress" aria-label="Paso 1 de 4">
+          <span class="current"></span><span></span><span></span><span></span>
+        </div>
+        <p class="progress-label">Paso 1 de 4 · Crear cuenta</p>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <p class="eyebrow">Invitación privada</p>
+          <h2>Datos de acceso</h2>
+          <p>La contraseña no se enviará por correo ni será visible para Administración.</p>
+        </div>
+        <div class="card-body">
+          <div id="activation-loading" class="loading">Comprobando la invitación…</div>
+
+          <section id="activation-unavailable" hidden>
+            <h2>Enlace no disponible</h2>
+            <p id="activation-unavailable-message" class="message error">La invitación puede haber caducado, sido reemplazada o utilizada anteriormente.</p>
+            <p class="notice">Solicita a Administración de Atelier Lumière que genere una invitación nueva.</p>
+          </section>
+
+          <section id="activation-content" hidden>
+            <div class="summary">
+              <strong id="provider-name"></strong>
+              <span id="provider-specialty"></span>
+              <span>Cuenta: <b id="provider-email"></b></span>
+              <span>Válida hasta: <b id="invitation-expiry"></b></span>
+            </div>
+
+            <form id="activation-form" class="form" autocomplete="on">
+              <label>
+                Tu nombre completo
+                <input id="display-name" name="name" type="text" minlength="2" maxlength="120" autocomplete="name" required>
+              </label>
+              <label>
+                Contraseña
+                <input id="password" name="new-password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+                <small>Mínimo 12 caracteres. Evita usar tu nombre, correo o el nombre del taller.</small>
+              </label>
+              <label>
+                Repite la contraseña
+                <input id="password-confirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+              </label>
+              <p id="activation-message" class="message" role="status" aria-live="polite"></p>
+              <button id="activation-submit" class="button primary full" type="submit">Crear mi cuenta</button>
+            </form>
+
+            <section id="activation-success" hidden>
+              <div class="completion-mark" aria-hidden="true">✓</div>
+              <h2>Cuenta creada</h2>
+              <p>Aún no tienes acceso al panel. El siguiente paso es confirmar que el correo de la invitación te pertenece.</p>
+              <a id="continue-verification" class="button primary full" href="#" hidden>Continuar con la verificación</a>
+              <p id="verification-email-note" class="notice" hidden>Revisa tu bandeja de entrada y abre el enlace de verificación que te hemos enviado.</p>
+            </section>
+          </section>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

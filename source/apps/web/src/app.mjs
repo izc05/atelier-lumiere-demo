@@ -7,6 +7,14 @@ const DEFAULT_PUBLIC_DIRECTORY = fileURLToPath(new URL("../public/", import.meta
 const MAX_BODY_BYTES = 64 * 1024;
 const SESSION_COOKIE = "atelier_admin_session";
 const ADMIN_PROXY_PATTERN = /^\/internal\/admin\/providers(?:\/[0-9a-f-]+\/(?:status|invitations|audit))?$/i;
+const PROVIDER_PROXY_ROUTES = new Map([
+  ["/internal/provider/invitation-preview", "/api/provider-invitations/preview"],
+  ["/internal/provider/invitation-accept", "/api/provider-invitations/accept"],
+  ["/internal/provider/email-verify", "/api/email-verifications/verify"],
+  ["/internal/provider/email-resend", "/api/email-verifications/resend"],
+  ["/internal/provider/two-factor-setup", "/api/two-factor/setup"],
+  ["/internal/provider/two-factor-confirm", "/api/two-factor/confirm"]
+]);
 
 const CONTENT_TYPES = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -47,6 +55,7 @@ function securityHeaders(extra = {}) {
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Cross-Origin-Resource-Policy": "same-origin",
     ...extra
   };
 }
@@ -202,6 +211,42 @@ export function createWebHandler({
     }
   }
 
+  async function proxyProvider(request, response, upstreamPath) {
+    if (request.method !== "POST") {
+      sendJson(response, 405, { error: "METHOD_NOT_ALLOWED" }, { Allow: "POST" });
+      return;
+    }
+
+    const body = await readBody(request);
+    if (!String(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) {
+      sendJson(response, 415, { error: "UNSUPPORTED_MEDIA_TYPE", message: "El cuerpo debe ser JSON." });
+      return;
+    }
+
+    try {
+      const upstream = await fetchImpl(new URL(upstreamPath, apiInternalUrl), {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body,
+        signal: AbortSignal.timeout(10000)
+      });
+      const responseBody = await upstream.text();
+      response.writeHead(upstream.status, securityHeaders({
+        "Content-Type": "application/json; charset=utf-8"
+      }));
+      response.end(responseBody);
+    } catch (error) {
+      logger.error("No se pudo contactar con la API de incorporación.", error);
+      sendJson(response, 502, {
+        error: "API_UNAVAILABLE",
+        message: "El servicio de activación no responde. Inténtalo de nuevo en unos minutos."
+      });
+    }
+  }
+
   async function proxyAdmin(request, response, url) {
     if (!currentSession(request)) {
       sendJson(response, 401, { error: "UNAUTHORIZED", message: "La sesión administrativa ha caducado." });
@@ -241,6 +286,12 @@ export function createWebHandler({
     try {
       if (request.method === "GET" && url.pathname === "/internal/api-health") {
         await proxyHealth(response);
+        return;
+      }
+
+      const providerUpstreamPath = PROVIDER_PROXY_ROUTES.get(url.pathname);
+      if (providerUpstreamPath) {
+        await proxyProvider(request, response, providerUpstreamPath);
         return;
       }
 
@@ -318,7 +369,7 @@ export function createWebHandler({
         const content = await readFile(filePath);
         response.writeHead(200, securityHeaders({
           "Content-Type": CONTENT_TYPES.get(extname(filePath)) ?? "application/octet-stream",
-          "Content-Security-Policy": "default-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:",
+          "Content-Security-Policy": "default-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; form-action 'self'; base-uri 'none'",
           "Cross-Origin-Opener-Policy": "same-origin"
         }));
         response.end(request.method === "HEAD" ? undefined : content);

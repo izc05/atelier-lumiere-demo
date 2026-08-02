@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Guarda tus códigos · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/onboarding.css">
+  <script defer src="/proveedor/onboarding.js"></script>
+</head>
+<body data-page="recovery">
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Atelier Lumière">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <span class="secure-badge">Último paso</span>
+    </header>
+
+    <section class="layout">
+      <div class="story">
+        <p class="eyebrow">Acceso de emergencia</p>
+        <h1>Guarda tus códigos.</h1>
+        <p>Cada código permite recuperar el acceso una sola vez si pierdes el teléfono. Guárdalos fuera del dispositivo donde utilizas la aplicación autenticadora.</p>
+        <div class="progress" aria-label="Paso 4 de 4">
+          <span class="done"></span><span class="done"></span><span class="done"></span><span class="current"></span>
+        </div>
+        <p class="progress-label">Paso 4 de 4 · Códigos de recuperación</p>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <p class="eyebrow">Copia única</p>
+          <h2 id="recovery-provider">Códigos de recuperación</h2>
+          <p>Atelier Lumière no podrá volver a mostrar estos mismos códigos.</p>
+        </div>
+        <div class="card-body">
+          <section id="recovery-unavailable" hidden>
+            <h2>Códigos no disponibles</h2>
+            <p class="message error">Esta pantalla solo puede abrirse inmediatamente después de activar el doble factor.</p>
+          </section>
+
+          <section id="recovery-content" hidden>
+            <div class="notice">No hagas una captura si el móvil sincroniza automáticamente las fotos con una nube compartida.</div>
+            <div id="recovery-grid" class="codes-grid" aria-label="Códigos de recuperación"></div>
+            <div class="button-row">
+              <button id="copy-codes" class="button secondary" type="button">Copiar códigos</button>
+              <button id="download-codes" class="button secondary" type="button">Descargar TXT</button>
+              <button id="print-codes" class="button secondary" type="button">Imprimir</button>
+            </div>
+            <p id="recovery-message" class="message" role="status" aria-live="polite"></p>
+            <label class="checkline">
+              <input id="codes-saved" type="checkbox">
+              <span>Confirmo que he guardado los diez códigos en un lugar seguro.</span>
+            </label>
+            <button id="finish-onboarding" class="button primary full" type="button" disabled>Finalizar activación</button>
+          </section>
+
+          <section id="onboarding-complete" class="completion" hidden>
+            <div class="completion-mark" aria-hidden="true">✓</div>
+            <h2>Cuenta protegida</h2>
+            <p>Tu usuario y la membresía de <strong id="complete-provider"></strong> ya están activos.</p>
+            <p class="notice">El taller permanece pendiente de aprobación administrativa. Podrás acceder al panel cuando Atelier Lumière lo active.</p>
+          </section>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
