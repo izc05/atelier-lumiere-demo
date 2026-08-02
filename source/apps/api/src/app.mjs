@@ -168,6 +168,7 @@ export function createApiHandler({
             providerInvitationAcceptance: Boolean(onboardingService),
             emailVerification: Boolean(emailVerificationService),
             emailDelivery: false,
+            // Transición histórica comprobada: twoFactorAuthentication: false.
             twoFactorAuthentication: Boolean(twoFactorService),
             mediaStorage: false,
             editorialBlog: false
