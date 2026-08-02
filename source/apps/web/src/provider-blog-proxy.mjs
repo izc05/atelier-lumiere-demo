@@ -2,13 +2,17 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
 const PROVIDER_SESSION_COOKIE = "atelier_provider_session";
-const BLOG_PROXY_PATTERN = /^\/internal\/provider\/blog-posts(?:\/([0-9a-f-]{36})(?:\/(tags|products|submit))?)?$/i;
+const BLOG_PROXY_PATTERN = /^\/internal\/provider\/blog-posts(?:\/([0-9a-f-]{36})(?:\/(tags|products|submit|media)(?:\/([0-9a-f-]{36})(?:\/(content|preview))?)?)?)?$/i;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,180}$/;
 const SAFE_RESPONSE_HEADERS = new Set([
   "content-type",
   "content-length",
+  "content-disposition",
+  "accept-ranges",
+  "content-range",
   "cache-control",
-  "x-content-type-options"
+  "x-content-type-options",
+  "content-security-policy"
 ]);
 
 function parseCookies(header) {
@@ -79,11 +83,14 @@ function isProtectedBlogPage(pathname) {
 }
 
 function routeAllows(method, match) {
-  const [, postId, action] = match;
+  const [, postId, action, mediaId, variant] = match;
   if (!postId) return ["GET", "POST"].includes(method);
   if (!action) return ["GET", "PATCH"].includes(method);
-  if (action === "tags" || action === "products") return method === "PUT";
-  return action === "submit" && method === "POST";
+  if (action === "tags" || action === "products") return !mediaId && method === "PUT";
+  if (action === "submit") return !mediaId && method === "POST";
+  if (action === "media" && !mediaId) return method === "POST";
+  if (action === "media" && mediaId && !variant) return ["PATCH", "DELETE"].includes(method);
+  return action === "media" && Boolean(mediaId) && Boolean(variant) && method === "GET";
 }
 
 function requestHeaders(request, token) {
@@ -91,7 +98,15 @@ function requestHeaders(request, token) {
     Accept: request.headers.accept ?? "application/json",
     Authorization: `Bearer ${token}`
   });
-  for (const name of ["content-type", "content-length", "user-agent"]) {
+  for (const name of [
+    "content-type",
+    "content-length",
+    "x-file-name",
+    "x-alt-text",
+    "x-media-placement",
+    "range",
+    "user-agent"
+  ]) {
     const value = request.headers[name];
     if (value !== undefined) headers.set(name, Array.isArray(value) ? value[0] : String(value));
   }
@@ -175,12 +190,14 @@ export function createProviderBlogWebHandler({
         apiBase
       );
       const hasBody = !["GET", "HEAD", "DELETE"].includes(method);
+      const isBinaryUpload = match[2] === "media" && !match[3] && method === "POST";
+      const timeoutMs = isBinaryUpload ? 120_000 : match[4] ? 60_000 : 15_000;
       try {
         const upstream = await fetchImpl(target, {
           method,
           headers: requestHeaders(request, token),
           ...(hasBody ? { body: request, duplex: "half" } : {}),
-          signal: AbortSignal.timeout(15_000)
+          signal: AbortSignal.timeout(timeoutMs)
         });
         await pipeUpstream(upstream, response, {
           clearCookie: upstream.status === 401,
