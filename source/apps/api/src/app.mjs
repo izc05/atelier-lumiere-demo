@@ -1,3 +1,4 @@
+import QRCode from "qrcode";
 import { DatabaseUnavailableError } from "./database.mjs";
 import { ServiceError } from "./providers-service.mjs";
 
@@ -116,7 +117,7 @@ function resendResponse(result, environment) {
 }
 
 export function createApiHandler({
-  version = "0.5.0",
+  version = "0.6.0",
   environment = process.env.NODE_ENV ?? "development",
   now = () => new Date(),
   database,
@@ -167,7 +168,6 @@ export function createApiHandler({
             providerInvitationAcceptance: Boolean(onboardingService),
             emailVerification: Boolean(emailVerificationService),
             emailDelivery: false,
-            // Transición desde la fase anterior: twoFactorAuthentication: false.
             twoFactorAuthentication: Boolean(twoFactorService),
             mediaStorage: false,
             editorialBlog: false
@@ -230,7 +230,16 @@ export function createApiHandler({
         const input = await readJson(request);
         if (url.pathname.endsWith("/setup")) {
           const setup = await twoFactorService.begin(input.token);
-          sendJson(response, 200, setup);
+          const qrDataUrl = await QRCode.toDataURL(setup.otpauthUri, {
+            errorCorrectionLevel: "M",
+            margin: 1,
+            width: 320,
+            color: {
+              dark: "#3b0914ff",
+              light: "#fffdf9ff"
+            }
+          });
+          sendJson(response, 200, { ...setup, qrDataUrl });
           return;
         }
 
