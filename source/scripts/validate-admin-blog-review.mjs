@@ -60,7 +60,8 @@ assert.match(apiTest, /BLOG_POST_COVER_REQUIRED/);
 assert.match(apiTest, /BLOG_CHANGES_REQUESTED/);
 assert.match(apiTest, /BLOG_POST_PUBLISHED/);
 
-assert.match(proxy, /\/internal\/admin\/blog-posts/);
+assert.match(proxy, /ADMIN_BLOG_PATTERN/);
+assert.match(proxy, /internal\\\/admin\\\/blog-posts/);
 assert.match(proxy, /\/internal\/admin\/session/);
 assert.match(proxy, /Authorization: `Bearer \$\{token\}`/);
 assert.match(proxy, /Readable\.fromWeb/);
