@@ -1,0 +1,108 @@
+/* Capa de animación para la vista previa. No modifica botones, tipografía ni estructura. */
+.lumiere-effects-preview {
+  --lumiere-hero-shift: 0px;
+  --lumiere-hero-scale: 1.025;
+  --lumiere-copy-shift: 0px;
+  --lumiere-copy-opacity: 1;
+  --lumiere-thread-progress: 0;
+}
+
+.lumiere-effects-preview .hilo-hero {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.lumiere-effects-preview .hilo-hero-visual {
+  transform: translate3d(0, var(--lumiere-hero-shift), 0) scale(var(--lumiere-hero-scale)) !important;
+  transform-origin: 56% 46%;
+  will-change: transform;
+}
+
+.lumiere-effects-preview .hilo-hero-copy {
+  opacity: var(--lumiere-copy-opacity) !important;
+  transform: translate3d(0, var(--lumiere-copy-shift), 0) !important;
+  will-change: transform, opacity;
+}
+
+.lumiere-effects-preview .hilo-scroll-cue {
+  animation: lumiereCue 2.4s ease-in-out infinite;
+}
+
+@keyframes lumiereCue {
+  0%, 100% { transform: translateY(0); opacity: .72; }
+  50% { transform: translateY(7px); opacity: 1; }
+}
+
+.lumiere-effects-preview .atelier-story-section {
+  position: relative;
+  overflow: clip;
+}
+
+.lumiere-scroll-thread {
+  position: absolute;
+  z-index: 1;
+  top: -118px;
+  right: clamp(10px, 4vw, 58px);
+  width: 92px;
+  height: 340px;
+  overflow: visible;
+  pointer-events: none;
+  opacity: .42;
+}
+
+.lumiere-scroll-thread path {
+  fill: none;
+  stroke: #8f2443;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  path-length: 1;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--lumiere-thread-progress));
+}
+
+.lumiere-scroll-thread circle {
+  fill: #8f2443;
+  opacity: calc(.18 + (var(--lumiere-thread-progress) * .62));
+}
+
+.lumiere-reveal {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition: opacity .75s cubic-bezier(.22,.61,.36,1), transform .8s cubic-bezier(.22,.61,.36,1);
+  transition-delay: var(--lumiere-delay, 0ms);
+  will-change: transform, opacity;
+}
+
+.lumiere-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (max-width: 700px) {
+  .lumiere-effects-preview .hilo-hero-visual { transform-origin: 62% 45%; }
+  .lumiere-scroll-thread {
+    top: -82px;
+    right: 4px;
+    width: 62px;
+    height: 260px;
+    opacity: .28;
+  }
+  .lumiere-reveal {
+    transform: translate3d(0, 18px, 0);
+    transition-duration: .62s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lumiere-effects-preview .hilo-hero-visual,
+  .lumiere-effects-preview .hilo-hero-copy,
+  .lumiere-effects-preview .hilo-scroll-cue,
+  .lumiere-reveal {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .lumiere-scroll-thread { display: none; }
+}
