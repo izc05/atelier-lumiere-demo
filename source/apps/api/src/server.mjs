@@ -7,6 +7,7 @@ import {
   ensureDevelopmentAdmin
 } from "./auth-context.mjs";
 import { createEmailVerificationService } from "./email-verification-service.mjs";
+import { createProviderAuthService } from "./provider-auth-service.mjs";
 import { createProviderOnboardingService } from "./provider-onboarding-service.mjs";
 import { createProvidersService } from "./providers-service.mjs";
 import { createTwoFactorService } from "./two-factor-service.mjs";
@@ -49,6 +50,13 @@ const twoFactorService = database.enabled && developmentAdminContext
     })
   : null;
 
+const providerAuthService = database.enabled && developmentAdminContext
+  ? createProviderAuthService({
+      database,
+      systemContext: developmentAdminContext
+    })
+  : null;
+
 const server = createServer(
   createApiHandler({
     environment,
@@ -57,6 +65,7 @@ const server = createServer(
     onboardingService,
     emailVerificationService,
     twoFactorService,
+    providerAuthService,
     authenticateRequest
   })
 );
