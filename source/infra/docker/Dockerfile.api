@@ -7,7 +7,7 @@ ENV API_PORT=4000
 ENV STORAGE_PATH=/data/media
 
 COPY apps/api/package.json ./package.json
-RUN npm install --omit=dev --ignore-scripts \
+RUN npm install --omit=dev \
   && npm cache clean --force
 
 COPY apps/api/src ./src
