@@ -5,6 +5,7 @@ export const CORE_TABLES = Object.freeze([
   "onboarding_continuations",
   "user_totp_credentials",
   "user_recovery_codes",
+  "account_recovery_tokens",
   "providers",
   "provider_members",
   "provider_invitations",
@@ -18,6 +19,7 @@ export const CATALOG_TABLES = Object.freeze([
   "products",
   "product_media",
   "product_events",
+  "product_personalization_options",
   "product_reviews"
 ]);
 
@@ -49,5 +51,11 @@ export const DATABASE_RULES = Object.freeze({
   providerLoginRequiresTwoIndependentFactors: true,
   providerSessionsStoreOnlyTokenHashes: true,
   providerLoginHasPasswordAndChallengeThrottling: true,
-  providerAccessRequiresVerifiedEmailAndTwoFactor: true
+  providerAccessRequiresVerifiedEmailAndTwoFactor: true,
+  productsAreTenantIsolated: true,
+  providersCanEditOnlyDraftOrReturnedProducts: true,
+  productReviewRequiresAtLeastOneReadyImage: true,
+  productMediaUsesPrivateStorageKeys: true,
+  productMediaAllowsAtMostEightImagesAndOneVideo: true,
+  publishedProductsRequireAdministrativeApproval: true
 });

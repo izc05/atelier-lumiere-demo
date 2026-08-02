@@ -73,6 +73,9 @@ jobs:
       - name: Verificar aislamiento por proveedor
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/tenant_isolation.sql
 
+      - name: Verificar catálogo, medios y revisión editorial
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/catalog_isolation.sql
+
       - name: Instalar dependencias de la aplicación fuente
         working-directory: source
         run: npm install --ignore-scripts
