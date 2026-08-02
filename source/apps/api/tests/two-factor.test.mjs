@@ -26,8 +26,7 @@ async function postJson(baseUrl, path, body) {
     },
     body: JSON.stringify(body)
   });
-  const payload = await response.json();
-  return { response, payload };
+  return { response, payload: await response.json() };
 }
 
 test("2FA activa la cuenta sin publicar automáticamente el taller", {
@@ -124,13 +123,12 @@ test("2FA activa la cuenta sin publicar automáticamente el taller", {
   assert.ok(emailVerified.payload.twoFactorSetupToken.length >= 32);
 
   const setupToken = emailVerified.payload.twoFactorSetupToken;
-  const setup = await postJson(baseUrl, "/api/two-factor/setup", {
-    token: setupToken
-  });
+  const setup = await postJson(baseUrl, "/api/two-factor/setup", { token: setupToken });
   assert.equal(setup.response.status, 200);
   assert.equal(setup.payload.algorithm, "SHA1");
   assert.equal(setup.payload.digits, 6);
   assert.equal(setup.payload.period, 30);
+  assert.equal(setup.payload.attemptsRemaining, 5);
   assert.ok(setup.payload.secret.length >= 32);
   assert.match(setup.payload.otpauthUri, /^otpauth:\/\/totp\//);
   assert.equal(setup.payload.otpauthUri.includes(setup.payload.secret), true);
@@ -138,28 +136,46 @@ test("2FA activa la cuenta sin publicar automáticamente el taller", {
 
   const storedBeforeConfirm = await database.withContext(adminContext, async (transaction) => {
     const result = await transaction.query(
-      `SELECT secret_ciphertext, secret_iv, secret_auth_tag, status
+      `SELECT utc.secret_ciphertext, utc.secret_iv, utc.secret_auth_tag, utc.status,
+              oc.failed_attempts
        FROM user_totp_credentials utc
        INNER JOIN users u ON u.id = utc.user_id
+       INNER JOIN onboarding_continuations oc ON oc.user_id = u.id
        WHERE u.email = $1`,
       [email]
     );
     return result.rows[0];
   });
   assert.equal(storedBeforeConfirm.status, "PENDING");
+  assert.equal(storedBeforeConfirm.failed_attempts, 0);
   assert.notEqual(storedBeforeConfirm.secret_ciphertext, setup.payload.secret);
   assert.equal(JSON.stringify(storedBeforeConfirm).includes(setup.payload.secret), false);
   assert.ok(storedBeforeConfirm.secret_iv.length >= 16);
   assert.ok(storedBeforeConfirm.secret_auth_tag.length >= 16);
 
+  const code = generateTotpCode(setup.payload.secret, fixedTime);
+  const wrongCode = code === "000000" ? "000001" : "000000";
   const incorrect = await postJson(baseUrl, "/api/two-factor/confirm", {
     token: setupToken,
-    code: "000000"
+    code: wrongCode
   });
   assert.equal(incorrect.response.status, 422);
   assert.equal(incorrect.payload.error, "INVALID_TWO_FACTOR_CODE");
+  assert.equal(incorrect.payload.details.attemptsRemaining, 4);
 
-  const code = generateTotpCode(setup.payload.secret, fixedTime);
+  const failedAttempts = await database.withContext(adminContext, async (transaction) => {
+    const result = await transaction.query(
+      `SELECT oc.failed_attempts, oc.status
+       FROM onboarding_continuations oc
+       INNER JOIN users u ON u.id = oc.user_id
+       WHERE u.email = $1`,
+      [email]
+    );
+    return result.rows[0];
+  });
+  assert.equal(failedAttempts.failed_attempts, 1);
+  assert.equal(failedAttempts.status, "PENDING");
+
   const confirmed = await postJson(baseUrl, "/api/two-factor/confirm", {
     token: setupToken,
     code
@@ -175,11 +191,13 @@ test("2FA activa la cuenta sin publicar automáticamente el taller", {
   assert.deepEqual(confirmed.payload.nextSteps, ["ADMIN_PROVIDER_ACTIVATION"]);
   assert.equal(confirmed.payload.recoveryCodes.length, 10);
   assert.equal(new Set(confirmed.payload.recoveryCodes).size, 10);
-  assert.ok(confirmed.payload.recoveryCodes.every((item) => /^[A-Z2-7]{4}(?:-[A-Z2-7]{4}){3}$/.test(item)));
+  assert.ok(
+    confirmed.payload.recoveryCodes.every(
+      (item) => /^[A-Z2-7]{4}(?:-[A-Z2-7]{4}){3}$/.test(item)
+    )
+  );
 
-  const reused = await postJson(baseUrl, "/api/two-factor/setup", {
-    token: setupToken
-  });
+  const reused = await postJson(baseUrl, "/api/two-factor/setup", { token: setupToken });
   assert.equal(reused.response.status, 410);
   assert.equal(reused.payload.error, "TWO_FACTOR_SETUP_UNAVAILABLE");
 
@@ -189,7 +207,7 @@ test("2FA activa la cuenta sin publicar automáticamente el taller", {
          u.status AS user_status, u.two_factor_enabled, u.email_verified_at,
          pm.status AS membership_status, p.status AS provider_status,
          utc.status AS totp_status, utc.activated_at, utc.last_used_step,
-         oc.status AS continuation_status, oc.used_at
+         oc.status AS continuation_status, oc.used_at, oc.failed_attempts
        FROM users u
        INNER JOIN provider_members pm ON pm.user_id = u.id
        INNER JOIN providers p ON p.id = pm.provider_id
@@ -209,14 +227,15 @@ test("2FA activa la cuenta sin publicar automáticamente el taller", {
       `SELECT action, metadata::text AS metadata
        FROM audit_events
        WHERE provider_id = $1
-         AND action IN ('PROVIDER_2FA_SETUP_ISSUED', 'PROVIDER_2FA_SETUP_STARTED', 'PROVIDER_2FA_ENABLED')`,
+         AND action IN (
+           'PROVIDER_2FA_SETUP_ISSUED',
+           'PROVIDER_2FA_SETUP_STARTED',
+           'PROVIDER_2FA_CODE_REJECTED',
+           'PROVIDER_2FA_ENABLED'
+         )`,
       [provider.provider.id]
     );
-    return {
-      account: account.rows[0],
-      recovery: recovery.rows,
-      audit: audit.rows
-    };
+    return { account: account.rows[0], recovery: recovery.rows, audit: audit.rows };
   });
 
   assert.equal(storedAfterConfirm.account.user_status, "ACTIVE");
@@ -228,9 +247,14 @@ test("2FA activa la cuenta sin publicar automáticamente el taller", {
   assert.ok(storedAfterConfirm.account.activated_at);
   assert.ok(storedAfterConfirm.account.last_used_step);
   assert.equal(storedAfterConfirm.account.continuation_status, "USED");
+  assert.equal(storedAfterConfirm.account.failed_attempts, 1);
   assert.ok(storedAfterConfirm.account.used_at);
   assert.equal(storedAfterConfirm.recovery.length, 10);
-  assert.ok(storedAfterConfirm.recovery.every((item) => item.code_hash.length === 64 && item.used_at === null));
+  assert.ok(
+    storedAfterConfirm.recovery.every(
+      (item) => item.code_hash.length === 64 && item.used_at === null
+    )
+  );
   for (const rawRecoveryCode of confirmed.payload.recoveryCodes) {
     assert.equal(JSON.stringify(storedAfterConfirm.recovery).includes(rawRecoveryCode), false);
     assert.equal(JSON.stringify(storedAfterConfirm.audit).includes(rawRecoveryCode), false);
@@ -238,5 +262,6 @@ test("2FA activa la cuenta sin publicar automáticamente el taller", {
   const actions = new Set(storedAfterConfirm.audit.map((item) => item.action));
   assert.ok(actions.has("PROVIDER_2FA_SETUP_ISSUED"));
   assert.ok(actions.has("PROVIDER_2FA_SETUP_STARTED"));
+  assert.ok(actions.has("PROVIDER_2FA_CODE_REJECTED"));
   assert.ok(actions.has("PROVIDER_2FA_ENABLED"));
 });
