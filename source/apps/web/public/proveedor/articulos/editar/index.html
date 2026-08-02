@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#5a0f1f">
   <title>Editor de artículos · Atelier Lumière</title>
   <link rel="stylesheet" href="/proveedor/articulos/products.css">
+  <link rel="stylesheet" href="/proveedor/articulos/editor-extra.css">
   <script defer src="/proveedor/articulos/editor.js"></script>
 </head>
 <body>
@@ -31,9 +32,7 @@
       </div>
     </section>
 
-    <section id="editor-loading" class="loading">
-      <p>Preparando el editor…</p>
-    </section>
+    <section id="editor-loading" class="loading"><p>Preparando el editor…</p></section>
 
     <section id="editor-error" class="error-card" hidden>
       <div>
@@ -48,122 +47,53 @@
       <div class="editor-layout">
         <form id="product-form" class="editor-main">
           <section class="panel-card">
-            <header>
-              <p class="eyebrow">01 · Información principal</p>
-              <h2>Presenta la pieza</h2>
-              <p>El nombre y la descripción breve serán lo primero que vea el comprador.</p>
-            </header>
+            <header><p class="eyebrow">01 · Información principal</p><h2>Presenta la pieza</h2><p>El nombre y la descripción breve serán lo primero que vea el comprador.</p></header>
             <div class="form-grid">
-              <label class="field full">Nombre del artículo
-                <input id="name" name="name" type="text" minlength="2" maxlength="180" required>
-              </label>
-              <label class="field">Categoría
-                <input id="category" name="category" type="text" maxlength="80" placeholder="Cerámica, textil, papelería…">
-              </label>
-              <label class="field">Precio
-                <input id="price" name="price" type="number" min="0" max="1000000" step="0.01" inputmode="decimal" placeholder="0,00">
-              </label>
-              <label class="field full">Descripción breve
-                <textarea id="short-description" name="shortDescription" maxlength="320" placeholder="Resume qué hace especial este artículo."></textarea>
-                <small><span id="short-description-count">0</span>/320 caracteres. Para revisión deberá tener al menos 20.</small>
-              </label>
-              <label class="field full">Historia y proceso artesanal
-                <textarea id="story" name="story" maxlength="12000" placeholder="Materiales, técnica, inspiración y proceso de elaboración."></textarea>
-              </label>
+              <label class="field full">Nombre del artículo<input id="name" type="text" minlength="2" maxlength="180" required></label>
+              <label class="field">Categoría<input id="category" type="text" maxlength="80" placeholder="Cerámica, textil, papelería…"></label>
+              <label class="field">Precio<input id="price" type="number" min="0" max="1000000" step="0.01" inputmode="decimal" placeholder="0,00"></label>
+              <label class="field full">Descripción breve<textarea id="short-description" maxlength="320" placeholder="Resume qué hace especial este artículo."></textarea><small><span id="short-description-count">0</span>/320 caracteres. Para revisión deberá tener al menos 20.</small></label>
+              <label class="field full">Historia y proceso artesanal<textarea id="story" maxlength="12000" placeholder="Materiales, técnica, inspiración y proceso de elaboración."></textarea></label>
             </div>
           </section>
 
           <section class="panel-card">
-            <header>
-              <p class="eyebrow">02 · Preparación y existencias</p>
-              <h2>Define cómo se vende</h2>
-              <p>Indica si está fabricado, se prepara bajo pedido o no tiene límite de unidades.</p>
-            </header>
+            <header><p class="eyebrow">02 · Preparación y existencias</p><h2>Define cómo se vende</h2><p>Indica si está fabricado, se prepara bajo pedido o no tiene límite de unidades.</p></header>
             <div class="form-grid">
-              <label class="field">Tipo de existencias
-                <select id="stock-mode" name="stockMode">
-                  <option value="FINITE">Unidades disponibles</option>
-                  <option value="MADE_TO_ORDER">Fabricado bajo pedido</option>
-                  <option value="UNLIMITED">Sin límite</option>
-                </select>
-              </label>
-              <label id="stock-quantity-field" class="field">Unidades disponibles
-                <input id="stock-quantity" name="stockQuantity" type="number" min="0" max="100000000" step="1" value="0">
-              </label>
-              <label class="field">Preparación mínima (días)
-                <input id="preparation-min" name="preparationMinDays" type="number" min="0" max="365" step="1">
-              </label>
-              <label class="field">Preparación máxima (días)
-                <input id="preparation-max" name="preparationMaxDays" type="number" min="0" max="365" step="1">
-              </label>
-              <label class="field full">Condiciones de envío
-                <textarea id="shipping-notes" name="shippingNotes" maxlength="4000" placeholder="Embalaje, fragilidad, montaje o recomendaciones de entrega."></textarea>
-              </label>
+              <label class="field">Tipo de existencias<select id="stock-mode"><option value="FINITE">Unidades disponibles</option><option value="MADE_TO_ORDER">Fabricado bajo pedido</option><option value="UNLIMITED">Sin límite</option></select></label>
+              <label id="stock-quantity-field" class="field">Unidades disponibles<input id="stock-quantity" type="number" min="0" max="100000000" step="1" value="0"></label>
+              <label class="field">Preparación mínima (días)<input id="preparation-min" type="number" min="0" max="365" step="1"></label>
+              <label class="field">Preparación máxima (días)<input id="preparation-max" type="number" min="0" max="365" step="1"></label>
+              <label class="field full">Condiciones de envío<textarea id="shipping-notes" maxlength="4000" placeholder="Embalaje, fragilidad, montaje o recomendaciones de entrega."></textarea></label>
             </div>
           </section>
 
           <section class="panel-card">
-            <header>
-              <p class="eyebrow">03 · Ocasiones</p>
-              <h2>¿Para qué celebración encaja?</h2>
-              <p>Estas etiquetas ayudarán a encontrar el artículo desde los filtros de la tienda.</p>
-            </header>
+            <header><p class="eyebrow">03 · Ocasiones</p><h2>¿Para qué celebración encaja?</h2><p>Estas etiquetas ayudarán a encontrar el artículo desde los filtros de la tienda.</p></header>
             <div id="events-grid" class="events-grid">
-              <label class="event-chip"><input type="checkbox" value="boda"><span>Boda</span></label>
-              <label class="event-chip"><input type="checkbox" value="aniversario"><span>Aniversario</span></label>
-              <label class="event-chip"><input type="checkbox" value="cumpleanos"><span>Cumpleaños</span></label>
-              <label class="event-chip"><input type="checkbox" value="bautizo"><span>Bautizo</span></label>
-              <label class="event-chip"><input type="checkbox" value="comunion"><span>Comunión</span></label>
-              <label class="event-chip"><input type="checkbox" value="nacimiento"><span>Nacimiento</span></label>
-              <label class="event-chip"><input type="checkbox" value="navidad"><span>Navidad</span></label>
-              <label class="event-chip"><input type="checkbox" value="agradecimiento"><span>Agradecimiento</span></label>
+              <label class="event-chip"><input type="checkbox" value="boda"><span>Boda</span></label><label class="event-chip"><input type="checkbox" value="aniversario"><span>Aniversario</span></label><label class="event-chip"><input type="checkbox" value="cumpleanos"><span>Cumpleaños</span></label><label class="event-chip"><input type="checkbox" value="bautizo"><span>Bautizo</span></label><label class="event-chip"><input type="checkbox" value="comunion"><span>Comunión</span></label><label class="event-chip"><input type="checkbox" value="nacimiento"><span>Nacimiento</span></label><label class="event-chip"><input type="checkbox" value="navidad"><span>Navidad</span></label><label class="event-chip"><input type="checkbox" value="agradecimiento"><span>Agradecimiento</span></label>
             </div>
-            <label class="field full" style="margin-top:16px">Otras ocasiones
-              <input id="custom-events" type="text" maxlength="300" placeholder="jubilacion, inauguracion… separadas por comas">
-              <small>Se convertirán en etiquetas sencillas sin espacios ni acentos.</small>
-            </label>
+            <label class="field full section-gap">Otras ocasiones<input id="custom-events" type="text" maxlength="300" placeholder="jubilacion, inauguracion… separadas por comas"><small>Se convertirán en etiquetas sencillas sin espacios ni acentos.</small></label>
           </section>
 
           <section class="panel-card">
-            <header>
-              <p class="eyebrow">04 · Personalización</p>
-              <h2>Opciones para el comprador</h2>
-              <p>Texto, selección, color o número. El incremento de precio es opcional.</p>
-            </header>
-            <label class="checkline">
-              <input id="customizable" type="checkbox">
-              <span>Este artículo admite personalización.</span>
-            </label>
-            <label class="field full" style="margin-top:14px">Indicaciones generales
-              <textarea id="personalization-notes" maxlength="4000" placeholder="Explica límites, plazos o cómo debe enviar el comprador sus datos."></textarea>
-            </label>
-            <div id="options-list" class="options-list" style="margin-top:16px"></div>
+            <header><p class="eyebrow">04 · Personalización</p><h2>Opciones para el comprador</h2><p>Texto, selección, color o número. El incremento de precio es opcional.</p></header>
+            <label class="checkline"><input id="customizable" type="checkbox"><span>Este artículo admite personalización.</span></label>
+            <label class="field full section-gap">Indicaciones generales<textarea id="personalization-notes" maxlength="4000" placeholder="Explica límites, plazos o cómo debe enviar el comprador sus datos."></textarea></label>
+            <div id="options-list" class="options-list section-gap"></div>
             <button id="add-option-button" class="button secondary" type="button">Añadir opción</button>
           </section>
 
-          <section id="media-section" class="panel-card">
-            <header>
-              <p class="eyebrow">05 · Fotografías y vídeo</p>
-              <h2>Muestra el trabajo artesanal</h2>
-              <p>Hasta ocho JPEG, PNG o WebP de 12 MB y un MP4 de 50 MB. Las fotografías generan una preview ligera automáticamente.</p>
-            </header>
+          <section class="panel-card">
+            <header><p class="eyebrow">05 · Fotografías y vídeo</p><h2>Muestra el trabajo artesanal</h2><p>Hasta ocho JPEG, PNG o WebP de 12 MB y un MP4 de 50 MB. Las fotografías generan una preview ligera automáticamente.</p></header>
             <div id="media-needs-save" class="review-note">Guarda primero el borrador para activar la subida de archivos.</div>
             <div id="media-controls" hidden>
               <div class="form-grid">
-                <label class="upload-zone">Añadir fotografías
-                  <input id="image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-                  <small>Selecciona una o varias imágenes. Se subirán de una en una.</small>
-                </label>
-                <label class="upload-zone">Añadir vídeo
-                  <input id="video-input" type="file" accept="video/mp4">
-                  <small>Un único MP4 de hasta 50 MB.</small>
-                </label>
+                <label class="upload-zone">Añadir fotografías<input id="image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple><small>Selecciona una o varias imágenes. Se subirán de una en una.</small></label>
+                <label class="upload-zone">Añadir vídeo<input id="video-input" type="file" accept="video/mp4"><small>Un único MP4 de hasta 50 MB.</small></label>
               </div>
-              <div id="upload-status" hidden style="margin-top:14px">
-                <p id="upload-label" class="message"></p>
-                <div class="upload-progress"><span id="upload-progress-bar"></span></div>
-              </div>
-              <div id="media-grid" class="media-grid" style="margin-top:18px"></div>
+              <div id="upload-status" class="upload-status" hidden><p id="upload-label" class="message"></p><progress id="upload-progress-bar" class="upload-progress" max="100" value="0"></progress></div>
+              <div id="media-grid" class="media-grid"></div>
               <p id="media-message" class="message" role="status" aria-live="polite"></p>
             </div>
           </section>
@@ -171,27 +101,14 @@
 
         <aside class="editor-side">
           <section class="panel-card">
-            <p class="eyebrow">Estado</p>
-            <h2 id="status-title">Borrador nuevo</h2>
-            <div class="summary-list">
-              <div class="summary-item"><span>Versión</span><strong id="version-label">—</strong></div>
-              <div class="summary-item"><span>Fotografías</span><strong id="image-count">0/8</strong></div>
-              <div class="summary-item"><span>Vídeo</span><strong id="video-count">0/1</strong></div>
-              <div class="summary-item"><span>Último guardado</span><strong id="updated-label">Sin guardar</strong></div>
-            </div>
-            <button id="save-button" class="button primary" type="submit" form="product-form" style="width:100%">Guardar borrador</button>
-            <p id="save-message" class="message" role="status" aria-live="polite"></p>
+            <p class="eyebrow">Estado</p><h2 id="status-title">Borrador nuevo</h2>
+            <div class="summary-list"><div class="summary-item"><span>Versión</span><strong id="version-label">—</strong></div><div class="summary-item"><span>Fotografías</span><strong id="image-count">0/8</strong></div><div class="summary-item"><span>Vídeo</span><strong id="video-count">0/1</strong></div><div class="summary-item"><span>Último guardado</span><strong id="updated-label">Sin guardar</strong></div></div>
+            <button id="save-button" class="button primary full-width" type="submit" form="product-form">Guardar borrador</button><p id="save-message" class="message" role="status" aria-live="polite"></p>
           </section>
-
-          <section id="review-card" class="panel-card">
-            <p class="eyebrow">Revisión editorial</p>
-            <h2>Enviar a Atelier Lumière</h2>
-            <p class="review-note">La ficha quedará bloqueada mientras se revisa. Necesita información completa y al menos una fotografía lista.</p>
-            <label class="field" style="margin-top:14px">Nota para Administración
-              <textarea id="review-note" maxlength="4000" placeholder="Añade alguna aclaración sobre el artículo."></textarea>
-            </label>
-            <button id="submit-review-button" class="button secondary" type="button" style="width:100%;margin-top:12px">Enviar a revisión</button>
-            <p id="review-message" class="message" role="status" aria-live="polite"></p>
+          <section class="panel-card">
+            <p class="eyebrow">Revisión editorial</p><h2>Enviar a Atelier Lumière</h2><p class="review-note">La ficha quedará bloqueada mientras se revisa. Necesita información completa y al menos una fotografía lista.</p>
+            <label class="field section-gap">Nota para Administración<textarea id="review-note" maxlength="4000" placeholder="Añade alguna aclaración sobre el artículo."></textarea></label>
+            <button id="submit-review-button" class="button secondary full-width section-gap-small" type="button">Enviar a revisión</button><p id="review-message" class="message" role="status" aria-live="polite"></p>
           </section>
         </aside>
       </div>
