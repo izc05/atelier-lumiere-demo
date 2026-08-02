@@ -1,7 +1,7 @@
 import { ServiceError } from "./providers-service.mjs";
 
 const PUBLIC_CONTEXT = Object.freeze({
-  role: "CUSTOMER",
+  role: "CATALOG_READER",
   userId: "00000000-0000-4000-8000-000000000002",
   providerId: null
 });
