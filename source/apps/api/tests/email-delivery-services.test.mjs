@@ -131,3 +131,55 @@ test("aceptar la invitación envía la verificación sin modificar el resultado 
   assert.equal(result.accessGranted, false);
   assert.equal(result.emailDelivery.status, "SENT");
 });
+
+test("el listado administrativo calcula el progreso desde PostgreSQL", async () => {
+  const providerId = "00000000-0000-4000-8000-000000000201";
+  const base = {
+    async list() {
+      return [{
+        id: providerId,
+        displayName: "Taller listo",
+        status: "INVITED",
+        latestInvitation: { status: "ACCEPTED" }
+      }];
+    },
+    async create() {},
+    async setStatus() {},
+    async audit() {},
+    async renewInvitation() {}
+  };
+  const database = {
+    async withContext(receivedContext, operation) {
+      assert.equal(receivedContext, context);
+      return operation({
+        async query(sql) {
+          assert.match(sql, /provider_members/);
+          assert.match(sql, /two_factor_enabled/);
+          return {
+            rows: [{
+              provider_id: providerId,
+              user_id: "00000000-0000-4000-8000-000000000401",
+              user_status: "ACTIVE",
+              email_verified_at: "2026-08-02T10:00:00.000Z",
+              two_factor_enabled: true,
+              membership_status: "ACTIVE",
+              membership_role: "PROVIDER_OWNER"
+            }]
+          };
+        }
+      });
+    }
+  };
+
+  const service = withProviderInvitationDelivery({
+    providersService: base,
+    mailService: { enabled: false },
+    database
+  });
+  const providers = await service.list(context);
+  assert.equal(providers[0].onboarding.stage, "PENDING_APPROVAL");
+  assert.equal(providers[0].onboarding.accountCreated, true);
+  assert.equal(providers[0].onboarding.emailVerified, true);
+  assert.equal(providers[0].onboarding.twoFactorEnabled, true);
+  assert.equal(providers[0].onboarding.approved, false);
+});
