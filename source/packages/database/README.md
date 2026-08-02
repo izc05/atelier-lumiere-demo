@@ -25,9 +25,10 @@ El tercer parámetro `true` limita el valor a la transacción actual. La API no 
 - `PROVIDER_MEMBER`: acceso operativo limitado al taller.
 - `CUSTOMER`: no accede a tablas privadas de proveedores.
 
-## Tablas del Bloque 1
+## Tablas centrales
 
 - `users`
+- `user_credentials`
 - `providers`
 - `provider_members`
 - `provider_invitations`
@@ -35,6 +36,25 @@ El tercer parámetro `true` limita el valor a la transacción actual. La API no 
 - `audit_events`
 
 Todas tienen seguridad por fila cuando corresponde. `providers`, `provider_members`, `provider_invitations` y `audit_events` se aíslan mediante `app.provider_id`.
+
+## Incorporación del proveedor
+
+La aceptación de una invitación se ejecuta de forma atómica:
+
+1. Se calcula SHA-256 del token recibido y nunca se guarda el token original.
+2. Se bloquea la invitación durante la transacción.
+3. Se comprueba que siga pendiente, no haya caducado y el taller no esté suspendido.
+4. Se crea el usuario con estado `PENDING`.
+5. La contraseña se deriva con `scrypt-v1`, sal aleatoria individual y 64 bytes de salida.
+6. Se crea la membresía con estado `INVITED`.
+7. La invitación pasa a `ACCEPTED` y queda vinculada al usuario.
+8. Se registra `PROVIDER_INVITATION_ACCEPTED` en auditoría.
+
+Aceptar la invitación **no concede acceso**. El usuario y la membresía permanecerán pendientes hasta completar:
+
+- verificación del correo electrónico;
+- activación del doble factor;
+- activación final de la membresía.
 
 ## Prueba de aislamiento
 
