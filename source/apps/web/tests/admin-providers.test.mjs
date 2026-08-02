@@ -85,7 +85,7 @@ test("el panel mantiene el token de API fuera del navegador", async (t) => {
     apiAdminToken: apiToken,
     enableAdminUi: true,
     adminAccessKey: accessKey,
-    sessionTtlMs: 30 * 60 * 1000,
+    adminSessionTtlMs: 30 * 60 * 1000,
     now: () => currentTime,
     logger: { error() {} }
   }));

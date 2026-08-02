@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Acceso de proveedores · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/onboarding.css">
+  <script defer src="/proveedor/access.js"></script>
+</head>
+<body data-page="provider-access">
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Atelier Lumière">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <span class="secure-badge">Acceso privado</span>
+    </header>
+
+    <section class="layout">
+      <div class="story">
+        <p class="eyebrow">Talleres colaboradores</p>
+        <h1>Tu espacio de trabajo.</h1>
+        <p>Gestiona tus artículos, publicaciones y pedidos desde un entorno privado. Para entrar necesitas la contraseña y el código de tu aplicación autenticadora.</p>
+        <div class="progress" aria-label="Acceso en dos pasos">
+          <span id="access-progress-password" class="current"></span>
+          <span id="access-progress-factor"></span>
+          <span></span><span></span>
+        </div>
+        <p id="access-progress-label" class="progress-label">Paso 1 de 2 · Correo y contraseña</p>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <p class="eyebrow">Identificación</p>
+          <h2 id="access-title">Inicia sesión</h2>
+          <p id="access-description">Tu taller debe estar aprobado por Administración para poder crear una sesión.</p>
+        </div>
+        <div class="card-body">
+          <form id="password-stage" class="form" autocomplete="on">
+            <label>
+              Correo electrónico
+              <input id="login-email" name="email" type="email" maxlength="254" autocomplete="username" required>
+            </label>
+            <label>
+              Contraseña
+              <input id="login-password" name="password" type="password" maxlength="128" autocomplete="current-password" required>
+            </label>
+            <p id="password-message" class="message" role="status" aria-live="polite"></p>
+            <button id="password-submit" class="button primary full" type="submit">Continuar</button>
+          </form>
+
+          <form id="factor-stage" class="form" autocomplete="off" hidden>
+            <div class="summary">
+              <strong id="login-provider"></strong>
+              <span>Contraseña comprobada. Completa el segundo factor.</span>
+              <span>El desafío caduca: <b id="challenge-expiry"></b></span>
+            </div>
+            <label>
+              Código de autenticación o recuperación
+              <input id="login-code" type="text" maxlength="19" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required>
+              <small>Introduce seis dígitos de tu app o un código de recuperación con guiones.</small>
+            </label>
+            <p>Intentos restantes: <strong id="login-attempts">5</strong></p>
+            <p id="factor-message" class="message" role="status" aria-live="polite"></p>
+            <button id="factor-submit" class="button primary full" type="submit">Entrar en mi panel</button>
+            <button id="restart-login" class="button secondary full" type="button">Volver a empezar</button>
+          </form>
+
+          <section id="pending-approval" hidden>
+            <div class="completion-mark" aria-hidden="true">✓</div>
+            <h2>Cuenta preparada</h2>
+            <p>Tu seguridad está configurada, pero Atelier Lumière todavía debe aprobar y activar el taller.</p>
+            <p class="notice">No necesitas repetir la invitación ni configurar de nuevo el doble factor.</p>
+          </section>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

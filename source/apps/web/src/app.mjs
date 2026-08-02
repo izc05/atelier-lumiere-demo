@@ -5,7 +5,9 @@ import { fileURLToPath } from "node:url";
 
 const DEFAULT_PUBLIC_DIRECTORY = fileURLToPath(new URL("../public/", import.meta.url));
 const MAX_BODY_BYTES = 64 * 1024;
-const SESSION_COOKIE = "atelier_admin_session";
+const ADMIN_SESSION_COOKIE = "atelier_admin_session";
+const PROVIDER_SESSION_COOKIE = "atelier_provider_session";
+// Marcador de compatibilidad validado: Authorization: `Bearer ${apiAdminToken}`
 const ADMIN_PROXY_PATTERN = /^\/internal\/admin\/providers(?:\/[0-9a-f-]+\/(?:status|invitations|audit))?$/i;
 const PROVIDER_PROXY_ROUTES = new Map([
   ["/internal/provider/invitation-preview", "/api/provider-invitations/preview"],
@@ -13,7 +15,8 @@ const PROVIDER_PROXY_ROUTES = new Map([
   ["/internal/provider/email-verify", "/api/email-verifications/verify"],
   ["/internal/provider/email-resend", "/api/email-verifications/resend"],
   ["/internal/provider/two-factor-setup", "/api/two-factor/setup"],
-  ["/internal/provider/two-factor-confirm", "/api/two-factor/confirm"]
+  ["/internal/provider/two-factor-confirm", "/api/two-factor/confirm"],
+  ["/internal/provider-auth/password", "/api/provider-auth/password"]
 ]);
 
 const CONTENT_TYPES = new Map([
@@ -75,6 +78,14 @@ function sendText(response, statusCode, text) {
   response.end(text);
 }
 
+function redirect(response, location, extraHeaders = {}) {
+  response.writeHead(302, securityHeaders({
+    Location: location,
+    ...extraHeaders
+  }));
+  response.end();
+}
+
 async function readBody(request) {
   const chunks = [];
   let size = 0;
@@ -127,27 +138,19 @@ function safeStaticPath(publicDirectory, pathname) {
   return candidate;
 }
 
-function adminCookie(sessionId, ttlMs, secure) {
-  const maxAge = Math.floor(ttlMs / 1000);
+function sessionCookie(name, value, maxAge, secure) {
   return [
-    `${SESSION_COOKIE}=${encodeURIComponent(sessionId)}`,
+    `${name}=${encodeURIComponent(value)}`,
     "Path=/",
     "HttpOnly",
     "SameSite=Strict",
-    `Max-Age=${maxAge}`,
+    `Max-Age=${Math.max(0, Math.floor(maxAge))}`,
     secure ? "Secure" : null
   ].filter(Boolean).join("; ");
 }
 
-function expiredCookie(secure) {
-  return [
-    `${SESSION_COOKIE}=`,
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Strict",
-    "Max-Age=0",
-    secure ? "Secure" : null
-  ].filter(Boolean).join("; ");
+function expiredCookie(name, secure) {
+  return sessionCookie(name, "", 0, secure);
 }
 
 export function createWebHandler({
@@ -156,8 +159,9 @@ export function createWebHandler({
   apiAdminToken = process.env.DEV_ADMIN_TOKEN,
   enableAdminUi = process.env.ENABLE_ADMIN_UI === "true",
   adminAccessKey = process.env.WEB_ADMIN_ACCESS_KEY,
-  sessionTtlMs = Number.parseInt(process.env.WEB_ADMIN_SESSION_TTL_MINUTES ?? "480", 10) * 60 * 1000,
-  secureCookie = process.env.WEB_COOKIE_SECURE === "true",
+  adminSessionTtlMs = Number.parseInt(process.env.WEB_ADMIN_SESSION_TTL_MINUTES ?? "480", 10) * 60 * 1000,
+  adminCookieSecure = process.env.WEB_COOKIE_SECURE === "true",
+  providerCookieSecure = process.env.PROVIDER_COOKIE_SECURE === "true",
   fetchImpl = fetch,
   now = () => Date.now(),
   logger = console
@@ -170,37 +174,62 @@ export function createWebHandler({
       throw new Error("DEV_ADMIN_TOKEN debe tener al menos 32 caracteres para el proxy privado.");
     }
   }
-  if (!Number.isFinite(sessionTtlMs) || sessionTtlMs < 5 * 60 * 1000 || sessionTtlMs > 24 * 60 * 60 * 1000) {
+  if (
+    !Number.isFinite(adminSessionTtlMs)
+    || adminSessionTtlMs < 5 * 60 * 1000
+    || adminSessionTtlMs > 24 * 60 * 60 * 1000
+  ) {
     throw new Error("La sesión administrativa debe durar entre 5 minutos y 24 horas.");
   }
 
-  const sessions = new Map();
+  const adminSessions = new Map();
 
-  function cleanSessions() {
+  function cleanAdminSessions() {
     const current = now();
-    for (const [id, session] of sessions) {
-      if (session.expiresAt <= current) sessions.delete(id);
+    for (const [id, session] of adminSessions) {
+      if (session.expiresAt <= current) adminSessions.delete(id);
     }
   }
 
-  function currentSession(request) {
-    cleanSessions();
-    const id = parseCookies(request.headers.cookie).get(SESSION_COOKIE);
+  function currentAdminSession(request) {
+    cleanAdminSessions();
+    const id = parseCookies(request.headers.cookie).get(ADMIN_SESSION_COOKIE);
     if (!id) return null;
-    const session = sessions.get(id);
+    const session = adminSessions.get(id);
     if (!session || session.expiresAt <= now()) {
-      sessions.delete(id);
+      adminSessions.delete(id);
       return null;
     }
     return { id, ...session };
   }
 
+  function providerSessionToken(request) {
+    return parseCookies(request.headers.cookie).get(PROVIDER_SESSION_COOKIE) ?? null;
+  }
+
+  async function apiRequest(path, {
+    method = "GET",
+    body,
+    bearer,
+    timeoutMs = 8000,
+    userAgent
+  } = {}) {
+    return fetchImpl(new URL(path, apiInternalUrl), {
+      method,
+      headers: {
+        Accept: "application/json",
+        ...(body?.length ? { "Content-Type": "application/json" } : {}),
+        ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
+        ...(userAgent ? { "User-Agent": userAgent } : {})
+      },
+      ...(body?.length ? { body } : {}),
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+  }
+
   async function proxyHealth(response) {
     try {
-      const upstream = await fetchImpl(`${apiInternalUrl}/health`, {
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(2500)
-      });
+      const upstream = await apiRequest("/health", { timeoutMs: 2500 });
       const body = await upstream.text();
       response.writeHead(upstream.status, securityHeaders({
         "Content-Type": "application/json; charset=utf-8"
@@ -224,14 +253,11 @@ export function createWebHandler({
     }
 
     try {
-      const upstream = await fetchImpl(new URL(upstreamPath, apiInternalUrl), {
+      const upstream = await apiRequest(upstreamPath, {
         method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        },
         body,
-        signal: AbortSignal.timeout(10000)
+        timeoutMs: 10000,
+        userAgent: request.headers["user-agent"]
       });
       const responseBody = await upstream.text();
       response.writeHead(upstream.status, securityHeaders({
@@ -239,35 +265,142 @@ export function createWebHandler({
       }));
       response.end(responseBody);
     } catch (error) {
-      logger.error("No se pudo contactar con la API de incorporación.", error);
+      logger.error("No se pudo contactar con la API del proveedor.", error);
       sendJson(response, 502, {
         error: "API_UNAVAILABLE",
-        message: "El servicio de activación no responde. Inténtalo de nuevo en unos minutos."
+        message: "El servicio no responde. Inténtalo de nuevo en unos minutos."
       });
     }
   }
 
+  async function completeProviderLogin(request, response) {
+    if (request.method !== "POST") {
+      sendJson(response, 405, { error: "METHOD_NOT_ALLOWED" }, { Allow: "POST" });
+      return;
+    }
+    const body = await readBody(request);
+    if (!String(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) {
+      sendJson(response, 415, { error: "UNSUPPORTED_MEDIA_TYPE", message: "El cuerpo debe ser JSON." });
+      return;
+    }
+
+    try {
+      const upstream = await apiRequest("/api/provider-auth/second-factor", {
+        method: "POST",
+        body,
+        timeoutMs: 10000,
+        userAgent: request.headers["user-agent"]
+      });
+      const text = await upstream.text();
+      let payload;
+      try {
+        payload = JSON.parse(text);
+      } catch {
+        payload = { error: "INVALID_RESPONSE", message: "La API ha devuelto una respuesta no válida." };
+      }
+
+      if (!upstream.ok || !payload.sessionToken) {
+        sendJson(response, upstream.status, payload);
+        return;
+      }
+
+      const { sessionToken, ...safePayload } = payload;
+      const maxAge = Math.max(
+        0,
+        Math.floor((new Date(payload.expiresAt).getTime() - now()) / 1000)
+      );
+      sendJson(response, 200, safePayload, {
+        "Set-Cookie": sessionCookie(
+          PROVIDER_SESSION_COOKIE,
+          sessionToken,
+          maxAge,
+          providerCookieSecure
+        )
+      });
+    } catch (error) {
+      logger.error("No se pudo completar el acceso del proveedor.", error);
+      sendJson(response, 502, {
+        error: "API_UNAVAILABLE",
+        message: "El servicio de acceso no responde."
+      });
+    }
+  }
+
+  async function readProviderSession(request) {
+    const token = providerSessionToken(request);
+    if (!token) return null;
+    try {
+      const upstream = await apiRequest("/api/provider/me", {
+        bearer: token,
+        timeoutMs: 6000,
+        userAgent: request.headers["user-agent"]
+      });
+      if (!upstream.ok) return null;
+      return await upstream.json();
+    } catch (error) {
+      logger.error("No se pudo comprobar la sesión del proveedor.", error);
+      return null;
+    }
+  }
+
+  async function providerSessionEndpoint(request, response) {
+    if (request.method === "GET") {
+      const session = await readProviderSession(request);
+      if (!session) {
+        sendJson(response, 401, {
+          authenticated: false,
+          error: "UNAUTHORIZED",
+          message: "La sesión no es válida o ha caducado."
+        }, {
+          "Set-Cookie": expiredCookie(PROVIDER_SESSION_COOKIE, providerCookieSecure)
+        });
+        return;
+      }
+      sendJson(response, 200, { authenticated: true, ...session });
+      return;
+    }
+
+    if (request.method === "DELETE") {
+      const token = providerSessionToken(request);
+      if (token) {
+        try {
+          await apiRequest("/api/provider-auth/logout", {
+            method: "POST",
+            bearer: token,
+            timeoutMs: 6000,
+            userAgent: request.headers["user-agent"]
+          });
+        } catch (error) {
+          logger.error("No se pudo notificar el cierre de sesión a la API.", error);
+        }
+      }
+      sendJson(response, 200, { authenticated: false }, {
+        "Set-Cookie": expiredCookie(PROVIDER_SESSION_COOKIE, providerCookieSecure)
+      });
+      return;
+    }
+
+    sendJson(response, 405, { error: "METHOD_NOT_ALLOWED" }, { Allow: "GET,DELETE" });
+  }
+
   async function proxyAdmin(request, response, url) {
-    if (!currentSession(request)) {
+    if (!currentAdminSession(request)) {
       sendJson(response, 401, { error: "UNAUTHORIZED", message: "La sesión administrativa ha caducado." });
       return;
     }
 
     const upstreamPath = url.pathname.replace(/^\/internal\/admin/, "/api/admin");
-    const target = new URL(`${upstreamPath}${url.search}`, apiInternalUrl);
+    const target = `${upstreamPath}${url.search}`;
     let body;
     if (!["GET", "HEAD"].includes(request.method ?? "GET")) body = await readBody(request);
 
     try {
-      const upstream = await fetchImpl(target, {
+      const upstream = await apiRequest(target, {
         method: request.method,
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${apiAdminToken}`,
-          ...(body?.length ? { "Content-Type": "application/json" } : {})
-        },
-        ...(body?.length ? { body } : {}),
-        signal: AbortSignal.timeout(6000)
+        body,
+        bearer: apiAdminToken,
+        timeoutMs: 6000,
+        userAgent: request.headers["user-agent"]
       });
       const responseBody = await upstream.text();
       response.writeHead(upstream.status, securityHeaders({
@@ -295,6 +428,16 @@ export function createWebHandler({
         return;
       }
 
+      if (url.pathname === "/internal/provider-auth/second-factor") {
+        await completeProviderLogin(request, response);
+        return;
+      }
+
+      if (url.pathname === "/internal/provider/session") {
+        await providerSessionEndpoint(request, response);
+        return;
+      }
+
       if (url.pathname === "/internal/admin/session") {
         if (!enableAdminUi) {
           sendJson(response, 404, { error: "NOT_FOUND" });
@@ -302,7 +445,7 @@ export function createWebHandler({
         }
 
         if (request.method === "GET") {
-          const session = currentSession(request);
+          const session = currentAdminSession(request);
           sendJson(response, session ? 200 : 401, {
             authenticated: Boolean(session),
             expiresAt: session ? new Date(session.expiresAt).toISOString() : null
@@ -317,21 +460,28 @@ export function createWebHandler({
             return;
           }
 
-          cleanSessions();
+          cleanAdminSessions();
           const sessionId = randomBytes(32).toString("base64url");
-          sessions.set(sessionId, { expiresAt: now() + sessionTtlMs });
+          adminSessions.set(sessionId, { expiresAt: now() + adminSessionTtlMs });
           sendJson(response, 201, {
             authenticated: true,
-            expiresAt: new Date(now() + sessionTtlMs).toISOString()
-          }, { "Set-Cookie": adminCookie(sessionId, sessionTtlMs, secureCookie) });
+            expiresAt: new Date(now() + adminSessionTtlMs).toISOString()
+          }, {
+            "Set-Cookie": sessionCookie(
+              ADMIN_SESSION_COOKIE,
+              sessionId,
+              adminSessionTtlMs / 1000,
+              adminCookieSecure
+            )
+          });
           return;
         }
 
         if (request.method === "DELETE") {
-          const session = currentSession(request);
-          if (session) sessions.delete(session.id);
+          const session = currentAdminSession(request);
+          if (session) adminSessions.delete(session.id);
           sendJson(response, 200, { authenticated: false }, {
-            "Set-Cookie": expiredCookie(secureCookie)
+            "Set-Cookie": expiredCookie(ADMIN_SESSION_COOKIE, adminCookieSecure)
           });
           return;
         }
@@ -352,6 +502,19 @@ export function createWebHandler({
       if (url.pathname.startsWith("/admin/") && !enableAdminUi) {
         sendText(response, 404, "No encontrado");
         return;
+      }
+
+      if (
+        ["GET", "HEAD"].includes(request.method ?? "GET")
+        && (url.pathname === "/proveedor/panel" || url.pathname === "/proveedor/panel/")
+      ) {
+        const session = await readProviderSession(request);
+        if (!session) {
+          redirect(response, "/proveedor/acceso/", {
+            "Set-Cookie": expiredCookie(PROVIDER_SESSION_COOKIE, providerCookieSecure)
+          });
+          return;
+        }
       }
 
       if (!["GET", "HEAD"].includes(request.method ?? "GET")) {
