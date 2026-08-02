@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Recuperar acceso · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/onboarding.css">
+  <link rel="stylesheet" href="/proveedor/recovery.css">
+  <script src="/proveedor/recovery.js" defer></script>
+</head>
+<body data-page="recovery-request">
+  <main class="onboarding-shell">
+    <header class="onboarding-brand">
+      <a href="/" aria-label="Atelier Lumière"><span class="brand-mark">AL</span></a>
+      <div><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></div>
+    </header>
+
+    <section class="onboarding-card wide">
+      <p class="eyebrow">Acceso de proveedores</p>
+      <h1>Recupera tu cuenta</h1>
+      <p class="lead">Elige la situación que necesitas resolver. Por seguridad, no confirmaremos en pantalla si un correo está registrado.</p>
+
+      <div class="split-grid">
+        <form id="password-request-form" class="form-stack">
+          <div>
+            <p class="eyebrow">Contraseña</p>
+            <h2>He olvidado mi contraseña</h2>
+            <p>Recibirás un enlace temporal para crear una nueva. Las sesiones anteriores quedarán cerradas.</p>
+          </div>
+          <label>Correo de la cuenta
+            <input id="password-request-email" type="email" maxlength="254" autocomplete="email" required>
+          </label>
+          <p id="password-request-message" class="message" role="status" aria-live="polite"></p>
+          <button id="password-request-submit" class="button primary" type="submit">Enviar enlace</button>
+          <a id="password-development-link" class="button secondary" href="#" hidden>Abrir enlace de prueba</a>
+        </form>
+
+        <form id="two-factor-request-form" class="form-stack">
+          <div>
+            <p class="eyebrow">Doble factor</p>
+            <h2>He perdido el móvil o los códigos</h2>
+            <p>Necesitamos comprobar primero tu contraseña. El autenticador y los códigos anteriores quedarán anulados.</p>
+          </div>
+          <label>Correo de la cuenta
+            <input id="two-factor-request-email" type="email" maxlength="254" autocomplete="email" required>
+          </label>
+          <label>Contraseña actual
+            <input id="two-factor-request-password" type="password" maxlength="128" autocomplete="current-password" required>
+          </label>
+          <p id="two-factor-request-message" class="message" role="status" aria-live="polite"></p>
+          <button id="two-factor-request-submit" class="button primary" type="submit">Solicitar sustitución</button>
+          <a id="two-factor-development-link" class="button secondary" href="#" hidden>Abrir enlace de prueba</a>
+        </form>
+      </div>
+
+      <p class="security-note">Los enlaces caducan a los 30 minutos y solo pueden utilizarse una vez.</p>
+      <a class="text-link" href="/proveedor/acceso/">Volver al acceso</a>
+    </section>
+  </main>
+</body>
+</html>

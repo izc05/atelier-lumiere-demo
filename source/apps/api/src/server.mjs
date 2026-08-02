@@ -1,5 +1,7 @@
 import { createServer } from "node:http";
 import { createApiHandler } from "./app.mjs";
+import { createAccountRecoveryApiHandler } from "./account-recovery-api.mjs";
+import { createAccountRecoveryService } from "./account-recovery-service.mjs";
 import { createDatabase } from "./database.mjs";
 import {
   createDevelopmentAdminContext,
@@ -84,6 +86,15 @@ const providerAuthService = database.enabled && developmentAdminContext
     })
   : null;
 
+const accountRecoveryService = database.enabled && developmentAdminContext
+  ? createAccountRecoveryService({
+      database,
+      systemContext: developmentAdminContext,
+      mailService,
+      environment
+    })
+  : null;
+
 if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
   try {
     await mailService.verify();
@@ -95,17 +106,22 @@ if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
   }
 }
 
+const baseApiHandler = createApiHandler({
+  environment,
+  database,
+  providersService,
+  onboardingService,
+  emailVerificationService,
+  twoFactorService,
+  providerAuthService,
+  mailService,
+  authenticateRequest
+});
+
 const server = createServer(
-  createApiHandler({
-    environment,
-    database,
-    providersService,
-    onboardingService,
-    emailVerificationService,
-    twoFactorService,
-    providerAuthService,
-    mailService,
-    authenticateRequest
+  createAccountRecoveryApiHandler({
+    baseHandler: baseApiHandler,
+    accountRecoveryService
   })
 );
 

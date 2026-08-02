@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Recuperar doble factor · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/onboarding.css">
+  <link rel="stylesheet" href="/proveedor/recovery.css">
+  <script src="/proveedor/recovery.js" defer></script>
+</head>
+<body data-page="two-factor-reset">
+  <main class="onboarding-shell">
+    <header class="onboarding-brand">
+      <a href="/" aria-label="Atelier Lumière"><span class="brand-mark">AL</span></a>
+      <div><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></div>
+    </header>
+
+    <section class="onboarding-card">
+      <p class="eyebrow">Recuperación segura</p>
+      <h1>Sustituye tu autenticador</h1>
+      <p class="lead">Este proceso invalida el móvil anterior, los diez códigos de recuperación y todas las sesiones abiertas.</p>
+
+      <section id="two-factor-reset-action">
+        <div class="warning-card">
+          <h2>Antes de continuar</h2>
+          <p>Ten preparada una aplicación compatible como Google Authenticator, Microsoft Authenticator o Authy. Al pulsar el botón tendrás 15 minutos para escanear el QR nuevo.</p>
+        </div>
+        <p id="two-factor-reset-message" class="message" role="status" aria-live="polite"></p>
+        <button id="two-factor-reset-submit" class="button primary" type="button">Invalidar el anterior y continuar</button>
+        <a class="button secondary" href="/proveedor/acceso/">Cancelar</a>
+      </section>
+
+      <section id="recovery-unavailable" hidden>
+        <h2>Enlace no disponible</h2>
+        <p>El enlace puede haber caducado, haberse utilizado o haber sido sustituido por otro más reciente.</p>
+        <a class="button secondary" href="/proveedor/solicitar-recuperacion/">Solicitar uno nuevo</a>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

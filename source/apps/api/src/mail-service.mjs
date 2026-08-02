@@ -3,6 +3,10 @@ import {
   createInvitationEmail,
   createVerificationEmail
 } from "./email-templates.mjs";
+import {
+  createPasswordResetEmail,
+  createTwoFactorResetEmail
+} from "./recovery-email-templates.mjs";
 
 function booleanValue(value, fallback = false) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -52,17 +56,16 @@ function actionUrl(baseUrl, pathname, token) {
 }
 
 function disabledService() {
+  const disabled = async () => ({ status: "DISABLED", messageId: null, accepted: [] });
   return Object.freeze({
     enabled: false,
     async verify() {
       return { enabled: false, ready: false };
     },
-    async sendInvitation() {
-      return { status: "DISABLED", messageId: null, accepted: [] };
-    },
-    async sendEmailVerification() {
-      return { status: "DISABLED", messageId: null, accepted: [] };
-    },
+    sendInvitation: disabled,
+    sendEmailVerification: disabled,
+    sendPasswordReset: disabled,
+    sendTwoFactorReset: disabled,
     close() {}
   });
 }
@@ -150,6 +153,28 @@ export function createMailService({
     return deliveryResult(info);
   }
 
+  function recoveryTemplate({
+    type,
+    displayName,
+    providerName,
+    token,
+    expiresAt
+  }) {
+    const input = {
+      displayName,
+      providerName,
+      actionUrl: actionUrl(
+        baseUrl,
+        type === "PASSWORD" ? "/proveedor/recuperar-clave/" : "/proveedor/recuperar-2fa/",
+        token
+      ),
+      expiresAt
+    };
+    return type === "PASSWORD"
+      ? createPasswordResetEmail(input)
+      : createTwoFactorResetEmail(input);
+  }
+
   return Object.freeze({
     enabled: true,
 
@@ -158,13 +183,7 @@ export function createMailService({
       return { enabled: true, ready: true };
     },
 
-    async sendInvitation({
-      to,
-      contactName,
-      providerName,
-      token,
-      expiresAt
-    }) {
+    async sendInvitation({ to, contactName, providerName, token, expiresAt }) {
       const template = createInvitationEmail({
         contactName,
         providerName,
@@ -174,13 +193,7 @@ export function createMailService({
       return send({ to, template });
     },
 
-    async sendEmailVerification({
-      to,
-      displayName,
-      providerName,
-      token,
-      expiresAt
-    }) {
+    async sendEmailVerification({ to, displayName, providerName, token, expiresAt }) {
       const template = createVerificationEmail({
         displayName,
         providerName,
@@ -188,6 +201,32 @@ export function createMailService({
         expiresAt
       });
       return send({ to, template });
+    },
+
+    async sendPasswordReset({ to, displayName, providerName, token, expiresAt }) {
+      return send({
+        to,
+        template: recoveryTemplate({
+          type: "PASSWORD",
+          displayName,
+          providerName,
+          token,
+          expiresAt
+        })
+      });
+    },
+
+    async sendTwoFactorReset({ to, displayName, providerName, token, expiresAt }) {
+      return send({
+        to,
+        template: recoveryTemplate({
+          type: "TWO_FACTOR",
+          displayName,
+          providerName,
+          token,
+          expiresAt
+        })
+      });
     },
 
     close() {
