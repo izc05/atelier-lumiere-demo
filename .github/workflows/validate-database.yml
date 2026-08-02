@@ -3,21 +3,27 @@ name: Validar base de datos multi-proveedor
 on:
   pull_request:
     paths:
+      - "source/apps/api/**"
       - "source/packages/database/**"
+      - "source/infra/docker/Dockerfile.api"
       - "source/infra/docker/docker-compose.yml"
+      - "source/package.json"
       - ".github/workflows/validate-database.yml"
   push:
     branches: [main]
     paths:
+      - "source/apps/api/**"
       - "source/packages/database/**"
+      - "source/infra/docker/Dockerfile.api"
       - "source/infra/docker/docker-compose.yml"
+      - "source/package.json"
       - ".github/workflows/validate-database.yml"
 
 permissions:
   contents: read
 
 jobs:
-  tenant-isolation:
+  tenant-isolation-and-api:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -36,21 +42,41 @@ jobs:
 
     env:
       PGPASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/atelier_test
 
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: source/package.json
 
       - name: Instalar cliente PostgreSQL
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Aplicar esquema principal
-        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/migrations/0001_core_identity.sql
+      - name: Aplicar migraciones
+        run: |
+          for migration in source/packages/database/migrations/*.sql; do
+            echo "Aplicando ${migration}"
+            psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f "${migration}"
+          done
 
       - name: Cargar dos talleres ficticios
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/seeds/0001_two_providers.sql
 
       - name: Verificar aislamiento por proveedor
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/tenant_isolation.sql
+
+      - name: Instalar dependencias de la aplicación fuente
+        working-directory: source
+        run: npm install --ignore-scripts
+
+      - name: Probar API administrativa y auditoría
+        working-directory: source
+        run: npm run test:api-integration
