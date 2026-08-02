@@ -10,6 +10,9 @@ import { createBlogMediaApiHandler } from "./blog-media-api.mjs";
 import { createBlogMediaService } from "./blog-media-service.mjs";
 import { createBlogPostsApiHandler } from "./blog-posts-api.mjs";
 import { createBlogPostsService } from "./blog-posts-service.mjs";
+import { createCustomerAuthService } from "./customer-auth-service.mjs";
+import { createCustomerOrdersApiHandler } from "./customer-orders-api.mjs";
+import { createCustomerOrdersService } from "./customer-orders-service.mjs";
 import { createDatabase } from "./database.mjs";
 import {
   createDevelopmentAdminContext,
@@ -89,6 +92,9 @@ const twoFactorService = database.enabled && developmentAdminContext
 const providerAuthService = database.enabled && developmentAdminContext
   ? createProviderAuthService({ database, systemContext: developmentAdminContext })
   : null;
+const customerAuthService = database.enabled && developmentAdminContext
+  ? createCustomerAuthService({ database, systemContext: developmentAdminContext })
+  : null;
 const accountRecoveryService = database.enabled && developmentAdminContext
   ? createAccountRecoveryService({
       database,
@@ -107,6 +113,9 @@ const productMediaService = database.enabled
   : null;
 const providerOrdersService = database.enabled
   ? createProviderOrdersService({ database })
+  : null;
+const customerOrdersService = database.enabled
+  ? createCustomerOrdersService({ database })
   : null;
 const adminBlogService = database.enabled
   ? createAdminBlogService({ database, storage: mediaStorage })
@@ -172,8 +181,13 @@ const providerOrdersHandler = createProviderOrdersApiHandler({
   providerOrdersService,
   providerAuthService
 });
-const adminBlogHandler = createAdminBlogApiHandler({
+const customerOrdersHandler = createCustomerOrdersApiHandler({
   baseHandler: providerOrdersHandler,
+  customerAuthService,
+  customerOrdersService
+});
+const adminBlogHandler = createAdminBlogApiHandler({
+  baseHandler: customerOrdersHandler,
   adminBlogService,
   authenticateRequest
 });
