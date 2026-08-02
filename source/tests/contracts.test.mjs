@@ -80,10 +80,13 @@ test("la política multimedia limita imágenes y vídeo", () => {
   assert.match(result.errors[0], /8 imágenes/);
 });
 
-test("el mapa de datos incluye auditoría y exige ámbito de proveedor", () => {
+test("el mapa de datos incluye credenciales y exige seguridad antes del acceso", () => {
   assert.ok(CORE_TABLES.includes("audit_events"));
+  assert.ok(CORE_TABLES.includes("user_credentials"));
   assert.equal(DATABASE_RULES.providerScopedTablesRequireProviderId, true);
   assert.equal(DATABASE_RULES.allMutationsCreateAuditEvent, true);
+  assert.equal(DATABASE_RULES.passwordsStoredWithScrypt, true);
+  assert.equal(DATABASE_RULES.providerAccessRequiresVerifiedEmailAndTwoFactor, true);
 });
 
 test("la API informa de la conexión sin fingir autenticación definitiva", async () => {
@@ -95,8 +98,9 @@ test("la API informa de la conexión sin fingir autenticación definitiva", asyn
   };
   const response = captureResponse();
   const handler = createApiHandler({
-    version: "0.2.0-test",
+    version: "0.3.0-test",
     database,
+    onboardingService: {},
     now: () => new Date("2026-08-02T09:00:00.000Z")
   });
 
@@ -105,7 +109,7 @@ test("la API informa de la conexión sin fingir autenticación definitiva", asyn
   assert.deepEqual(JSON.parse(response.body), {
     status: "ok",
     service: "atelier-lumiere-api",
-    version: "0.2.0-test",
+    version: "0.3.0-test",
     environment: "development",
     database: "connected",
     timestamp: "2026-08-02T09:00:00.000Z"
@@ -118,5 +122,8 @@ test("la API informa de la conexión sin fingir autenticación definitiva", asyn
   assert.equal(meta.publicDemoProtected, true);
   assert.equal(meta.capabilities.database, true);
   assert.equal(meta.capabilities.providerIsolation, true);
+  assert.equal(meta.capabilities.providerInvitationAcceptance, true);
   assert.equal(meta.capabilities.authentication, false);
+  assert.equal(meta.capabilities.emailVerification, false);
+  assert.equal(meta.capabilities.twoFactorAuthentication, false);
 });
