@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#59101f">
+  <title>Tienda · Atelier Lumière</title>
+  <link rel="stylesheet" href="/tienda/store.css">
+  <script defer src="/tienda/store.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <nav class="nav" aria-label="Navegación principal">
+        <a class="button ghost" href="/">Inicio técnico</a>
+        <a class="button secondary" href="/proveedor/acceso/">Acceso de talleres</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Piezas con historia</p>
+        <h1>La tienda de los talleres invitados.</h1>
+        <p class="lead">Descubre artículos artesanales revisados por Atelier Lumière. Esta tienda del piloto solo muestra talleres activos y piezas aprobadas y publicadas.</p>
+      </div>
+      <aside class="hero-note">
+        <strong>Catálogo editorial</strong>
+        <p>Cada pieza pasa por un flujo de borrador, revisión, aprobación y publicación antes de aparecer aquí.</p>
+      </aside>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros del catálogo">
+      <input id="search-input" type="search" autocomplete="off" placeholder="Buscar pieza, categoría o taller">
+      <select id="category-filter"><option value="">Todas las categorías</option></select>
+      <select id="event-filter">
+        <option value="">Todas las ocasiones</option>
+        <option value="boda">Boda</option>
+        <option value="aniversario">Aniversario</option>
+        <option value="cumpleanos">Cumpleaños</option>
+        <option value="bautizo">Bautizo</option>
+        <option value="comunion">Comunión</option>
+        <option value="nacimiento">Nacimiento</option>
+        <option value="navidad">Navidad</option>
+        <option value="agradecimiento">Agradecimiento</option>
+      </select>
+    </section>
+
+    <section id="loading-view" class="loading"><p>Preparando las piezas publicadas…</p></section>
+    <section id="empty-view" class="empty" hidden><div><h2>El catálogo todavía está vacío</h2><p>Los artículos aparecerán aquí cuando sean aprobados y publicados.</p></div></section>
+    <section id="error-view" class="error" hidden><div><h2>No se pudo abrir la tienda</h2><p id="error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div></section>
+    <section id="products-view" class="products" aria-live="polite" hidden></section>
+  </main>
+</body>
+</html>
