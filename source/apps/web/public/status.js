@@ -2,7 +2,7 @@ const statusElement = document.querySelector("#api-status");
 
 async function checkApi() {
   try {
-    const response = await fetch("http://localhost:4000/health", {
+    const response = await fetch("/internal/api-health", {
       headers: { Accept: "application/json" }
     });
 
