@@ -1,6 +1,6 @@
 {
   "name": "@atelier-lumiere/api",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,8 @@
     "test:integration": "node --test tests/*.test.mjs"
   },
   "dependencies": {
-    "pg": "8.22.0"
+    "pg": "8.22.0",
+    "qrcode": "1.5.4"
   },
   "engines": {
     "node": ">=22"
