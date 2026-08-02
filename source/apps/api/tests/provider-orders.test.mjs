@@ -10,7 +10,6 @@ const ADMIN = {
   userId: "00000000-0000-4000-8000-000000000001",
   providerId: null
 };
-const CUSTOMER_ID = "00000000-0000-4000-8000-000000000002";
 const PROVIDER_A = "00000000-0000-4000-8000-000000000201";
 const PROVIDER_B = "00000000-0000-4000-8000-000000000202";
 const PROVIDER_A_CONTEXT = {
@@ -43,6 +42,8 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
   t.after(() => database.close());
 
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();
+  const customerId = randomUUID();
+  const customerEmail = `cliente-${suffix.toLowerCase()}@example.test`;
   const checkoutId = randomUUID();
   const orderAId = randomUUID();
   const orderBId = randomUUID();
@@ -52,6 +53,13 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
 
   await database.withContext(ADMIN, async (transaction) => {
     await transaction.query(
+      `INSERT INTO users (
+         id, email, display_name, status, email_verified_at, two_factor_enabled
+       ) VALUES ($1, $2, 'Cliente integración', 'ACTIVE', now(), false)`,
+      [customerId, customerEmail]
+    );
+
+    await transaction.query(
       `INSERT INTO checkout_batches (
          id, customer_user_id, checkout_reference, currency,
          customer_name, contact_email, contact_phone, shipping_address,
@@ -59,10 +67,10 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
        ) VALUES ($1, $2, $3, 'EUR', $4, $5, $6, $7::jsonb, 'SUBMITTED', now())`,
       [
         checkoutId,
-        CUSTOMER_ID,
+        customerId,
         `AL-CHECKOUT-${suffix}`,
         "Cliente integración",
-        `cliente-${suffix.toLowerCase()}@example.test`,
+        customerEmail,
         "+34000000000",
         JSON.stringify(address())
       ]
@@ -84,7 +92,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
       orderAId,
       checkoutId,
       PROVIDER_A,
-      CUSTOMER_ID,
+      customerId,
       `AL-ORDER-A-${suffix}`,
       5400,
       600,
@@ -93,7 +101,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
       8,
       "Entregar envuelto para regalo.",
       "Cliente integración",
-      `cliente-${suffix.toLowerCase()}@example.test`,
+      customerEmail,
       "+34000000000",
       JSON.stringify(address())
     ]);
@@ -101,7 +109,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
       orderBId,
       checkoutId,
       PROVIDER_B,
-      CUSTOMER_ID,
+      customerId,
       `AL-ORDER-B-${suffix}`,
       3100,
       400,
@@ -110,7 +118,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
       12,
       "",
       "Cliente integración",
-      `cliente-${suffix.toLowerCase()}@example.test`,
+      customerEmail,
       "+34000000000",
       JSON.stringify(address())
     ]);
@@ -127,7 +135,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
         itemAId,
         orderAId,
         PROVIDER_A,
-        CUSTOMER_ID,
+        customerId,
         JSON.stringify({ name: "Adriana", color: "rosa" }),
         itemBId,
         orderBId,
@@ -146,7 +154,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
         orderAId,
         itemAId,
         PROVIDER_A,
-        CUSTOMER_ID,
+        customerId,
         "Bordado con nombre",
         "El nombre debe quedar centrado y mantener el estilo delicado indicado por el cliente."
       ]
