@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Mis pedidos · Atelier Lumière</title>
+  <link rel="stylesheet" href="/mis-pedidos/customer-orders.css">
+  <script defer src="/mis-pedidos/common.js"></script>
+  <script defer src="/mis-pedidos/orders.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Atelier Lumière">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Seguimiento privado</small></span>
+      </a>
+      <div class="top-actions"><button id="logout-button" class="button secondary" type="button">Cerrar acceso</button></div>
+    </header>
+
+    <section class="page-head">
+      <div>
+        <p class="eyebrow">Compra separada por taller</p>
+        <h1>Mis pedidos</h1>
+        <p id="welcome-text" class="lead">Cada taller prepara y envía su parte de forma independiente. Aquí puedes seguirlas juntas sin mezclar sus estados.</p>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Resumen">
+      <article class="metric"><span>Pedidos</span><strong id="metric-total">0</strong><small>Separados por taller</small></article>
+      <article class="metric"><span>En preparación</span><strong id="metric-active">0</strong><small>Aceptados o elaborándose</small></article>
+      <article class="metric"><span>Enviados</span><strong id="metric-shipped">0</strong><small>En camino</small></article>
+      <article class="metric"><span>Atención</span><strong id="metric-attention">0</strong><small>Presupuestos o incidencias</small></article>
+    </section>
+
+    <section id="orders-loading" class="loading"><p>Cargando tus pedidos…</p></section>
+    <section id="orders-empty" class="empty" hidden><div><h2>No hay pedidos vinculados</h2><p>Este acceso no tiene compras disponibles.</p></div></section>
+    <section id="orders-list" class="orders-grid" hidden aria-live="polite"></section>
+    <section id="orders-error" class="error-card" hidden><div><h2>No se pudieron cargar tus pedidos</h2><p id="orders-error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div></section>
+  </main>
+</body>
+</html>
