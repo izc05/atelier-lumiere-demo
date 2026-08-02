@@ -52,7 +52,8 @@ function contentLength(value) {
   return size;
 }
 
-function serialize(row) {
+function serialize(row, context) {
+  const actor = context.role === "CUSTOMER" ? "customer" : "provider";
   return {
     id: row.id,
     requestId: row.request_id,
@@ -64,7 +65,7 @@ function serialize(row) {
     status: row.status,
     readyAt: row.ready_at,
     createdAt: row.created_at,
-    contentPath: row.status === "READY" ? `/api/request-files/${row.id}/content` : null
+    contentPath: row.status === "READY" ? `/api/${actor}/request-files/${row.id}/content` : null
   };
 }
 
@@ -167,7 +168,7 @@ export function createCustomRequestFilesService({ database, storage } = {}) {
              context.role === "CUSTOMER" ? null : scope.customer_user_id,
              JSON.stringify({ requestId, fileId, filename: selectedFilename })]
           );
-          return serialize(result.rows[0]);
+          return serialize(result.rows[0], context);
         });
       } catch (error) {
         if (stored?.storageKey) await storage.remove(stored.storageKey).catch(() => {});
