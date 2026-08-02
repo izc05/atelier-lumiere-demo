@@ -12,6 +12,7 @@ const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,180}$/;
 const CODE_PATTERN = /^\d{6}$/;
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const ISSUER = "Atelier Lumière";
+const MAX_SETUP_ATTEMPTS = 5;
 
 function hashToken(value) {
   return createHash("sha256").update(value).digest("hex");
@@ -105,10 +106,7 @@ export function generateTotpCode(secretBase32, currentTime = new Date(), stepSec
 function encryptSecret(secretBase32, encryptionKey) {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", encryptionKey, iv);
-  const ciphertext = Buffer.concat([
-    cipher.update(secretBase32, "utf8"),
-    cipher.final()
-  ]);
+  const ciphertext = Buffer.concat([cipher.update(secretBase32, "utf8"), cipher.final()]);
   return {
     ciphertext: ciphertext.toString("base64url"),
     iv: iv.toString("base64url"),
@@ -203,16 +201,14 @@ export async function issueTwoFactorContinuation(transaction, {
     metadata: { expiresAt: result.rows[0].expires_at }
   });
 
-  return {
-    token,
-    expiresAt: result.rows[0].expires_at
-  };
+  return { token, expiresAt: result.rows[0].expires_at };
 }
 
 async function findContinuation(transaction, tokenHash, { lock = false } = {}) {
   const result = await transaction.query(
     `SELECT
-       oc.id, oc.user_id, oc.provider_id, oc.status, oc.expires_at,
+       oc.id, oc.user_id, oc.provider_id, oc.status, oc.failed_attempts,
+       oc.expires_at, oc.locked_at,
        u.email, u.display_name, u.status AS user_status,
        u.email_verified_at, u.two_factor_enabled,
        p.display_name AS provider_display_name, p.status AS provider_status,
@@ -233,6 +229,8 @@ function continuationIsAvailable(row, currentTime) {
   return Boolean(
     row
     && row.status === "PENDING"
+    && !row.locked_at
+    && Number(row.failed_attempts) < MAX_SETUP_ATTEMPTS
     && row.provider_status !== "SUSPENDED"
     && row.email_verified_at
     && !row.two_factor_enabled
@@ -319,6 +317,7 @@ export function createTwoFactorService({
           digits: 6,
           period: 30,
           setupExpiresAt: continuation.expires_at,
+          attemptsRemaining: MAX_SETUP_ATTEMPTS - Number(continuation.failed_attempts),
           accessGranted: false
         };
       });
@@ -362,15 +361,37 @@ export function createTwoFactorService({
           matchedStep === null
           || (credential.last_used_step !== null && matchedStep <= Number(credential.last_used_step))
         ) {
-          throw new ServiceError(
-            "INVALID_TWO_FACTOR_CODE",
-            "El código de la aplicación autenticadora no es válido.",
-            422
+          const failedAttempts = Number(continuation.failed_attempts) + 1;
+          const locked = failedAttempts >= MAX_SETUP_ATTEMPTS;
+          await transaction.query(
+            `UPDATE onboarding_continuations
+             SET failed_attempts = $2,
+                 last_attempt_at = $3,
+                 status = CASE WHEN $4 THEN 'REVOKED' ELSE status END,
+                 revoked_at = CASE WHEN $4 THEN $3 ELSE revoked_at END,
+                 locked_at = CASE WHEN $4 THEN $3 ELSE locked_at END
+             WHERE id = $1`,
+            [continuation.id, failedAttempts, currentTime, locked]
           );
+          await writeAudit(transaction, {
+            actorUserId: continuation.user_id,
+            providerId: continuation.provider_id,
+            action: "PROVIDER_2FA_CODE_REJECTED",
+            entityId: continuation.id,
+            metadata: { failedAttempts, locked }
+          });
+          return {
+            invalidCode: true,
+            locked,
+            attemptsRemaining: Math.max(0, MAX_SETUP_ATTEMPTS - failedAttempts)
+          };
         }
 
         const recoveryCodes = Array.from({ length: 10 }, recoveryCode);
-        await transaction.query("DELETE FROM user_recovery_codes WHERE user_id = $1", [continuation.user_id]);
+        await transaction.query(
+          "DELETE FROM user_recovery_codes WHERE user_id = $1",
+          [continuation.user_id]
+        );
         for (const recovery of recoveryCodes) {
           await transaction.query(
             `INSERT INTO user_recovery_codes (user_id, code_hash, created_at)
@@ -399,7 +420,7 @@ export function createTwoFactorService({
         );
         await transaction.query(
           `UPDATE onboarding_continuations
-           SET status = 'USED', used_at = $2
+           SET status = 'USED', used_at = $2, last_attempt_at = $2
            WHERE id = $1`,
           [continuation.id, currentTime]
         );
@@ -443,6 +464,16 @@ export function createTwoFactorService({
       });
 
       if (outcome.unavailable) throw unavailableContinuation();
+      if (outcome.invalidCode) {
+        throw new ServiceError(
+          outcome.locked ? "TWO_FACTOR_SETUP_LOCKED" : "INVALID_TWO_FACTOR_CODE",
+          outcome.locked
+            ? "La configuración se ha bloqueado por demasiados intentos incorrectos."
+            : "El código de la aplicación autenticadora no es válido.",
+          outcome.locked ? 429 : 422,
+          { attemptsRemaining: outcome.attemptsRemaining }
+        );
+      }
       return outcome;
     }
   });
