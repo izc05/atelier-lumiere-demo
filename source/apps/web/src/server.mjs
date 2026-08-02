@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.WEB_PORT ?? "3000", 10);
+const apiInternalUrl = process.env.API_INTERNAL_URL ?? "http://localhost:4000";
 const publicDirectory = fileURLToPath(new URL("../public/", import.meta.url));
 
 const contentTypes = new Map([
@@ -21,10 +22,37 @@ function safePublicPath(pathname) {
   return join(publicDirectory, normalized);
 }
 
+async function proxyApiHealth(response) {
+  try {
+    const apiResponse = await fetch(`${apiInternalUrl}/health`, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(2500)
+    });
+    const body = await apiResponse.text();
+    response.writeHead(apiResponse.status, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff"
+    });
+    response.end(body);
+  } catch {
+    response.writeHead(503, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    response.end(JSON.stringify({ status: "unavailable" }));
+  }
+}
+
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
-  const filePath = safePublicPath(url.pathname);
 
+  if (request.method === "GET" && url.pathname === "/internal/api-health") {
+    await proxyApiHealth(response);
+    return;
+  }
+
+  const filePath = safePublicPath(url.pathname);
   if (request.method !== "GET" || !filePath) {
     response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
     response.end("No encontrado");
@@ -37,7 +65,7 @@ const server = createServer(async (request, response) => {
       "Content-Type": contentTypes.get(extname(filePath)) ?? "application/octet-stream",
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",
-      "Content-Security-Policy": "default-src 'self'; connect-src 'self' http://localhost:4000; style-src 'self'; script-src 'self'; img-src 'self' data:"
+      "Content-Security-Policy": "default-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:"
     });
     response.end(content);
   } catch {
