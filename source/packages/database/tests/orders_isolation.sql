@@ -5,13 +5,24 @@ SELECT set_config('app.role', 'ADMIN', true);
 SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000001', true);
 SELECT set_config('app.provider_id', '', true);
 
+INSERT INTO users (
+  id, email, display_name, status, email_verified_at, two_factor_enabled
+) VALUES (
+  '00000000-0000-4000-8000-000000000003',
+  'cliente-pedidos@example.test',
+  'Cliente de prueba',
+  'ACTIVE',
+  now(),
+  false
+);
+
 INSERT INTO checkout_batches (
   id, customer_user_id, checkout_reference, currency,
   customer_name, contact_email, contact_phone, shipping_address,
   status, submitted_at
 ) VALUES (
   '50000000-0000-4000-8000-000000000001',
-  '00000000-0000-4000-8000-000000000002',
+  '00000000-0000-4000-8000-000000000003',
   'AL-CHECKOUT-TEST-ORDER-0001',
   'EUR',
   'Cliente de prueba',
@@ -32,7 +43,7 @@ INSERT INTO provider_orders (
   '51000000-0000-4000-8000-000000000001',
   '50000000-0000-4000-8000-000000000001',
   '00000000-0000-4000-8000-000000000201',
-  '00000000-0000-4000-8000-000000000002',
+  '00000000-0000-4000-8000-000000000003',
   'AL-TEST-ORDER-A-0001',
   'PENDING_CONFIRMATION',
   'EUR', 4500, 500, 5000, 3, 7,
@@ -44,7 +55,7 @@ INSERT INTO provider_orders (
   '51000000-0000-4000-8000-000000000002',
   '50000000-0000-4000-8000-000000000001',
   '00000000-0000-4000-8000-000000000202',
-  '00000000-0000-4000-8000-000000000002',
+  '00000000-0000-4000-8000-000000000003',
   'AL-TEST-ORDER-B-0001',
   'PENDING_CONFIRMATION',
   'EUR', 3200, 400, 3600, 5, 10,
@@ -62,7 +73,7 @@ INSERT INTO order_items (
   '52000000-0000-4000-8000-000000000001',
   '51000000-0000-4000-8000-000000000001',
   '00000000-0000-4000-8000-000000000201',
-  '00000000-0000-4000-8000-000000000002',
+  '00000000-0000-4000-8000-000000000003',
   'CUSTOM', 'Bordado personalizado', 1, 4500, 4500, 'EUR',
   '{"name":"Adriana","thread":"rosa"}'::jsonb
 ),
@@ -70,7 +81,7 @@ INSERT INTO order_items (
   '52000000-0000-4000-8000-000000000002',
   '51000000-0000-4000-8000-000000000002',
   '00000000-0000-4000-8000-000000000202',
-  '00000000-0000-4000-8000-000000000002',
+  '00000000-0000-4000-8000-000000000003',
   'CUSTOM', 'Lámina personalizada', 1, 3200, 3200, 'EUR',
   '{"text":"Familia"}'::jsonb
 );
@@ -83,7 +94,7 @@ INSERT INTO custom_requests (
   '51000000-0000-4000-8000-000000000001',
   '52000000-0000-4000-8000-000000000001',
   '00000000-0000-4000-8000-000000000201',
-  '00000000-0000-4000-8000-000000000002',
+  '00000000-0000-4000-8000-000000000003',
   'Bordado con nombre',
   'Necesito bordar el nombre indicado y mantener la tipografía suave de la muestra.',
   current_date + 30
@@ -97,7 +108,7 @@ INSERT INTO custom_request_messages (
   '53000000-0000-4000-8000-000000000001',
   '51000000-0000-4000-8000-000000000001',
   '00000000-0000-4000-8000-000000000201',
-  '00000000-0000-4000-8000-000000000002',
+  '00000000-0000-4000-8000-000000000003',
   '00000000-0000-4000-8000-000000000001',
   'ADMIN',
   'Conversación inicial creada para la prueba de aislamiento.'
@@ -157,6 +168,10 @@ BEGIN
 END;
 $$;
 
+SELECT set_config('app.role', 'ADMIN', true);
+SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000001', true);
+SELECT set_config('app.provider_id', '', true);
+
 DO $$
 BEGIN
   BEGIN
@@ -167,7 +182,7 @@ BEGIN
       '51000000-0000-4000-8000-000000000001',
       '52000000-0000-4000-8000-000000000002',
       '00000000-0000-4000-8000-000000000201',
-      '00000000-0000-4000-8000-000000000002',
+      '00000000-0000-4000-8000-000000000003',
       'Relación inválida',
       'Este encargo intenta utilizar un artículo perteneciente a otro pedido y debe fallar.'
     );
@@ -183,31 +198,29 @@ SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000102', true);
 SELECT set_config('app.provider_id', '00000000-0000-4000-8000-000000000202', true);
 
 DO $$
-DECLARE
-  affected integer;
 BEGIN
-  INSERT INTO custom_request_messages (
-    request_id, order_id, provider_id, customer_user_id,
-    author_user_id, author_role, body
-  )
-  SELECT
-    '53000000-0000-4000-8000-000000000001',
-    '51000000-0000-4000-8000-000000000001',
-    '00000000-0000-4000-8000-000000000201',
-    '00000000-0000-4000-8000-000000000002',
-    '00000000-0000-4000-8000-000000000102',
-    'PROVIDER_OWNER',
-    'Este mensaje no debe insertarse.'
-  WHERE false;
-  GET DIAGNOSTICS affected = ROW_COUNT;
-  IF affected <> 0 THEN
+  BEGIN
+    INSERT INTO custom_request_messages (
+      request_id, order_id, provider_id, customer_user_id,
+      author_user_id, author_role, body
+    ) VALUES (
+      '53000000-0000-4000-8000-000000000001',
+      '51000000-0000-4000-8000-000000000001',
+      '00000000-0000-4000-8000-000000000201',
+      '00000000-0000-4000-8000-000000000003',
+      '00000000-0000-4000-8000-000000000102',
+      'PROVIDER_OWNER',
+      'Este mensaje no debe insertarse.'
+    );
     RAISE EXCEPTION 'El taller B ha escrito en el encargo del taller A';
-  END IF;
+  EXCEPTION
+    WHEN insufficient_privilege THEN NULL;
+  END;
 END;
 $$;
 
 SELECT set_config('app.role', 'CUSTOMER', true);
-SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000002', true);
+SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000003', true);
 SELECT set_config('app.provider_id', '', true);
 
 DO $$
