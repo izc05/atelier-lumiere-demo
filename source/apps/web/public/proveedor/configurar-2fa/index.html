@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Configura el doble factor · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/onboarding.css">
+  <script defer src="/proveedor/onboarding.js"></script>
+</head>
+<body data-page="two-factor">
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Atelier Lumière">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <span class="secure-badge">2FA obligatorio</span>
+    </header>
+
+    <section class="layout">
+      <div class="story">
+        <p class="eyebrow">Protege tu taller</p>
+        <h1>Activa el doble factor.</h1>
+        <p>Usa Google Authenticator, Microsoft Authenticator, Authy u otra aplicación TOTP. Después de escanear el código, escribe los seis dígitos que aparezcan.</p>
+        <div class="progress" aria-label="Paso 3 de 4">
+          <span class="done"></span><span class="done"></span><span class="current"></span><span></span>
+        </div>
+        <p class="progress-label">Paso 3 de 4 · Configurar 2FA</p>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <p class="eyebrow">Aplicación autenticadora</p>
+          <h2 id="two-factor-provider">Configuración segura</h2>
+          <p>La sesión caduca el <strong id="setup-expiry"></strong>.</p>
+        </div>
+        <div class="card-body">
+          <div id="two-factor-loading" class="loading">Preparando tu código QR…</div>
+
+          <section id="two-factor-unavailable" hidden>
+            <h2>Configuración no disponible</h2>
+            <p id="two-factor-unavailable-message" class="message error">La sesión puede haber caducado o utilizado anteriormente.</p>
+            <p class="notice">Vuelve a abrir el enlace de verificación del correo para generar una sesión nueva.</p>
+          </section>
+
+          <section id="two-factor-content" hidden>
+            <div class="qr-layout">
+              <div class="qr-box">
+                <img id="two-factor-qr" alt="Código QR para configurar Atelier Lumière en una aplicación autenticadora" width="320" height="320">
+              </div>
+              <div>
+                <ol class="steps">
+                  <li>Abre tu aplicación autenticadora.</li>
+                  <li>Escanea el QR o añade la clave manual.</li>
+                  <li>Introduce abajo el código de seis dígitos.</li>
+                </ol>
+                <p><a id="open-authenticator" class="button secondary full" href="#">Abrir en la app autenticadora</a></p>
+                <div class="secret-box">
+                  <code id="two-factor-secret"></code>
+                  <button id="copy-secret" class="text-button" type="button">Copiar</button>
+                </div>
+              </div>
+            </div>
+
+            <form id="two-factor-form" class="form" autocomplete="off">
+              <label>
+                Código de seis dígitos
+                <input id="two-factor-code" class="code-input" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required>
+                <small>Intentos restantes: <strong id="attempts-remaining">5</strong>.</small>
+              </label>
+              <p id="two-factor-message" class="message" role="status" aria-live="polite"></p>
+              <button id="two-factor-submit" class="button primary full" type="submit">Confirmar y activar 2FA</button>
+            </form>
+          </section>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
