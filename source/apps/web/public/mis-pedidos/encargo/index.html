@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Encargo personalizado · Atelier Lumière</title>
+  <link rel="stylesheet" href="/mis-pedidos/customer-orders.css">
+  <script defer src="/mis-pedidos/common.js"></script>
+  <script defer src="/mis-pedidos/encargo/request-detail.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/mis-pedidos/"><span class="brand-mark" aria-hidden="true">AL</span><span><strong>Atelier Lumière</strong><small>Encargo personalizado</small></span></a>
+      <div class="top-actions"><a class="button ghost" href="/mis-pedidos/">Mis pedidos</a><button id="logout-button" class="button secondary" type="button">Cerrar acceso</button></div>
+    </header>
+
+    <section id="detail-loading" class="loading"><p>Cargando la conversación…</p></section>
+    <section id="detail-content" hidden>
+      <section class="page-head">
+        <div><p class="eyebrow"><span id="provider-name"></span> · <span id="order-number"></span></p><div class="detail-title"><h1 id="request-title"></h1><span id="request-status"></span></div><p id="request-brief" class="lead"></p></div>
+        <strong id="request-quote" class="price"></strong>
+      </section>
+      <section class="detail-grid">
+        <div class="detail-main">
+          <article class="panel-card"><header><h2>Conversación</h2><p>Mensajes privados entre tú y el taller.</p></header><div id="messages-list" class="conversation"></div><p id="messages-empty" hidden>Todavía no hay mensajes.</p><form id="message-form" class="action-form"><label class="field">Responder al taller<textarea id="message-body" maxlength="8000" required placeholder="Confirma colores, medidas, acabado o cualquier detalle"></textarea></label><button id="message-button" class="button primary" type="submit">Enviar mensaje</button><p id="message-result" class="message" role="status" aria-live="polite"></p></form></article>
+          <article class="panel-card"><header><h2>Archivos</h2><p>Referencias y documentos registrados en el encargo.</p></header><div id="files-list" class="compact-list"></div><p id="files-empty" hidden>No hay archivos adjuntos.</p></article>
+        </div>
+        <aside class="detail-side">
+          <article class="panel-card"><header><h2>Resumen</h2></header><div id="request-data" class="key-values"></div><a id="order-link" class="button secondary" href="/mis-pedidos/">Abrir pedido completo</a></article>
+          <article id="approval-card" class="panel-card" hidden><header><h2>Aprobar presupuesto</h2><p>Comprueba el importe. La aprobación autoriza al taller a iniciar la elaboración; el cobro real todavía no está activado.</p></header><div id="approval-quote" class="quote-box"></div><button id="approve-button" class="button primary" type="button">Aprobar presupuesto</button><p id="approve-result" class="message" role="status" aria-live="polite"></p></article>
+          <article id="approved-card" class="panel-card" hidden><div class="notice">El presupuesto ya está aprobado. El taller podrá continuar con la elaboración.</div></article>
+        </aside>
+      </section>
+    </section>
+    <section id="detail-error" class="error-card" hidden><div><h2>No se pudo abrir el encargo</h2><p id="detail-error-message"></p><a class="button primary" href="/mis-pedidos/">Volver a mis pedidos</a></div></section>
+  </main>
+</body>
+</html>

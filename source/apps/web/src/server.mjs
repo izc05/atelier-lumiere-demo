@@ -3,6 +3,7 @@ import { createWebHandler } from "./app.mjs";
 import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
 import { createAdminBlogWebHandler } from "./admin-blog-proxy.mjs";
 import { createAdminProductsWebHandler } from "./admin-products-proxy.mjs";
+import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
 import { createProviderBlogWebHandler } from "./provider-blog-proxy.mjs";
 import { createProviderOrdersWebHandler } from "./provider-orders-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
@@ -21,7 +22,8 @@ const accountRecoveryHandler = createAccountRecoveryWebHandler({ baseHandler: ba
 const providerProductsHandler = createProviderProductsWebHandler({ baseHandler: accountRecoveryHandler });
 const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: providerProductsHandler });
 const providerOrdersHandler = createProviderOrdersWebHandler({ baseHandler: providerBlogHandler });
-const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: providerOrdersHandler });
+const customerOrdersHandler = createCustomerOrdersWebHandler({ baseHandler: providerOrdersHandler });
+const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: customerOrdersHandler });
 const adminProductsHandler = createAdminProductsWebHandler({ baseHandler: adminBlogHandler });
 const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: adminProductsHandler });
 const server = createServer(createPublicCatalogWebHandler({ baseHandler: publicBlogHandler }));

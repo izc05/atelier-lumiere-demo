@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Detalle del pedido · Atelier Lumière</title>
+  <link rel="stylesheet" href="/mis-pedidos/customer-orders.css">
+  <script defer src="/mis-pedidos/common.js"></script>
+  <script defer src="/mis-pedidos/detalle/order-detail.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/mis-pedidos/"><span class="brand-mark" aria-hidden="true">AL</span><span><strong>Atelier Lumière</strong><small>Detalle del pedido</small></span></a>
+      <div class="top-actions"><a class="button ghost" href="/mis-pedidos/">Mis pedidos</a><button id="logout-button" class="button secondary" type="button">Cerrar acceso</button></div>
+    </header>
+
+    <section id="detail-loading" class="loading"><p>Cargando el pedido…</p></section>
+    <section id="detail-content" hidden>
+      <section class="page-head">
+        <div><p class="eyebrow">Pedido de <span id="provider-name"></span></p><div class="detail-title"><h1 id="order-number"></h1><span id="order-status"></span></div><p id="order-summary" class="lead"></p></div>
+        <strong id="order-total" class="price"></strong>
+      </section>
+      <section class="detail-grid">
+        <div class="detail-main">
+          <article class="panel-card"><header><h2>Artículos</h2><p>Detalle y personalización registrados al realizar la compra.</p></header><div id="items-list" class="item-list"></div></article>
+          <article class="panel-card"><header><h2>Encargos personalizados</h2><p>Conversaciones y presupuestos asociados a este taller.</p></header><div id="requests-list" class="compact-list"></div><p id="requests-empty" hidden>No hay encargos personalizados en este pedido.</p></article>
+          <article class="panel-card"><header><h2>Cronología</h2><p>Seguimiento ordenado desde que se recibió el pedido.</p></header><div id="events-list" class="timeline"></div></article>
+          <article class="panel-card"><header><h2>Envío e incidencias</h2></header><div id="shipments-list" class="compact-list"></div><div id="incidents-list" class="compact-list"></div><p id="logistics-empty" hidden>Todavía no hay seguimiento ni incidencias.</p></article>
+        </div>
+        <aside class="detail-side">
+          <article class="panel-card"><header><h2>Resumen</h2></header><div id="order-data" class="key-values"></div></article>
+          <article id="cancel-card" class="panel-card" hidden><header><h2>Cancelar pedido</h2><p>Solo es posible mientras el taller todavía no lo haya aceptado.</p></header><button id="cancel-button" class="button danger" type="button">Cancelar este pedido</button><p id="cancel-result" class="message" role="status" aria-live="polite"></p></article>
+        </aside>
+      </section>
+    </section>
+    <section id="detail-error" class="error-card" hidden><div><h2>No se pudo abrir el pedido</h2><p id="detail-error-message"></p><a class="button primary" href="/mis-pedidos/">Volver a mis pedidos</a></div></section>
+  </main>
+</body>
+</html>
