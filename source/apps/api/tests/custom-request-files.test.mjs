@@ -79,7 +79,7 @@ test("cliente y taller comparten archivos privados sin cruces entre proveedores"
   });
   assert.equal(customerFile.mimeType, "image/png");
   assert.equal(customerFile.uploadedBy, customerId);
-  assert.match(customerFile.contentPath, /^\/api\/request-files\//);
+  assert.match(customerFile.contentPath, /^\/api\/customer\/request-files\//);
 
   const openedByProvider = await service.open(providerA, customerFile.id);
   assert.deepEqual(await streamBuffer(openedByProvider.stream), png);
@@ -93,6 +93,7 @@ test("cliente y taller comparten archivos privados sin cruces entre proveedores"
     stream: Readable.from(pdf)
   });
   assert.equal(providerFile.uploadedBy, OWNER_A);
+  assert.match(providerFile.contentPath, /^\/api\/provider\/request-files\//);
   const openedByCustomer = await service.open(customer, providerFile.id, "bytes=0-7");
   assert.equal(openedByCustomer.statusCode, 206);
   assert.deepEqual(await streamBuffer(openedByCustomer.stream), pdf.subarray(0, 8));
