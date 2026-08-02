@@ -15,13 +15,61 @@ function bearerToken(request) {
   return authorization.slice(7).trim();
 }
 
+export function createDevelopmentAdminContext({
+  environment = process.env.NODE_ENV ?? "development",
+  allowDevelopmentAdminAuth = process.env.ALLOW_DEV_ADMIN_AUTH === "true",
+  developmentAdminUserId = process.env.DEV_ADMIN_USER_ID
+} = {}) {
+  if (environment === "production" || !allowDevelopmentAdminAuth) return null;
+  if (typeof developmentAdminUserId !== "string" || !UUID_PATTERN.test(developmentAdminUserId)) {
+    throw new Error("DEV_ADMIN_USER_ID debe ser un UUID válido cuando el acceso temporal está activo.");
+  }
+
+  return Object.freeze({
+    role: "ADMIN",
+    userId: developmentAdminUserId.toLowerCase(),
+    providerId: null,
+    authenticationMode: "development-admin-token"
+  });
+}
+
+export async function ensureDevelopmentAdmin(database, context, {
+  email = process.env.DEV_ADMIN_EMAIL ?? "admin@atelier.localhost",
+  displayName = process.env.DEV_ADMIN_DISPLAY_NAME ?? "Administración Atelier Lumière"
+} = {}) {
+  if (!context) return false;
+
+  await database.withContext(context, async (transaction) => {
+    await transaction.query(
+      `INSERT INTO users
+        (id, email, display_name, status, email_verified_at, two_factor_enabled)
+       VALUES ($1, $2, $3, 'ACTIVE', now(), true)
+       ON CONFLICT (id) DO UPDATE
+       SET email = EXCLUDED.email,
+           display_name = EXCLUDED.display_name,
+           status = 'ACTIVE',
+           email_verified_at = COALESCE(users.email_verified_at, now()),
+           two_factor_enabled = true`,
+      [context.userId, email, displayName]
+    );
+  });
+
+  return true;
+}
+
 export function createRequestAuthenticator({
   environment = process.env.NODE_ENV ?? "development",
   allowDevelopmentAdminAuth = process.env.ALLOW_DEV_ADMIN_AUTH === "true",
   developmentAdminToken = process.env.DEV_ADMIN_TOKEN,
   developmentAdminUserId = process.env.DEV_ADMIN_USER_ID
 } = {}) {
-  if (environment === "production" || !allowDevelopmentAdminAuth) {
+  const context = createDevelopmentAdminContext({
+    environment,
+    allowDevelopmentAdminAuth,
+    developmentAdminUserId
+  });
+
+  if (!context) {
     return async function authenticationNotConfigured() {
       return null;
     };
@@ -30,16 +78,6 @@ export function createRequestAuthenticator({
   if (typeof developmentAdminToken !== "string" || developmentAdminToken.length < 32) {
     throw new Error("DEV_ADMIN_TOKEN debe tener al menos 32 caracteres cuando el acceso temporal está activo.");
   }
-  if (typeof developmentAdminUserId !== "string" || !UUID_PATTERN.test(developmentAdminUserId)) {
-    throw new Error("DEV_ADMIN_USER_ID debe ser un UUID válido cuando el acceso temporal está activo.");
-  }
-
-  const context = Object.freeze({
-    role: "ADMIN",
-    userId: developmentAdminUserId.toLowerCase(),
-    providerId: null,
-    authenticationMode: "development-admin-token"
-  });
 
   return async function authenticateDevelopmentAdmin(request) {
     const token = bearerToken(request);
