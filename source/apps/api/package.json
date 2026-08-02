@@ -11,7 +11,8 @@
   "dependencies": {
     "nodemailer": "9.0.3",
     "pg": "8.22.0",
-    "qrcode": "1.5.4"
+    "qrcode": "1.5.4",
+    "sharp": "0.35.3"
   },
   "engines": {
     "node": ">=22"
