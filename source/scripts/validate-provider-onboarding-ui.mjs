@@ -82,7 +82,6 @@ for (const expected of [
   "PROVIDER_PROXY_ROUTES",
   "proxyProvider",
   "request.method !== \"POST\"",
-  "AbortSignal.timeout(10000)",
   "Cross-Origin-Resource-Policy",
   "form-action 'self'",
   "/api/provider-invitations/preview",
@@ -90,6 +89,12 @@ for (const expected of [
   "/api/two-factor/confirm"
 ]) {
   if (!webApp.includes(expected)) failures.push(`Falta una protección del proxy del proveedor: ${expected}`);
+}
+if (
+  !webApp.includes("AbortSignal.timeout(10000)")
+  && !webApp.includes("timeoutMs: 10000")
+) {
+  failures.push("El proxy del proveedor no limita las peticiones a diez segundos.");
 }
 
 const webTest = files.get("apps/web/tests/provider-onboarding-ui.test.mjs") ?? "";
