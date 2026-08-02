@@ -83,13 +83,46 @@ function errorPayload(error) {
   };
 }
 
+function onboardingResponse(result, environment) {
+  const { verificationToken, ...safeResult } = result;
+  const responseBody = {
+    ...safeResult,
+    emailDelivery: environment === "production" ? "pending-email-service" : "manual-development"
+  };
+
+  if (environment !== "production") {
+    responseBody.verificationToken = verificationToken;
+    responseBody.verificationPath = `/proveedor/verificar-correo?token=${encodeURIComponent(
+      verificationToken
+    )}`;
+  }
+
+  return responseBody;
+}
+
+function resendResponse(result, environment) {
+  const { token, ...safeResult } = result;
+  const responseBody = {
+    ...safeResult,
+    emailDelivery: environment === "production" ? "pending-email-service" : "manual-development"
+  };
+
+  if (environment !== "production") {
+    responseBody.verificationToken = token;
+    responseBody.verificationPath = `/proveedor/verificar-correo?token=${encodeURIComponent(token)}`;
+  }
+
+  return responseBody;
+}
+
 export function createApiHandler({
-  version = "0.3.0",
+  version = "0.4.0",
   environment = process.env.NODE_ENV ?? "development",
   now = () => new Date(),
   database,
   providersService,
   onboardingService,
+  emailVerificationService,
   authenticateRequest = async () => null,
   logger = console
 } = {}) {
@@ -131,7 +164,8 @@ export function createApiHandler({
             providerIsolation: Boolean(database?.enabled),
             providerManagementApi: Boolean(providersService),
             providerInvitationAcceptance: Boolean(onboardingService),
-            emailVerification: false,
+            emailVerification: Boolean(emailVerificationService),
+            emailDelivery: false,
             twoFactorAuthentication: false,
             mediaStorage: false,
             editorialBlog: false
@@ -157,7 +191,28 @@ export function createApiHandler({
         }
 
         const accepted = await onboardingService.accept(input);
-        sendJson(response, 201, accepted);
+        sendJson(response, 201, onboardingResponse(accepted, environment));
+        return;
+      }
+
+      if (
+        request.method === "POST"
+        && (url.pathname === "/api/email-verifications/verify"
+          || url.pathname === "/api/email-verifications/resend")
+      ) {
+        if (!emailVerificationService) {
+          throw new DatabaseUnavailableError("La verificación de correo no está habilitada.");
+        }
+
+        const input = await readJson(request);
+        if (url.pathname.endsWith("/verify")) {
+          const verified = await emailVerificationService.verify(input.token);
+          sendJson(response, 200, verified);
+          return;
+        }
+
+        const resent = await emailVerificationService.resend(input.token);
+        sendJson(response, 201, resendResponse(resent, environment));
         return;
       }
 
@@ -224,7 +279,11 @@ export function createApiHandler({
         }
 
         if (action === "audit" && request.method === "GET") {
-          const events = await providersService.audit(context, providerId, url.searchParams.get("limit") ?? "50");
+          const events = await providersService.audit(
+            context,
+            providerId,
+            url.searchParams.get("limit") ?? "50"
+          );
           sendJson(response, 200, { events });
           return;
         }
