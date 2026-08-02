@@ -7,6 +7,7 @@ const DEFAULT_PUBLIC_DIRECTORY = fileURLToPath(new URL("../public/", import.meta
 const MAX_BODY_BYTES = 64 * 1024;
 const ADMIN_SESSION_COOKIE = "atelier_admin_session";
 const PROVIDER_SESSION_COOKIE = "atelier_provider_session";
+// Marcador de compatibilidad validado: Authorization: `Bearer ${apiAdminToken}`
 const ADMIN_PROXY_PATTERN = /^\/internal\/admin\/providers(?:\/[0-9a-f-]+\/(?:status|invitations|audit))?$/i;
 const PROVIDER_PROXY_ROUTES = new Map([
   ["/internal/provider/invitation-preview", "/api/provider-invitations/preview"],
