@@ -1,6 +1,7 @@
 export const CORE_TABLES = Object.freeze([
   "users",
   "user_credentials",
+  "email_verification_tokens",
   "providers",
   "provider_members",
   "provider_invitations",
@@ -36,5 +37,6 @@ export const DATABASE_RULES = Object.freeze({
   hardDeleteProviders: false,
   timestampsStoredAsUtc: true,
   passwordsStoredWithScrypt: true,
+  emailVerificationTokensAreHashedAndSingleUse: true,
   providerAccessRequiresVerifiedEmailAndTwoFactor: true
 });
