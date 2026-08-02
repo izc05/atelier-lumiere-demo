@@ -8,13 +8,17 @@ CREATE TABLE onboarding_continuations (
   purpose text NOT NULL CHECK (purpose = 'SETUP_2FA'),
   status text NOT NULL DEFAULT 'PENDING'
     CHECK (status IN ('PENDING', 'USED', 'REVOKED', 'EXPIRED')),
+  failed_attempts integer NOT NULL DEFAULT 0 CHECK (failed_attempts BETWEEN 0 AND 5),
   expires_at timestamptz NOT NULL,
+  last_attempt_at timestamptz,
+  locked_at timestamptz,
   used_at timestamptz,
   revoked_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   CHECK (expires_at > created_at),
-  CHECK ((status = 'USED') = (used_at IS NOT NULL)),
-  CHECK ((status = 'REVOKED') = (revoked_at IS NOT NULL))
+  CHECK (status <> 'USED' OR used_at IS NOT NULL),
+  CHECK (status <> 'REVOKED' OR revoked_at IS NOT NULL),
+  CHECK (locked_at IS NULL OR status = 'REVOKED')
 );
 
 CREATE UNIQUE INDEX onboarding_continuations_one_pending_idx
@@ -37,8 +41,8 @@ CREATE TABLE user_totp_credentials (
   revoked_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  CHECK ((status = 'ACTIVE') = (activated_at IS NOT NULL)),
-  CHECK ((status = 'REVOKED') = (revoked_at IS NOT NULL))
+  CHECK (status <> 'ACTIVE' OR activated_at IS NOT NULL),
+  CHECK (status <> 'REVOKED' OR revoked_at IS NOT NULL)
 );
 
 CREATE TRIGGER user_totp_credentials_set_updated_at
