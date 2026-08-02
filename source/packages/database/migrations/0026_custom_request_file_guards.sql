@@ -54,7 +54,7 @@ BEGIN
        OR NEW.ready_at IS NULL
        OR NEW.deleted_at IS NOT NULL
        OR NEW.rejection_reason IS NOT NULL
-       OR NEW.storage_key !~ ('^providers/' || NEW.provider_id::text || '/requests/' || NEW.request_id::text || '/' || NEW.id::text || '/original\\.(jpg|png|webp|pdf)$') THEN
+       OR NEW.storage_key !~ ('^providers/' || NEW.provider_id::text || '/requests/' || NEW.request_id::text || '/' || NEW.id::text || '/original[.](jpg|png|webp|pdf)$') THEN
       RAISE EXCEPTION 'REQUEST_FILE_METADATA_INVALID' USING ERRCODE = '23514';
     END IF;
     RETURN NEW;
