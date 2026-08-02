@@ -47,6 +47,34 @@ async function loadPrivateSummary(path, countId, noteId, itemKey, emptyText, rea
   }
 }
 
+async function loadOrdersSummary() {
+  try {
+    const [ordersResponse, requestsResponse] = await Promise.all([
+      fetch("/internal/provider/orders", { headers: { Accept: "application/json" } }),
+      fetch("/internal/provider/custom-requests", { headers: { Accept: "application/json" } })
+    ]);
+    if (ordersResponse.status === 401 || requestsResponse.status === 401) {
+      window.location.replace("/proveedor/acceso/");
+      return;
+    }
+    const ordersPayload = await ordersResponse.json().catch(() => ({}));
+    const requestsPayload = await requestsResponse.json().catch(() => ({}));
+    if (!ordersResponse.ok || !requestsResponse.ok) throw new Error();
+    const orders = Array.isArray(ordersPayload.orders) ? ordersPayload.orders : [];
+    const requests = Array.isArray(requestsPayload.requests) ? requestsPayload.requests : [];
+    byId("orders-count").textContent = String(orders.length);
+    const pending = orders.filter((order) => order.status === "PENDING_CONFIRMATION").length;
+    const attention = requests.filter((request) => ["OPEN", "NEEDS_INFO", "APPROVED"].includes(request.status)).length;
+    byId("orders-note").textContent = pending > 0
+      ? `${pending} pedido${pending === 1 ? "" : "s"} por confirmar`
+      : attention > 0
+        ? `${attention} encargo${attention === 1 ? "" : "s"} requiere${attention === 1 ? "" : "n"} atención`
+        : orders.length > 0 ? "Operativa del taller al día" : "Sin pedidos todavía";
+  } catch {
+    byId("orders-note").textContent = "No se pudo cargar la operativa";
+  }
+}
+
 async function loadPanel() {
   try {
     const data = await requestSession();
@@ -73,7 +101,8 @@ async function loadPanel() {
         "posts",
         "Crea la primera historia",
         "Blog privado preparado"
-      )
+      ),
+      loadOrdersSummary()
     ]);
   } catch {
     window.location.replace("/proveedor/acceso/");
