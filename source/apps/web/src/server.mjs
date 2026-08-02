@@ -5,6 +5,7 @@ import { createAdminBlogWebHandler } from "./admin-blog-proxy.mjs";
 import { createAdminProductsWebHandler } from "./admin-products-proxy.mjs";
 import { createProviderBlogWebHandler } from "./provider-blog-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
+import { createPublicBlogWebHandler } from "./public-blog-proxy.mjs";
 import { createPublicCatalogWebHandler } from "./public-catalog-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
@@ -16,21 +17,12 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 
 const baseWebHandler = createWebHandler();
 const accountRecoveryHandler = createAccountRecoveryWebHandler({ baseHandler: baseWebHandler });
-const providerProductsHandler = createProviderProductsWebHandler({
-  baseHandler: accountRecoveryHandler
-});
-const providerBlogHandler = createProviderBlogWebHandler({
-  baseHandler: providerProductsHandler
-});
-const adminBlogHandler = createAdminBlogWebHandler({
-  baseHandler: providerBlogHandler
-});
-const adminProductsHandler = createAdminProductsWebHandler({
-  baseHandler: adminBlogHandler
-});
-const server = createServer(createPublicCatalogWebHandler({
-  baseHandler: adminProductsHandler
-}));
+const providerProductsHandler = createProviderProductsWebHandler({ baseHandler: accountRecoveryHandler });
+const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: providerProductsHandler });
+const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: providerBlogHandler });
+const adminProductsHandler = createAdminProductsWebHandler({ baseHandler: adminBlogHandler });
+const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: adminProductsHandler });
+const server = createServer(createPublicCatalogWebHandler({ baseHandler: publicBlogHandler }));
 
 server.listen(port, host, () => {
   console.log(`Atelier Lumière web fuente disponible en http://${host}:${port}`);
