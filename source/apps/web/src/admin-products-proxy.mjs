@@ -1,7 +1,7 @@
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-const ADMIN_PRODUCTS_PATTERN = /^\/internal\/admin\/products(?:\/([0-9a-f-]{36})(?:\/(review|publish|media)(?:\/([0-9a-f-]{36})\/(preview))?)?)?)?$/i;
+const ADMIN_PRODUCTS_PATTERN = /^\/internal\/admin\/products(?:\/([0-9a-f-]{36})(?:\/(review|publish)|\/media\/([0-9a-f-]{36})\/(preview))?)?$/i;
 const SAFE_RESPONSE_HEADERS = new Set([
   "content-type", "content-length", "content-disposition",
   "accept-ranges", "content-range", "cache-control",
@@ -41,9 +41,9 @@ function redirectToAdmin(response) {
 function routeAllows(method, match) {
   const [, productId, action, mediaId, preview] = match;
   if (!productId) return method === "GET";
-  if (!action) return method === "GET";
+  if (!action && !mediaId) return method === "GET";
   if (action === "review" || action === "publish") return !mediaId && method === "POST";
-  return action === "media" && Boolean(mediaId) && preview === "preview" && method === "GET";
+  return Boolean(mediaId) && preview === "preview" && method === "GET";
 }
 
 function isAdminProductsPage(pathname) {
