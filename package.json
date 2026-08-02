@@ -1,0 +1,11 @@
+{
+  "name": "atelier-lumiere-demo",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:js": "node --check assets/app.js",
+    "check:site": "node scripts/validate-site.mjs",
+    "test": "npm run check:js && npm run check:site"
+  }
+}

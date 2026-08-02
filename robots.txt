@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /atelier-lumiere-demo/
+Disallow: /atelier-lumiere-demo/admin/
+Disallow: /atelier-lumiere-demo/cuenta/
+Disallow: /atelier-lumiere-demo/carrito/
+Disallow: /atelier-lumiere-demo/checkout/
+Disallow: /atelier-lumiere-demo/_next/
+
+Sitemap: https://izc05.github.io/atelier-lumiere-demo/sitemap.xml

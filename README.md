@@ -1,67 +1,84 @@
-# Lumiere
+# Alma de Fiesta · demo pública
 
-Marketplace curado de artesanía para bodas, comuniones y celebraciones.
+Demostración navegable de un marketplace curado de artesanía para bodas, comuniones, bautizos y celebraciones.
 
-## Estado
+## Estado real del proyecto
 
-La primera versión ejecutable ya está disponible. Incluye Inicio, Tienda con filtros, fichas de producto, carrito separado por proveedor, checkout de demostración, Blog, cuenta con historial de pedidos y encargos, solicitudes personalizadas y un panel de administración navegable. El panel permite gestionar proveedores cerrados; crear, editar y publicar artículos; controlar pedidos separados por taller y envío; y tramitar encargos personalizados desde la solicitud hasta la elaboración. Los cambios son temporales, se guardan solo en el navegador y no envían correos ni pagos reales; la conexión a PostgreSQL, autenticación y Bizum/Redsys corresponde a la siguiente fase.
+Esta rama contiene una **demostración estática mantenible** para GitHub Pages. No realiza pagos, no envía formularios a un servidor y no dispone todavía de autenticación ni base de datos.
 
-## Ejecutar en local
+Incluye:
 
-Requiere Node.js 24.
+- Portada visible incluso antes de ejecutar JavaScript.
+- Tienda con seis productos renderizados en HTML, filtros por evento y categoría.
+- Carrito limitado a un único proveedor.
+- Checkout local con pago Bizum simulado.
+- Solicitudes de diseño propio que conservan nombre, correo y detalles en el navegador.
+- Cuenta de demostración con historial de pedidos y encargos locales.
+- Panel administrativo claramente identificado como público y ficticio.
+- Páginas provisionales de aviso legal, privacidad y almacenamiento local.
+- Reglas SEO básicas, `robots.txt` y sitemap.
 
-```bash
-npm install
-npm run dev
+## Estructura
+
+```text
+assets/
+  app.css        Estilos compartidos
+  app.js         Catálogo y flujos de demostración
+  product.css    Ajustes responsive de la ficha
+index.html       Portada
+tienda/          Catálogo
+producto/        Ficha dinámica por `?slug=`
+carrito/         Carrito local
+checkout/        Checkout simulado
+cuenta/          Historial local
+admin/           Panel público de demostración
+blog/            Portada editorial
+scripts/         Validación automática
 ```
 
-Comprobaciones antes de publicar cambios:
+Los antiguos archivos `_next/` permanecen temporalmente en el repositorio para no borrar recursos sin una migración controlada, pero las páginas principales ya no dependen de ellos.
+
+## Comprobaciones
+
+Requiere Node.js 22 o superior. No hay dependencias externas.
 
 ```bash
-npm run lint
-npm run typecheck
-npm run build
+npm test
 ```
 
-Para generar la demostración estática publicada en GitHub Pages:
+La validación comprueba:
 
-```bash
-npm run build:pages
-```
+- Sintaxis de `assets/app.js`.
+- Presencia de páginas y recursos requeridos.
+- Enlaces internos rotos.
+- Ausencia de bundles minificados de Next.js en las rutas principales.
+- Contenido visible en la portada y productos visibles en la tienda.
+- `noindex` en cuenta, carrito, checkout y administración.
+- Protección del carrito por proveedor y apertura de `?encargo=1`.
+
+GitHub Actions ejecuta estas comprobaciones en cada pull request.
 
 ## Principios del producto
 
-- Catálogo público con artículos de proveedores invitados por administración.
-- No existe registro público de proveedores.
+- Los proveedores son cerrados e invitados por administración.
 - Cada carrito, pedido, pago y envío pertenece a un único proveedor.
-- El cliente puede comprar varios artículos del mismo proveedor y compartir el envío.
-- Cada artículo puede incluir historia, fotografías, vídeo y solicitud de diseño personalizado.
-- La portada tendrá movimiento elegante, vídeo y efectos de desplazamiento, respetando rendimiento y accesibilidad.
-- Administrador, proveedor y cliente tienen permisos claramente separados.
+- El cliente puede comprar varios artículos del mismo taller y compartir el envío.
+- Cada artículo puede incorporar historia, fotografías, vídeo y solicitud personalizada.
+- Administrador, proveedor y cliente tendrán permisos separados cuando exista backend.
+- Las credenciales, datos personales, copias de base de datos y archivos reales nunca se almacenarán en GitHub.
 
-## Tecnología acordada
+## Siguiente fase técnica
 
-- TypeScript.
-- Next.js 16 y React.
-- PostgreSQL 18 y Prisma ORM.
-- Better Auth para autenticación y doble factor.
-- Tailwind CSS y Motion para el sistema visual.
-- MinIO/S3 para imágenes y vídeos.
-- FFmpeg para optimización de vídeo.
-- Bizum mediante integración segura por redirección.
-- Docker Compose en el mini PC.
-- Cloudflare Tunnel para la publicación sin abrir puertos del router.
+La versión comercial deberá migrarse a una aplicación con:
 
-## Documentación
+- Backend protegido y PostgreSQL.
+- Autenticación y verificación de correo.
+- Roles de administrador, proveedor y cliente.
+- Almacenamiento S3/MinIO para imágenes y vídeos.
+- Correos transaccionales.
+- Bizum/Redsys mediante redirección y confirmación firmada.
+- Copias de seguridad, auditoría y despliegue en el mini PC mediante Cloudflare Tunnel.
 
-- [Arquitectura](docs/ARQUITECTURA.md)
-- [Seguridad](docs/SEGURIDAD.md)
-- [Flujos funcionales](docs/FLUJOS.md)
-- [Decisiones](docs/DECISIONES.md)
-- [Hoja de ruta](docs/ROADMAP.md)
-- [Referencia visual](docs/design/README.md)
-- [Informe de calidad visual](design-qa.md)
+## URL pública
 
-## Repositorio
-
-Las claves, datos personales, copias de la base de datos y archivos reales de clientes o proveedores nunca se almacenarán en GitHub.
+`https://izc05.github.io/atelier-lumiere-demo/`
