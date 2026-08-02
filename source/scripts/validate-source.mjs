@@ -17,7 +17,11 @@ const requiredFiles = [
   "packages/shared/src/domain.mjs",
   "packages/auth/src/policy.mjs",
   "packages/storage/src/policy.mjs",
+  "packages/database/README.md",
   "packages/database/src/schema-plan.mjs",
+  "packages/database/migrations/0001_core_identity.sql",
+  "packages/database/seeds/0001_two_providers.sql",
+  "packages/database/tests/tenant_isolation.sql",
   "infra/docker/Dockerfile.web",
   "infra/docker/Dockerfile.api",
   "infra/docker/docker-compose.yml",
@@ -88,12 +92,36 @@ for (const disabled of ["database: false", "authentication: false", "providerIso
   if (!api.includes(disabled)) failures.push(`La API no declara correctamente una capacidad pendiente: ${disabled}`);
 }
 
+const migration = contents.get("packages/database/migrations/0001_core_identity.sql") ?? "";
+for (const table of ["users", "providers", "provider_members", "provider_invitations", "sessions", "audit_events"]) {
+  if (!migration.includes(`CREATE TABLE ${table}`)) failures.push(`La migración no crea la tabla ${table}.`);
+}
+for (const table of ["users", "providers", "provider_members", "provider_invitations", "sessions", "audit_events"]) {
+  if (!migration.includes(`ALTER TABLE ${table} FORCE ROW LEVEL SECURITY`)) {
+    failures.push(`La tabla ${table} no fuerza seguridad por fila.`);
+  }
+}
+for (const helper of ["app.current_role()", "app.current_user_id()", "app.current_provider_id()", "app.is_admin()"] ) {
+  if (!migration.includes(helper)) failures.push(`Falta la función de contexto ${helper}.`);
+}
+if (!migration.includes("ON DELETE RESTRICT")) {
+  failures.push("Las relaciones de talleres deben evitar borrados en cascada accidentales.");
+}
+
+const tenantTest = contents.get("packages/database/tests/tenant_isolation.sql") ?? "";
+for (const expected of ["Taller A puede ver el Taller B", "Taller B puede ver el Taller A", "Un cliente puede leer proveedores privados", "Administración ve"]) {
+  if (!tenantTest.includes(expected)) failures.push(`Falta una comprobación RLS: ${expected}`);
+}
+
 const compose = contents.get("infra/docker/docker-compose.yml") ?? "";
 for (const service of ["web:", "api:", "database:", "database_data:", "media_data:"]) {
   if (!compose.includes(service)) failures.push(`Docker Compose no contiene: ${service}`);
 }
 if (!compose.includes("API_INTERNAL_URL: http://api:4000")) {
   failures.push("Docker Compose no conecta la web con la API mediante la red interna.");
+}
+if (!compose.includes("packages/database/migrations:/docker-entrypoint-initdb.d:ro")) {
+  failures.push("PostgreSQL no tiene montadas las migraciones de producción en modo lectura.");
 }
 
 const combined = [...contents.entries()]
