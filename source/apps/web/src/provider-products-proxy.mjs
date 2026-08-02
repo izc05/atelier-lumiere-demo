@@ -86,7 +86,8 @@ function redirectToAccess(response, secure) {
 function isProtectedProductsPage(pathname) {
   return pathname === "/proveedor/articulos"
     || pathname === "/proveedor/articulos/"
-    || pathname.startsWith("/proveedor/articulos/");
+    || pathname === "/proveedor/articulos/editar"
+    || pathname === "/proveedor/articulos/editar/";
 }
 
 function routeAllows(method, match) {
