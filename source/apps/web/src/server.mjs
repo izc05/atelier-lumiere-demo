@@ -4,6 +4,7 @@ import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
 import { createAdminBlogWebHandler } from "./admin-blog-proxy.mjs";
 import { createAdminProductsWebHandler } from "./admin-products-proxy.mjs";
 import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
+import { createOrderLogisticsWebHandler } from "./order-logistics-proxy.mjs";
 import { createProviderBlogWebHandler } from "./provider-blog-proxy.mjs";
 import { createProviderOrdersWebHandler } from "./provider-orders-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
@@ -25,7 +26,8 @@ const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: provider
 const providerOrdersHandler = createProviderOrdersWebHandler({ baseHandler: providerBlogHandler });
 const customerOrdersHandler = createCustomerOrdersWebHandler({ baseHandler: providerOrdersHandler });
 const requestFilesHandler = createRequestFilesWebHandler({ baseHandler: customerOrdersHandler });
-const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: requestFilesHandler });
+const orderLogisticsHandler = createOrderLogisticsWebHandler({ baseHandler: requestFilesHandler });
+const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: orderLogisticsHandler });
 const adminProductsHandler = createAdminProductsWebHandler({ baseHandler: adminBlogHandler });
 const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: adminProductsHandler });
 const server = createServer(createPublicCatalogWebHandler({ baseHandler: publicBlogHandler }));
