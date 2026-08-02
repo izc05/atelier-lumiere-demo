@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#5a0f1f">
   <title>Ficha del pedido · Atelier Lumière</title>
   <link rel="stylesheet" href="/proveedor/pedidos/orders.css">
+  <link rel="stylesheet" href="/shared/order-logistics.css">
   <script defer src="/proveedor/pedidos/common.js"></script>
   <script defer src="/proveedor/pedidos/detalle/order-detail.js"></script>
 </head>
@@ -31,10 +32,7 @@
       <section class="page-head detail-head">
         <div>
           <p class="eyebrow">Pedido del taller</p>
-          <div class="detail-title">
-            <h1 id="order-number"></h1>
-            <span id="order-status"></span>
-          </div>
+          <div class="detail-title"><h1 id="order-number"></h1><span id="order-status"></span></div>
           <p id="order-summary" class="lead"></p>
         </div>
         <strong id="order-total" class="price"></strong>
@@ -59,10 +57,60 @@
           </article>
 
           <article class="panel-card">
-            <header><h2>Seguimiento e incidencias</h2><p>Información logística y problemas abiertos asociados a este pedido.</p></header>
-            <div id="shipments-list" class="compact-list"></div>
-            <div id="incidents-list" class="compact-list"></div>
-            <p id="logistics-empty" class="help" hidden>Todavía no hay seguimiento ni incidencias registradas.</p>
+            <header><h2>Seguimiento e incidencias</h2><p>Actualiza el transporte y responde a cualquier problema comunicado.</p></header>
+            <div class="logistics-grid">
+              <section class="logistics-block">
+                <header><h3>Seguimiento del envío</h3><p>El estado en tránsito o entregado actualizará también el pedido.</p></header>
+                <div id="shipments-list" class="compact-list"></div>
+                <p id="shipments-empty" class="help" hidden>No hay seguimiento registrado.</p>
+                <form id="shipment-form" class="logistics-form">
+                  <label class="field">Estado
+                    <select id="shipment-status" required>
+                      <option value="PENDING">Preparando datos</option>
+                      <option value="LABEL_CREATED">Etiqueta creada</option>
+                      <option value="IN_TRANSIT">En tránsito</option>
+                      <option value="DELIVERED">Entregado</option>
+                      <option value="EXCEPTION">Excepción</option>
+                      <option value="RETURNED">Devuelto</option>
+                    </select>
+                  </label>
+                  <label class="field">Transportista
+                    <input id="shipment-carrier" maxlength="120" placeholder="Ejemplo: Correos Express">
+                  </label>
+                  <label class="field">Código de seguimiento
+                    <input id="shipment-code" maxlength="180" placeholder="Código facilitado por el transportista">
+                  </label>
+                  <label class="field">Enlace HTTPS de seguimiento
+                    <input id="shipment-url" type="url" maxlength="1000" placeholder="https://…">
+                  </label>
+                  <button id="shipment-button" class="button primary" type="submit">Guardar seguimiento</button>
+                  <p id="shipment-result" class="message" role="status" aria-live="polite"></p>
+                </form>
+              </section>
+
+              <section class="logistics-block">
+                <header><h3>Incidencias</h3><p>El cliente también puede abrir una incidencia desde su pedido.</p></header>
+                <div id="incidents-list" class="compact-list"></div>
+                <p id="incidents-empty" class="help" hidden>No hay incidencias registradas.</p>
+                <form id="incident-form" class="logistics-form">
+                  <label class="field">Tipo
+                    <select id="incident-type" required>
+                      <option value="DELAY">Retraso</option>
+                      <option value="DAMAGE">Daño</option>
+                      <option value="WRONG_ITEM">Artículo incorrecto</option>
+                      <option value="DELIVERY">Entrega</option>
+                      <option value="CUSTOMIZATION">Personalización</option>
+                      <option value="OTHER">Otro</option>
+                    </select>
+                  </label>
+                  <label class="field">Descripción
+                    <textarea id="incident-description" minlength="10" maxlength="8000" required placeholder="Explica qué ha ocurrido y qué necesitas revisar"></textarea>
+                  </label>
+                  <button id="incident-button" class="button warning" type="submit">Registrar incidencia</button>
+                  <p id="incident-result" class="message" role="status" aria-live="polite"></p>
+                </form>
+              </section>
+            </div>
           </article>
         </div>
 
@@ -72,20 +120,13 @@
             <div id="customer-data" class="key-values"></div>
           </article>
 
-          <article class="panel-card">
-            <header><h2>Resumen económico</h2></header>
-            <div id="money-data" class="key-values"></div>
-          </article>
+          <article class="panel-card"><header><h2>Resumen económico</h2></header><div id="money-data" class="key-values"></div></article>
 
           <article class="panel-card">
             <header><h2>Actualizar avance</h2><p id="transition-help">Selecciona el siguiente paso permitido.</p></header>
             <form id="transition-form" class="action-form">
-              <label class="field">Nuevo estado
-                <select id="next-status" required></select>
-              </label>
-              <label class="field">Nota para la cronología
-                <textarea id="provider-note" maxlength="4000" placeholder="Ejemplo: materiales confirmados y preparación iniciada"></textarea>
-              </label>
+              <label class="field">Nuevo estado<select id="next-status" required></select></label>
+              <label class="field">Nota para la cronología<textarea id="provider-note" maxlength="4000" placeholder="Ejemplo: materiales confirmados y preparación iniciada"></textarea></label>
               <button id="transition-button" class="button primary" type="submit">Guardar avance</button>
               <p id="transition-message" class="message" role="status" aria-live="polite"></p>
             </form>
@@ -95,11 +136,7 @@
     </section>
 
     <section id="detail-error" class="error-card" hidden>
-      <div>
-        <h2>No se pudo abrir el pedido</h2>
-        <p id="detail-error-message"></p>
-        <a class="button primary" href="/proveedor/pedidos/">Volver a mis pedidos</a>
-      </div>
+      <div><h2>No se pudo abrir el pedido</h2><p id="detail-error-message"></p><a class="button primary" href="/proveedor/pedidos/">Volver a mis pedidos</a></div>
     </section>
   </main>
 </body>
