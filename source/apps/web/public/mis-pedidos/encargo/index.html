@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#5a0f1f">
   <title>Encargo personalizado · Atelier Lumière</title>
   <link rel="stylesheet" href="/mis-pedidos/customer-orders.css">
+  <link rel="stylesheet" href="/shared/request-files.css">
   <script defer src="/mis-pedidos/common.js"></script>
   <script defer src="/mis-pedidos/encargo/request-detail.js"></script>
 </head>
@@ -27,7 +28,25 @@
       <section class="detail-grid">
         <div class="detail-main">
           <article class="panel-card"><header><h2>Conversación</h2><p>Mensajes privados entre tú y el taller.</p></header><div id="messages-list" class="conversation"></div><p id="messages-empty" hidden>Todavía no hay mensajes.</p><form id="message-form" class="action-form"><label class="field">Responder al taller<textarea id="message-body" maxlength="8000" required placeholder="Confirma colores, medidas, acabado o cualquier detalle"></textarea></label><button id="message-button" class="button primary" type="submit">Enviar mensaje</button><p id="message-result" class="message" role="status" aria-live="polite"></p></form></article>
-          <article class="panel-card"><header><h2>Archivos</h2><p>Referencias y documentos registrados en el encargo.</p></header><div id="files-list" class="compact-list"></div><p id="files-empty" hidden>No hay archivos adjuntos.</p></article>
+          <article class="panel-card">
+            <header><h2>Archivos</h2><p>Comparte referencias y documentos privados con el taller.</p></header>
+            <div id="files-list" class="compact-list"></div>
+            <p id="files-empty" hidden>No hay archivos adjuntos.</p>
+            <form id="file-form" class="file-upload-form">
+              <label class="file-picker" for="file-input">
+                <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required>
+                <strong>Elegir archivo</strong>
+                <span id="file-name">JPEG, PNG, WebP o PDF</span>
+              </label>
+              <div class="file-upload-actions">
+                <button id="file-button" class="button primary" type="submit">Adjuntar archivo</button>
+                <small id="file-count">0 de 20 archivos · máximo 12 MB</small>
+              </div>
+              <progress id="file-progress" class="file-progress" max="100" value="0" hidden></progress>
+              <p id="file-result" class="message" role="status" aria-live="polite"></p>
+              <p class="help">Solo tú puedes retirar los archivos que hayas subido. El taller podrá descargarlos para preparar el encargo.</p>
+            </form>
+          </article>
         </div>
         <aside class="detail-side">
           <article class="panel-card"><header><h2>Resumen</h2></header><div id="request-data" class="key-values"></div><a id="order-link" class="button secondary" href="/mis-pedidos/">Abrir pedido completo</a></article>
