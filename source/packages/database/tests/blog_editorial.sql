@@ -156,6 +156,25 @@ WHERE post_id = '40000000-0000-4000-8000-000000000001'
 
 UPDATE blog_posts SET status = 'APPROVED'
 WHERE id = '40000000-0000-4000-8000-000000000001';
+
+INSERT INTO blog_post_media (
+  id, provider_id, post_id, placement, mime_type, original_filename,
+  storage_key, size_bytes, checksum_sha256, status, sort_order,
+  alt_text, width, height, preview_storage_key, preview_mime_type,
+  preview_size_bytes, preview_checksum_sha256, preview_width,
+  preview_height, uploaded_by, ready_at
+) VALUES (
+  '50000000-0000-4000-8000-000000000001',
+  '00000000-0000-4000-8000-000000000201',
+  '40000000-0000-4000-8000-000000000001',
+  'COVER', 'image/png', 'portada-blog.png',
+  'providers/test/blog/post/cover/original.png', 68, repeat('a', 64),
+  'READY', 0, 'Portada del proceso artesanal', 1, 1,
+  'providers/test/blog/post/cover/preview.webp', 'image/webp',
+  32, repeat('b', 64), 1, 1,
+  '00000000-0000-4000-8000-000000000001', now()
+);
+
 UPDATE blog_posts SET status = 'PUBLISHED'
 WHERE id = '40000000-0000-4000-8000-000000000001';
 
