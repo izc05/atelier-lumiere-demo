@@ -62,7 +62,8 @@ function originalFilename(value) {
   return normalized;
 }
 
-function altText(value) {
+function altText(value, { nullable = false } = {}) {
+  if (value === undefined && nullable) return null;
   if (value === undefined || value === null || value === "") return "";
   let decoded;
   try {
@@ -78,7 +79,8 @@ function altText(value) {
 }
 
 function contentLength(value, selectedMimeType) {
-  const parsed = Number.parseInt(String(value ?? ""), 10);
+  const raw = String(value ?? "").trim();
+  const parsed = /^\d+$/.test(raw) ? Number(raw) : Number.NaN;
   const maximum = selectedMimeType === "video/mp4" ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
   if (!Number.isSafeInteger(parsed) || parsed < 1 || parsed > maximum) {
     throw new ServiceError(
@@ -129,7 +131,17 @@ function notFound() {
   return new ServiceError("MEDIA_NOT_FOUND", "No se ha encontrado el archivo.", 404);
 }
 
+function previewNotFound() {
+  return new ServiceError(
+    "MEDIA_PREVIEW_NOT_AVAILABLE",
+    "La previsualización de este archivo no está disponible.",
+    404
+  );
+}
+
 function serializeMedia(row) {
+  const ready = row.status === "READY";
+  const hasPreview = ready && Boolean(row.preview_storage_key);
   return {
     id: row.id,
     productId: row.product_id,
@@ -137,7 +149,7 @@ function serializeMedia(row) {
     mimeType: row.mime_type,
     originalFilename: row.original_filename,
     sizeBytes: Number(row.size_bytes),
-    checksumSha256: row.status === "READY" ? row.checksum_sha256 : null,
+    checksumSha256: ready ? row.checksum_sha256 : null,
     status: row.status,
     sortOrder: row.sort_order,
     altText: row.alt_text,
@@ -147,8 +159,19 @@ function serializeMedia(row) {
     rejectionReason: row.rejection_reason,
     readyAt: row.ready_at,
     createdAt: row.created_at,
-    contentPath: row.status === "READY"
+    contentPath: ready
       ? `/api/provider/products/${row.product_id}/media/${row.id}/content`
+      : null,
+    previewPath: hasPreview
+      ? `/api/provider/products/${row.product_id}/media/${row.id}/preview`
+      : null,
+    preview: hasPreview
+      ? {
+          mimeType: row.preview_mime_type,
+          sizeBytes: Number(row.preview_size_bytes),
+          width: row.preview_width,
+          height: row.preview_height
+        }
       : null
   };
 }
@@ -182,8 +205,13 @@ export function createProductMediaService({
   if (!database || typeof database.withContext !== "function") {
     throw new TypeError("createProductMediaService necesita una base de datos.");
   }
-  if (!storage || typeof storage.write !== "function" || typeof storage.openRead !== "function") {
-    throw new TypeError("createProductMediaService necesita almacenamiento privado.");
+  if (
+    !storage
+    || typeof storage.write !== "function"
+    || typeof storage.openRead !== "function"
+    || typeof storage.openPreview !== "function"
+  ) {
+    throw new TypeError("createProductMediaService necesita almacenamiento privado con previews.");
   }
   if (!Number.isInteger(uploadTtlMinutes) || uploadTtlMinutes < 5 || uploadTtlMinutes > 60) {
     throw new TypeError("MEDIA_UPLOAD_TTL_MINUTES debe estar entre 5 y 60.");
@@ -282,9 +310,8 @@ export function createProductMediaService({
         throw translateDatabaseError(error);
       }
 
-      let stored;
       try {
-        stored = await storage.write({
+        const stored = await storage.write({
           stream,
           storageKey,
           expectedBytes,
@@ -301,8 +328,14 @@ export function createProductMediaService({
                  width = $4,
                  height = $5,
                  duration_seconds = $6,
+                 preview_storage_key = $7,
+                 preview_mime_type = $8,
+                 preview_size_bytes = $9,
+                 preview_checksum_sha256 = $10,
+                 preview_width = $11,
+                 preview_height = $12,
                  upload_expires_at = NULL
-             WHERE id = $1 AND product_id = $7 AND status = 'PENDING_UPLOAD'
+             WHERE id = $1 AND product_id = $13 AND status = 'PENDING_UPLOAD'
              RETURNING *`,
             [
               mediaId,
@@ -311,6 +344,12 @@ export function createProductMediaService({
               stored.width,
               stored.height,
               stored.durationSeconds,
+              stored.previewStorageKey,
+              stored.previewMimeType,
+              stored.previewSizeBytes,
+              stored.previewChecksumSha256,
+              stored.previewWidth,
+              stored.previewHeight,
               productId
             ]
           );
@@ -320,7 +359,9 @@ export function createProductMediaService({
             sizeBytes: stored.sizeBytes,
             checksumSha256: stored.checksumSha256,
             width: stored.width,
-            height: stored.height
+            height: stored.height,
+            previewGenerated: Boolean(stored.previewStorageKey),
+            previewSizeBytes: stored.previewSizeBytes
           });
           return serializeMedia(result.rows[0]);
         });
@@ -341,18 +382,21 @@ export function createProductMediaService({
       const context = providerContext(rawContext);
       const productId = uuid(rawProductId, "productId");
       const mediaId = uuid(rawMediaId, "mediaId");
-      const selectedAltText = altText(input.altText);
+      const selectedAltText = altText(input.altText, { nullable: true });
       const sortOrder = input.sortOrder === undefined ? null : Number(input.sortOrder);
       if (sortOrder !== null && (!Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 1000)) {
         throw new ServiceError("VALIDATION_ERROR", "El orden del archivo no es válido.", 422, {
           field: "sortOrder"
         });
       }
+      if (selectedAltText === null && sortOrder === null) {
+        throw new ServiceError("VALIDATION_ERROR", "No hay ningún cambio multimedia que guardar.", 422);
+      }
       try {
         return await database.withContext(context, async (transaction) => {
           const result = await transaction.query(
             `UPDATE product_media
-             SET alt_text = $3,
+             SET alt_text = COALESCE($3, alt_text),
                  sort_order = COALESCE($4, sort_order)
              WHERE id = $1 AND product_id = $2 AND status <> 'DELETED'
              RETURNING *`,
@@ -398,13 +442,17 @@ export function createProductMediaService({
       return { deleted: true, mediaId };
     },
 
-    async open(rawContext, rawProductId, rawMediaId, rangeHeader) {
+    async open(rawContext, rawProductId, rawMediaId, variant = "content", rangeHeader) {
       const context = providerContext(rawContext);
       const productId = uuid(rawProductId, "productId");
       const mediaId = uuid(rawMediaId, "mediaId");
+      if (!["content", "preview"].includes(variant)) {
+        throw new ServiceError("VALIDATION_ERROR", "La variante multimedia no es válida.", 422);
+      }
       const row = await database.withContext(context, async (transaction) => {
         const result = await transaction.query(
-          `SELECT id, product_id, mime_type, original_filename, storage_key, size_bytes
+          `SELECT id, product_id, mime_type, original_filename, storage_key, size_bytes,
+                  preview_storage_key, preview_mime_type, preview_size_bytes
            FROM product_media
            WHERE id = $1 AND product_id = $2 AND status = 'READY'`,
           [mediaId, productId]
@@ -412,12 +460,26 @@ export function createProductMediaService({
         return result.rows[0] ?? null;
       });
       if (!row) throw notFound();
+
+      if (variant === "preview") {
+        if (!row.preview_storage_key) throw previewNotFound();
+        const opened = await storage.openPreview(row.preview_storage_key, rangeHeader);
+        return {
+          ...opened,
+          mimeType: row.preview_mime_type,
+          originalFilename: `${row.original_filename.replace(/\.[^.]+$/, "")}-preview.webp`,
+          mediaId: row.id,
+          variant
+        };
+      }
+
       const opened = await storage.openRead(row.storage_key, rangeHeader);
       return {
         ...opened,
         mimeType: row.mime_type,
         originalFilename: row.original_filename,
-        mediaId: row.id
+        mediaId: row.id,
+        variant
       };
     }
   });

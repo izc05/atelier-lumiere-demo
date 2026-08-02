@@ -8,6 +8,7 @@ ENV STORAGE_PATH=/data/media
 
 COPY apps/api/package.json ./package.json
 RUN npm install --omit=dev --ignore-scripts \
+  && npm rebuild sharp \
   && npm cache clean --force
 
 COPY apps/api/src ./src

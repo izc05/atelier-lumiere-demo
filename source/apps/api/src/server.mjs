@@ -15,6 +15,7 @@ import {
 } from "./email-delivery-services.mjs";
 import { createEmailVerificationService } from "./email-verification-service.mjs";
 import { createMailService } from "./mail-service.mjs";
+import { createMediaPreviewStorage } from "./media-preview-storage.mjs";
 import { createLocalMediaStorage } from "./media-storage-service.mjs";
 import { createProductMediaApiHandler } from "./product-media-api.mjs";
 import { createProductMediaService } from "./product-media-service.mjs";
@@ -35,7 +36,10 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 
 const database = createDatabase();
 const mailService = createMailService();
-const mediaStorage = createLocalMediaStorage();
+const localMediaStorage = createLocalMediaStorage();
+const mediaStorage = createMediaPreviewStorage({
+  baseStorage: localMediaStorage
+});
 const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
 const authenticateRequest = createRequestAuthenticator({ environment });
 const developmentAdminContext = createDevelopmentAdminContext({ environment });

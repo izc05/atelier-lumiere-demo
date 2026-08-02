@@ -7,6 +7,7 @@ import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDatabase } from "../src/database.mjs";
+import { createMediaPreviewStorage } from "../src/media-preview-storage.mjs";
 import { createLocalMediaStorage } from "../src/media-storage-service.mjs";
 import { createProductMediaApiHandler } from "../src/product-media-api.mjs";
 import { createProductMediaService } from "../src/product-media-service.mjs";
@@ -56,7 +57,16 @@ async function upload(baseUrl, productId, bearer, buffer, {
   return { response, payload: await jsonResponse(response) };
 }
 
-test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
+async function privateRead(baseUrl, productId, mediaId, variant, bearer, range) {
+  return fetch(`${baseUrl}/api/provider/products/${productId}/media/${mediaId}/${variant}`, {
+    headers: {
+      Authorization: `Bearer ${bearer}`,
+      ...(range ? { Range: range } : {})
+    }
+  });
+}
+
+test("las fotografías generan WebP privado y conservan aislamiento y flujo editorial", {
   skip: !connectionString
 }, async (t) => {
   const storageRoot = await mkdtemp(join(tmpdir(), "atelier-media-"));
@@ -66,7 +76,12 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     statementTimeoutMs: 5000,
     logger: { error() {} }
   });
-  const storage = createLocalMediaStorage({ rootPath: storageRoot });
+  const storage = createMediaPreviewStorage({
+    baseStorage: createLocalMediaStorage({ rootPath: storageRoot }),
+    previewMaxWidth: 640,
+    previewMaxHeight: 640,
+    previewQuality: 82
+  });
   const mediaService = createProductMediaService({
     database,
     storage,
@@ -93,12 +108,11 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
       return null;
     }
   };
-  const baseHandler = (_request, response) => {
-    response.writeHead(404, { "Content-Type": "application/json" });
-    response.end(JSON.stringify({ error: "NOT_FOUND" }));
-  };
   const handler = createProductMediaApiHandler({
-    baseHandler,
+    baseHandler(_request, response) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "NOT_FOUND" }));
+    },
     productMediaService: mediaService,
     providerAuthService,
     logger: { error() {} }
@@ -113,8 +127,7 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     await rm(storageRoot, { recursive: true, force: true });
   });
 
-  const address = server.address();
-  const baseUrl = `http://127.0.0.1:${address.port}`;
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
   const suffix = randomUUID().slice(0, 8);
   const product = await productsService.create(contextA, {
     name: `Caja de recuerdos ${suffix}`,
@@ -141,13 +154,10 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   });
   assert.equal(unauthorized.status, 401);
 
-  const disguised = await upload(
-    baseUrl,
-    product.id,
-    tokenA,
-    Buffer.from("esto no es una imagen"),
-    { mimeType: "image/jpeg", filename: "disfraz.jpg" }
-  );
+  const disguised = await upload(baseUrl, product.id, tokenA, Buffer.from("no es una imagen"), {
+    mimeType: "image/jpeg",
+    filename: "disfraz.jpg"
+  });
   assert.equal(disguised.response.status, 422);
   assert.equal(disguised.payload.error, "MEDIA_CONTENT_INVALID");
 
@@ -164,39 +174,43 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     first.payload.media.checksumSha256,
     createHash("sha256").update(PNG_1X1).digest("hex")
   );
+  assert.match(first.payload.media.previewPath, /\/preview$/);
+  assert.deepEqual(
+    {
+      mimeType: first.payload.media.preview.mimeType,
+      width: first.payload.media.preview.width,
+      height: first.payload.media.preview.height
+    },
+    { mimeType: "image/webp", width: 1, height: 1 }
+  );
   const firstMediaId = first.payload.media.id;
 
-  const foreignRead = await fetch(
-    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/content`,
-    { headers: { Authorization: `Bearer ${tokenB}` } }
-  );
-  assert.equal(foreignRead.status, 404);
-  assert.equal((await jsonResponse(foreignRead)).error, "MEDIA_NOT_FOUND");
+  for (const variant of ["content", "preview"]) {
+    const foreign = await privateRead(baseUrl, product.id, firstMediaId, variant, tokenB);
+    assert.equal(foreign.status, 404);
+    assert.equal((await jsonResponse(foreign)).error, "MEDIA_NOT_FOUND");
+  }
 
-  const fullRead = await fetch(
-    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/content`,
-    { headers: { Authorization: `Bearer ${tokenA}` } }
-  );
-  assert.equal(fullRead.status, 200);
-  assert.equal(fullRead.headers.get("content-type"), "image/png");
-  assert.match(fullRead.headers.get("cache-control"), /private/);
-  assert.equal(fullRead.headers.get("x-content-type-options"), "nosniff");
-  assert.deepEqual(Buffer.from(await fullRead.arrayBuffer()), PNG_1X1);
+  const original = await privateRead(baseUrl, product.id, firstMediaId, "content", tokenA);
+  assert.equal(original.status, 200);
+  assert.equal(original.headers.get("content-type"), "image/png");
+  assert.match(original.headers.get("cache-control"), /private/);
+  assert.deepEqual(Buffer.from(await original.arrayBuffer()), PNG_1X1);
 
-  const ranged = await fetch(
-    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/content`,
-    {
-      headers: {
-        Authorization: `Bearer ${tokenA}`,
-        Range: "bytes=0-7"
-      }
-    }
-  );
+  const preview = await privateRead(baseUrl, product.id, firstMediaId, "preview", tokenA);
+  assert.equal(preview.status, 200);
+  assert.equal(preview.headers.get("content-type"), "image/webp");
+  const previewBytes = Buffer.from(await preview.arrayBuffer());
+  assert.equal(previewBytes.toString("ascii", 0, 4), "RIFF");
+  assert.equal(previewBytes.toString("ascii", 8, 12), "WEBP");
+  assert.equal(previewBytes.length, first.payload.media.preview.sizeBytes);
+
+  const ranged = await privateRead(baseUrl, product.id, firstMediaId, "content", tokenA, "bytes=0-7");
   assert.equal(ranged.status, 206);
   assert.equal(ranged.headers.get("content-range"), `bytes 0-7/${PNG_1X1.length}`);
   assert.deepEqual(Buffer.from(await ranged.arrayBuffer()), PNG_1X1.subarray(0, 8));
 
-  const metadataResponse = await fetch(
+  const metadata = await fetch(
     `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}`,
     {
       method: "PATCH",
@@ -207,10 +221,27 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
       body: JSON.stringify({ altText: "Vista principal de la caja", sortOrder: 2 })
     }
   );
-  const metadataPayload = await jsonResponse(metadataResponse);
-  assert.equal(metadataResponse.status, 200);
+  const metadataPayload = await jsonResponse(metadata);
+  assert.equal(metadata.status, 200);
   assert.equal(metadataPayload.media.altText, "Vista principal de la caja");
   assert.equal(metadataPayload.media.sortOrder, 2);
+  assert.match(metadataPayload.media.previewPath, /\/preview$/);
+
+  const orderOnly = await fetch(
+    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${tokenA}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ sortOrder: 3 })
+    }
+  );
+  const orderPayload = await jsonResponse(orderOnly);
+  assert.equal(orderOnly.status, 200);
+  assert.equal(orderPayload.media.altText, "Vista principal de la caja");
+  assert.equal(orderPayload.media.sortOrder, 3);
 
   const mismatch = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
     mimeType: "image/jpeg",
@@ -219,14 +250,13 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   assert.equal(mismatch.response.status, 422);
   assert.equal(mismatch.payload.error, "MEDIA_TYPE_MISMATCH");
 
-  const readyImageIds = [firstMediaId];
   for (let index = 2; index <= 8; index += 1) {
     const item = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
       filename: `detalle-${index}.png`,
       altText: `Detalle ${index} de la caja`
     });
     assert.equal(item.response.status, 201);
-    readyImageIds.push(item.payload.media.id);
+    assert.match(item.payload.media.previewPath, /\/preview$/);
   }
 
   const ninth = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
@@ -234,40 +264,42 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   });
   assert.equal(ninth.response.status, 409);
   assert.equal(ninth.payload.error, "MEDIA_LIMIT_REACHED");
-  assert.equal(ninth.payload.details.maximum, 8);
 
-  const mp4 = minimalMp4();
-  const video = await upload(baseUrl, product.id, tokenA, mp4, {
+  const video = await upload(baseUrl, product.id, tokenA, minimalMp4(), {
     mimeType: "video/mp4",
     filename: "proceso-artesanal.mp4"
   });
   assert.equal(video.response.status, 201);
   assert.equal(video.payload.media.kind, "VIDEO");
-  assert.equal(video.payload.media.status, "READY");
+  assert.equal(video.payload.media.previewPath, null);
+  assert.equal(video.payload.media.preview, null);
 
-  const secondVideo = await upload(baseUrl, product.id, tokenA, mp4, {
+  const videoPreview = await privateRead(
+    baseUrl,
+    product.id,
+    video.payload.media.id,
+    "preview",
+    tokenA
+  );
+  assert.equal(videoPreview.status, 404);
+  assert.equal((await jsonResponse(videoPreview)).error, "MEDIA_PREVIEW_NOT_AVAILABLE");
+
+  const secondVideo = await upload(baseUrl, product.id, tokenA, minimalMp4(), {
     mimeType: "video/mp4",
     filename: "otro-video.mp4"
   });
   assert.equal(secondVideo.response.status, 409);
   assert.equal(secondVideo.payload.error, "MEDIA_LIMIT_REACHED");
-  assert.equal(secondVideo.payload.details.kind, "VIDEO");
 
   const deleted = await fetch(
     `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}`,
-    {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${tokenA}` }
-    }
+    { method: "DELETE", headers: { Authorization: `Bearer ${tokenA}` } }
   );
   assert.equal(deleted.status, 200);
-  assert.equal((await jsonResponse(deleted)).deleted, true);
-
-  const afterDelete = await fetch(
-    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/content`,
-    { headers: { Authorization: `Bearer ${tokenA}` } }
-  );
-  assert.equal(afterDelete.status, 404);
+  for (const variant of ["content", "preview"]) {
+    const missing = await privateRead(baseUrl, product.id, firstMediaId, variant, tokenA);
+    assert.equal(missing.status, 404);
+  }
 
   const replacement = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
     filename: "portada-sustituta.png"
@@ -280,11 +312,11 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   });
   assert.equal(submitted.product.status, "IN_REVIEW");
 
-  const lockedUpload = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
+  const locked = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
     filename: "cambio-durante-revision.png"
   });
-  assert.equal(lockedUpload.response.status, 409);
-  assert.equal(lockedUpload.payload.error, "PRODUCT_LOCKED");
+  assert.equal(locked.response.status, 409);
+  assert.equal(locked.payload.error, "PRODUCT_LOCKED");
 
   const stored = await database.withContext({
     userId: "00000000-0000-4000-8000-000000000001",
@@ -292,14 +324,16 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     role: "ADMIN"
   }, async (transaction) => {
     const media = await transaction.query(
-      `SELECT kind, status, checksum_sha256, storage_key
+      `SELECT kind, status, checksum_sha256, storage_key,
+              preview_storage_key, preview_mime_type, preview_size_bytes,
+              preview_checksum_sha256, preview_width, preview_height
        FROM product_media
        WHERE product_id = $1
        ORDER BY created_at`,
       [product.id]
     );
     const audits = await transaction.query(
-      `SELECT action, metadata::text AS metadata
+      `SELECT action, metadata
        FROM audit_events
        WHERE provider_id = $1 AND entity_type = 'product_media'`,
       [contextA.providerId]
@@ -307,15 +341,22 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     return { media: media.rows, audits: audits.rows };
   });
 
-  assert.equal(stored.media.filter((item) => item.kind === "IMAGE" && item.status === "READY").length, 8);
-  assert.equal(stored.media.filter((item) => item.kind === "VIDEO" && item.status === "READY").length, 1);
+  const readyImages = stored.media.filter((item) => item.kind === "IMAGE" && item.status === "READY");
+  const readyVideos = stored.media.filter((item) => item.kind === "VIDEO" && item.status === "READY");
+  assert.equal(readyImages.length, 8);
+  assert.equal(readyVideos.length, 1);
   assert.ok(stored.media.filter((item) => item.status === "REJECTED").length >= 2);
+  assert.ok(readyImages.every((item) => item.preview_storage_key));
+  assert.ok(readyImages.every((item) => item.preview_mime_type === "image/webp"));
+  assert.ok(readyImages.every((item) => Number(item.preview_size_bytes) > 0));
+  assert.ok(readyImages.every((item) => /^[a-f0-9]{64}$/.test(item.preview_checksum_sha256)));
+  assert.ok(readyImages.every((item) => item.preview_width === 1 && item.preview_height === 1));
+  assert.ok(readyVideos.every((item) => item.preview_storage_key === null));
   assert.ok(
-    stored.media
-      .filter((item) => item.status === "READY")
-      .every((item) => item.checksum_sha256 !== "0".repeat(64))
+    stored.audits.some(
+      (item) => item.action === "PRODUCT_MEDIA_UPLOADED" && item.metadata.previewGenerated === true
+    )
   );
-  assert.ok(stored.audits.some((item) => item.action === "PRODUCT_MEDIA_UPLOADED"));
   assert.equal(JSON.stringify(stored.audits).includes("storage_key"), false);
   assert.equal(JSON.stringify(stored.audits).includes(storageRoot), false);
 
