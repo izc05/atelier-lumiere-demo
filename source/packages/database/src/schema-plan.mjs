@@ -1,5 +1,6 @@
 export const CORE_TABLES = Object.freeze([
   "users",
+  "user_credentials",
   "providers",
   "provider_members",
   "provider_invitations",
@@ -33,5 +34,7 @@ export const DATABASE_RULES = Object.freeze({
   providerScopedTablesRequireProviderId: true,
   allMutationsCreateAuditEvent: true,
   hardDeleteProviders: false,
-  timestampsStoredAsUtc: true
+  timestampsStoredAsUtc: true,
+  passwordsStoredWithScrypt: true,
+  providerAccessRequiresVerifiedEmailAndTwoFactor: true
 });
