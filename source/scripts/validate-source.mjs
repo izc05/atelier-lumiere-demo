@@ -7,10 +7,15 @@ const requiredFiles = [
   ".gitignore",
   ".dockerignore",
   "apps/web/package.json",
+  "apps/web/src/app.mjs",
   "apps/web/src/server.mjs",
   "apps/web/public/index.html",
   "apps/web/public/styles.css",
   "apps/web/public/status.js",
+  "apps/web/public/admin/proveedores/index.html",
+  "apps/web/public/admin/proveedores/admin.css",
+  "apps/web/public/admin/proveedores/providers.js",
+  "apps/web/tests/admin-providers.test.mjs",
   "apps/api/package.json",
   "apps/api/src/app.mjs",
   "apps/api/src/server.mjs",
@@ -62,7 +67,14 @@ for (const forbidden of [
 }
 
 const workspace = contents.get("package.json") ?? "";
-for (const expected of ["apps/*", "packages/*", "tests/*.test.mjs", "test:api-integration", "validate-source.mjs"]) {
+for (const expected of [
+  "apps/*",
+  "packages/*",
+  "tests/*.test.mjs",
+  "test:web-integration",
+  "test:api-integration",
+  "validate-source.mjs"
+]) {
   if (!workspace.includes(expected)) failures.push(`El workspace no contiene: ${expected}`);
 }
 
@@ -87,9 +99,59 @@ if (!web.includes("Atelier Lumière") || !web.includes("noindex,nofollow")) {
   failures.push("La pantalla fuente debe conservar la marca y permanecer fuera de buscadores.");
 }
 
-const webServer = contents.get("apps/web/src/server.mjs") ?? "";
-if (!webServer.includes("/internal/api-health") || !webServer.includes("API_INTERNAL_URL")) {
-  failures.push("La web fuente debe consultar la API por el canal interno.");
+const webApp = contents.get("apps/web/src/app.mjs") ?? "";
+for (const expected of [
+  "/internal/api-health",
+  "API_INTERNAL_URL",
+  "ENABLE_ADMIN_UI",
+  "WEB_ADMIN_ACCESS_KEY",
+  "atelier_admin_session",
+  "HttpOnly",
+  "SameSite=Strict",
+  "timingSafeEqual",
+  "Authorization: `Bearer ${apiAdminToken}`",
+  "url.pathname.startsWith(\"/admin/\") && !enableAdminUi"
+]) {
+  if (!webApp.includes(expected)) failures.push(`Falta una protección del servidor web: ${expected}`);
+}
+
+const adminHtml = contents.get("apps/web/public/admin/proveedores/index.html") ?? "";
+for (const expected of [
+  "noindex,nofollow,noarchive",
+  "Administración de talleres invitados",
+  "Crear proveedor",
+  "Enlace provisional",
+  "Auditoría del taller"
+]) {
+  if (!adminHtml.includes(expected)) failures.push(`La administración fuente no contiene: ${expected}`);
+}
+
+const adminJs = contents.get("apps/web/public/admin/proveedores/providers.js") ?? "";
+for (const expected of [
+  "/internal/admin/session",
+  "/internal/admin/providers",
+  "activationToken",
+  "La pantalla para que el proveedor"
+]) {
+  if (!adminJs.includes(expected) && !adminHtml.includes(expected)) {
+    failures.push(`Falta un flujo administrativo: ${expected}`);
+  }
+}
+for (const forbidden of ["DEV_ADMIN_TOKEN", "WEB_ADMIN_ACCESS_KEY", "Authorization:", "Bearer "]) {
+  if (adminJs.includes(forbidden) || adminHtml.includes(forbidden)) {
+    failures.push(`El navegador no debe conocer el secreto o cabecera: ${forbidden}`);
+  }
+}
+
+const webTest = contents.get("apps/web/tests/admin-providers.test.mjs") ?? "";
+for (const expected of [
+  "HttpOnly",
+  "SameSite=Strict",
+  "withoutSession.response.status, 401",
+  "panel y el proxy desaparecen",
+  "includes(apiToken), false"
+]) {
+  if (!webTest.includes(expected)) failures.push(`Falta una prueba del panel privado: ${expected}`);
 }
 
 const api = contents.get("apps/api/src/app.mjs") ?? "";
@@ -140,7 +202,17 @@ for (const expected of ["Taller A puede ver el Taller B", "Taller B puede ver el
 }
 
 const compose = contents.get("infra/docker/docker-compose.yml") ?? "";
-for (const expected of ["web:", "api:", "database:", "API_INTERNAL_URL: http://api:4000", "ALLOW_DEV_ADMIN_AUTH", "packages/database/migrations:/docker-entrypoint-initdb.d:ro"]) {
+for (const expected of [
+  "web:",
+  "api:",
+  "database:",
+  "API_INTERNAL_URL: http://api:4000",
+  "ALLOW_DEV_ADMIN_AUTH",
+  "ENABLE_ADMIN_UI",
+  "WEB_ADMIN_ACCESS_KEY",
+  "127.0.0.1:${API_PORT:-4000}:4000",
+  "packages/database/migrations:/docker-entrypoint-initdb.d:ro"
+]) {
   if (!compose.includes(expected)) failures.push(`Docker Compose no contiene: ${expected}`);
 }
 
@@ -150,7 +222,7 @@ if (!dockerApi.includes("npm install --omit=dev --ignore-scripts")) {
 }
 
 const combined = [...contents.entries()]
-  .filter(([path]) => path !== ".env.example")
+  .filter(([path]) => path !== ".env.example" && !path.includes("/tests/") && !path.startsWith("tests/"))
   .map(([, content]) => content)
   .join("\n");
 

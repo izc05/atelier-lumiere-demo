@@ -7,6 +7,11 @@ services:
       WEB_HOST: 0.0.0.0
       WEB_PORT: 3000
       API_INTERNAL_URL: http://api:4000
+      ENABLE_ADMIN_UI: ${ENABLE_ADMIN_UI:-false}
+      DEV_ADMIN_TOKEN: ${DEV_ADMIN_TOKEN:-}
+      WEB_ADMIN_ACCESS_KEY: ${WEB_ADMIN_ACCESS_KEY:-}
+      WEB_ADMIN_SESSION_TTL_MINUTES: ${WEB_ADMIN_SESSION_TTL_MINUTES:-480}
+      WEB_COOKIE_SECURE: ${WEB_COOKIE_SECURE:-false}
     ports:
       - "${WEB_PORT:-3000}:3000"
     depends_on:
@@ -33,7 +38,7 @@ services:
       INVITATION_TTL_HOURS: ${INVITATION_TTL_HOURS:-48}
       STORAGE_PATH: /data/media
     ports:
-      - "${API_PORT:-4000}:4000"
+      - "127.0.0.1:${API_PORT:-4000}:4000"
     volumes:
       - media_data:/data/media
     depends_on:

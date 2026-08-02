@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Proveedores · Atelier Lumière</title>
+  <link rel="stylesheet" href="/admin/proveedores/admin.css">
+  <script src="/admin/proveedores/providers.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <main class="page-shell">
+    <section id="login-view" class="login-layout" aria-labelledby="login-title">
+      <div class="login-story">
+        <p class="eyebrow">Entorno privado de pruebas</p>
+        <a class="brand" href="/" aria-label="Atelier Lumière, estado técnico">
+          <span class="brand-mark">AL</span>
+          <span>
+            <strong>Atelier Lumière</strong>
+            <small>Artesanía para celebrar</small>
+          </span>
+        </a>
+        <h1 id="login-title">Administración de talleres invitados</h1>
+        <p>Gestiona altas, estados e invitaciones desde la nueva aplicación fuente. La demostración pública permanece separada y protegida.</p>
+        <ul class="login-points">
+          <li>Sesión local mediante cookie segura.</li>
+          <li>El token interno de la API nunca llega al navegador.</li>
+          <li>Cada acción queda registrada en auditoría.</li>
+        </ul>
+      </div>
+
+      <form id="login-form" class="login-card">
+        <p class="eyebrow">Acceso administrativo</p>
+        <h2>Entrar al panel privado</h2>
+        <p class="muted">Utiliza la clave temporal configurada en el servidor de pruebas.</p>
+        <label>
+          Clave de acceso
+          <input id="access-key" name="accessKey" type="password" autocomplete="current-password" minlength="24" required>
+        </label>
+        <p id="login-message" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button primary full" type="submit">Entrar en administración</button>
+        <p class="security-note">Este acceso queda desactivado cuando el entorno se configura como producción.</p>
+      </form>
+    </section>
+
+    <section id="admin-view" class="admin-layout" hidden>
+      <header class="topbar">
+        <a class="brand compact" href="/">
+          <span class="brand-mark">AL</span>
+          <span>
+            <strong>Atelier Lumière</strong>
+            <small>Administración privada</small>
+          </span>
+        </a>
+        <div class="topbar-actions">
+          <span class="environment-badge">Piloto privado</span>
+          <button id="refresh-button" class="icon-button" type="button">Actualizar</button>
+          <button id="logout-button" class="text-button" type="button">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Red de artesanos</p>
+          <h1>Proveedores</h1>
+          <p>Da de alta talleres, controla su estado y prepara sus invitaciones de acceso.</p>
+        </div>
+        <button id="open-create-button" class="button primary" type="button">Añadir proveedor</button>
+      </section>
+
+      <section class="metrics" aria-label="Resumen de proveedores">
+        <article>
+          <span>Total</span>
+          <strong id="metric-total">—</strong>
+          <small>Talleres registrados</small>
+        </article>
+        <article>
+          <span>Activos</span>
+          <strong id="metric-active">—</strong>
+          <small>Con acceso operativo</small>
+        </article>
+        <article>
+          <span>Invitados</span>
+          <strong id="metric-invited">—</strong>
+          <small>Pendientes de activar</small>
+        </article>
+        <article>
+          <span>Pausados</span>
+          <strong id="metric-suspended">—</strong>
+          <small>Acceso suspendido</small>
+        </article>
+      </section>
+
+      <section class="workspace-grid">
+        <aside id="create-panel" class="create-panel" aria-labelledby="create-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Nuevo taller</p>
+              <h2 id="create-title">Crear proveedor</h2>
+            </div>
+            <button id="close-create-button" class="icon-button mobile-only" type="button" aria-label="Cerrar formulario">Cerrar</button>
+          </div>
+
+          <form id="provider-form" class="provider-form">
+            <label>
+              Nombre comercial
+              <input name="displayName" maxlength="140" required placeholder="Ej. Cerámica de la Sierra">
+            </label>
+            <label>
+              Nombre legal <span>opcional</span>
+              <input name="legalName" maxlength="180" placeholder="Razón social o nombre completo">
+            </label>
+            <div class="field-row">
+              <label>
+                Persona responsable
+                <input name="contactName" maxlength="120" required>
+              </label>
+              <label>
+                Especialidad
+                <input name="specialty" maxlength="160" required placeholder="Cerámica, bordado…">
+              </label>
+            </div>
+            <label>
+              Correo de invitación
+              <input name="contactEmail" type="email" maxlength="254" required placeholder="nombre@taller.es">
+            </label>
+            <label>
+              Identificador web <span>opcional</span>
+              <input name="slug" maxlength="80" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="Se genera automáticamente">
+            </label>
+            <label>
+              Tipo de acceso inicial
+              <select name="role">
+                <option value="PROVIDER_OWNER">Propietario del taller</option>
+                <option value="PROVIDER_MEMBER">Colaborador</option>
+              </select>
+            </label>
+            <p id="provider-form-message" class="form-message" role="status" aria-live="polite"></p>
+            <button class="button primary full" type="submit">Crear taller e invitación</button>
+            <p class="security-note">El token se mostrará una sola vez y en la base de datos únicamente se guardará su huella.</p>
+          </form>
+        </aside>
+
+        <section class="providers-panel" aria-labelledby="providers-title">
+          <div class="panel-heading providers-heading">
+            <div>
+              <p class="eyebrow">Directorio privado</p>
+              <h2 id="providers-title">Talleres registrados</h2>
+            </div>
+            <label class="search-field">
+              <span class="sr-only">Buscar proveedor</span>
+              <input id="provider-search" type="search" placeholder="Buscar por taller o correo">
+            </label>
+          </div>
+
+          <p id="global-message" class="global-message" role="status" aria-live="polite"></p>
+          <div id="providers-list" class="providers-list" aria-live="polite">
+            <div class="loading-card">Cargando proveedores…</div>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="invitation-dialog" class="dialog-card">
+    <form method="dialog" class="dialog-close-row">
+      <button class="icon-button" value="close" aria-label="Cerrar">Cerrar</button>
+    </form>
+    <p class="eyebrow">Invitación creada</p>
+    <h2>Guarda este acceso ahora</h2>
+    <p>El token original no volverá a mostrarse. Durante el piloto puedes copiarlo para entregarlo manualmente al proveedor.</p>
+    <label>
+      Enlace provisional
+      <span class="copy-field">
+        <input id="invitation-link" readonly>
+        <button id="copy-link-button" class="button secondary" type="button">Copiar</button>
+      </span>
+    </label>
+    <label>
+      Token de un solo uso
+      <span class="copy-field">
+        <input id="invitation-token" readonly>
+        <button id="copy-token-button" class="button secondary" type="button">Copiar</button>
+      </span>
+    </label>
+    <p class="warning-note">La pantalla para que el proveedor cree su contraseña y active doble factor se conectará en el siguiente tramo.</p>
+  </dialog>
+
+  <dialog id="audit-dialog" class="dialog-card audit-dialog">
+    <form method="dialog" class="dialog-close-row">
+      <button class="icon-button" value="close" aria-label="Cerrar">Cerrar</button>
+    </form>
+    <p class="eyebrow">Registro de actividad</p>
+    <h2 id="audit-title">Auditoría del taller</h2>
+    <div id="audit-list" class="audit-list"></div>
+  </dialog>
+</body>
+</html>
