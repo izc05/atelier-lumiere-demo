@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Ficha del pedido · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/pedidos/orders.css">
+  <script defer src="/proveedor/pedidos/common.js"></script>
+  <script defer src="/proveedor/pedidos/detalle/order-detail.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/proveedor/pedidos/" aria-label="Volver a los pedidos">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Ficha del pedido</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/proveedor/pedidos/">Mis pedidos</a>
+        <a class="button ghost" href="/proveedor/encargos/">Encargos</a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section id="detail-loading" class="loading"><p>Cargando la ficha privada…</p></section>
+
+    <section id="detail-content" hidden>
+      <section class="page-head detail-head">
+        <div>
+          <p class="eyebrow">Pedido del taller</p>
+          <div class="detail-title">
+            <h1 id="order-number"></h1>
+            <span id="order-status"></span>
+          </div>
+          <p id="order-summary" class="lead"></p>
+        </div>
+        <strong id="order-total" class="price"></strong>
+      </section>
+
+      <section class="detail-grid">
+        <div class="detail-main">
+          <article class="panel-card">
+            <header><h2>Artículos y personalización</h2><p>Importes y textos congelados cuando el cliente realizó la compra.</p></header>
+            <div id="items-list" class="item-list"></div>
+          </article>
+
+          <article class="panel-card">
+            <header><h2>Encargos vinculados</h2><p>Solicitudes de diseño propio o detalles que requieren conversación.</p></header>
+            <div id="requests-list" class="compact-list"></div>
+            <p id="requests-empty" class="help" hidden>Este pedido no contiene encargos personalizados.</p>
+          </article>
+
+          <article class="panel-card">
+            <header><h2>Cronología</h2><p>Registro ordenado de los cambios del pedido.</p></header>
+            <div id="events-list" class="timeline"></div>
+          </article>
+
+          <article class="panel-card">
+            <header><h2>Seguimiento e incidencias</h2><p>Información logística y problemas abiertos asociados a este pedido.</p></header>
+            <div id="shipments-list" class="compact-list"></div>
+            <div id="incidents-list" class="compact-list"></div>
+            <p id="logistics-empty" class="help" hidden>Todavía no hay seguimiento ni incidencias registradas.</p>
+          </article>
+        </div>
+
+        <aside class="detail-side">
+          <article class="panel-card">
+            <header><h2>Cliente y entrega</h2><p>Datos privados necesarios para preparar este pedido.</p></header>
+            <div id="customer-data" class="key-values"></div>
+          </article>
+
+          <article class="panel-card">
+            <header><h2>Resumen económico</h2></header>
+            <div id="money-data" class="key-values"></div>
+          </article>
+
+          <article class="panel-card">
+            <header><h2>Actualizar avance</h2><p id="transition-help">Selecciona el siguiente paso permitido.</p></header>
+            <form id="transition-form" class="action-form">
+              <label class="field">Nuevo estado
+                <select id="next-status" required></select>
+              </label>
+              <label class="field">Nota para la cronología
+                <textarea id="provider-note" maxlength="4000" placeholder="Ejemplo: materiales confirmados y preparación iniciada"></textarea>
+              </label>
+              <button id="transition-button" class="button primary" type="submit">Guardar avance</button>
+              <p id="transition-message" class="message" role="status" aria-live="polite"></p>
+            </form>
+          </article>
+        </aside>
+      </section>
+    </section>
+
+    <section id="detail-error" class="error-card" hidden>
+      <div>
+        <h2>No se pudo abrir el pedido</h2>
+        <p id="detail-error-message"></p>
+        <a class="button primary" href="/proveedor/pedidos/">Volver a mis pedidos</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
