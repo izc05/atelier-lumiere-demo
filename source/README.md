@@ -1,33 +1,67 @@
 # Código fuente de Atelier Lumière
 
-Esta carpeta contendrá la aplicación real. Se mantiene separada de la exportación pública de GitHub Pages para poder desarrollar sin romper la demo actual.
+Esta carpeta contiene la base ejecutable de la aplicación real. Permanece separada de la exportación pública de GitHub Pages para desarrollar y probar sin romper la demo actual.
 
-## Estructura prevista
+## Estructura
 
 ```text
 source/
 ├── apps/
-│   ├── web/       # Interfaz pública, administración y panel de proveedor
-│   └── api/       # Autenticación, permisos, catálogo, pedidos y blog
+│   ├── web/       # Interfaz fuente y comprobación de servicios
+│   └── api/       # API privada y rutas técnicas
 ├── packages/
-│   ├── database/  # Esquema, migraciones y datos de prueba
-│   ├── auth/      # Sesiones, roles, invitaciones y doble factor
-│   ├── storage/   # Imágenes y vídeos
-│   └── shared/    # Tipos y validaciones compartidas
+│   ├── database/  # Mapa de datos y futuro esquema PostgreSQL
+│   ├── auth/      # Invitaciones, roles y doble factor
+│   ├── storage/   # Políticas de imágenes y vídeos
+│   └── shared/    # Estados y permisos compartidos
 ├── infra/
-│   ├── docker/    # Contenedores para el mini PC
-│   └── backups/   # Scripts de copia y restauración
+│   └── docker/    # Web, API y PostgreSQL para el mini PC
+├── scripts/       # Validaciones de seguridad y estructura
+├── tests/         # Pruebas de aislamiento y contratos
 └── .env.example
 ```
 
-## Estado
+## Ejecutar sin Docker
 
-El Bloque 0 solo establece la separación y las reglas. El código ejecutable se añadirá progresivamente a partir del Bloque 1.
+Se necesita Node.js 22 o posterior.
 
-## Principios
+```bash
+cd source
+npm test
+npm run dev:api
+```
 
-- Un proveedor solo puede acceder a los datos de su taller.
-- La administración controla altas, pausas, publicaciones y permisos.
+En otra terminal:
+
+```bash
+cd source
+npm run dev:web
+```
+
+- Web fuente: `http://localhost:3000`
+- Salud de API: `http://localhost:4000/health`
+- Metadatos técnicos: `http://localhost:4000/api/meta`
+
+## Ejecutar con Docker
+
+```bash
+cd source
+cp .env.example .env
+# Cambiar todas las contraseñas y secretos del archivo .env
+docker compose -f infra/docker/docker-compose.yml up --build
+```
+
+El archivo `.env` nunca debe subirse a GitHub.
+
+## Estado actual
+
+El runtime ya puede arrancar, validar la comunicación Web/API y ejecutar pruebas automáticas. PostgreSQL está incluido en Docker, pero todavía no se utiliza desde la API. La autenticación, el almacenamiento y el aislamiento persistente siguen declarados como desactivados hasta implementarlos y probarlos en el Bloque 1.
+
+## Reglas permanentes
+
+- Un proveedor solo puede acceder a datos de su taller.
+- Administración controla altas, pausas, revisiones y publicaciones.
 - Las imágenes y vídeos no se almacenan en GitHub.
-- La demo pública continúa funcionando durante todo el desarrollo.
-- Antes de sustituir la demo, la aplicación real debe reproducir el diseño actual y superar todas las pruebas.
+- Toda mutación futura deberá generar auditoría.
+- La demo pública continúa funcionando durante el desarrollo.
+- La aplicación real no sustituirá a la demo hasta reproducir el diseño y superar pruebas funcionales.
