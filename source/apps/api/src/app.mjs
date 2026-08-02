@@ -91,11 +91,18 @@ function errorPayload(error) {
   };
 }
 
+function deliveryLabel(delivery, environment) {
+  if (delivery?.status === "SENT") return "sent";
+  if (delivery?.status === "FAILED") return "failed";
+  if (environment !== "production") return "manual-development";
+  return "disabled";
+}
+
 function onboardingResponse(result, environment) {
-  const { verificationToken, ...safeResult } = result;
+  const { verificationToken, emailDelivery, ...safeResult } = result;
   const responseBody = {
     ...safeResult,
-    emailDelivery: environment === "production" ? "pending-email-service" : "manual-development"
+    emailDelivery: deliveryLabel(emailDelivery, environment)
   };
 
   if (environment !== "production") {
@@ -109,10 +116,10 @@ function onboardingResponse(result, environment) {
 }
 
 function resendResponse(result, environment) {
-  const { token, ...safeResult } = result;
+  const { token, emailDelivery, ...safeResult } = result;
   const responseBody = {
     ...safeResult,
-    emailDelivery: environment === "production" ? "pending-email-service" : "manual-development"
+    emailDelivery: deliveryLabel(emailDelivery, environment)
   };
 
   if (environment !== "production") {
@@ -124,7 +131,7 @@ function resendResponse(result, environment) {
 }
 
 export function createApiHandler({
-  version = "0.7.0",
+  version = "0.8.0",
   environment = process.env.NODE_ENV ?? "development",
   now = () => new Date(),
   database,
@@ -133,6 +140,7 @@ export function createApiHandler({
   emailVerificationService,
   twoFactorService,
   providerAuthService,
+  mailService,
   authenticateRequest = async () => null,
   logger = console
 } = {}) {
@@ -157,6 +165,7 @@ export function createApiHandler({
           version,
           environment,
           database: databaseReady ? "connected" : "unavailable",
+          smtp: mailService?.enabled ? "configured" : "disabled",
           timestamp: now().toISOString()
         });
         return;
@@ -176,7 +185,7 @@ export function createApiHandler({
             providerManagementApi: Boolean(providersService),
             providerInvitationAcceptance: Boolean(onboardingService),
             emailVerification: Boolean(emailVerificationService),
-            emailDelivery: false,
+            emailDelivery: Boolean(mailService?.enabled),
             // Transición histórica comprobada: twoFactorAuthentication: false.
             twoFactorAuthentication: Boolean(twoFactorService),
             mediaStorage: false,
@@ -329,7 +338,7 @@ export function createApiHandler({
         const responseBody = {
           provider: created.provider,
           invitation: created.invitation,
-          delivery: environment === "production" ? "pending-email-service" : "manual-development"
+          delivery: deliveryLabel(created.emailDelivery, environment)
         };
         if (environment !== "production") {
           responseBody.activationToken = created.token;
@@ -355,7 +364,7 @@ export function createApiHandler({
           const renewed = await providersService.renewInvitation(context, providerId, input);
           const responseBody = {
             invitation: renewed.invitation,
-            delivery: environment === "production" ? "pending-email-service" : "manual-development"
+            delivery: deliveryLabel(renewed.emailDelivery, environment)
           };
           if (environment !== "production") {
             responseBody.activationToken = renewed.token;

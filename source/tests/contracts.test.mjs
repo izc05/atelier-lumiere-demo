@@ -89,7 +89,7 @@ test("el mapa de datos incluye credenciales y exige seguridad antes del acceso",
   assert.equal(DATABASE_RULES.providerAccessRequiresVerifiedEmailAndTwoFactor, true);
 });
 
-test("la API informa de la conexión sin fingir autenticación definitiva", async () => {
+test("la API informa de conexión y capacidades sin exponer configuración", async () => {
   const database = {
     enabled: true,
     async ping() {
@@ -101,6 +101,7 @@ test("la API informa de la conexión sin fingir autenticación definitiva", asyn
     version: "0.3.0-test",
     database,
     onboardingService: {},
+    mailService: { enabled: false },
     now: () => new Date("2026-08-02T09:00:00.000Z")
   });
 
@@ -112,6 +113,7 @@ test("la API informa de la conexión sin fingir autenticación definitiva", asyn
     version: "0.3.0-test",
     environment: "development",
     database: "connected",
+    smtp: "disabled",
     timestamp: "2026-08-02T09:00:00.000Z"
   });
 
@@ -125,5 +127,7 @@ test("la API informa de la conexión sin fingir autenticación definitiva", asyn
   assert.equal(meta.capabilities.providerInvitationAcceptance, true);
   assert.equal(meta.capabilities.authentication, false);
   assert.equal(meta.capabilities.emailVerification, false);
+  assert.equal(meta.capabilities.emailDelivery, false);
   assert.equal(meta.capabilities.twoFactorAuthentication, false);
+  assert.equal(JSON.stringify(meta).includes("SMTP_PASSWORD"), false);
 });

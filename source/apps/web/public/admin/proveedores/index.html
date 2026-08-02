@@ -7,7 +7,9 @@
   <meta name="theme-color" content="#5a0f1f">
   <title>Proveedores · Atelier Lumière</title>
   <link rel="stylesheet" href="/admin/proveedores/admin.css">
+  <link rel="stylesheet" href="/admin/proveedores/provider-status.css">
   <script src="/admin/proveedores/providers.js" defer></script>
+  <script src="/admin/proveedores/provider-status.js" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -95,6 +97,20 @@
         </article>
       </section>
 
+      <section class="activation-overview" aria-labelledby="activation-title">
+        <div class="activation-overview-heading">
+          <div>
+            <p class="eyebrow">Incorporación segura</p>
+            <h2 id="activation-title">Estado de activación</h2>
+            <p>Consulta en qué punto está cada taller: invitación, cuenta, correo, doble factor y aprobación final.</p>
+          </div>
+          <span id="activation-summary" class="activation-summary">Cargando…</span>
+        </div>
+        <div id="activation-status-list" class="activation-status-list" aria-live="polite">
+          <div class="activation-placeholder">Inicia sesión para consultar el progreso.</div>
+        </div>
+      </section>
+
       <section class="workspace-grid">
         <aside id="create-panel" class="create-panel" aria-labelledby="create-title">
           <div class="panel-heading">
@@ -172,7 +188,7 @@
     </form>
     <p class="eyebrow">Invitación creada</p>
     <h2>Guarda este acceso ahora</h2>
-    <p>El token original no volverá a mostrarse. Durante el piloto puedes copiarlo para entregarlo manualmente al proveedor.</p>
+    <p>El token original no volverá a mostrarse. Durante el piloto puedes copiarlo como respaldo aunque SMTP esté activado.</p>
     <label>
       Enlace provisional
       <span class="copy-field">
@@ -187,7 +203,7 @@
         <button id="copy-token-button" class="button secondary" type="button">Copiar</button>
       </span>
     </label>
-    <p class="warning-note">La pantalla para que el proveedor cree su contraseña y active doble factor se conectará en el siguiente tramo.</p>
+    <p class="warning-note">En producción el token no se mostrará en pantalla: la invitación se entregará exclusivamente mediante el correo configurado.</p>
   </dialog>
 
   <dialog id="audit-dialog" class="dialog-card audit-dialog">

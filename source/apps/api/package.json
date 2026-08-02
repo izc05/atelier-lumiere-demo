@@ -1,6 +1,6 @@
 {
   "name": "@atelier-lumiere/api",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,7 @@
     "test:integration": "node --test tests/*.test.mjs"
   },
   "dependencies": {
+    "nodemailer": "9.0.3",
     "pg": "8.22.0",
     "qrcode": "1.5.4"
   },
