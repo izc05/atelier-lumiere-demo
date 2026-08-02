@@ -6,7 +6,13 @@ import {
   createRequestAuthenticator,
   ensureDevelopmentAdmin
 } from "./auth-context.mjs";
+import {
+  withOnboardingEmailDelivery,
+  withProviderInvitationDelivery,
+  withVerificationEmailDelivery
+} from "./email-delivery-services.mjs";
 import { createEmailVerificationService } from "./email-verification-service.mjs";
+import { createMailService } from "./mail-service.mjs";
 import { createProviderAuthService } from "./provider-auth-service.mjs";
 import { createProviderOnboardingService } from "./provider-onboarding-service.mjs";
 import { createProvidersService } from "./providers-service.mjs";
@@ -21,7 +27,8 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 }
 
 const database = createDatabase();
-const providersService = database.enabled ? createProvidersService({ database }) : null;
+const mailService = createMailService();
+const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
 const authenticateRequest = createRequestAuthenticator({ environment });
 const developmentAdminContext = createDevelopmentAdminContext({ environment });
 
@@ -29,15 +36,34 @@ if (database.enabled && developmentAdminContext) {
   await ensureDevelopmentAdmin(database, developmentAdminContext);
 }
 
-const onboardingService = database.enabled && developmentAdminContext
+const baseOnboardingService = database.enabled && developmentAdminContext
   ? createProviderOnboardingService({
       database,
       systemContext: developmentAdminContext
     })
   : null;
 
-const emailVerificationService = database.enabled && developmentAdminContext
+const baseEmailVerificationService = database.enabled && developmentAdminContext
   ? createEmailVerificationService({
+      database,
+      systemContext: developmentAdminContext
+    })
+  : null;
+
+const providersService = withProviderInvitationDelivery({
+  providersService: baseProvidersService,
+  mailService
+});
+
+const onboardingService = withOnboardingEmailDelivery({
+  onboardingService: baseOnboardingService,
+  mailService
+});
+
+const emailVerificationService = baseEmailVerificationService && developmentAdminContext
+  ? withVerificationEmailDelivery({
+      emailVerificationService: baseEmailVerificationService,
+      mailService,
       database,
       systemContext: developmentAdminContext
     })
@@ -57,6 +83,17 @@ const providerAuthService = database.enabled && developmentAdminContext
     })
   : null;
 
+if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
+  try {
+    await mailService.verify();
+    console.log("SMTP verificado y preparado para correos transaccionales.");
+  } catch (error) {
+    console.error("SMTP configurado, pero la verificación inicial ha fallado.", {
+      code: typeof error?.code === "string" ? error.code : "SMTP_VERIFY_FAILED"
+    });
+  }
+}
+
 const server = createServer(
   createApiHandler({
     environment,
@@ -66,6 +103,7 @@ const server = createServer(
     emailVerificationService,
     twoFactorService,
     providerAuthService,
+    mailService,
     authenticateRequest
   })
 );
@@ -90,6 +128,7 @@ async function shutdown(signal) {
     });
   });
 
+  mailService.close();
   await database.close();
 }
 
