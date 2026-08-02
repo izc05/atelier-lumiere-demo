@@ -4,6 +4,8 @@ import { createAccountRecoveryApiHandler } from "./account-recovery-api.mjs";
 import { createAccountRecoveryService } from "./account-recovery-service.mjs";
 import { createAdminProductsApiHandler } from "./admin-products-api.mjs";
 import { createAdminProductsService } from "./admin-products-service.mjs";
+import { createBlogMediaApiHandler } from "./blog-media-api.mjs";
+import { createBlogMediaService } from "./blog-media-service.mjs";
 import { createBlogPostsApiHandler } from "./blog-posts-api.mjs";
 import { createBlogPostsService } from "./blog-posts-service.mjs";
 import { createDatabase } from "./database.mjs";
@@ -90,6 +92,9 @@ const accountRecoveryService = database.enabled && developmentAdminContext
     })
   : null;
 const blogPostsService = database.enabled ? createBlogPostsService({ database }) : null;
+const blogMediaService = database.enabled
+  ? createBlogMediaService({ database, storage: mediaStorage })
+  : null;
 const productsService = database.enabled ? createProductsService({ database }) : null;
 const productMediaService = database.enabled
   ? createProductMediaService({ database, storage: mediaStorage })
@@ -132,8 +137,13 @@ const blogPostsHandler = createBlogPostsApiHandler({
   blogPostsService,
   providerAuthService
 });
-const productsHandler = createProductsApiHandler({
+const blogMediaHandler = createBlogMediaApiHandler({
   baseHandler: blogPostsHandler,
+  blogMediaService,
+  providerAuthService
+});
+const productsHandler = createProductsApiHandler({
+  baseHandler: blogMediaHandler,
   productsService,
   providerAuthService
 });
