@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Panel del proveedor · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/panel.css">
+  <script defer src="/proveedor/panel.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <main class="panel-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Atelier Lumière">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Panel del proveedor</small></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="secure-badge">Sesión protegida</span>
+        <button id="logout-button" class="text-button" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section id="panel-loading" class="loading-card">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Comprobando la sesión privada…</p>
+    </section>
+
+    <section id="panel-content" hidden>
+      <div class="welcome">
+        <div>
+          <p class="eyebrow">Espacio del taller</p>
+          <h1>Hola, <span id="user-name"></span>.</h1>
+          <p>Estás gestionando <strong id="provider-name"></strong>. Solo puedes acceder a la información vinculada con este taller.</p>
+        </div>
+        <div class="account-card">
+          <span id="role-label" class="role-badge"></span>
+          <strong id="account-email"></strong>
+          <small>Sesión válida hasta <span id="session-expiry"></span></small>
+        </div>
+      </div>
+
+      <section class="metrics" aria-label="Resumen del taller">
+        <article><span>Artículos</span><strong>0</strong><small>Catálogo pendiente de activar</small></article>
+        <article><span>Publicaciones</span><strong>0</strong><small>Blog pendiente de activar</small></article>
+        <article><span>Pedidos</span><strong>0</strong><small>Sin pedidos en el piloto</small></article>
+        <article><span>Estado</span><strong class="status-text">Activo</strong><small>Taller aprobado</small></article>
+      </section>
+
+      <section class="workspace">
+        <article class="module-card primary-module">
+          <div class="module-icon" aria-hidden="true">01</div>
+          <p class="eyebrow">Siguiente bloque</p>
+          <h2>Mis artículos</h2>
+          <p>Crear productos, añadir fotografías y vídeo, guardar borradores y enviarlos a revisión.</p>
+          <button class="button primary" type="button" disabled>Disponible en el Bloque 4</button>
+        </article>
+
+        <article class="module-card">
+          <div class="module-icon" aria-hidden="true">02</div>
+          <p class="eyebrow">Editorial</p>
+          <h2>Blog del taller</h2>
+          <p>Redactar historias y procesos artesanales para que Atelier Lumière los revise antes de publicar.</p>
+          <button class="button secondary" type="button" disabled>Próximamente</button>
+        </article>
+
+        <article class="module-card">
+          <div class="module-icon" aria-hidden="true">03</div>
+          <p class="eyebrow">Operativa</p>
+          <h2>Pedidos y encargos</h2>
+          <p>Consultar pedidos del taller, tiempos de preparación y solicitudes personalizadas.</p>
+          <button class="button secondary" type="button" disabled>Próximamente</button>
+        </article>
+
+        <article class="module-card">
+          <div class="module-icon" aria-hidden="true">04</div>
+          <p class="eyebrow">Identidad</p>
+          <h2>Perfil del taller</h2>
+          <p>Completar presentación, datos de contacto, condiciones de preparación y métodos de envío.</p>
+          <button class="button secondary" type="button" disabled>Próximamente</button>
+        </article>
+      </section>
+
+      <section class="security-card">
+        <div>
+          <p class="eyebrow">Seguridad activa</p>
+          <h2>Tu acceso está protegido</h2>
+          <p>Correo verificado, doble factor obligatorio y aislamiento de datos por taller.</p>
+        </div>
+        <ul>
+          <li>Sesión almacenada en cookie HttpOnly</li>
+          <li>Caducidad automática</li>
+          <li>Cierre de sesiones anteriores al entrar</li>
+        </ul>
+      </section>
+    </section>
+
+    <p id="panel-message" class="panel-message" role="status" aria-live="polite"></p>
+  </main>
+</body>
+</html>
