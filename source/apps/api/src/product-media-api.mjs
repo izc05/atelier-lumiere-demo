@@ -1,7 +1,7 @@
 import { pipeline } from "node:stream/promises";
 import { ServiceError } from "./providers-service.mjs";
 
-const MEDIA_PATH = /^\/api\/provider\/products\/([0-9a-f-]{36})\/media(?:\/([0-9a-f-]{36})(?:\/(content))?)?$/i;
+const MEDIA_PATH = /^\/api\/provider\/products\/([0-9a-f-]{36})\/media(?:\/([0-9a-f-]{36})(?:\/(content|preview))?)?$/i;
 const MAX_JSON_BYTES = 64 * 1024;
 
 function sendJson(response, statusCode, body, extraHeaders = {}) {
@@ -100,7 +100,7 @@ export function createProductMediaApiHandler({
         throw new ServiceError("UNAUTHORIZED", "Necesitas iniciar sesión como proveedor.", 401);
       }
 
-      const [, productId, mediaId, contentAction] = match;
+      const [, productId, mediaId, mediaVariant] = match;
       if (!mediaId && request.method === "POST") {
         const declaredLength = headerValue(request, "content-length");
         if (declaredLength === undefined) {
@@ -125,7 +125,7 @@ export function createProductMediaApiHandler({
         return;
       }
 
-      if (mediaId && !contentAction && request.method === "PATCH") {
+      if (mediaId && !mediaVariant && request.method === "PATCH") {
         const media = await productMediaService.updateMetadata(
           session.context,
           productId,
@@ -136,17 +136,18 @@ export function createProductMediaApiHandler({
         return;
       }
 
-      if (mediaId && !contentAction && request.method === "DELETE") {
+      if (mediaId && !mediaVariant && request.method === "DELETE") {
         const result = await productMediaService.remove(session.context, productId, mediaId);
         sendJson(response, 200, result);
         return;
       }
 
-      if (mediaId && contentAction === "content" && request.method === "GET") {
+      if (mediaId && mediaVariant && request.method === "GET") {
         const opened = await productMediaService.open(
           session.context,
           productId,
           mediaId,
+          mediaVariant,
           headerValue(request, "range")
         );
         const length = opened.end - opened.start + 1;
