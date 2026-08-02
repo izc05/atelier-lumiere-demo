@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Mis encargos · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/pedidos/orders.css">
+  <script defer src="/proveedor/pedidos/common.js"></script>
+  <script defer src="/proveedor/encargos/custom-requests.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/proveedor/panel/" aria-label="Volver al panel del proveedor">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Diseños personalizados</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/proveedor/pedidos/">Mis pedidos</a>
+        <a class="button ghost" href="/proveedor/panel/">Panel</a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section class="page-head">
+      <div>
+        <p class="eyebrow">Conversación con el cliente</p>
+        <h1>Mis encargos</h1>
+        <p class="lead">Consulta el diseño solicitado, pide la información necesaria, prepara un presupuesto y continúa la elaboración cuando el cliente lo apruebe.</p>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Resumen de encargos">
+      <article class="metric"><span>Total</span><strong id="metric-total">0</strong><small>Solicitudes del taller</small></article>
+      <article class="metric"><span>Por atender</span><strong id="metric-open">0</strong><small>Abiertos o con respuesta pendiente</small></article>
+      <article class="metric"><span>Presupuestados</span><strong id="metric-quoted">0</strong><small>Esperando decisión del cliente</small></article>
+      <article class="metric"><span>En curso</span><strong id="metric-active">0</strong><small>Aprobados o en elaboración</small></article>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros de encargos">
+      <input id="search-input" type="search" placeholder="Buscar por pedido, cliente o título" autocomplete="off">
+      <select id="status-filter">
+        <option value="ALL">Todos los estados</option>
+        <option value="OPEN">Abiertos</option>
+        <option value="NEEDS_INFO">Falta información</option>
+        <option value="QUOTED">Presupuestados</option>
+        <option value="APPROVED">Aprobados por el cliente</option>
+        <option value="IN_PROGRESS">En elaboración</option>
+        <option value="COMPLETED">Completados</option>
+        <option value="CANCELLED">Cancelados</option>
+      </select>
+    </section>
+
+    <section id="requests-loading" class="loading"><p>Cargando los encargos del taller…</p></section>
+    <section id="requests-empty" class="empty" hidden><div><h2>Todavía no hay encargos</h2><p>Las solicitudes de diseño propio aparecerán aquí vinculadas con su pedido.</p></div></section>
+    <section id="requests-no-results" class="empty" hidden><div><h2>No hay coincidencias</h2><p>Cambia la búsqueda o selecciona otro estado.</p></div></section>
+    <section id="requests-list" class="requests-grid" aria-live="polite" hidden></section>
+    <section id="requests-error" class="error-card" hidden>
+      <div><h2>No se pudieron cargar los encargos</h2><p id="requests-error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div>
+    </section>
+  </main>
+</body>
+</html>
