@@ -16,7 +16,12 @@ function address() {
 }
 
 test("cliente y taller gestionan seguimiento e incidencias sin cruces", { skip: !connectionString }, async (t) => {
-  const database = createDatabase({ connectionString, maxConnections: 5, statementTimeoutMs: 5000, logger: { error() {} } });
+  const database = createDatabase({
+    connectionString,
+    maxConnections: 5,
+    statementTimeoutMs: 5000,
+    logger: { error() {} }
+  });
   t.after(() => database.close());
 
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();
@@ -50,7 +55,15 @@ test("cliente y taller gestionan seguimiento e incidencias sin cruces", { skip: 
          $1,$2,$3,$4,$5,'READY_TO_SHIP','EUR',5200,600,5800,
          3,7,'Cliente logística',$6,$7::jsonb,now()
        )`,
-      [orderId, checkoutId, PROVIDER_A, customerId, `AL-LOG-${suffix}`, email, JSON.stringify(address())]
+      [
+        orderId,
+        checkoutId,
+        PROVIDER_A,
+        customerId,
+        `AL-LOG-${suffix}`,
+        email,
+        JSON.stringify(address())
+      ]
     );
   });
 
@@ -63,13 +76,14 @@ test("cliente y taller gestionan seguimiento e incidencias sin cruces", { skip: 
   });
   assert.equal(shipment.status, "LABEL_CREATED");
   assert.equal(shipment.version, 1);
+  assert.equal((await service.listShipments(customer, orderId))[0].version, 1);
 
   const inTransit = await service.updateShipment(providerA, orderId, shipment.id, {
     status: "IN_TRANSIT",
     carrier: shipment.carrier,
     trackingCode: shipment.trackingCode,
     trackingUrl: shipment.trackingUrl,
-    expectedUpdatedAt: shipment.updatedAt
+    expectedVersion: shipment.version
   });
   assert.equal(inTransit.status, "IN_TRANSIT");
   assert.equal(inTransit.version, 2);
@@ -81,7 +95,7 @@ test("cliente y taller gestionan seguimiento e incidencias sin cruces", { skip: 
       carrier: shipment.carrier,
       trackingCode: shipment.trackingCode,
       trackingUrl: shipment.trackingUrl,
-      expectedUpdatedAt: shipment.updatedAt
+      expectedVersion: shipment.version
     }),
     (error) => error?.code === "SHIPMENT_VERSION_CONFLICT"
   );
@@ -92,6 +106,7 @@ test("cliente y taller gestionan seguimiento e incidencias sin cruces", { skip: 
   });
   assert.equal(incident.status, "OPEN");
   assert.equal(incident.openedBy, customerId);
+  assert.equal((await service.listIncidents(providerA, orderId))[0].version, 1);
 
   await assert.rejects(
     () => service.createShipment(providerB, orderId, { status: "PENDING" }),
@@ -101,22 +116,34 @@ test("cliente y taller gestionan seguimiento e incidencias sin cruces", { skip: 
     () => service.updateIncident(customer, orderId, incident.id, {
       status: "RESOLVED",
       resolution: "El transporte ha corregido la dirección.",
-      expectedUpdatedAt: incident.updatedAt
+      expectedVersion: incident.version
     }),
     (error) => error?.code === "FORBIDDEN"
   );
 
   const investigating = await service.updateIncident(providerA, orderId, incident.id, {
     status: "INVESTIGATING",
-    expectedUpdatedAt: incident.updatedAt
+    expectedVersion: incident.version
   });
   assert.equal(investigating.status, "INVESTIGATING");
+  assert.equal(investigating.version, 2);
+
+  await assert.rejects(
+    () => service.updateIncident(providerA, orderId, incident.id, {
+      status: "RESOLVED",
+      resolution: "El transportista ha corregido la dirección.",
+      expectedVersion: incident.version
+    }),
+    (error) => error?.code === "INCIDENT_VERSION_CONFLICT"
+  );
+
   const resolved = await service.updateIncident(providerA, orderId, incident.id, {
     status: "RESOLVED",
     resolution: "El transportista ha corregido la dirección y confirma la entrega prevista.",
-    expectedUpdatedAt: investigating.updatedAt
+    expectedVersion: investigating.version
   });
   assert.equal(resolved.status, "RESOLVED");
+  assert.equal(resolved.version, 3);
   assert.ok(resolved.resolvedAt);
 
   const delivered = await service.updateShipment(providerA, orderId, shipment.id, {
@@ -124,9 +151,10 @@ test("cliente y taller gestionan seguimiento e incidencias sin cruces", { skip: 
     carrier: shipment.carrier,
     trackingCode: shipment.trackingCode,
     trackingUrl: shipment.trackingUrl,
-    expectedUpdatedAt: inTransit.updatedAt
+    expectedVersion: inTransit.version
   });
   assert.equal(delivered.status, "DELIVERED");
+  assert.equal(delivered.version, 3);
   assert.ok(delivered.deliveredAt);
 
   await database.withContext(ADMIN, async (tx) => {
@@ -138,7 +166,10 @@ test("cliente y taller gestionan seguimiento e incidencias sin cruces", { skip: 
     assert.equal(eventTypes.has("SHIPMENT_STATUS_IN_TRANSIT"), true);
     assert.equal(eventTypes.has("INCIDENT_OPENED"), true);
     assert.equal(eventTypes.has("INCIDENT_STATUS_RESOLVED"), true);
-    const notifications = await tx.query("SELECT count(*)::integer AS total FROM order_notifications WHERE order_id=$1", [orderId]);
+    const notifications = await tx.query(
+      "SELECT count(*)::integer AS total FROM order_notifications WHERE order_id=$1",
+      [orderId]
+    );
     assert.ok(notifications.rows[0].total >= 5);
   });
 });
