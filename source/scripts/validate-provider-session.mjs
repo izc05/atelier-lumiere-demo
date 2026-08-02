@@ -127,10 +127,12 @@ for (const expected of [
 const panelJs = contents.get("apps/web/public/proveedor/panel.js") ?? "";
 for (const expected of [
   "/internal/provider/session",
-  "method: \"DELETE\"",
   "window.location.replace(\"/proveedor/acceso/\")"
 ]) {
   if (!panelJs.includes(expected)) failures.push(`Falta una función en el panel: ${expected}`);
+}
+if (!panelJs.includes("method: \"DELETE\"") && !panelJs.includes("requestSession(\"DELETE\")")) {
+  failures.push("El panel no envía la petición DELETE de cierre de sesión.");
 }
 
 for (const [name, source] of [["acceso", accessJs], ["panel", panelJs]]) {
