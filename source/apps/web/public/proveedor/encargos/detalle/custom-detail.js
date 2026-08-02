@@ -13,9 +13,38 @@
     COMPLETED: [],
     CANCELLED: []
   });
+  const ALLOWED_FILE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
+  const MAX_FILE_BYTES = 12 * 1024 * 1024;
+  const MAX_FILES = 20;
 
   const requestId = queryUuid("id");
   let detail = null;
+  let currentUserId = null;
+
+  function sessionUserId(payload) {
+    return payload?.user?.id
+      ?? payload?.session?.userId
+      ?? payload?.context?.userId
+      ?? payload?.membership?.userId
+      ?? null;
+  }
+
+  function formatBytes(value) {
+    const bytes = Number(value);
+    if (!Number.isFinite(bytes) || bytes < 0) return "Tamaño desconocido";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function typeLabel(mimeType) {
+    return ({
+      "image/jpeg": "JPG",
+      "image/png": "PNG",
+      "image/webp": "WEBP",
+      "application/pdf": "PDF"
+    })[mimeType] ?? "FILE";
+  }
 
   function messageNode(message) {
     const providerMessage = message.authorRole !== "CUSTOMER";
@@ -27,18 +56,54 @@
     return node;
   }
 
+  async function removeFile(file, button) {
+    if (!window.confirm(`¿Retirar “${file.originalFilename}” de la conversación?`)) return;
+    button.disabled = true;
+    button.textContent = "Retirando…";
+    setMessage(byId("file-result"), "");
+    try {
+      await requestJson(`/internal/provider/request-files/${encodeURIComponent(file.id)}`, {
+        method: "DELETE"
+      });
+      await reloadDetail();
+      setMessage(byId("file-result"), "Archivo retirado correctamente.", "success");
+    } catch (error) {
+      setMessage(byId("file-result"), error.message, "error");
+      button.disabled = false;
+      button.textContent = "Retirar";
+    }
+  }
+
   function fileNode(file) {
-    const row = element("article", "compact-row");
-    const header = element("header");
-    header.append(
-      element("h3", "", file.originalFilename),
-      element("strong", "", file.status)
+    const row = element("article", "compact-row file-row");
+    const main = element("div", "file-main");
+    const title = element("div", "file-title");
+    title.append(
+      element("span", "", typeLabel(file.mimeType)),
+      element("h3", "", file.originalFilename)
     );
-    row.append(
-      header,
-      element("p", "", `${file.mimeType} · ${new Intl.NumberFormat("es-ES").format(file.sizeBytes)} bytes · ${date(file.createdAt)}`)
+    const owner = currentUserId && file.uploadedBy === currentUserId
+      ? "Subido por ti"
+      : "Compartido por el cliente o tu equipo";
+    main.append(
+      title,
+      element("p", "file-meta", `${formatBytes(file.sizeBytes)} · ${owner} · ${date(file.createdAt, true)}`)
     );
-    if (file.rejectionReason) row.append(element("p", "", `Motivo: ${file.rejectionReason}`));
+
+    const actions = element("div", "file-actions");
+    const download = element("a", "file-action", "Descargar");
+    download.href = `/internal/provider/request-files/${encodeURIComponent(file.id)}/content`;
+    download.setAttribute("download", file.originalFilename);
+    actions.append(download);
+
+    if (currentUserId && file.uploadedBy === currentUserId) {
+      const remove = element("button", "file-action remove", "Retirar");
+      remove.type = "button";
+      remove.addEventListener("click", () => void removeFile(file, remove));
+      actions.append(remove);
+    }
+
+    row.append(main, actions);
     return row;
   }
 
@@ -68,6 +133,20 @@
     const quoted = byId("next-status").value === "QUOTED";
     byId("quote-field").hidden = !quoted;
     byId("quote-amount").required = quoted;
+  }
+
+  function updateFileForm() {
+    const closed = ["COMPLETED", "CANCELLED"].includes(detail.request.status);
+    const full = detail.files.length >= MAX_FILES;
+    const disabled = closed || full;
+    byId("file-input").disabled = disabled;
+    byId("file-button").disabled = disabled;
+    byId("file-count").textContent = `${detail.files.length} de ${MAX_FILES} archivos · máximo 12 MB`;
+    if (closed) {
+      setMessage(byId("file-result"), "El encargo está cerrado y ya no admite nuevos archivos.", "warning");
+    } else if (full) {
+      setMessage(byId("file-result"), "Se ha alcanzado el límite de veinte archivos.", "warning");
+    }
   }
 
   function render() {
@@ -119,6 +198,12 @@
       ? ""
       : (request.quotedPriceCents / 100).toFixed(2);
     updateTransitionForm();
+    updateFileForm();
+  }
+
+  async function reloadDetail() {
+    detail = await requestJson(`/internal/provider/custom-requests/${encodeURIComponent(requestId)}`);
+    render();
   }
 
   async function loadDetail() {
@@ -129,7 +214,12 @@
       return;
     }
     try {
-      detail = await requestJson(`/internal/provider/custom-requests/${encodeURIComponent(requestId)}`);
+      const [loadedDetail, session] = await Promise.all([
+        requestJson(`/internal/provider/custom-requests/${encodeURIComponent(requestId)}`),
+        requestJson("/internal/provider/session")
+      ]);
+      detail = loadedDetail;
+      currentUserId = sessionUserId(session);
       render();
       byId("detail-loading").hidden = true;
       byId("detail-content").hidden = false;
@@ -139,6 +229,83 @@
       byId("detail-error").hidden = false;
     }
   }
+
+  function uploadFile(file) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const progress = byId("file-progress");
+      xhr.open("POST", `/internal/provider/custom-requests/${encodeURIComponent(requestId)}/files`);
+      xhr.responseType = "json";
+      xhr.setRequestHeader("Content-Type", file.type);
+      xhr.setRequestHeader("X-File-Name", encodeURIComponent(file.name));
+      xhr.upload.addEventListener("progress", (event) => {
+        progress.hidden = false;
+        if (event.lengthComputable) progress.value = Math.round((event.loaded / event.total) * 100);
+      });
+      xhr.addEventListener("load", () => {
+        const payload = xhr.response && typeof xhr.response === "object" ? xhr.response : {};
+        if (xhr.status === 401) {
+          window.location.replace("/proveedor/acceso/");
+          reject(new Error("La sesión ha caducado."));
+          return;
+        }
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(payload);
+          return;
+        }
+        const error = new Error(payload.message || "No se pudo subir el archivo.");
+        error.code = payload.error;
+        reject(error);
+      });
+      xhr.addEventListener("error", () => reject(new Error("No se pudo conectar con el almacenamiento privado.")));
+      xhr.addEventListener("timeout", () => reject(new Error("La carga ha tardado demasiado.")));
+      xhr.timeout = 90000;
+      xhr.send(file);
+    });
+  }
+
+  byId("file-input").addEventListener("change", () => {
+    const file = byId("file-input").files?.[0];
+    byId("file-name").textContent = file ? `${file.name} · ${formatBytes(file.size)}` : "JPEG, PNG, WebP o PDF";
+  });
+
+  byId("file-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const file = byId("file-input").files?.[0];
+    const result = byId("file-result");
+    if (!file) {
+      setMessage(result, "Selecciona un archivo.", "error");
+      return;
+    }
+    if (!ALLOWED_FILE_TYPES.has(file.type)) {
+      setMessage(result, "Solo se admiten imágenes JPEG, PNG, WebP o documentos PDF.", "error");
+      return;
+    }
+    if (file.size < 1 || file.size > MAX_FILE_BYTES) {
+      setMessage(result, "El archivo debe ocupar como máximo 12 MB.", "error");
+      return;
+    }
+    const button = byId("file-button");
+    const progress = byId("file-progress");
+    button.disabled = true;
+    button.textContent = "Subiendo…";
+    progress.value = 0;
+    progress.hidden = false;
+    setMessage(result, "");
+    try {
+      await uploadFile(file);
+      byId("file-input").value = "";
+      byId("file-name").textContent = "JPEG, PNG, WebP o PDF";
+      await reloadDetail();
+      setMessage(result, "Archivo compartido con el cliente.", "success");
+    } catch (error) {
+      setMessage(result, error.message, "error");
+    } finally {
+      progress.hidden = true;
+      button.textContent = "Adjuntar archivo";
+      updateFileForm();
+    }
+  });
 
   byId("next-status").addEventListener("change", updateQuoteField);
 
@@ -154,8 +321,7 @@
         method: "POST",
         body: JSON.stringify({ body: byId("message-body").value.trim() })
       });
-      detail = await requestJson(`/internal/provider/custom-requests/${encodeURIComponent(requestId)}`);
-      render();
+      await reloadDetail();
       setMessage(result, "Mensaje enviado al cliente.", "success");
     } catch (error) {
       setMessage(result, error.message, "error");
@@ -188,8 +354,7 @@
           ...(status === "QUOTED" ? { quotedPriceCents: Math.round(amount * 100) } : {})
         })
       });
-      detail = await requestJson(`/internal/provider/custom-requests/${encodeURIComponent(requestId)}`);
-      render();
+      await reloadDetail();
       setMessage(result, "Encargo actualizado correctamente.", "success");
     } catch (error) {
       setMessage(result, error.message, error.code?.includes("CONFLICT") ? "warning" : "error");

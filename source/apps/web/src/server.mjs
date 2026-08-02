@@ -9,6 +9,7 @@ import { createProviderOrdersWebHandler } from "./provider-orders-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
 import { createPublicBlogWebHandler } from "./public-blog-proxy.mjs";
 import { createPublicCatalogWebHandler } from "./public-catalog-proxy.mjs";
+import { createRequestFilesWebHandler } from "./request-files-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.WEB_PORT ?? "3000", 10);
@@ -23,7 +24,8 @@ const providerProductsHandler = createProviderProductsWebHandler({ baseHandler: 
 const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: providerProductsHandler });
 const providerOrdersHandler = createProviderOrdersWebHandler({ baseHandler: providerBlogHandler });
 const customerOrdersHandler = createCustomerOrdersWebHandler({ baseHandler: providerOrdersHandler });
-const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: customerOrdersHandler });
+const requestFilesHandler = createRequestFilesWebHandler({ baseHandler: customerOrdersHandler });
+const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: requestFilesHandler });
 const adminProductsHandler = createAdminProductsWebHandler({ baseHandler: adminBlogHandler });
 const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: adminProductsHandler });
 const server = createServer(createPublicCatalogWebHandler({ baseHandler: publicBlogHandler }));

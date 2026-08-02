@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#5a0f1f">
   <title>Ficha del encargo · Atelier Lumière</title>
   <link rel="stylesheet" href="/proveedor/pedidos/orders.css">
+  <link rel="stylesheet" href="/shared/request-files.css">
   <script defer src="/proveedor/pedidos/common.js"></script>
   <script defer src="/proveedor/encargos/detalle/custom-detail.js"></script>
 </head>
@@ -59,10 +60,23 @@
           </article>
 
           <article class="panel-card">
-            <header><h2>Archivos del encargo</h2><p>Referencias visuales y documentos privados vinculados con la conversación.</p></header>
+            <header><h2>Archivos del encargo</h2><p>Imágenes y PDF privados compartidos únicamente con este cliente.</p></header>
             <div id="files-list" class="compact-list"></div>
             <p id="files-empty" class="help" hidden>No hay archivos adjuntos.</p>
-            <p class="notice">La carga directa de nuevos archivos desde esta pantalla se conectará en la siguiente entrega multimedia. Los archivos ya registrados sí aparecen aquí.</p>
+            <form id="file-form" class="file-upload-form">
+              <label class="file-picker" for="file-input">
+                <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required>
+                <strong>Elegir archivo</strong>
+                <span id="file-name">JPEG, PNG, WebP o PDF</span>
+              </label>
+              <div class="file-upload-actions">
+                <button id="file-button" class="button primary" type="submit">Adjuntar archivo</button>
+                <small id="file-count">0 de 20 archivos · máximo 12 MB</small>
+              </div>
+              <progress id="file-progress" class="file-progress" max="100" value="0" hidden></progress>
+              <p id="file-result" class="message" role="status" aria-live="polite"></p>
+              <p class="help">Solo quien sube un archivo puede retirarlo. El cliente y el taller pueden descargar los archivos del encargo.</p>
+            </form>
           </article>
         </div>
 
