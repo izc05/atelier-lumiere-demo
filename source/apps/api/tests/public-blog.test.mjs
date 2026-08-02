@@ -17,12 +17,13 @@ test("el blog público muestra solo historias publicadas y previews seguras",{sk
  const suffix=randomUUID().slice(0,8);const publishedId=randomUUID();const draftId=randomUUID();const coverId=randomUUID();
  await database.withContext(ADMIN,async tx=>{
   await tx.query(`INSERT INTO blog_posts(id,provider_id,slug,title,excerpt,body_markdown,category,status,created_by,updated_by,submitted_at,approved_by,approved_at,published_by,published_at)
-   VALUES($1,$2,$3,$4,$5,$6,'Procesos artesanales','PUBLISHED',$7,$7,now(),$8,now(),$8,now()),
-         ($9,$2,$10,$11,'Borrador privado','Contenido privado que nunca debe aparecer en la lectura pública.','Procesos artesanales','DRAFT',$7,$7)`,[
+   VALUES($1,$2,$3,$4,$5,$6,'Procesos artesanales','PUBLISHED',$7,$7,now(),$8,now(),$8,now())`,[
    publishedId,PROVIDER_ID,`historia-publica-${suffix}`,`Historia pública ${suffix}`,
    "Una historia completa sobre el trabajo manual y el origen de una pieza artesanal.",
-   "## El proceso\n\nCada material se selecciona y trabaja lentamente en el taller hasta conseguir una pieza única.",
-   USER_ID,ADMIN.userId,draftId,`borrador-${suffix}`,`Borrador ${suffix}`]);
+   "## El proceso\n\nCada material se selecciona y trabaja lentamente en el taller hasta conseguir una pieza única.",USER_ID,ADMIN.userId]);
+  await tx.query(`INSERT INTO blog_posts(id,provider_id,slug,title,excerpt,body_markdown,category,status,created_by,updated_by)
+   VALUES($1,$2,$3,$4,'Borrador privado','Contenido privado que nunca debe aparecer en la lectura pública.','Procesos artesanales','DRAFT',$5,$5)`,[
+   draftId,PROVIDER_ID,`borrador-${suffix}`,`Borrador ${suffix}`,USER_ID]);
   await tx.query(`INSERT INTO blog_post_media(id,provider_id,post_id,placement,mime_type,original_filename,storage_key,size_bytes,checksum_sha256,status,alt_text,preview_storage_key,preview_mime_type,preview_size_bytes,preview_checksum_sha256,preview_width,preview_height,uploaded_by,ready_at)
    VALUES($1,$2,$3,'COVER','image/png','portada.png',$4,68,repeat('a',64),'READY','Portada artesanal',$5,'image/webp',$6,repeat('b',64),1200,750,$7,now())`,[
    coverId,PROVIDER_ID,publishedId,`private/${publishedId}/original.png`,`private/${publishedId}/preview.webp`,PREVIEW.length,USER_ID]);
