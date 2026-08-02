@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Mis pedidos · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/pedidos/orders.css">
+  <script defer src="/proveedor/pedidos/common.js"></script>
+  <script defer src="/proveedor/pedidos/orders.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/proveedor/panel/" aria-label="Volver al panel del proveedor">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Operativa del taller</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/proveedor/encargos/">Mis encargos</a>
+        <a class="button ghost" href="/proveedor/panel/">Panel</a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section class="page-head">
+      <div>
+        <p class="eyebrow">Preparación y entrega</p>
+        <h1>Mis pedidos</h1>
+        <p class="lead">Cada pedido pertenece únicamente a tu taller. Confirma la preparación, consulta la personalización y actualiza el avance sin mezclar información de otros proveedores.</p>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Resumen de pedidos">
+      <article class="metric"><span>Total</span><strong id="metric-total">0</strong><small>Pedidos del taller</small></article>
+      <article class="metric"><span>Por confirmar</span><strong id="metric-pending">0</strong><small>Necesitan respuesta</small></article>
+      <article class="metric"><span>En curso</span><strong id="metric-active">0</strong><small>Preparación o envío</small></article>
+      <article class="metric"><span>Atención</span><strong id="metric-attention">0</strong><small>Incidencias o encargos</small></article>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros de pedidos">
+      <input id="search-input" type="search" placeholder="Buscar por número, cliente o correo" autocomplete="off">
+      <select id="status-filter">
+        <option value="ALL">Todos los estados</option>
+        <option value="PENDING_CONFIRMATION">Pendientes de confirmar</option>
+        <option value="ACCEPTED">Aceptados</option>
+        <option value="IN_PRODUCTION">En elaboración</option>
+        <option value="READY_TO_SHIP">Listos para enviar</option>
+        <option value="SHIPPED">Enviados</option>
+        <option value="DELIVERED">Entregados</option>
+        <option value="INCIDENT">Con incidencia</option>
+        <option value="CANCELLED">Cancelados</option>
+      </select>
+    </section>
+
+    <section id="orders-loading" class="loading"><p>Cargando los pedidos del taller…</p></section>
+
+    <section id="orders-empty" class="empty" hidden>
+      <div><h2>Todavía no hay pedidos</h2><p>Cuando un cliente complete una compra, aparecerá aquí un pedido independiente para tu taller.</p></div>
+    </section>
+
+    <section id="orders-no-results" class="empty" hidden>
+      <div><h2>No hay coincidencias</h2><p>Cambia la búsqueda o selecciona otro estado.</p></div>
+    </section>
+
+    <section id="orders-list" class="orders-grid" aria-live="polite" hidden></section>
+
+    <section id="orders-error" class="error-card" hidden>
+      <div>
+        <h2>No se pudieron cargar los pedidos</h2>
+        <p id="orders-error-message"></p>
+        <button id="retry-button" class="button primary" type="button">Volver a intentar</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

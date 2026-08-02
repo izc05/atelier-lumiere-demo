@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Ficha del encargo · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/pedidos/orders.css">
+  <script defer src="/proveedor/pedidos/common.js"></script>
+  <script defer src="/proveedor/encargos/detalle/custom-detail.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/proveedor/encargos/" aria-label="Volver a los encargos">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Encargo personalizado</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/proveedor/encargos/">Mis encargos</a>
+        <a class="button ghost" href="/proveedor/pedidos/">Pedidos</a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section id="detail-loading" class="loading"><p>Cargando el encargo y la conversación…</p></section>
+
+    <section id="detail-content" hidden>
+      <section class="page-head detail-head">
+        <div>
+          <p class="eyebrow">Diseño propio</p>
+          <div class="detail-title"><h1 id="request-title"></h1><span id="request-status"></span></div>
+          <p id="request-summary" class="lead"></p>
+        </div>
+        <strong id="request-quote" class="price"></strong>
+      </section>
+
+      <section class="detail-grid">
+        <div class="detail-main">
+          <article class="panel-card">
+            <header><h2>Descripción del cliente</h2><p>El texto original de la solicitud permanece congelado durante la conversación.</p></header>
+            <p id="request-brief" class="lead"></p>
+            <div id="request-facts" class="facts"></div>
+          </article>
+
+          <article class="panel-card">
+            <header><h2>Conversación</h2><p>Los mensajes quedan vinculados al encargo y al pedido de tu taller.</p></header>
+            <div id="messages-list" class="conversation"></div>
+            <p id="messages-empty" class="help" hidden>Todavía no hay mensajes. Escribe al cliente para confirmar los detalles.</p>
+            <form id="message-form" class="message-form">
+              <label class="field">Nuevo mensaje
+                <textarea id="message-body" maxlength="8000" required placeholder="Pregunta por medidas, colores, acabados o cualquier detalle necesario"></textarea>
+              </label>
+              <button id="message-button" class="button primary" type="submit">Enviar mensaje</button>
+              <p id="message-result" class="message" role="status" aria-live="polite"></p>
+            </form>
+          </article>
+
+          <article class="panel-card">
+            <header><h2>Archivos del encargo</h2><p>Referencias visuales y documentos privados vinculados con la conversación.</p></header>
+            <div id="files-list" class="compact-list"></div>
+            <p id="files-empty" class="help" hidden>No hay archivos adjuntos.</p>
+            <p class="notice">La carga directa de nuevos archivos desde esta pantalla se conectará en la siguiente entrega multimedia. Los archivos ya registrados sí aparecen aquí.</p>
+          </article>
+        </div>
+
+        <aside class="detail-side">
+          <article class="panel-card">
+            <header><h2>Resumen</h2></header>
+            <div id="request-data" class="key-values"></div>
+            <a id="order-link" class="button secondary" href="/proveedor/pedidos/">Abrir pedido completo</a>
+          </article>
+
+          <article id="quote-card" class="panel-card">
+            <header><h2>Estado y presupuesto</h2><p id="transition-help"></p></header>
+            <div id="current-quote" class="quote-box" hidden></div>
+            <form id="transition-form" class="action-form">
+              <label class="field">Siguiente paso
+                <select id="next-status" required></select>
+              </label>
+              <label id="quote-field" class="field" hidden>Presupuesto total, en euros
+                <input id="quote-amount" type="number" inputmode="decimal" min="0" max="1000000" step="0.01" placeholder="Ejemplo: 48,50">
+              </label>
+              <label class="field">Nota para el cliente
+                <textarea id="transition-note" maxlength="4000" placeholder="Explica el presupuesto o la información que necesitas"></textarea>
+              </label>
+              <button id="transition-button" class="button primary" type="submit">Guardar cambio</button>
+              <p id="transition-result" class="message" role="status" aria-live="polite"></p>
+            </form>
+          </article>
+        </aside>
+      </section>
+    </section>
+
+    <section id="detail-error" class="error-card" hidden>
+      <div><h2>No se pudo abrir el encargo</h2><p id="detail-error-message"></p><a class="button primary" href="/proveedor/encargos/">Volver a mis encargos</a></div>
+    </section>
+  </main>
+</body>
+</html>

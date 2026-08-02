@@ -82,6 +82,9 @@ jobs:
       - name: Verificar pedidos y encargos multi-proveedor
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/orders_isolation.sql
 
+      - name: Verificar aprobación de presupuestos por el cliente
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/custom_quote_approval.sql
+
       - name: Instalar dependencias de la aplicación fuente
         working-directory: source
         run: npm install --ignore-scripts

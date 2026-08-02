@@ -7,6 +7,7 @@
   <meta name="referrer" content="no-referrer">
   <title>Panel del proveedor · Atelier Lumière</title>
   <link rel="stylesheet" href="/proveedor/panel.css">
+  <link rel="stylesheet" href="/proveedor/panel-orders.css">
   <script defer src="/proveedor/panel.js"></script>
 </head>
 <body>
@@ -47,7 +48,7 @@
       <section class="metrics" aria-label="Resumen del taller">
         <article><span>Artículos</span><strong id="articles-count">0</strong><small id="articles-note">Cargando catálogo…</small></article>
         <article><span>Publicaciones</span><strong id="posts-count">0</strong><small id="posts-note">Cargando blog…</small></article>
-        <article><span>Pedidos</span><strong>0</strong><small>Sin pedidos en el piloto</small></article>
+        <article><span>Pedidos</span><strong id="orders-count">0</strong><small id="orders-note">Cargando operativa…</small></article>
         <article><span>Estado</span><strong class="status-text">Activo</strong><small>Taller aprobado</small></article>
       </section>
 
@@ -68,12 +69,15 @@
           <a class="button primary" href="/proveedor/publicaciones/">Gestionar publicaciones</a>
         </article>
 
-        <article class="module-card">
+        <article class="module-card primary-module">
           <div class="module-icon" aria-hidden="true">03</div>
-          <p class="eyebrow">Operativa</p>
+          <p class="eyebrow">Operativa activa</p>
           <h2>Pedidos y encargos</h2>
-          <p>Consultar pedidos del taller, tiempos de preparación y solicitudes personalizadas.</p>
-          <button class="button secondary" type="button" disabled>Próximamente</button>
+          <p>Confirma pedidos, actualiza la preparación y conversa con el cliente sobre diseños personalizados.</p>
+          <div class="module-actions">
+            <a class="button primary" href="/proveedor/pedidos/">Gestionar pedidos</a>
+            <a class="button secondary" href="/proveedor/encargos/">Ver encargos</a>
+          </div>
         </article>
 
         <article class="module-card">

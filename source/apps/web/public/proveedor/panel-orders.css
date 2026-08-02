@@ -1,0 +1,11 @@
+.module-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 18px;
+}
+.module-actions .button { flex: 1 1 150px; }
+@media (max-width: 560px) {
+  .module-actions { display: grid; }
+  .module-actions .button { width: 100%; }
+}

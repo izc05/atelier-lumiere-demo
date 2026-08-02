@@ -43,6 +43,19 @@ async function readJson(request) {
   }
 }
 
+async function readProviderCustomTransition(request) {
+  const payload = await readJson(request);
+  const status = typeof payload.status === "string" ? payload.status.trim().toUpperCase() : "";
+  if (status === "APPROVED") {
+    throw new ServiceError(
+      "CUSTOM_REQUEST_APPROVAL_CUSTOMER_ONLY",
+      "El presupuesto solo puede aprobarlo el cliente.",
+      403
+    );
+  }
+  return payload;
+}
+
 function bearerToken(request) {
   const authorization = request.headers?.authorization;
   if (typeof authorization !== "string") return null;
@@ -168,7 +181,7 @@ export function createProviderOrdersApiHandler({
             request: await providerOrdersService.transitionCustomRequest(
               context,
               requestId,
-              await readJson(request)
+              await readProviderCustomTransition(request)
             )
           });
           return;
