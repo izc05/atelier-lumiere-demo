@@ -56,6 +56,13 @@ function adminOnly(context) {
   return context;
 }
 
+function bearerToken(request) {
+  const value = String(request.headers.authorization ?? "");
+  if (!value.startsWith("Bearer ")) return null;
+  const token = value.slice(7).trim();
+  return token || null;
+}
+
 function errorPayload(error) {
   if (error instanceof ServiceError) {
     return {
@@ -117,7 +124,7 @@ function resendResponse(result, environment) {
 }
 
 export function createApiHandler({
-  version = "0.6.0",
+  version = "0.7.0",
   environment = process.env.NODE_ENV ?? "development",
   now = () => new Date(),
   database,
@@ -125,6 +132,7 @@ export function createApiHandler({
   onboardingService,
   emailVerificationService,
   twoFactorService,
+  providerAuthService,
   authenticateRequest = async () => null,
   logger = console
 } = {}) {
@@ -162,6 +170,7 @@ export function createApiHandler({
           capabilities: {
             database: Boolean(database?.enabled),
             authentication: false,
+            providerAuthentication: Boolean(providerAuthService),
             developmentAdminAccess: environment !== "production",
             providerIsolation: Boolean(database?.enabled),
             providerManagementApi: Boolean(providersService),
@@ -246,6 +255,51 @@ export function createApiHandler({
 
         const confirmed = await twoFactorService.confirm(input.token, input.code);
         sendJson(response, 200, confirmed);
+        return;
+      }
+
+      if (url.pathname.startsWith("/api/provider-auth/") || url.pathname === "/api/provider/me") {
+        if (!providerAuthService) {
+          throw new DatabaseUnavailableError("El acceso del proveedor no está habilitado.");
+        }
+
+        if (request.method === "POST" && url.pathname === "/api/provider-auth/password") {
+          const input = await readJson(request);
+          const challenge = await providerAuthService.start(input);
+          sendJson(response, 200, challenge);
+          return;
+        }
+
+        if (request.method === "POST" && url.pathname === "/api/provider-auth/second-factor") {
+          const input = await readJson(request);
+          const authenticated = await providerAuthService.complete(input, {
+            userAgent: request.headers["user-agent"]
+          });
+          sendJson(response, 200, authenticated);
+          return;
+        }
+
+        if (request.method === "GET" && url.pathname === "/api/provider/me") {
+          const authenticated = await providerAuthService.authenticate(bearerToken(request));
+          if (!authenticated) {
+            throw new ServiceError("UNAUTHORIZED", "La sesión no es válida o ha caducado.", 401);
+          }
+          sendJson(response, 200, authenticated);
+          return;
+        }
+
+        if (request.method === "POST" && url.pathname === "/api/provider-auth/logout") {
+          await providerAuthService.logout(bearerToken(request));
+          sendJson(response, 200, { authenticated: false });
+          return;
+        }
+
+        sendJson(
+          response,
+          405,
+          { error: "METHOD_NOT_ALLOWED", message: "Método no permitido para esta ruta." },
+          { Allow: "GET,POST,OPTIONS" }
+        );
         return;
       }
 
