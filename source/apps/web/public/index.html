@@ -13,41 +13,25 @@
     <header class="hero">
       <p class="eyebrow">Entorno privado de desarrollo</p>
       <h1>Atelier Lumière</h1>
-      <p class="lead">Base mantenible separada de la demostración pública. Esta pantalla no sustituye todavía la web de GitHub Pages.</p>
+      <p class="lead">Aplicación mantenible separada de la demostración pública. Aquí se prueban proveedores, catálogo, revisión y publicación antes de llevarlos al mini PC.</p>
       <div class="actions">
-        <a class="button primary" href="/admin/proveedores/">Gestionar proveedores</a>
+        <a class="button primary" href="/tienda/">Abrir tienda fuente</a>
+        <a class="button" href="/admin/proveedores/">Gestionar proveedores</a>
+        <a class="button" href="/admin/articulos/">Revisar artículos</a>
         <a class="button" href="/internal/api-health">Comprobar API</a>
         <a class="button" href="https://izc05.github.io/atelier-lumiere-demo/">Abrir demo protegida</a>
       </div>
     </header>
 
     <section class="status-card" aria-labelledby="service-title">
-      <div>
-        <p class="eyebrow">Estado técnico</p>
-        <h2 id="service-title">Servicios locales</h2>
-      </div>
+      <div><p class="eyebrow">Estado técnico</p><h2 id="service-title">Servicios locales</h2></div>
       <p id="api-status" class="status pending" role="status">Comprobando la API…</p>
     </section>
 
     <section class="grid" aria-label="Ruta de activación">
-      <article>
-        <span>01</span>
-        <h2>Base técnica</h2>
-        <p>Web, API, validaciones y contenedores separados de la demo pública.</p>
-        <strong>Completado</strong>
-      </article>
-      <article>
-        <span>02</span>
-        <h2>Usuarios y talleres</h2>
-        <p>PostgreSQL, roles, invitaciones, auditoría y aislamiento real entre proveedores.</p>
-        <strong>Base conectada</strong>
-      </article>
-      <article>
-        <span>03</span>
-        <h2>Gestión privada</h2>
-        <p>Panel fuente para crear, pausar y reactivar talleres y renovar sus invitaciones.</p>
-        <strong>En pruebas</strong>
-      </article>
+      <article><span>01</span><h2>Base técnica</h2><p>Web, API, validaciones y contenedores separados de la demo pública.</p><strong>Completado</strong></article>
+      <article><span>02</span><h2>Usuarios y talleres</h2><p>PostgreSQL, roles, invitaciones, auditoría y aislamiento real entre proveedores.</p><strong>Completado</strong></article>
+      <article><span>03</span><h2>Catálogo editorial</h2><p>Artículos, multimedia, revisión administrativa y tienda limitada a piezas publicadas.</p><strong>En pruebas</strong></article>
     </section>
   </main>
 </body>
