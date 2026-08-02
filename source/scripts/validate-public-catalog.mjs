@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const paths = [
   "packages/database/migrations/0013_public_catalog_access.sql",
+  "apps/api/src/database.mjs",
   "apps/api/src/public-catalog-service.mjs",
   "apps/api/src/public-catalog-api.mjs",
   "apps/api/src/server.mjs",
@@ -20,6 +21,7 @@ const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [
 ])));
 
 const migration = files["packages/database/migrations/0013_public_catalog_access.sql"];
+const database = files["apps/api/src/database.mjs"];
 const service = files["apps/api/src/public-catalog-service.mjs"];
 const api = files["apps/api/src/public-catalog-api.mjs"];
 const proxy = files["apps/web/src/public-catalog-proxy.mjs"];
@@ -30,12 +32,17 @@ const detailJs = files["apps/web/public/tienda/product.js"];
 
 assert.match(migration, /providers_catalog_select_policy/);
 assert.match(migration, /products_catalog_select_policy/);
+assert.match(migration, /app\.current_role\(\) = 'CATALOG_READER'/);
+assert.doesNotMatch(migration, /app\.current_role\(\) = 'CUSTOMER'/);
 assert.match(migration, /status = 'PUBLISHED'/);
 assert.match(migration, /status = 'ACTIVE'/);
 assert.match(migration, /status = 'READY'/);
 assert.doesNotMatch(migration, /FOR INSERT|FOR UPDATE|FOR DELETE/);
 
-assert.match(service, /role: "CUSTOMER"/);
+assert.match(database, /"CATALOG_READER"/);
+assert.match(database, /El lector del catálogo no puede adoptar el contexto de un proveedor/);
+assert.match(service, /role: "CATALOG_READER"/);
+assert.doesNotMatch(service, /role: "CUSTOMER"/);
 assert.match(service, /product\.status = 'PUBLISHED'/);
 assert.match(service, /provider\.status = 'ACTIVE'/);
 assert.match(service, /row\.kind !== "VIDEO"/);
