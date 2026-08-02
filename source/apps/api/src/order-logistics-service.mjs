@@ -21,7 +21,11 @@ function actorContext(context) {
     return { role: "CUSTOMER", userId: context.userId.toLowerCase(), providerId: null };
   }
   if (["PROVIDER_OWNER", "PROVIDER_MEMBER"].includes(context.role) && UUID_PATTERN.test(context.providerId ?? "")) {
-    return { role: context.role, userId: context.userId.toLowerCase(), providerId: context.providerId.toLowerCase() };
+    return {
+      role: context.role,
+      userId: context.userId.toLowerCase(),
+      providerId: context.providerId.toLowerCase()
+    };
   }
   throw new ServiceError("UNAUTHORIZED", "La sesión no es válida.", 401);
 }
@@ -34,10 +38,22 @@ function providerContext(context) {
   return actor;
 }
 
+function expectedVersion(value, field = "expectedVersion") {
+  const version = Number(value);
+  if (!Number.isSafeInteger(version) || version < 1) {
+    throw new ServiceError("VALIDATION_ERROR", `${field} no es válido.`, 422, { field });
+  }
+  return version;
+}
+
 function requiredText(value, minimum, maximum, field) {
   const text = typeof value === "string" ? value.trim() : "";
   if (text.length < minimum || text.length > maximum) {
-    throw new ServiceError("VALIDATION_ERROR", `${field} no es válido.`, 422, { field, minimum, maximum });
+    throw new ServiceError("VALIDATION_ERROR", `${field} no es válido.`, 422, {
+      field,
+      minimum,
+      maximum
+    });
   }
   return text;
 }
@@ -46,7 +62,10 @@ function optionalText(value, maximum, field) {
   if (value === undefined || value === null || value === "") return null;
   const text = String(value).trim();
   if (!text || text.length > maximum) {
-    throw new ServiceError("VALIDATION_ERROR", `${field} no es válido.`, 422, { field, maximum });
+    throw new ServiceError("VALIDATION_ERROR", `${field} no es válido.`, 422, {
+      field,
+      maximum
+    });
   }
   return text;
 }
@@ -55,7 +74,9 @@ function shipmentStatus(value, { creating = false } = {}) {
   const status = typeof value === "string" ? value.trim().toUpperCase() : "";
   const allowed = creating ? SHIPMENT_CREATE_STATUSES : SHIPMENT_STATUSES;
   if (!allowed.has(status)) {
-    throw new ServiceError("VALIDATION_ERROR", "El estado del envío no es válido.", 422, { field: "status" });
+    throw new ServiceError("VALIDATION_ERROR", "El estado del envío no es válido.", 422, {
+      field: "status"
+    });
   }
   return status;
 }
@@ -63,7 +84,9 @@ function shipmentStatus(value, { creating = false } = {}) {
 function incidentType(value) {
   const type = typeof value === "string" ? value.trim().toUpperCase() : "";
   if (!INCIDENT_TYPES.has(type)) {
-    throw new ServiceError("VALIDATION_ERROR", "El tipo de incidencia no es válido.", 422, { field: "type" });
+    throw new ServiceError("VALIDATION_ERROR", "El tipo de incidencia no es válido.", 422, {
+      field: "type"
+    });
   }
   return type;
 }
@@ -71,7 +94,9 @@ function incidentType(value) {
 function incidentStatus(value) {
   const status = typeof value === "string" ? value.trim().toUpperCase() : "";
   if (!INCIDENT_STATUSES.has(status)) {
-    throw new ServiceError("VALIDATION_ERROR", "El estado de la incidencia no es válido.", 422, { field: "status" });
+    throw new ServiceError("VALIDATION_ERROR", "El estado de la incidencia no es válido.", 422, {
+      field: "status"
+    });
   }
   return status;
 }
@@ -80,20 +105,22 @@ function httpsUrl(value) {
   const text = optionalText(value, 1000, "trackingUrl");
   if (!text) return null;
   let parsed;
-  try { parsed = new URL(text); }
-  catch { throw new ServiceError("VALIDATION_ERROR", "El enlace de seguimiento no es válido.", 422, { field: "trackingUrl" }); }
+  try {
+    parsed = new URL(text);
+  } catch {
+    throw new ServiceError("VALIDATION_ERROR", "El enlace de seguimiento no es válido.", 422, {
+      field: "trackingUrl"
+    });
+  }
   if (parsed.protocol !== "https:" || parsed.username || parsed.password) {
-    throw new ServiceError("VALIDATION_ERROR", "El seguimiento debe utilizar un enlace HTTPS sin credenciales.", 422, { field: "trackingUrl" });
+    throw new ServiceError(
+      "VALIDATION_ERROR",
+      "El seguimiento debe utilizar un enlace HTTPS sin credenciales.",
+      422,
+      { field: "trackingUrl" }
+    );
   }
   return parsed.toString();
-}
-
-function timestamp(value, field) {
-  const parsed = new Date(value ?? "");
-  if (!value || Number.isNaN(parsed.getTime())) {
-    throw new ServiceError("VALIDATION_ERROR", `${field} no es válido.`, 422, { field });
-  }
-  return parsed.toISOString();
 }
 
 function mapShipment(row) {
@@ -136,21 +163,41 @@ function translateDatabaseError(error) {
   }
   if (error?.code === "23514") {
     if (message.includes("ORDER_SHIPMENT_STATUS_TRANSITION_NOT_ALLOWED")) {
-      return new ServiceError("SHIPMENT_STATUS_TRANSITION_NOT_ALLOWED", "Ese cambio de seguimiento no está permitido.", 409);
+      return new ServiceError(
+        "SHIPMENT_STATUS_TRANSITION_NOT_ALLOWED",
+        "Ese cambio de seguimiento no está permitido.",
+        409
+      );
     }
     if (message.includes("ORDER_SHIPMENT_FINAL")) {
       return new ServiceError("SHIPMENT_FINAL", "El seguimiento ya está cerrado.", 409);
     }
     if (message.includes("ORDER_INCIDENT_STATUS_TRANSITION_NOT_ALLOWED")) {
-      return new ServiceError("INCIDENT_STATUS_TRANSITION_NOT_ALLOWED", "Ese cambio de incidencia no está permitido.", 409);
+      return new ServiceError(
+        "INCIDENT_STATUS_TRANSITION_NOT_ALLOWED",
+        "Ese cambio de incidencia no está permitido.",
+        409
+      );
     }
     if (message.includes("ORDER_INCIDENT_RESOLUTION_REQUIRED")) {
-      return new ServiceError("INCIDENT_RESOLUTION_REQUIRED", "La resolución debe explicar la solución con al menos diez caracteres.", 422);
+      return new ServiceError(
+        "INCIDENT_RESOLUTION_REQUIRED",
+        "La resolución debe explicar la solución con al menos diez caracteres.",
+        422
+      );
     }
     if (message.includes("ORDER_INCIDENT_ORDER_NOT_ACTIVE")) {
-      return new ServiceError("ORDER_NOT_ACTIVE", "El pedido todavía no admite incidencias o está cancelado.", 409);
+      return new ServiceError(
+        "ORDER_NOT_ACTIVE",
+        "El pedido todavía no admite incidencias o está cancelado.",
+        409
+      );
     }
-    return new ServiceError("ORDER_LOGISTICS_VALIDATION_FAILED", "La operación no cumple las reglas del pedido.", 409);
+    return new ServiceError(
+      "ORDER_LOGISTICS_VALIDATION_FAILED",
+      "La operación no cumple las reglas del pedido.",
+      409
+    );
   }
   if (error?.code === "23503") {
     return new ServiceError("ORDER_NOT_FOUND", "No se ha encontrado el pedido.", 404);
@@ -181,6 +228,42 @@ export function createOrderLogisticsService({ database } = {}) {
   }
 
   return Object.freeze({
+    async listShipments(rawContext, rawOrderId) {
+      const context = actorContext(rawContext);
+      const orderId = uuid(rawOrderId, "orderId");
+      return database.withContext(context, async (transaction) => {
+        const order = await orderScope(transaction, context, orderId);
+        const result = await transaction.query(
+          `SELECT *
+           FROM order_shipments
+           WHERE order_id = $1
+             AND provider_id = $2
+             AND customer_user_id = $3
+           ORDER BY created_at DESC, id DESC`,
+          [order.id, order.provider_id, order.customer_user_id]
+        );
+        return result.rows.map(mapShipment);
+      });
+    },
+
+    async listIncidents(rawContext, rawOrderId) {
+      const context = actorContext(rawContext);
+      const orderId = uuid(rawOrderId, "orderId");
+      return database.withContext(context, async (transaction) => {
+        const order = await orderScope(transaction, context, orderId);
+        const result = await transaction.query(
+          `SELECT *
+           FROM order_incidents
+           WHERE order_id = $1
+             AND provider_id = $2
+             AND customer_user_id = $3
+           ORDER BY created_at DESC, id DESC`,
+          [order.id, order.provider_id, order.customer_user_id]
+        );
+        return result.rows.map(mapIncident);
+      });
+    },
+
     async createShipment(rawContext, rawOrderId, input = {}) {
       const context = providerContext(rawContext);
       const orderId = uuid(rawOrderId, "orderId");
@@ -196,10 +279,18 @@ export function createOrderLogisticsService({ database } = {}) {
         return await database.withContext(context, async (transaction) => {
           const order = await orderScope(transaction, context, orderId);
           if (!["ACCEPTED", "IN_PRODUCTION", "READY_TO_SHIP", "SHIPPED", "INCIDENT"].includes(order.status)) {
-            throw new ServiceError("ORDER_NOT_READY_FOR_SHIPMENT", "El pedido todavía no admite seguimiento.", 409);
+            throw new ServiceError(
+              "ORDER_NOT_READY_FOR_SHIPMENT",
+              "El pedido todavía no admite seguimiento.",
+              409
+            );
           }
           if (status === "IN_TRANSIT" && !["READY_TO_SHIP", "SHIPPED"].includes(order.status)) {
-            throw new ServiceError("ORDER_NOT_READY_TO_SHIP", "Marca primero el pedido como listo para enviar.", 409);
+            throw new ServiceError(
+              "ORDER_NOT_READY_TO_SHIP",
+              "Marca primero el pedido como listo para enviar.",
+              409
+            );
           }
 
           const result = await transaction.query(
@@ -208,7 +299,15 @@ export function createOrderLogisticsService({ database } = {}) {
                carrier, tracking_code, tracking_url
              ) VALUES ($1,$2,$3,$4,$5,$6,$7)
              RETURNING *`,
-            [order.id, order.provider_id, order.customer_user_id, status, carrier, trackingCode, trackingUrl]
+            [
+              order.id,
+              order.provider_id,
+              order.customer_user_id,
+              status,
+              carrier,
+              trackingCode,
+              trackingUrl
+            ]
           );
           if (status === "IN_TRANSIT" && order.status === "READY_TO_SHIP") {
             await transaction.query(
@@ -231,7 +330,7 @@ export function createOrderLogisticsService({ database } = {}) {
       const carrier = optionalText(input.carrier, 120, "carrier");
       const trackingCode = optionalText(input.trackingCode, 180, "trackingCode");
       const trackingUrl = httpsUrl(input.trackingUrl);
-      const expectedUpdatedAt = timestamp(input.expectedUpdatedAt, "expectedUpdatedAt");
+      const version = expectedVersion(input.expectedVersion);
       if (status !== "PENDING" && (!carrier || !trackingCode)) {
         throw new ServiceError("TRACKING_REQUIRED", "Indica transportista y código de seguimiento.", 422);
       }
@@ -239,39 +338,77 @@ export function createOrderLogisticsService({ database } = {}) {
       try {
         return await database.withContext(context, async (transaction) => {
           const order = await orderScope(transaction, context, orderId);
-          if (status === "IN_TRANSIT" && !["READY_TO_SHIP", "SHIPPED"].includes(order.status)) {
-            throw new ServiceError("ORDER_NOT_READY_TO_SHIP", "Marca primero el pedido como listo para enviar.", 409);
+          if (status === "IN_TRANSIT" && !["READY_TO_SHIP", "SHIPPED", "INCIDENT"].includes(order.status)) {
+            throw new ServiceError(
+              "ORDER_NOT_READY_TO_SHIP",
+              "Marca primero el pedido como listo para enviar.",
+              409
+            );
           }
           if (status === "DELIVERED" && order.status !== "SHIPPED") {
-            throw new ServiceError("ORDER_NOT_SHIPPED", "El pedido debe constar como enviado antes de entregarlo.", 409);
+            throw new ServiceError(
+              "ORDER_NOT_SHIPPED",
+              "El pedido debe constar como enviado antes de entregarlo.",
+              409
+            );
           }
 
           const result = await transaction.query(
             `UPDATE order_shipments
-             SET status = $4, carrier = $5, tracking_code = $6, tracking_url = $7
-             WHERE id = $1 AND order_id = $2 AND provider_id = $3 AND updated_at = $8::timestamptz
+             SET status = $4,
+                 carrier = $5,
+                 tracking_code = $6,
+                 tracking_url = $7
+             WHERE id = $1
+               AND order_id = $2
+               AND provider_id = $3
+               AND version = $8
              RETURNING *`,
-            [shipmentId, order.id, order.provider_id, status, carrier, trackingCode, trackingUrl, expectedUpdatedAt]
+            [
+              shipmentId,
+              order.id,
+              order.provider_id,
+              status,
+              carrier,
+              trackingCode,
+              trackingUrl,
+              version
+            ]
           );
           if (result.rowCount !== 1) {
             const current = await transaction.query(
-              "SELECT updated_at FROM order_shipments WHERE id=$1 AND order_id=$2 AND provider_id=$3",
+              "SELECT version FROM order_shipments WHERE id=$1 AND order_id=$2 AND provider_id=$3",
               [shipmentId, order.id, order.provider_id]
             );
             if (current.rowCount !== 1) {
               throw new ServiceError("SHIPMENT_NOT_FOUND", "No se ha encontrado el seguimiento.", 404);
             }
-            throw new ServiceError("SHIPMENT_VERSION_CONFLICT", "El seguimiento ha cambiado. Actualiza la ficha.", 409, {
-              currentUpdatedAt: current.rows[0].updated_at
-            });
+            throw new ServiceError(
+              "SHIPMENT_VERSION_CONFLICT",
+              "El seguimiento ha cambiado. Actualiza la ficha.",
+              409,
+              { currentVersion: current.rows[0].version }
+            );
           }
 
-          if (status === "IN_TRANSIT" && order.status === "READY_TO_SHIP") {
-            await transaction.query("UPDATE provider_orders SET status='SHIPPED' WHERE id=$1 AND provider_id=$2", [order.id, order.provider_id]);
+          if (status === "IN_TRANSIT" && ["READY_TO_SHIP", "INCIDENT"].includes(order.status)) {
+            await transaction.query(
+              "UPDATE provider_orders SET status='SHIPPED' WHERE id=$1 AND provider_id=$2",
+              [order.id, order.provider_id]
+            );
           } else if (status === "DELIVERED" && order.status === "SHIPPED") {
-            await transaction.query("UPDATE provider_orders SET status='DELIVERED' WHERE id=$1 AND provider_id=$2", [order.id, order.provider_id]);
-          } else if (status === "EXCEPTION" && ["ACCEPTED", "IN_PRODUCTION", "READY_TO_SHIP", "SHIPPED"].includes(order.status)) {
-            await transaction.query("UPDATE provider_orders SET status='INCIDENT' WHERE id=$1 AND provider_id=$2", [order.id, order.provider_id]);
+            await transaction.query(
+              "UPDATE provider_orders SET status='DELIVERED' WHERE id=$1 AND provider_id=$2",
+              [order.id, order.provider_id]
+            );
+          } else if (
+            status === "EXCEPTION"
+            && ["ACCEPTED", "IN_PRODUCTION", "READY_TO_SHIP", "SHIPPED"].includes(order.status)
+          ) {
+            await transaction.query(
+              "UPDATE provider_orders SET status='INCIDENT' WHERE id=$1 AND provider_id=$2",
+              [order.id, order.provider_id]
+            );
           }
           return mapShipment(result.rows[0]);
         });
@@ -295,7 +432,14 @@ export function createOrderLogisticsService({ database } = {}) {
                incident_type, description
              ) VALUES ($1,$2,$3,$4,$5,$6)
              RETURNING *`,
-            [order.id, order.provider_id, order.customer_user_id, context.userId, type, description]
+            [
+              order.id,
+              order.provider_id,
+              order.customer_user_id,
+              context.userId,
+              type,
+              description
+            ]
           );
           return mapIncident(result.rows[0]);
         });
@@ -312,29 +456,36 @@ export function createOrderLogisticsService({ database } = {}) {
       const resolution = status === "INVESTIGATING"
         ? ""
         : requiredText(input.resolution, 10, 8000, "resolution");
-      const expectedUpdatedAt = timestamp(input.expectedUpdatedAt, "expectedUpdatedAt");
+      const version = expectedVersion(input.expectedVersion);
 
       try {
         return await database.withContext(context, async (transaction) => {
           const order = await orderScope(transaction, context, orderId);
           const result = await transaction.query(
             `UPDATE order_incidents
-             SET status = $4, resolution = $5
-             WHERE id = $1 AND order_id = $2 AND provider_id = $3 AND updated_at = $6::timestamptz
+             SET status = $4,
+                 resolution = $5
+             WHERE id = $1
+               AND order_id = $2
+               AND provider_id = $3
+               AND version = $6
              RETURNING *`,
-            [incidentId, order.id, order.provider_id, status, resolution, expectedUpdatedAt]
+            [incidentId, order.id, order.provider_id, status, resolution, version]
           );
           if (result.rowCount !== 1) {
             const current = await transaction.query(
-              "SELECT updated_at FROM order_incidents WHERE id=$1 AND order_id=$2 AND provider_id=$3",
+              "SELECT version FROM order_incidents WHERE id=$1 AND order_id=$2 AND provider_id=$3",
               [incidentId, order.id, order.provider_id]
             );
             if (current.rowCount !== 1) {
               throw new ServiceError("INCIDENT_NOT_FOUND", "No se ha encontrado la incidencia.", 404);
             }
-            throw new ServiceError("INCIDENT_VERSION_CONFLICT", "La incidencia ha cambiado. Actualiza la ficha.", 409, {
-              currentUpdatedAt: current.rows[0].updated_at
-            });
+            throw new ServiceError(
+              "INCIDENT_VERSION_CONFLICT",
+              "La incidencia ha cambiado. Actualiza la ficha.",
+              409,
+              { currentVersion: current.rows[0].version }
+            );
           }
           return mapIncident(result.rows[0]);
         });
