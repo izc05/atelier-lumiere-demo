@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#59101f">
+  <title>Artículo · Atelier Lumière</title>
+  <link rel="stylesheet" href="/tienda/store.css">
+  <script defer src="/tienda/product.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/tienda/">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <nav class="nav"><a class="button ghost" href="/tienda/">Volver a la tienda</a><a class="button secondary" href="/proveedor/acceso/">Acceso de talleres</a></nav>
+    </header>
+
+    <section id="loading-view" class="loading"><p>Preparando la pieza…</p></section>
+    <section id="error-view" class="error" hidden><div><h2>No se pudo abrir el artículo</h2><p id="error-message"></p><a class="button primary" href="/tienda/">Volver a la tienda</a></div></section>
+
+    <section id="detail-view" class="detail" hidden>
+      <div class="gallery">
+        <div id="main-media" class="main-media"></div>
+        <div id="thumbs" class="thumbs"></div>
+      </div>
+
+      <aside class="product-panel">
+        <section class="panel">
+          <p id="provider-name" class="eyebrow">Taller</p>
+          <h1 id="product-name">Artículo</h1>
+          <p id="short-description" class="lead"></p>
+          <strong id="price-value" class="price">—</strong>
+          <div class="facts">
+            <div class="fact"><span>Preparación</span><strong id="preparation-value">—</strong></div>
+            <div class="fact"><span>Disponibilidad</span><strong id="stock-value">—</strong></div>
+            <div class="fact"><span>Categoría</span><strong id="category-value">—</strong></div>
+          </div>
+          <div id="events-list" class="tags"></div>
+          <p class="pilot">Piloto privado: el proceso de compra todavía no está activado. La ficha permite revisar el catálogo real antes de conectar pedidos y pagos.</p>
+        </section>
+
+        <section class="panel">
+          <p class="eyebrow">La historia de la pieza</p>
+          <h2>Proceso artesanal</h2>
+          <p id="story-value" class="copy"></p>
+          <h3 class="section-gap">Envío y preparación</h3>
+          <p id="shipping-value" class="copy"></p>
+        </section>
+
+        <section id="personalization-panel" class="panel" hidden>
+          <p class="eyebrow">Diseñada para ti</p>
+          <h2>Personalización</h2>
+          <div id="options-list" class="options section-gap"></div>
+          <p id="personalization-notes" class="copy"></p>
+        </section>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

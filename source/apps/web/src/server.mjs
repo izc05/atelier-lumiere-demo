@@ -3,6 +3,7 @@ import { createWebHandler } from "./app.mjs";
 import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
 import { createAdminProductsWebHandler } from "./admin-products-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
+import { createPublicCatalogWebHandler } from "./public-catalog-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.WEB_PORT ?? "3000", 10);
@@ -16,8 +17,11 @@ const accountRecoveryHandler = createAccountRecoveryWebHandler({ baseHandler: ba
 const providerProductsHandler = createProviderProductsWebHandler({
   baseHandler: accountRecoveryHandler
 });
-const server = createServer(createAdminProductsWebHandler({
+const adminProductsHandler = createAdminProductsWebHandler({
   baseHandler: providerProductsHandler
+});
+const server = createServer(createPublicCatalogWebHandler({
+  baseHandler: adminProductsHandler
 }));
 
 server.listen(port, host, () => {
