@@ -52,7 +52,8 @@ const baseEmailVerificationService = database.enabled && developmentAdminContext
 
 const providersService = withProviderInvitationDelivery({
   providersService: baseProvidersService,
-  mailService
+  mailService,
+  database
 });
 
 const onboardingService = withOnboardingEmailDelivery({
