@@ -26,6 +26,8 @@ import { createProductsService } from "./products-service.mjs";
 import { createProviderAuthService } from "./provider-auth-service.mjs";
 import { createProviderOnboardingService } from "./provider-onboarding-service.mjs";
 import { createProvidersService } from "./providers-service.mjs";
+import { createPublicCatalogApiHandler } from "./public-catalog-api.mjs";
+import { createPublicCatalogService } from "./public-catalog-service.mjs";
 import { createTwoFactorService } from "./two-factor-service.mjs";
 
 const host = process.env.API_HOST ?? "0.0.0.0";
@@ -92,6 +94,9 @@ const productMediaService = database.enabled
 const adminProductsService = database.enabled
   ? createAdminProductsService({ database, storage: mediaStorage })
   : null;
+const publicCatalogService = database.enabled
+  ? createPublicCatalogService({ database, storage: mediaStorage })
+  : null;
 
 if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
   try {
@@ -129,10 +134,14 @@ const productMediaHandler = createProductMediaApiHandler({
   productMediaService,
   providerAuthService
 });
-const server = createServer(createAdminProductsApiHandler({
+const adminProductsHandler = createAdminProductsApiHandler({
   baseHandler: productMediaHandler,
   adminProductsService,
   authenticateRequest
+});
+const server = createServer(createPublicCatalogApiHandler({
+  baseHandler: adminProductsHandler,
+  publicCatalogService
 }));
 
 server.listen(port, host, () => {
