@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { createWebHandler } from "./app.mjs";
 import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
+import { createAdminProductsWebHandler } from "./admin-products-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
@@ -11,14 +12,13 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 }
 
 const baseWebHandler = createWebHandler();
-const accountRecoveryHandler = createAccountRecoveryWebHandler({
-  baseHandler: baseWebHandler
+const accountRecoveryHandler = createAccountRecoveryWebHandler({ baseHandler: baseWebHandler });
+const providerProductsHandler = createProviderProductsWebHandler({
+  baseHandler: accountRecoveryHandler
 });
-const server = createServer(
-  createProviderProductsWebHandler({
-    baseHandler: accountRecoveryHandler
-  })
-);
+const server = createServer(createAdminProductsWebHandler({
+  baseHandler: providerProductsHandler
+}));
 
 server.listen(port, host, () => {
   console.log(`Atelier Lumière web fuente disponible en http://${host}:${port}`);

@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { createApiHandler } from "./app.mjs";
 import { createAccountRecoveryApiHandler } from "./account-recovery-api.mjs";
 import { createAccountRecoveryService } from "./account-recovery-service.mjs";
+import { createAdminProductsApiHandler } from "./admin-products-api.mjs";
+import { createAdminProductsService } from "./admin-products-service.mjs";
 import { createDatabase } from "./database.mjs";
 import {
   createDevelopmentAdminContext,
@@ -37,9 +39,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 const database = createDatabase();
 const mailService = createMailService();
 const localMediaStorage = createLocalMediaStorage();
-const mediaStorage = createMediaPreviewStorage({
-  baseStorage: localMediaStorage
-});
+const mediaStorage = createMediaPreviewStorage({ baseStorage: localMediaStorage });
 const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
 const authenticateRequest = createRequestAuthenticator({ environment });
 const developmentAdminContext = createDevelopmentAdminContext({ environment });
@@ -49,30 +49,20 @@ if (database.enabled && developmentAdminContext) {
 }
 
 const baseOnboardingService = database.enabled && developmentAdminContext
-  ? createProviderOnboardingService({
-      database,
-      systemContext: developmentAdminContext
-    })
+  ? createProviderOnboardingService({ database, systemContext: developmentAdminContext })
   : null;
-
 const baseEmailVerificationService = database.enabled && developmentAdminContext
-  ? createEmailVerificationService({
-      database,
-      systemContext: developmentAdminContext
-    })
+  ? createEmailVerificationService({ database, systemContext: developmentAdminContext })
   : null;
-
 const providersService = withProviderInvitationDelivery({
   providersService: baseProvidersService,
   mailService,
   database
 });
-
 const onboardingService = withOnboardingEmailDelivery({
   onboardingService: baseOnboardingService,
   mailService
 });
-
 const emailVerificationService = baseEmailVerificationService && developmentAdminContext
   ? withVerificationEmailDelivery({
       emailVerificationService: baseEmailVerificationService,
@@ -81,21 +71,12 @@ const emailVerificationService = baseEmailVerificationService && developmentAdmi
       systemContext: developmentAdminContext
     })
   : null;
-
 const twoFactorService = database.enabled && developmentAdminContext
-  ? createTwoFactorService({
-      database,
-      systemContext: developmentAdminContext
-    })
+  ? createTwoFactorService({ database, systemContext: developmentAdminContext })
   : null;
-
 const providerAuthService = database.enabled && developmentAdminContext
-  ? createProviderAuthService({
-      database,
-      systemContext: developmentAdminContext
-    })
+  ? createProviderAuthService({ database, systemContext: developmentAdminContext })
   : null;
-
 const accountRecoveryService = database.enabled && developmentAdminContext
   ? createAccountRecoveryService({
       database,
@@ -104,16 +85,12 @@ const accountRecoveryService = database.enabled && developmentAdminContext
       environment
     })
   : null;
-
-const productsService = database.enabled
-  ? createProductsService({ database })
-  : null;
-
+const productsService = database.enabled ? createProductsService({ database }) : null;
 const productMediaService = database.enabled
-  ? createProductMediaService({
-      database,
-      storage: mediaStorage
-    })
+  ? createProductMediaService({ database, storage: mediaStorage })
+  : null;
+const adminProductsService = database.enabled
+  ? createAdminProductsService({ database, storage: mediaStorage })
   : null;
 
 if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
@@ -138,25 +115,25 @@ const baseApiHandler = createApiHandler({
   mailService,
   authenticateRequest
 });
-
 const accountRecoveryHandler = createAccountRecoveryApiHandler({
   baseHandler: baseApiHandler,
   accountRecoveryService
 });
-
 const productsHandler = createProductsApiHandler({
   baseHandler: accountRecoveryHandler,
   productsService,
   providerAuthService
 });
-
-const server = createServer(
-  createProductMediaApiHandler({
-    baseHandler: productsHandler,
-    productMediaService,
-    providerAuthService
-  })
-);
+const productMediaHandler = createProductMediaApiHandler({
+  baseHandler: productsHandler,
+  productMediaService,
+  providerAuthService
+});
+const server = createServer(createAdminProductsApiHandler({
+  baseHandler: productMediaHandler,
+  adminProductsService,
+  authenticateRequest
+}));
 
 server.listen(port, host, () => {
   console.log(`Atelier Lumière API disponible en http://${host}:${port}`);
@@ -167,7 +144,6 @@ async function shutdown(signal) {
   if (shuttingDown) return;
   shuttingDown = true;
   console.log(`Cerrando API por ${signal}…`);
-
   await new Promise((resolve) => {
     server.close((error) => {
       if (error) {
@@ -177,7 +153,6 @@ async function shutdown(signal) {
       resolve();
     });
   });
-
   mailService.close();
   await database.close();
 }

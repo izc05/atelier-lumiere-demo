@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Revisar artículo · Atelier Lumière</title>
+  <link rel="stylesheet" href="/admin/articulos/review.css">
+  <link rel="stylesheet" href="/admin/articulos/detail-extra.css">
+  <script defer src="/admin/articulos/detail.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/admin/articulos/" aria-label="Volver a la bandeja de revisión">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Ficha editorial</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/admin/articulos/">Volver a la bandeja</a>
+        <button id="logout-button" class="button ghost" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section id="loading-view" class="loading"><p>Cargando la ficha completa…</p></section>
+
+    <section id="error-view" class="error-card" hidden>
+      <div><h2>No se pudo abrir el artículo</h2><p id="error-message"></p><a class="button primary" href="/admin/articulos/">Volver a la bandeja</a></div>
+    </section>
+
+    <section id="detail-view" hidden>
+      <section class="page-head">
+        <div>
+          <p id="provider-eyebrow" class="eyebrow">Taller</p>
+          <h1 id="product-name">Artículo</h1>
+          <p id="product-description" class="lead"></p>
+        </div>
+        <span id="product-status" class="status review">En revisión</span>
+      </section>
+
+      <div class="detail-grid">
+        <div class="detail-main">
+          <section class="panel">
+            <header><p class="eyebrow">Información comercial</p><h2>Ficha del artículo</h2></header>
+            <div class="facts">
+              <div class="fact"><span>Precio</span><strong id="price-value">—</strong></div>
+              <div class="fact"><span>Existencias</span><strong id="stock-value">—</strong></div>
+              <div class="fact"><span>Preparación</span><strong id="preparation-value">—</strong></div>
+              <div class="fact"><span>Categoría</span><strong id="category-value">—</strong></div>
+              <div class="fact"><span>Versión</span><strong id="version-value">—</strong></div>
+              <div class="fact"><span>Actualizado</span><strong id="updated-value">—</strong></div>
+            </div>
+            <h3 class="section-gap">Historia y proceso</h3>
+            <p id="story-value" class="copy"></p>
+            <h3 class="section-gap">Condiciones de envío</h3>
+            <p id="shipping-value" class="copy"></p>
+          </section>
+
+          <section class="panel">
+            <header><p class="eyebrow">Contenido visual</p><h2>Fotografías y vídeo</h2></header>
+            <div id="media-grid" class="media-grid"></div>
+          </section>
+
+          <section class="panel">
+            <header><p class="eyebrow">Filtros y compra</p><h2>Ocasiones y personalización</h2></header>
+            <h3>Ocasiones</h3>
+            <div id="events-list" class="tags section-gap-small"></div>
+            <h3 class="section-gap">Opciones de personalización</h3>
+            <div id="options-list" class="option-list section-gap-small"></div>
+            <p id="personalization-notes" class="copy"></p>
+          </section>
+
+          <section class="panel">
+            <header><p class="eyebrow">Trazabilidad</p><h2>Historial de revisión</h2></header>
+            <div id="history-list" class="history"></div>
+          </section>
+        </div>
+
+        <aside class="detail-side">
+          <section class="panel">
+            <p class="eyebrow">Taller responsable</p>
+            <h2 id="provider-name">Proveedor</h2>
+            <p id="provider-contact" class="copy"></p>
+          </section>
+
+          <section id="provider-note-panel" class="panel">
+            <p class="eyebrow">Nota del proveedor</p>
+            <p id="provider-note" class="notice">Sin nota adicional.</p>
+          </section>
+
+          <section id="decision-panel" class="panel">
+            <p class="eyebrow">Decisión editorial</p>
+            <h2>Resolver revisión</h2>
+            <p class="copy">La devolución debe explicar claramente qué debe corregirse. Aprobar no publica automáticamente.</p>
+            <label class="section-gap-small">Observaciones
+              <textarea id="reviewer-note" maxlength="4000" placeholder="Escribe una valoración o los cambios concretos que debe realizar el taller."></textarea>
+            </label>
+            <div class="action-stack section-gap-small">
+              <button id="request-changes-button" class="button warning" type="button">Solicitar cambios</button>
+              <button id="approve-button" class="button approve" type="button">Aprobar artículo</button>
+            </div>
+            <p id="decision-message" class="message" role="status" aria-live="polite"></p>
+          </section>
+
+          <section id="publish-panel" class="panel" hidden>
+            <p class="eyebrow">Publicación</p>
+            <h2>Artículo aprobado</h2>
+            <p class="notice">La aprobación ya está registrada. Publica solo cuando la ficha esté lista para aparecer en la tienda.</p>
+            <button id="publish-button" class="button primary full-width section-gap-small" type="button">Publicar artículo</button>
+            <p id="publish-message" class="message" role="status" aria-live="polite"></p>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

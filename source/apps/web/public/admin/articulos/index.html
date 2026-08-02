@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Revisión de artículos · Atelier Lumière</title>
+  <link rel="stylesheet" href="/admin/articulos/review.css">
+  <script defer src="/admin/articulos/review.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/admin/proveedores/" aria-label="Volver a Administración">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Revisión editorial</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/admin/proveedores/">Proveedores</a>
+        <button id="refresh-button" class="button secondary" type="button">Actualizar</button>
+        <button id="logout-button" class="button ghost" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section class="page-head">
+      <div>
+        <p class="eyebrow">Control de catálogo</p>
+        <h1>Revisión de artículos</h1>
+        <p class="lead">Comprueba las fichas enviadas por los talleres, solicita mejoras, aprueba el contenido y controla su publicación.</p>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Resumen editorial">
+      <article class="metric"><span>Total</span><strong id="metric-total">0</strong><small>Artículos encontrados</small></article>
+      <article class="metric"><span>En revisión</span><strong id="metric-review">0</strong><small>Necesitan una decisión</small></article>
+      <article class="metric"><span>Aprobados</span><strong id="metric-approved">0</strong><small>Preparados para publicar</small></article>
+      <article class="metric"><span>Publicados</span><strong id="metric-published">0</strong><small>Visibles en la tienda futura</small></article>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros de artículos">
+      <input id="search-input" type="search" autocomplete="off" placeholder="Buscar por artículo, taller o categoría">
+      <select id="status-filter">
+        <option value="ALL">Todos los estados</option>
+        <option value="IN_REVIEW" selected>En revisión</option>
+        <option value="CHANGES_REQUESTED">Cambios solicitados</option>
+        <option value="APPROVED">Aprobados</option>
+        <option value="PUBLISHED">Publicados</option>
+        <option value="DRAFT">Borradores</option>
+        <option value="ARCHIVED">Archivados</option>
+      </select>
+    </section>
+
+    <section id="loading-view" class="loading"><p>Cargando la bandeja editorial…</p></section>
+
+    <section id="empty-view" class="empty" hidden>
+      <div><h2>No hay artículos en este estado</h2><p>Prueba otro filtro o actualiza la bandeja.</p></div>
+    </section>
+
+    <section id="error-view" class="error-card" hidden>
+      <div><h2>No se pudo abrir la revisión</h2><p id="error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div>
+    </section>
+
+    <section id="review-list" class="review-list" aria-live="polite" hidden></section>
+  </main>
+</body>
+</html>
