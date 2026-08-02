@@ -4,12 +4,16 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV API_HOST=0.0.0.0
 ENV API_PORT=4000
+ENV STORAGE_PATH=/data/media
 
 COPY apps/api/package.json ./package.json
 RUN npm install --omit=dev --ignore-scripts \
   && npm cache clean --force
 
 COPY apps/api/src ./src
+
+RUN mkdir -p /data/media/.tmp \
+  && chown -R node:node /data/media
 
 EXPOSE 4000
 
