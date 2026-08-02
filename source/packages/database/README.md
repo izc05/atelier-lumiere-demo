@@ -29,6 +29,7 @@ El tercer parámetro `true` limita el valor a la transacción actual. La API no 
 
 - `users`
 - `user_credentials`
+- `email_verification_tokens`
 - `providers`
 - `provider_members`
 - `provider_invitations`
@@ -48,13 +49,30 @@ La aceptación de una invitación se ejecuta de forma atómica:
 5. La contraseña se deriva con `scrypt-v1`, sal aleatoria individual y 64 bytes de salida.
 6. Se crea la membresía con estado `INVITED`.
 7. La invitación pasa a `ACCEPTED` y queda vinculada al usuario.
-8. Se registra `PROVIDER_INVITATION_ACCEPTED` en auditoría.
+8. Se crea un enlace de verificación de correo de un solo uso.
+9. Se registran los eventos correspondientes en auditoría.
 
 Aceptar la invitación **no concede acceso**. El usuario y la membresía permanecerán pendientes hasta completar:
 
 - verificación del correo electrónico;
 - activación del doble factor;
 - activación final de la membresía.
+
+## Verificación del correo
+
+Los enlaces de correo se almacenan únicamente como SHA-256 en `email_verification_tokens`.
+
+- Caducan por defecto a las 24 horas.
+- Solo puede existir un enlace pendiente por usuario.
+- Un reenvío revoca inmediatamente el enlace anterior.
+- Existe una espera mínima de 60 segundos entre reenvíos.
+- Solo el enlace más reciente puede verificarse o solicitar otro reenvío.
+- Un enlace verificado, revocado o sustituido no puede volver a utilizarse.
+- Los tokens y sus hashes no se guardan en auditoría ni se incluyen en respuestas de producción.
+
+Al verificar el correo se actualiza `users.email_verified_at`, pero el usuario continúa en estado `PENDING`, la membresía continúa `INVITED` y el acceso sigue bloqueado hasta activar 2FA.
+
+Durante el piloto privado el token puede mostrarse manualmente en modo de desarrollo. En producción deberá entregarse exclusivamente mediante el servicio SMTP pendiente de configurar.
 
 ## Prueba de aislamiento
 

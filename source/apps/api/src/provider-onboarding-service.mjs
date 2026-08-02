@@ -1,5 +1,6 @@
 import { createHash, randomBytes, scrypt } from "node:crypto";
 import { promisify } from "node:util";
+import { issueEmailVerification } from "./email-verification-service.mjs";
 import { ServiceError } from "./providers-service.mjs";
 
 const scryptAsync = promisify(scrypt);
@@ -14,9 +15,7 @@ const COMMON_PASSWORDS = new Set([
 
 function invitationToken(value) {
   const token = typeof value === "string" ? value.trim() : "";
-  if (!TOKEN_PATTERN.test(token)) {
-    throw unavailableInvitation();
-  }
+  if (!TOKEN_PATTERN.test(token)) throw unavailableInvitation();
   return token;
 }
 
@@ -126,6 +125,10 @@ async function findInvitation(transaction, tokenHash, { lock = false } = {}) {
 export function createProviderOnboardingService({
   database,
   systemContext,
+  emailVerificationTtlHours = Number.parseInt(
+    process.env.EMAIL_VERIFICATION_TTL_HOURS ?? "24",
+    10
+  ),
   now = () => new Date()
 } = {}) {
   if (!database || typeof database.withContext !== "function") {
@@ -133,6 +136,13 @@ export function createProviderOnboardingService({
   }
   if (!systemContext || systemContext.role !== "ADMIN") {
     throw new TypeError("La incorporación necesita un contexto interno de administración.");
+  }
+  if (
+    !Number.isInteger(emailVerificationTtlHours)
+    || emailVerificationTtlHours < 1
+    || emailVerificationTtlHours > 72
+  ) {
+    throw new TypeError("EMAIL_VERIFICATION_TTL_HOURS debe estar entre 1 y 72.");
   }
 
   async function loadAvailableInvitation(tokenHash) {
@@ -175,8 +185,9 @@ export function createProviderOnboardingService({
 
       try {
         return await database.withContext(systemContext, async (transaction) => {
+          const currentTime = now();
           const invitation = await findInvitation(transaction, tokenHash, { lock: true });
-          if (!isInvitationAvailable(invitation, now())) throw unavailableInvitation();
+          if (!isInvitationAvailable(invitation, currentTime)) throw unavailableInvitation();
 
           const existingUser = await transaction.query(
             "SELECT id FROM users WHERE email = $1",
@@ -193,7 +204,8 @@ export function createProviderOnboardingService({
           const userResult = await transaction.query(
             `INSERT INTO users (email, display_name, status)
              VALUES ($1, $2, 'PENDING')
-             RETURNING id, email, display_name, status, email_verified_at, two_factor_enabled, created_at`,
+             RETURNING id, email, display_name, status, email_verified_at,
+                       two_factor_enabled, created_at`,
             [invitation.email, name]
           );
           const user = userResult.rows[0];
@@ -221,19 +233,29 @@ export function createProviderOnboardingService({
             `UPDATE provider_invitations
              SET status = 'ACCEPTED', accepted_by = $2, accepted_at = $3
              WHERE id = $1`,
-            [invitation.id, user.id, now()]
+            [invitation.id, user.id, currentTime]
           );
+
+          const emailVerification = await issueEmailVerification(transaction, {
+            userId: user.id,
+            providerId: invitation.provider_id,
+            emailAddress: user.email,
+            ttlHours: emailVerificationTtlHours,
+            currentTime
+          });
 
           await transaction.query(
             `INSERT INTO audit_events
               (actor_user_id, provider_id, action, entity_type, entity_id, metadata)
-             VALUES ($1, $2, 'PROVIDER_INVITATION_ACCEPTED', 'provider_invitation', $3, $4::jsonb)`,
+             VALUES ($1, $2, 'PROVIDER_INVITATION_ACCEPTED',
+                     'provider_invitation', $3, $4::jsonb)`,
             [
               user.id,
               invitation.provider_id,
               invitation.id,
               JSON.stringify({
                 membershipId: membershipResult.rows[0].id,
+                verificationTokenId: emailVerification.verification.id,
                 role: invitation.role,
                 nextRequiredStep: "VERIFY_EMAIL"
               })
@@ -261,6 +283,8 @@ export function createProviderOnboardingService({
               role: membershipResult.rows[0].role,
               status: membershipResult.rows[0].status
             },
+            emailVerification: emailVerification.verification,
+            verificationToken: emailVerification.token,
             nextSteps: ["VERIFY_EMAIL", "ENABLE_2FA"],
             accessGranted: false
           };

@@ -6,8 +6,9 @@ import {
   createRequestAuthenticator,
   ensureDevelopmentAdmin
 } from "./auth-context.mjs";
-import { createProvidersService } from "./providers-service.mjs";
+import { createEmailVerificationService } from "./email-verification-service.mjs";
 import { createProviderOnboardingService } from "./provider-onboarding-service.mjs";
+import { createProvidersService } from "./providers-service.mjs";
 
 const host = process.env.API_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.API_PORT ?? "4000", 10);
@@ -33,12 +34,20 @@ const onboardingService = database.enabled && developmentAdminContext
     })
   : null;
 
+const emailVerificationService = database.enabled && developmentAdminContext
+  ? createEmailVerificationService({
+      database,
+      systemContext: developmentAdminContext
+    })
+  : null;
+
 const server = createServer(
   createApiHandler({
     environment,
     database,
     providersService,
     onboardingService,
+    emailVerificationService,
     authenticateRequest
   })
 );

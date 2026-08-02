@@ -23,8 +23,10 @@ const requiredFiles = [
   "apps/api/src/auth-context.mjs",
   "apps/api/src/providers-service.mjs",
   "apps/api/src/provider-onboarding-service.mjs",
+  "apps/api/src/email-verification-service.mjs",
   "apps/api/tests/providers-api.test.mjs",
   "apps/api/tests/provider-onboarding.test.mjs",
+  "apps/api/tests/email-verification.test.mjs",
   "packages/shared/src/domain.mjs",
   "packages/auth/src/policy.mjs",
   "packages/storage/src/policy.mjs",
@@ -33,6 +35,7 @@ const requiredFiles = [
   "packages/database/migrations/0001_core_identity.sql",
   "packages/database/migrations/0002_runtime_role.sql",
   "packages/database/migrations/0003_provider_onboarding.sql",
+  "packages/database/migrations/0004_email_verification.sql",
   "packages/database/seeds/0001_two_providers.sql",
   "packages/database/tests/tenant_isolation.sql",
   "infra/docker/Dockerfile.web",
@@ -81,8 +84,19 @@ for (const expected of [
   if (!workspace.includes(expected)) failures.push(`El workspace no contiene: ${expected}`);
 }
 
+const envExample = contents.get(".env.example") ?? "";
+for (const expected of [
+  "EMAIL_VERIFICATION_TTL_HOURS=24",
+  "EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS=60",
+  "REQUIRE_PROVIDER_2FA=true"
+]) {
+  if (!envExample.includes(expected)) failures.push(`Falta una variable de seguridad: ${expected}`);
+}
+
 const apiPackage = contents.get("apps/api/package.json") ?? "";
-if (!apiPackage.includes('"pg": "8.22.0"')) failures.push("La API no fija la versión revisada del cliente PostgreSQL.");
+if (!apiPackage.includes('"pg": "8.22.0"')) {
+  failures.push("La API no fija la versión revisada del cliente PostgreSQL.");
+}
 
 const domain = contents.get("packages/shared/src/domain.mjs") ?? "";
 for (const role of ["ADMIN", "PROVIDER_OWNER", "PROVIDER_MEMBER", "CUSTOMER"]) {
@@ -93,7 +107,12 @@ if (!domain.includes("actorProviderId === resourceProviderId")) {
 }
 
 const media = contents.get("packages/storage/src/policy.mjs") ?? "";
-for (const expected of ["maxImagesPerProduct: 8", "12 * 1024 * 1024", "50 * 1024 * 1024", "video/mp4"]) {
+for (const expected of [
+  "maxImagesPerProduct: 8",
+  "12 * 1024 * 1024",
+  "50 * 1024 * 1024",
+  "video/mp4"
+]) {
   if (!media.includes(expected)) failures.push(`Falta una política multimedia: ${expected}`);
 }
 
@@ -164,7 +183,9 @@ for (const route of [
   "/api/admin/providers",
   "status|invitations|audit",
   "/api/provider-invitations/preview",
-  "/api/provider-invitations/accept"
+  "/api/provider-invitations/accept",
+  "/api/email-verifications/verify",
+  "/api/email-verifications/resend"
 ]) {
   if (!api.includes(route)) failures.push(`Falta una ruta o contrato de API: ${route}`);
 }
@@ -172,24 +193,50 @@ for (const capability of [
   "authentication: false",
   "providerManagementApi",
   "providerInvitationAcceptance",
-  "emailVerification: false",
+  "emailVerification: Boolean(emailVerificationService)",
+  "emailDelivery: false",
   "twoFactorAuthentication: false"
 ]) {
   if (!api.includes(capability)) failures.push(`La API no declara correctamente: ${capability}`);
 }
+for (const expected of [
+  "const { verificationToken, ...safeResult }",
+  "environment !== \"production\"",
+  "manual-development",
+  "pending-email-service"
+]) {
+  if (!api.includes(expected)) failures.push(`Falta una protección de entrega de correo: ${expected}`);
+}
 
 const databaseClient = contents.get("apps/api/src/database.mjs") ?? "";
-for (const expected of ["SET LOCAL ROLE atelier_app_runtime", "set_config('app.role'", "ROLLBACK", "client.release()", "statement_timeout"]) {
+for (const expected of [
+  "SET LOCAL ROLE atelier_app_runtime",
+  "set_config('app.role'",
+  "ROLLBACK",
+  "client.release()",
+  "statement_timeout"
+]) {
   if (!databaseClient.includes(expected)) failures.push(`Falta una protección transaccional: ${expected}`);
 }
 
 const authContext = contents.get("apps/api/src/auth-context.mjs") ?? "";
-for (const expected of ["environment === \"production\"", "timingSafeEqual", "DEV_ADMIN_TOKEN", "ensureDevelopmentAdmin"]) {
+for (const expected of [
+  "environment === \"production\"",
+  "timingSafeEqual",
+  "DEV_ADMIN_TOKEN",
+  "ensureDevelopmentAdmin"
+]) {
   if (!authContext.includes(expected)) failures.push(`Falta una protección de acceso temporal: ${expected}`);
 }
 
 const providerService = contents.get("apps/api/src/providers-service.mjs") ?? "";
-for (const expected of ["randomBytes(32)", "createHash(\"sha256\")", "PROVIDER_CREATED", "PROVIDER_SUSPENDED", "PROVIDER_INVITATION_RENEWED"]) {
+for (const expected of [
+  "randomBytes(32)",
+  "createHash(\"sha256\")",
+  "PROVIDER_CREATED",
+  "PROVIDER_SUSPENDED",
+  "PROVIDER_INVITATION_RENEWED"
+]) {
   if (!providerService.includes(expected)) failures.push(`Falta una operación segura de proveedores: ${expected}`);
 }
 if (!providerService.includes("VALUES ($1, $2") || providerService.includes("token_hash: row.token_hash")) {
@@ -204,32 +251,69 @@ for (const expected of [
   "INVITATION_UNAVAILABLE",
   "FOR UPDATE OF pi",
   "PROVIDER_INVITATION_ACCEPTED",
+  "issueEmailVerification",
+  "verificationTokenId",
   "accessGranted: false",
   "VERIFY_EMAIL",
   "ENABLE_2FA"
 ]) {
   if (!onboardingService.includes(expected)) failures.push(`Falta una protección de incorporación: ${expected}`);
 }
-for (const forbidden of ["password: rawPassword", "token: token", "passwordHash:", "passwordSalt:"]) {
-  if (forbidden === "passwordHash:" || forbidden === "passwordSalt:") continue;
+for (const forbidden of ["password: rawPassword", "token: token"]) {
   if (onboardingService.includes(forbidden)) {
     failures.push(`La incorporación no debe serializar secretos: ${forbidden}`);
   }
 }
 
+const emailService = contents.get("apps/api/src/email-verification-service.mjs") ?? "";
+for (const expected of [
+  "randomBytes(32)",
+  "createHash(\"sha256\")",
+  "FOR UPDATE OF evt, u, pm",
+  "PROVIDER_EMAIL_VERIFICATION_ISSUED",
+  "PROVIDER_EMAIL_VERIFICATION_REISSUED",
+  "PROVIDER_EMAIL_VERIFIED",
+  "EMAIL_VERIFICATION_RESEND_TOO_SOON",
+  "await isLatestToken",
+  "accessGranted: false",
+  "nextSteps: [\"ENABLE_2FA\"]"
+]) {
+  if (!emailService.includes(expected)) failures.push(`Falta una protección de correo: ${expected}`);
+}
+if (emailService.includes("token_hash: row.token_hash")) {
+  failures.push("La verificación de correo no debe serializar el hash almacenado.");
+}
+
 const migration = contents.get("packages/database/migrations/0001_core_identity.sql") ?? "";
-for (const table of ["users", "providers", "provider_members", "provider_invitations", "sessions", "audit_events"]) {
+for (const table of [
+  "users",
+  "providers",
+  "provider_members",
+  "provider_invitations",
+  "sessions",
+  "audit_events"
+]) {
   if (!migration.includes(`CREATE TABLE ${table}`)) failures.push(`La migración no crea la tabla ${table}.`);
   if (!migration.includes(`ALTER TABLE ${table} FORCE ROW LEVEL SECURITY`)) {
     failures.push(`La tabla ${table} no fuerza seguridad por fila.`);
   }
 }
-for (const helper of ["app.current_role()", "app.current_user_id()", "app.current_provider_id()", "app.is_admin()"] ) {
+for (const helper of [
+  "app.current_role()",
+  "app.current_user_id()",
+  "app.current_provider_id()",
+  "app.is_admin()"
+]) {
   if (!migration.includes(helper)) failures.push(`Falta la función de contexto ${helper}.`);
 }
 
 const runtimeRole = contents.get("packages/database/migrations/0002_runtime_role.sql") ?? "";
-for (const expected of ["atelier_app_runtime", "NOBYPASSRLS", "NOLOGIN", "GRANT SELECT, INSERT, UPDATE, DELETE"]) {
+for (const expected of [
+  "atelier_app_runtime",
+  "NOBYPASSRLS",
+  "NOLOGIN",
+  "GRANT SELECT, INSERT, UPDATE, DELETE"
+]) {
   if (!runtimeRole.includes(expected)) failures.push(`Falta una restricción del rol de API: ${expected}`);
 }
 
@@ -243,8 +327,25 @@ for (const expected of [
   if (!onboardingMigration.includes(expected)) failures.push(`Falta una protección de credenciales: ${expected}`);
 }
 
+const emailMigration = contents.get("packages/database/migrations/0004_email_verification.sql") ?? "";
+for (const expected of [
+  "CREATE TABLE email_verification_tokens",
+  "char_length(token_hash) = 64",
+  "UNIQUE INDEX email_verification_tokens_one_pending_per_user_idx",
+  "ALTER TABLE email_verification_tokens FORCE ROW LEVEL SECURITY",
+  "USING (app.is_admin())",
+  "TO atelier_app_runtime"
+]) {
+  if (!emailMigration.includes(expected)) failures.push(`Falta una protección de tokens de correo: ${expected}`);
+}
+
 const tenantTest = contents.get("packages/database/tests/tenant_isolation.sql") ?? "";
-for (const expected of ["Taller A puede ver el Taller B", "Taller B puede ver el Taller A", "Un cliente puede leer proveedores privados", "Administración ve"]) {
+for (const expected of [
+  "Taller A puede ver el Taller B",
+  "Taller B puede ver el Taller A",
+  "Un cliente puede leer proveedores privados",
+  "Administración ve"
+]) {
   if (!tenantTest.includes(expected)) failures.push(`Falta una comprobación RLS: ${expected}`);
 }
 
@@ -259,6 +360,20 @@ for (const expected of [
   if (!onboardingTest.includes(expected)) failures.push(`Falta una prueba de incorporación: ${expected}`);
 }
 
+const emailTest = contents.get("apps/api/tests/email-verification.test.mjs") ?? "";
+for (const expected of [
+  "EMAIL_VERIFICATION_RESEND_TOO_SOON",
+  "assert.notEqual(resent.payload.verificationToken, firstToken)",
+  "oldLink.response.status, 410",
+  "verified.payload.user.emailVerified, true",
+  "verified.payload.accessGranted, false",
+  "reused.response.status, 410",
+  "finalStorage.tokens[0].status, \"REVOKED\"",
+  "finalStorage.tokens[1].status, \"VERIFIED\""
+]) {
+  if (!emailTest.includes(expected)) failures.push(`Falta una prueba de correo: ${expected}`);
+}
+
 const compose = contents.get("infra/docker/docker-compose.yml") ?? "";
 for (const expected of [
   "web:",
@@ -268,6 +383,8 @@ for (const expected of [
   "ALLOW_DEV_ADMIN_AUTH",
   "ENABLE_ADMIN_UI",
   "WEB_ADMIN_ACCESS_KEY",
+  "EMAIL_VERIFICATION_TTL_HOURS",
+  "EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS",
   "127.0.0.1:${API_PORT:-4000}:4000",
   "packages/database/migrations:/docker-entrypoint-initdb.d:ro"
 ]) {
