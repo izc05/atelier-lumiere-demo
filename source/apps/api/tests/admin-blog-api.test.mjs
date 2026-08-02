@@ -91,7 +91,7 @@ async function createSubmittedPost({
       personalizationNotes: "",
       shippingNotes: "Embalaje protegido."
     });
-    await postsService.replaceRelatedProducts(PROVIDER_CONTEXT, created.id, {
+    await postsService.replaceProducts(PROVIDER_CONTEXT, created.id, {
       productIds: [product.id]
     });
   }
