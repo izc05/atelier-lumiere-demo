@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Instalar dependencias
+        run: npm install --ignore-scripts
+
       - name: Probar contratos y políticas
         run: npm test
 

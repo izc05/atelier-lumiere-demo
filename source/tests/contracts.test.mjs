@@ -86,28 +86,37 @@ test("el mapa de datos incluye auditoría y exige ámbito de proveedor", () => {
   assert.equal(DATABASE_RULES.allMutationsCreateAuditEvent, true);
 });
 
-test("la API informa de salud sin fingir capacidades no conectadas", () => {
+test("la API informa de la conexión sin fingir autenticación definitiva", async () => {
+  const database = {
+    enabled: true,
+    async ping() {
+      return true;
+    }
+  };
   const response = captureResponse();
   const handler = createApiHandler({
-    version: "0.1.0-test",
+    version: "0.2.0-test",
+    database,
     now: () => new Date("2026-08-02T09:00:00.000Z")
   });
 
-  handler({ method: "GET", url: "/health" }, response);
+  await handler({ method: "GET", url: "/health", headers: {} }, response);
   assert.equal(response.statusCode, 200);
   assert.deepEqual(JSON.parse(response.body), {
     status: "ok",
     service: "atelier-lumiere-api",
-    version: "0.1.0-test",
+    version: "0.2.0-test",
     environment: "development",
+    database: "connected",
     timestamp: "2026-08-02T09:00:00.000Z"
   });
 
   const metaResponse = captureResponse();
-  handler({ method: "GET", url: "/api/meta" }, metaResponse);
+  await handler({ method: "GET", url: "/api/meta", headers: {} }, metaResponse);
   const meta = JSON.parse(metaResponse.body);
   assert.equal(meta.brand, "Atelier Lumière");
   assert.equal(meta.publicDemoProtected, true);
-  assert.equal(meta.capabilities.database, false);
+  assert.equal(meta.capabilities.database, true);
+  assert.equal(meta.capabilities.providerIsolation, true);
   assert.equal(meta.capabilities.authentication, false);
 });

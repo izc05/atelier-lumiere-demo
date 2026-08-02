@@ -1,11 +1,15 @@
 {
   "name": "@atelier-lumiere/api",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.mjs",
-    "start": "node src/server.mjs"
+    "start": "node src/server.mjs",
+    "test:integration": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "pg": "8.22.0"
   },
   "engines": {
     "node": ">=22"
