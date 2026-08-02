@@ -18,4 +18,4 @@ f:I[97367,["/atelier-lumiere-demo/_next/static/chunks/1g7ahfqon4j3y.js","/atelie
 c:"$W12"
 e:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
 b:null
-10:[["$","title","0",{"children":"Encargos · Administración"}],["$","meta","1",{"name":"description","content":"Piezas hechas a mano para bodas, comuniones, bautizos y celebraciones."}]]
+10:[["$","title","0",{"children":"Encargos · Administración"}],["$","meta","1",{"name":"description","content":"Piezas artesanales para bodas, comuniones y celebraciones. Detalles hechos despacio para momentos que merecen ser recordados."}]]
