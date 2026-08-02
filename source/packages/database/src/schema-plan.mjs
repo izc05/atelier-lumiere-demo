@@ -9,6 +9,8 @@ export const CORE_TABLES = Object.freeze([
   "provider_members",
   "provider_invitations",
   "sessions",
+  "login_throttles",
+  "provider_login_challenges",
   "audit_events"
 ]);
 
@@ -44,5 +46,8 @@ export const DATABASE_RULES = Object.freeze({
   totpSecretsEncryptedWithAuthenticatedEncryption: true,
   recoveryCodesStoredAsKeyedHashes: true,
   twoFactorSetupHasLimitedAttempts: true,
+  providerLoginRequiresTwoIndependentFactors: true,
+  providerSessionsStoreOnlyTokenHashes: true,
+  providerLoginHasPasswordAndChallengeThrottling: true,
   providerAccessRequiresVerifiedEmailAndTwoFactor: true
 });
