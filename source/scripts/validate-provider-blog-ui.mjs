@@ -9,6 +9,7 @@ const paths = [
   "apps/web/public/proveedor/publicaciones/index.html",
   "apps/web/public/proveedor/publicaciones/posts.js",
   "apps/web/public/proveedor/publicaciones/blog.css",
+  "apps/web/public/proveedor/publicaciones/media.css",
   "apps/web/public/proveedor/publicaciones/editar/index.html",
   "apps/web/public/proveedor/publicaciones/editor.js"
 ];
@@ -33,7 +34,9 @@ assert.match(proxy, /Authorization: `Bearer \$\{token\}`/);
 assert.match(proxy, /body: request, duplex: "half"/);
 assert.match(proxy, /Readable\.fromWeb/);
 assert.match(proxy, /\/proveedor\/publicaciones\/editar/);
-assert.match(proxy, /tags\|products\|submit/);
+assert.match(proxy, /tags\|products\|submit\|media/);
+assert.match(proxy, /x-media-placement/);
+assert.match(proxy, /content\|preview/);
 assert.doesNotMatch(proxy, /DEV_ADMIN_TOKEN|WEB_ADMIN_ACCESS_KEY/);
 assert.match(server, /createProviderBlogWebHandler/);
 
@@ -55,9 +58,17 @@ assert.match(editorHtml, /Contenido en Markdown/);
 assert.match(editorHtml, /mínimo 40 caracteres/);
 assert.match(editorHtml, /mínimo 200 caracteres/);
 assert.match(editorHtml, /hasta ocho piezas/i);
-assert.match(editorHtml, /Portada e imágenes/);
+assert.match(editorHtml, /Hasta doce fotografías JPEG, PNG o WebP de 12 MB/);
+assert.match(editorHtml, /id="cover-input"/);
+assert.match(editorHtml, /id="inline-input"/);
+assert.match(editorHtml, /media\.css/);
 assert.match(editorJs, /state\.selectedProductIds\.size >= 8/);
 assert.match(editorJs, /\.slice\(0, 12\)/);
+assert.match(editorJs, /MAX_IMAGE_BYTES = 12 \* 1024 \* 1024/);
+assert.match(editorJs, /MAX_IMAGES = 12/);
+assert.match(editorJs, /X-Media-Placement/);
+assert.match(editorJs, /\/media\/\$\{item\.id\}\/\$\{variant\}/);
+assert.match(editorJs, /placement: selectedPlacement\.value/);
 assert.match(editorJs, /expectedVersion/);
 assert.match(editorJs, /\/tags/);
 assert.match(editorJs, /\/products/);
@@ -72,4 +83,4 @@ assert.match(panelHtml, /id="posts-count"/);
 assert.match(panelJs, /\/internal\/provider\/blog-posts/);
 assert.doesNotMatch(panelJs, /Authorization|Bearer|atelier_provider_session/);
 
-console.log("Interfaz privada del blog validada.");
+console.log("Interfaz privada y gestor multimedia del blog validados.");
