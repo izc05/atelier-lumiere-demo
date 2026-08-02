@@ -83,10 +83,22 @@
     const row = element("article", "item-row");
     const header = element("header");
     const title = element("div");
-    title.append(element("h3", "", item.productName), element("small", "", item.itemType === "CUSTOM" ? "Diseño personalizado" : "Artículo del catálogo"));
+    title.append(
+      element("h3", "", item.productName),
+      element("small", "", item.itemType === "CUSTOM" ? "Diseño personalizado" : "Artículo del catálogo")
+    );
     header.append(title, element("strong", "price", money(item.lineTotalCents, item.currency)));
-    row.append(header, element("p", "", `${item.quantity} × ${money(item.unitPriceCents, item.currency)}${item.story ? ` · ${item.story}` : ""}`));
-    const personalization = item.personalization && typeof item.personalization === "object" ? Object.entries(item.personalization) : [];
+    row.append(
+      header,
+      element(
+        "p",
+        "",
+        `${item.quantity} × ${money(item.unitPriceCents, item.currency)}${item.story ? ` · ${item.story}` : ""}`
+      )
+    );
+    const personalization = item.personalization && typeof item.personalization === "object"
+      ? Object.entries(item.personalization)
+      : [];
     if (personalization.length > 0) {
       const facts = element("div", "personalization");
       for (const [key, value] of personalization) facts.append(fact(`${key}: ${String(value)}`));
@@ -103,7 +115,14 @@
     const link = element("a", "button secondary", "Abrir conversación");
     link.href = `/proveedor/encargos/detalle/?id=${encodeURIComponent(request.id)}`;
     header.append(title, link);
-    row.append(header, element("p", "", `${request.messageCount} mensajes · ${request.fileCount} archivos · Actualizado ${date(request.updatedAt)}`));
+    row.append(
+      header,
+      element(
+        "p",
+        "",
+        `${request.messageCount} mensajes · ${request.fileCount} archivos · Actualizado ${date(request.updatedAt)}`
+      )
+    );
     return row;
   }
 
@@ -124,7 +143,10 @@
       element("h3", "", shipment.carrier || "Seguimiento del envío"),
       element("strong", "", SHIPMENT_LABELS[shipment.status] ?? shipment.status)
     );
-    row.append(header, element("p", "", shipment.trackingCode ? `Código: ${shipment.trackingCode}` : "Código pendiente"));
+    row.append(
+      header,
+      element("p", "", shipment.trackingCode ? `Código: ${shipment.trackingCode}` : "Código pendiente")
+    );
     const url = safeTrackingUrl(shipment.trackingUrl);
     if (url) {
       const actions = element("div", "logistics-actions");
@@ -149,14 +171,17 @@
     button.textContent = "Guardando…";
     setMessage(message, "");
     try {
-      await requestJson(`/internal/provider/orders/${encodeURIComponent(orderId)}/incidents/${encodeURIComponent(incident.id)}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          status,
-          resolution,
-          expectedUpdatedAt: incident.updatedAt
-        })
-      });
+      await requestJson(
+        `/internal/provider/orders/${encodeURIComponent(orderId)}/incidents/${encodeURIComponent(incident.id)}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            status,
+            resolution,
+            expectedVersion: incident.version
+          })
+        }
+      );
       await reloadDetail();
       setMessage(byId("incident-result"), "Incidencia actualizada.", "success");
     } catch (error) {
@@ -297,7 +322,17 @@
   }
 
   async function reloadDetail() {
-    detail = await requestJson(`/internal/provider/orders/${encodeURIComponent(orderId)}`);
+    const encodedOrderId = encodeURIComponent(orderId);
+    const [orderDetail, shipmentPayload, incidentPayload] = await Promise.all([
+      requestJson(`/internal/provider/orders/${encodedOrderId}`),
+      requestJson(`/internal/provider/orders/${encodedOrderId}/shipments`),
+      requestJson(`/internal/provider/orders/${encodedOrderId}/incidents`)
+    ]);
+    detail = {
+      ...orderDetail,
+      shipments: shipmentPayload.shipments,
+      incidents: incidentPayload.incidents
+    };
     render();
   }
 
@@ -350,7 +385,7 @@
           carrier,
           trackingCode,
           trackingUrl,
-          ...(shipment ? { expectedUpdatedAt: shipment.updatedAt } : {})
+          ...(shipment ? { expectedVersion: shipment.version } : {})
         })
       });
       await reloadDetail();
@@ -398,7 +433,7 @@
     button.textContent = "Guardando…";
     setMessage(message, "");
     try {
-      const payload = await requestJson(`/internal/provider/orders/${encodeURIComponent(orderId)}/transitions`, {
+      await requestJson(`/internal/provider/orders/${encodeURIComponent(orderId)}/transitions`, {
         method: "POST",
         body: JSON.stringify({
           status: byId("next-status").value,
@@ -407,7 +442,6 @@
         })
       });
       await reloadDetail();
-      if (payload.order?.version !== detail.order.version) detail.order.version = payload.order.version;
       setMessage(message, "Avance guardado y añadido a la cronología.", "success");
     } catch (error) {
       setMessage(message, error.message, error.code?.includes("CONFLICT") ? "warning" : "error");
