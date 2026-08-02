@@ -1,7 +1,6 @@
 import pg from "pg";
 
 const { Pool } = pg;
-const RUNTIME_ROLE = "atelier_app_runtime";
 const VALID_ROLES = new Set(["ADMIN", "PROVIDER_OWNER", "PROVIDER_MEMBER", "CUSTOMER"]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -104,7 +103,7 @@ export function createDatabase({
       try {
         await client.query("BEGIN");
         transactionStarted = true;
-        await client.query(`SET LOCAL ROLE ${RUNTIME_ROLE}`);
+        await client.query("SET LOCAL ROLE atelier_app_runtime");
         await client.query(`SET LOCAL statement_timeout = '${statementTimeoutMs}ms'`);
         await client.query(
           "SELECT set_config('app.role', $1, true), set_config('app.user_id', $2, true), set_config('app.provider_id', $3, true)",
