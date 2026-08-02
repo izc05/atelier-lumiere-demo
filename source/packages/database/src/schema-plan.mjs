@@ -56,6 +56,11 @@ export const DATABASE_RULES = Object.freeze({
   providersCanEditOnlyDraftOrReturnedProducts: true,
   productReviewRequiresAtLeastOneReadyImage: true,
   productMediaUsesPrivateStorageKeys: true,
+  productMediaBytesStayOutsidePostgreSQLAndGit: true,
+  productMediaContentIsValidatedByBinarySignature: true,
+  productMediaUploadsAreStreamedThroughTemporaryFiles: true,
+  productMediaReservationsExpire: true,
+  productMediaReadsRequireProviderSession: true,
   productMediaAllowsAtMostEightImagesAndOneVideo: true,
   publishedProductsRequireAdministrativeApproval: true
 });
