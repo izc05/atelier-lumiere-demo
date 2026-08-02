@@ -7,6 +7,7 @@ import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDatabase } from "../src/database.mjs";
+import { createMediaPreviewStorage } from "../src/media-preview-storage.mjs";
 import { createLocalMediaStorage } from "../src/media-storage-service.mjs";
 import { createProductMediaApiHandler } from "../src/product-media-api.mjs";
 import { createProductMediaService } from "../src/product-media-service.mjs";
@@ -56,7 +57,7 @@ async function upload(baseUrl, productId, bearer, buffer, {
   return { response, payload: await jsonResponse(response) };
 }
 
-test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
+test("los medios generan previews, se aíslan y se sirven de forma privada", {
   skip: !connectionString
 }, async (t) => {
   const storageRoot = await mkdtemp(join(tmpdir(), "atelier-media-"));
@@ -66,7 +67,13 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     statementTimeoutMs: 5000,
     logger: { error() {} }
   });
-  const storage = createLocalMediaStorage({ rootPath: storageRoot });
+  const localStorage = createLocalMediaStorage({ rootPath: storageRoot });
+  const storage = createMediaPreviewStorage({
+    baseStorage: localStorage,
+    previewMaxWidth: 640,
+    previewMaxHeight: 640,
+    previewQuality: 82
+  });
   const mediaService = createProductMediaService({
     database,
     storage,
@@ -164,6 +171,11 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     first.payload.media.checksumSha256,
     createHash("sha256").update(PNG_1X1).digest("hex")
   );
+  assert.match(first.payload.media.previewPath, /\/preview$/);
+  assert.equal(first.payload.media.preview.mimeType, "image/webp");
+  assert.equal(first.payload.media.preview.width, 1);
+  assert.equal(first.payload.media.preview.height, 1);
+  assert.ok(first.payload.media.preview.sizeBytes > 0);
   const firstMediaId = first.payload.media.id;
 
   const foreignRead = await fetch(
@@ -172,6 +184,13 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   );
   assert.equal(foreignRead.status, 404);
   assert.equal((await jsonResponse(foreignRead)).error, "MEDIA_NOT_FOUND");
+
+  const foreignPreview = await fetch(
+    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/preview`,
+    { headers: { Authorization: `Bearer ${tokenB}` } }
+  );
+  assert.equal(foreignPreview.status, 404);
+  assert.equal((await jsonResponse(foreignPreview)).error, "MEDIA_NOT_FOUND");
 
   const fullRead = await fetch(
     `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/content`,
@@ -182,6 +201,18 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   assert.match(fullRead.headers.get("cache-control"), /private/);
   assert.equal(fullRead.headers.get("x-content-type-options"), "nosniff");
   assert.deepEqual(Buffer.from(await fullRead.arrayBuffer()), PNG_1X1);
+
+  const previewRead = await fetch(
+    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/preview`,
+    { headers: { Authorization: `Bearer ${tokenA}` } }
+  );
+  assert.equal(previewRead.status, 200);
+  assert.equal(previewRead.headers.get("content-type"), "image/webp");
+  assert.match(previewRead.headers.get("cache-control"), /private/);
+  const previewBytes = Buffer.from(await previewRead.arrayBuffer());
+  assert.equal(previewBytes.toString("ascii", 0, 4), "RIFF");
+  assert.equal(previewBytes.toString("ascii", 8, 12), "WEBP");
+  assert.equal(previewBytes.length, first.payload.media.preview.sizeBytes);
 
   const ranged = await fetch(
     `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/content`,
@@ -211,6 +242,23 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   assert.equal(metadataResponse.status, 200);
   assert.equal(metadataPayload.media.altText, "Vista principal de la caja");
   assert.equal(metadataPayload.media.sortOrder, 2);
+  assert.match(metadataPayload.media.previewPath, /\/preview$/);
+
+  const orderOnlyResponse = await fetch(
+    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${tokenA}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ sortOrder: 3 })
+    }
+  );
+  const orderOnlyPayload = await jsonResponse(orderOnlyResponse);
+  assert.equal(orderOnlyResponse.status, 200);
+  assert.equal(orderOnlyPayload.media.altText, "Vista principal de la caja");
+  assert.equal(orderOnlyPayload.media.sortOrder, 3);
 
   const mismatch = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
     mimeType: "image/jpeg",
@@ -219,14 +267,13 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   assert.equal(mismatch.response.status, 422);
   assert.equal(mismatch.payload.error, "MEDIA_TYPE_MISMATCH");
 
-  const readyImageIds = [firstMediaId];
   for (let index = 2; index <= 8; index += 1) {
     const item = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
       filename: `detalle-${index}.png`,
       altText: `Detalle ${index} de la caja`
     });
     assert.equal(item.response.status, 201);
-    readyImageIds.push(item.payload.media.id);
+    assert.match(item.payload.media.previewPath, /\/preview$/);
   }
 
   const ninth = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
@@ -244,6 +291,15 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   assert.equal(video.response.status, 201);
   assert.equal(video.payload.media.kind, "VIDEO");
   assert.equal(video.payload.media.status, "READY");
+  assert.equal(video.payload.media.previewPath, null);
+  assert.equal(video.payload.media.preview, null);
+
+  const videoPreview = await fetch(
+    `${baseUrl}/api/provider/products/${product.id}/media/${video.payload.media.id}/preview`,
+    { headers: { Authorization: `Bearer ${tokenA}` } }
+  );
+  assert.equal(videoPreview.status, 404);
+  assert.equal((await jsonResponse(videoPreview)).error, "MEDIA_PREVIEW_NOT_AVAILABLE");
 
   const secondVideo = await upload(baseUrl, product.id, tokenA, mp4, {
     mimeType: "video/mp4",
@@ -263,16 +319,19 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
   assert.equal(deleted.status, 200);
   assert.equal((await jsonResponse(deleted)).deleted, true);
 
-  const afterDelete = await fetch(
-    `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/content`,
-    { headers: { Authorization: `Bearer ${tokenA}` } }
-  );
-  assert.equal(afterDelete.status, 404);
+  for (const variant of ["content", "preview"]) {
+    const afterDelete = await fetch(
+      `${baseUrl}/api/provider/products/${product.id}/media/${firstMediaId}/${variant}`,
+      { headers: { Authorization: `Bearer ${tokenA}` } }
+    );
+    assert.equal(afterDelete.status, 404);
+  }
 
   const replacement = await upload(baseUrl, product.id, tokenA, PNG_1X1, {
     filename: "portada-sustituta.png"
   });
   assert.equal(replacement.response.status, 201);
+  assert.match(replacement.payload.media.previewPath, /\/preview$/);
 
   const submitted = await productsService.submit(contextA, product.id, {
     expectedVersion: 1,
@@ -292,7 +351,9 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     role: "ADMIN"
   }, async (transaction) => {
     const media = await transaction.query(
-      `SELECT kind, status, checksum_sha256, storage_key
+      `SELECT kind, status, checksum_sha256, storage_key,
+              preview_storage_key, preview_mime_type, preview_size_bytes,
+              preview_checksum_sha256, preview_width, preview_height
        FROM product_media
        WHERE product_id = $1
        ORDER BY created_at`,
@@ -307,15 +368,24 @@ test("los medios se validan, aíslan, almacenan y sirven de forma privada", {
     return { media: media.rows, audits: audits.rows };
   });
 
-  assert.equal(stored.media.filter((item) => item.kind === "IMAGE" && item.status === "READY").length, 8);
-  assert.equal(stored.media.filter((item) => item.kind === "VIDEO" && item.status === "READY").length, 1);
+  const readyImages = stored.media.filter((item) => item.kind === "IMAGE" && item.status === "READY");
+  const readyVideos = stored.media.filter((item) => item.kind === "VIDEO" && item.status === "READY");
+  assert.equal(readyImages.length, 8);
+  assert.equal(readyVideos.length, 1);
   assert.ok(stored.media.filter((item) => item.status === "REJECTED").length >= 2);
   assert.ok(
     stored.media
       .filter((item) => item.status === "READY")
       .every((item) => item.checksum_sha256 !== "0".repeat(64))
   );
+  assert.ok(readyImages.every((item) => item.preview_storage_key));
+  assert.ok(readyImages.every((item) => item.preview_mime_type === "image/webp"));
+  assert.ok(readyImages.every((item) => Number(item.preview_size_bytes) > 0));
+  assert.ok(readyImages.every((item) => /^[a-f0-9]{64}$/.test(item.preview_checksum_sha256)));
+  assert.ok(readyImages.every((item) => item.preview_width === 1 && item.preview_height === 1));
+  assert.ok(readyVideos.every((item) => item.preview_storage_key === null));
   assert.ok(stored.audits.some((item) => item.action === "PRODUCT_MEDIA_UPLOADED"));
+  assert.ok(stored.audits.some((item) => item.metadata.includes('"previewGenerated":true')));
   assert.equal(JSON.stringify(stored.audits).includes("storage_key"), false);
   assert.equal(JSON.stringify(stored.audits).includes(storageRoot), false);
 
