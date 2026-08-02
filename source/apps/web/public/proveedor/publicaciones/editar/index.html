@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#5a0f1f">
   <title>Editor del blog · Atelier Lumière</title>
   <link rel="stylesheet" href="/proveedor/publicaciones/blog.css">
+  <link rel="stylesheet" href="/proveedor/publicaciones/media.css">
   <script defer src="/proveedor/publicaciones/editor.js"></script>
 </head>
 <body>
@@ -104,10 +105,34 @@
           <section class="panel-card">
             <header>
               <p class="eyebrow">05 · Portada e imágenes</p>
-              <h2>Preparado para la siguiente fase</h2>
-              <p>La base de datos ya admite portada e imágenes, pero la carga privada y las previews se conectarán en el siguiente tramo.</p>
+              <h2>Muestra el proceso artesanal</h2>
+              <p>Hasta doce fotografías JPEG, PNG o WebP de 12 MB. Cada imagen genera automáticamente una copia WebP ligera y privada.</p>
             </header>
-            <div class="notice">Esta publicación puede guardarse y enviarse a revisión sin imágenes durante esta fase. No se mostrará públicamente hasta completar la galería y la aprobación administrativa.</div>
+
+            <div id="media-needs-save" class="notice">Guarda primero el borrador para activar la subida de imágenes.</div>
+            <div id="media-controls" hidden>
+              <div class="media-upload-grid">
+                <label class="upload-zone">
+                  <strong>Subir portada</strong>
+                  <input id="cover-input" type="file" accept="image/jpeg,image/png,image/webp">
+                  <small>Una sola imagen. Puede cambiarse retirando o reclasificando la portada actual.</small>
+                </label>
+                <label class="upload-zone">
+                  <strong>Añadir imágenes interiores</strong>
+                  <input id="inline-input" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+                  <small>Selecciona una o varias. Se subirán de una en una.</small>
+                </label>
+              </div>
+
+              <div id="upload-status" class="upload-status" hidden>
+                <p id="upload-label" class="message"></p>
+                <progress id="upload-progress" class="upload-progress" max="100" value="0"></progress>
+              </div>
+
+              <div id="media-empty" class="media-empty">Todavía no has añadido ninguna fotografía.</div>
+              <div id="media-grid" class="blog-media-grid" hidden></div>
+              <p id="media-message" class="message" role="status" aria-live="polite"></p>
+            </div>
           </section>
         </form>
 
@@ -119,6 +144,8 @@
               <div class="summary-item"><span>Versión</span><strong id="version-label">—</strong></div>
               <div class="summary-item"><span>Etiquetas</span><strong id="tag-count">0/12</strong></div>
               <div class="summary-item"><span>Artículos</span><strong id="product-count">0/8</strong></div>
+              <div class="summary-item"><span>Imágenes</span><strong id="image-count">0/12</strong></div>
+              <div class="summary-item"><span>Portada</span><strong id="cover-label">Pendiente</strong></div>
               <div class="summary-item"><span>Último guardado</span><strong id="updated-label">Sin guardar</strong></div>
             </div>
             <button id="save-button" class="button primary full-width" type="submit" form="post-form">Guardar borrador</button>
