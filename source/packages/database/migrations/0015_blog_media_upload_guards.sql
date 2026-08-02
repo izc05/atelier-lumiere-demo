@@ -1,0 +1,131 @@
+BEGIN;
+
+ALTER TABLE blog_post_media
+  ADD COLUMN upload_expires_at timestamptz;
+
+ALTER TABLE blog_post_media
+  ADD CONSTRAINT blog_media_pending_expiry_check CHECK (
+    (status = 'PENDING_UPLOAD' AND upload_expires_at IS NOT NULL)
+    OR (status <> 'PENDING_UPLOAD' AND upload_expires_at IS NULL)
+  ),
+  ADD CONSTRAINT blog_media_ready_preview_check CHECK (
+    status <> 'READY'
+    OR (
+      ready_at IS NOT NULL
+      AND preview_storage_key IS NOT NULL
+      AND preview_mime_type = 'image/webp'
+      AND preview_size_bytes IS NOT NULL
+      AND preview_checksum_sha256 IS NOT NULL
+      AND preview_width IS NOT NULL
+      AND preview_height IS NOT NULL
+    )
+  );
+
+CREATE INDEX blog_post_media_expired_upload_idx
+  ON blog_post_media(upload_expires_at)
+  WHERE status = 'PENDING_UPLOAD';
+
+CREATE OR REPLACE FUNCTION app.guard_blog_media_internal_fields()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  upload_context text := current_setting('app.blog_media_upload_id', true);
+BEGIN
+  IF app.is_admin() THEN
+    RETURN NEW;
+  END IF;
+
+  IF TG_OP = 'INSERT' THEN
+    IF NEW.status <> 'PENDING_UPLOAD'
+       OR NEW.checksum_sha256 <> repeat('0', 64)
+       OR NEW.width IS NOT NULL
+       OR NEW.height IS NOT NULL
+       OR NEW.preview_storage_key IS NOT NULL
+       OR NEW.preview_mime_type IS NOT NULL
+       OR NEW.preview_size_bytes IS NOT NULL
+       OR NEW.preview_checksum_sha256 IS NOT NULL
+       OR NEW.preview_width IS NOT NULL
+       OR NEW.preview_height IS NOT NULL
+       OR NEW.rejection_reason IS NOT NULL
+       OR NEW.ready_at IS NOT NULL
+       OR NEW.deleted_at IS NOT NULL
+       OR NEW.upload_expires_at IS NULL THEN
+      RAISE EXCEPTION 'BLOG_MEDIA_RESERVATION_INVALID' USING ERRCODE = '42501';
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  IF NEW.id IS DISTINCT FROM OLD.id
+     OR NEW.provider_id IS DISTINCT FROM OLD.provider_id
+     OR NEW.post_id IS DISTINCT FROM OLD.post_id
+     OR NEW.mime_type IS DISTINCT FROM OLD.mime_type
+     OR NEW.original_filename IS DISTINCT FROM OLD.original_filename
+     OR NEW.storage_key IS DISTINCT FROM OLD.storage_key
+     OR NEW.uploaded_by IS DISTINCT FROM OLD.uploaded_by
+     OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
+    RAISE EXCEPTION 'BLOG_MEDIA_IDENTITY_IMMUTABLE' USING ERRCODE = '23514';
+  END IF;
+
+  IF upload_context IS DISTINCT FROM OLD.id::text THEN
+    IF NEW.size_bytes IS DISTINCT FROM OLD.size_bytes
+       OR NEW.checksum_sha256 IS DISTINCT FROM OLD.checksum_sha256
+       OR NEW.status IS DISTINCT FROM OLD.status
+       OR NEW.width IS DISTINCT FROM OLD.width
+       OR NEW.height IS DISTINCT FROM OLD.height
+       OR NEW.preview_storage_key IS DISTINCT FROM OLD.preview_storage_key
+       OR NEW.preview_mime_type IS DISTINCT FROM OLD.preview_mime_type
+       OR NEW.preview_size_bytes IS DISTINCT FROM OLD.preview_size_bytes
+       OR NEW.preview_checksum_sha256 IS DISTINCT FROM OLD.preview_checksum_sha256
+       OR NEW.preview_width IS DISTINCT FROM OLD.preview_width
+       OR NEW.preview_height IS DISTINCT FROM OLD.preview_height
+       OR NEW.rejection_reason IS DISTINCT FROM OLD.rejection_reason
+       OR NEW.ready_at IS DISTINCT FROM OLD.ready_at
+       OR NEW.deleted_at IS DISTINCT FROM OLD.deleted_at
+       OR NEW.upload_expires_at IS DISTINCT FROM OLD.upload_expires_at THEN
+      RAISE EXCEPTION 'BLOG_MEDIA_INTERNAL_FIELDS_IMMUTABLE' USING ERRCODE = '42501';
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  IF NOT (
+    (OLD.status = 'PENDING_UPLOAD' AND NEW.status IN ('READY', 'REJECTED'))
+    OR (OLD.status IN ('READY', 'REJECTED') AND NEW.status = 'DELETED')
+  ) THEN
+    RAISE EXCEPTION 'BLOG_MEDIA_STATUS_TRANSITION_INVALID' USING ERRCODE = '23514';
+  END IF;
+
+  IF NEW.status = 'READY' AND (
+    NEW.checksum_sha256 = repeat('0', 64)
+    OR NEW.width IS NULL
+    OR NEW.height IS NULL
+    OR NEW.preview_storage_key IS NULL
+    OR NEW.preview_mime_type <> 'image/webp'
+    OR NEW.preview_size_bytes IS NULL
+    OR NEW.preview_checksum_sha256 IS NULL
+    OR NEW.preview_width IS NULL
+    OR NEW.preview_height IS NULL
+    OR NEW.upload_expires_at IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'BLOG_MEDIA_READY_INVALID' USING ERRCODE = '23514';
+  END IF;
+
+  IF NEW.status = 'REJECTED' AND (
+    NEW.rejection_reason IS NULL OR NEW.upload_expires_at IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'BLOG_MEDIA_REJECTION_INVALID' USING ERRCODE = '23514';
+  END IF;
+
+  IF NEW.status = 'DELETED' AND NEW.upload_expires_at IS NOT NULL THEN
+    RAISE EXCEPTION 'BLOG_MEDIA_DELETE_INVALID' USING ERRCODE = '23514';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER blog_post_media_00_guard_internal
+BEFORE INSERT OR UPDATE ON blog_post_media
+FOR EACH ROW EXECUTE FUNCTION app.guard_blog_media_internal_fields();
+
+COMMIT;
