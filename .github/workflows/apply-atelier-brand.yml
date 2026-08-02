@@ -31,12 +31,13 @@ jobs:
 
       - name: Validar archivos
         run: |
-          python -m py_compile scripts/apply_atelier_brand.py
+          python -c "import ast, pathlib; ast.parse(pathlib.Path('scripts/apply_atelier_brand.py').read_text(encoding='utf-8'))"
           node --check assets/brand/brand.js
           git diff --check
 
       - name: Guardar cambios generados
         run: |
+          rm -rf scripts/__pycache__
           if git diff --quiet; then
             echo "No hay cambios pendientes."
             exit 0
