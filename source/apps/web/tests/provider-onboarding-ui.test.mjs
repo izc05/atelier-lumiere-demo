@@ -24,7 +24,14 @@ async function post(baseUrl, path, body) {
     },
     body: JSON.stringify(body)
   });
-  return { response, payload: await response.json() };
+  const text = await response.text();
+  let payload = {};
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    payload = { text };
+  }
+  return { response, payload };
 }
 
 test("la incorporación usa un proxy limitado sin credenciales administrativas", async (t) => {
@@ -117,4 +124,5 @@ test("la incorporación usa un proxy limitado sin credenciales administrativas",
 
   const unknownRoute = await post(webUrl, "/internal/provider/delete-account", {});
   assert.equal(unknownRoute.response.status, 404);
+  assert.equal(unknownRoute.payload.text, "No encontrado");
 });
