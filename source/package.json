@@ -1,6 +1,6 @@
 {
   "name": "@atelier-lumiere/source",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -10,10 +10,10 @@
   "scripts": {
     "dev:web": "npm --workspace @atelier-lumiere/web run dev",
     "dev:api": "npm --workspace @atelier-lumiere/api run dev",
-    "test": "node --test tests/*.test.mjs && npm run test:web-integration && node scripts/validate-source.mjs && node scripts/validate-two-factor.mjs && node scripts/validate-provider-onboarding-ui.mjs && node scripts/validate-provider-session.mjs && node scripts/validate-smtp-email.mjs && node scripts/validate-account-recovery.mjs && node scripts/validate-provider-products-ui.mjs && node scripts/validate-admin-products-review.mjs && node scripts/validate-public-catalog.mjs",
+    "test": "node --test tests/*.test.mjs && npm run test:web-integration && node scripts/validate-source.mjs && node scripts/validate-two-factor.mjs && node scripts/validate-provider-onboarding-ui.mjs && node scripts/validate-provider-session.mjs && node scripts/validate-smtp-email.mjs && node scripts/validate-account-recovery.mjs && node scripts/validate-provider-products-ui.mjs && node scripts/validate-admin-products-review.mjs && node scripts/validate-public-catalog.mjs && node scripts/validate-blog-editorial.mjs",
     "test:web-integration": "npm --workspace @atelier-lumiere/web run test:integration",
     "test:api-integration": "npm --workspace @atelier-lumiere/api run test:integration",
-    "validate": "node scripts/validate-source.mjs && node scripts/validate-two-factor.mjs && node scripts/validate-provider-onboarding-ui.mjs && node scripts/validate-provider-session.mjs && node scripts/validate-smtp-email.mjs && node scripts/validate-account-recovery.mjs && node scripts/validate-provider-products-ui.mjs && node scripts/validate-admin-products-review.mjs && node scripts/validate-public-catalog.mjs"
+    "validate": "node scripts/validate-source.mjs && node scripts/validate-two-factor.mjs && node scripts/validate-provider-onboarding-ui.mjs && node scripts/validate-provider-session.mjs && node scripts/validate-smtp-email.mjs && node scripts/validate-account-recovery.mjs && node scripts/validate-provider-products-ui.mjs && node scripts/validate-admin-products-review.mjs && node scripts/validate-public-catalog.mjs && node scripts/validate-blog-editorial.mjs"
   },
   "engines": {
     "node": ">=22"

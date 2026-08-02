@@ -76,6 +76,9 @@ jobs:
       - name: Verificar catálogo, medios y revisión editorial
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/catalog_isolation.sql
 
+      - name: Verificar blog editorial multi-proveedor
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/blog_editorial.sql
+
       - name: Instalar dependencias de la aplicación fuente
         working-directory: source
         run: npm install --ignore-scripts
