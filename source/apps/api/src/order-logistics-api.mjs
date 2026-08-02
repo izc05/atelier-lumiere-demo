@@ -83,9 +83,10 @@ export function createOrderLogisticsApiHandler({
         throw new ServiceError("SERVICE_UNAVAILABLE", "El seguimiento todavía no está disponible.", 503);
       }
 
-      const [, actor, orderId, resource, resourceId] = match;
+      const [, rawActor, orderId, resource, resourceId] = match;
+      const actor = rawActor.toLowerCase();
       const token = bearer(request);
-      const authService = actor.toLowerCase() === "provider" ? providerAuthService : customerAuthService;
+      const authService = actor === "provider" ? providerAuthService : customerAuthService;
       const session = token ? await authService.authenticate(token) : null;
       if (!session) {
         throw new ServiceError("UNAUTHORIZED", "La sesión no es válida o ha caducado.", 401);
@@ -93,16 +94,38 @@ export function createOrderLogisticsApiHandler({
       const context = session.context;
       const method = request.method ?? "GET";
 
-      if (actor.toLowerCase() === "provider" && resource === "shipments") {
+      if (!resourceId && method === "GET") {
+        if (resource === "shipments") {
+          sendJson(response, 200, {
+            shipments: await orderLogisticsService.listShipments(context, orderId)
+          });
+          return;
+        }
+        sendJson(response, 200, {
+          incidents: await orderLogisticsService.listIncidents(context, orderId)
+        });
+        return;
+      }
+
+      if (actor === "provider" && resource === "shipments") {
         if (!resourceId && method === "POST") {
           sendJson(response, 201, {
-            shipment: await orderLogisticsService.createShipment(context, orderId, await readJson(request))
+            shipment: await orderLogisticsService.createShipment(
+              context,
+              orderId,
+              await readJson(request)
+            )
           });
           return;
         }
         if (resourceId && method === "PATCH") {
           sendJson(response, 200, {
-            shipment: await orderLogisticsService.updateShipment(context, orderId, resourceId, await readJson(request))
+            shipment: await orderLogisticsService.updateShipment(
+              context,
+              orderId,
+              resourceId,
+              await readJson(request)
+            )
           });
           return;
         }
@@ -111,13 +134,22 @@ export function createOrderLogisticsApiHandler({
       if (resource === "incidents") {
         if (!resourceId && method === "POST") {
           sendJson(response, 201, {
-            incident: await orderLogisticsService.createIncident(context, orderId, await readJson(request))
+            incident: await orderLogisticsService.createIncident(
+              context,
+              orderId,
+              await readJson(request)
+            )
           });
           return;
         }
-        if (actor.toLowerCase() === "provider" && resourceId && method === "PATCH") {
+        if (actor === "provider" && resourceId && method === "PATCH") {
           sendJson(response, 200, {
-            incident: await orderLogisticsService.updateIncident(context, orderId, resourceId, await readJson(request))
+            incident: await orderLogisticsService.updateIncident(
+              context,
+              orderId,
+              resourceId,
+              await readJson(request)
+            )
           });
           return;
         }
@@ -126,7 +158,7 @@ export function createOrderLogisticsApiHandler({
       sendJson(response, 405, {
         error: "METHOD_NOT_ALLOWED",
         message: "Método no permitido."
-      }, { Allow: actor.toLowerCase() === "provider" ? "POST,PATCH" : "POST" });
+      }, { Allow: actor === "provider" ? "GET,POST,PATCH" : "GET,POST" });
     } catch (error) {
       handleError(response, error, logger);
     }
