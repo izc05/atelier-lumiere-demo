@@ -15,6 +15,9 @@ import {
 } from "./email-delivery-services.mjs";
 import { createEmailVerificationService } from "./email-verification-service.mjs";
 import { createMailService } from "./mail-service.mjs";
+import { createLocalMediaStorage } from "./media-storage-service.mjs";
+import { createProductMediaApiHandler } from "./product-media-api.mjs";
+import { createProductMediaService } from "./product-media-service.mjs";
 import { createProductsApiHandler } from "./products-api.mjs";
 import { createProductsService } from "./products-service.mjs";
 import { createProviderAuthService } from "./provider-auth-service.mjs";
@@ -32,6 +35,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 
 const database = createDatabase();
 const mailService = createMailService();
+const mediaStorage = createLocalMediaStorage();
 const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
 const authenticateRequest = createRequestAuthenticator({ environment });
 const developmentAdminContext = createDevelopmentAdminContext({ environment });
@@ -101,6 +105,13 @@ const productsService = database.enabled
   ? createProductsService({ database })
   : null;
 
+const productMediaService = database.enabled
+  ? createProductMediaService({
+      database,
+      storage: mediaStorage
+    })
+  : null;
+
 if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
   try {
     await mailService.verify();
@@ -129,10 +140,16 @@ const accountRecoveryHandler = createAccountRecoveryApiHandler({
   accountRecoveryService
 });
 
+const productsHandler = createProductsApiHandler({
+  baseHandler: accountRecoveryHandler,
+  productsService,
+  providerAuthService
+});
+
 const server = createServer(
-  createProductsApiHandler({
-    baseHandler: accountRecoveryHandler,
-    productsService,
+  createProductMediaApiHandler({
+    baseHandler: productsHandler,
+    productMediaService,
     providerAuthService
   })
 );
