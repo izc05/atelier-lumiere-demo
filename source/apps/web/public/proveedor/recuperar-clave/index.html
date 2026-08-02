@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Nueva contraseña · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/onboarding.css">
+  <script src="/proveedor/recovery.js" defer></script>
+</head>
+<body data-page="password-reset">
+  <main class="onboarding-shell">
+    <header class="onboarding-brand">
+      <a href="/" aria-label="Atelier Lumière"><span class="brand-mark">AL</span></a>
+      <div><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></div>
+    </header>
+
+    <section class="onboarding-card">
+      <p class="eyebrow">Recuperación segura</p>
+      <h1>Crea una contraseña nueva</h1>
+      <p class="lead">Al guardar el cambio se cerrarán todas las sesiones anteriores. Después tendrás que entrar de nuevo y completar el doble factor.</p>
+
+      <form id="password-reset-form" class="form-stack">
+        <label>Nueva contraseña
+          <input id="new-password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+        </label>
+        <label>Repite la contraseña
+          <input id="new-password-confirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+        </label>
+        <p class="security-note">Utiliza al menos 12 caracteres y evita nombres, correo o expresiones fáciles de adivinar.</p>
+        <p id="password-reset-message" class="message" role="status" aria-live="polite"></p>
+        <button id="password-reset-submit" class="button primary" type="submit">Guardar contraseña</button>
+      </form>
+
+      <section id="password-reset-success" hidden>
+        <div class="success-mark" aria-hidden="true">✓</div>
+        <h2>Contraseña actualizada</h2>
+        <p>Todas las sesiones anteriores han quedado cerradas.</p>
+        <a class="button primary" href="/proveedor/acceso/">Entrar con la nueva contraseña</a>
+      </section>
+
+      <section id="recovery-unavailable" hidden>
+        <h2>Enlace no disponible</h2>
+        <p>El enlace puede haber caducado, haberse utilizado o haber sido sustituido por otro más reciente.</p>
+        <a class="button secondary" href="/proveedor/solicitar-recuperacion/">Solicitar uno nuevo</a>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
