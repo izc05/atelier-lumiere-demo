@@ -1,0 +1,48 @@
+name: Aplicar identidad Atelier Lumière
+
+on:
+  push:
+    branches:
+      - agent/identidad-atelier-lumiere
+    paths:
+      - 'assets/brand/**'
+      - 'scripts/apply_atelier_brand.py'
+      - '.github/workflows/apply-atelier-brand.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Aplicar nombre, logo y recursos compartidos
+        run: python scripts/apply_atelier_brand.py
+
+      - name: Validar archivos
+        run: |
+          python -m py_compile scripts/apply_atelier_brand.py
+          node --check assets/brand/brand.js
+          git diff --check
+
+      - name: Guardar cambios generados
+        run: |
+          if git diff --quiet; then
+            echo "No hay cambios pendientes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Aplicar identidad Atelier Lumière"
+          git push
