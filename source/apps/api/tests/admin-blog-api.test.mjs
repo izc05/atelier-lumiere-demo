@@ -144,8 +144,10 @@ test("Administración revisa, devuelve y publica historias con portada obligator
   });
   const postsService = createBlogPostsService({ database });
   const productsService = createProductsService({ database });
+  const observedRanges = [];
   const storage = {
     async openPreview(_key, range) {
+      observedRanges.push(range ?? null);
       return {
         stream: Readable.from(PREVIEW),
         statusCode: range ? 206 : 200,
@@ -232,17 +234,22 @@ test("Administración revisa, devuelve y publica historias con portada obligator
   );
   assert.equal(noPreviewAuth.status, 401);
 
+  const rangedPreview = await adminBlogService.openPreview(
+    ADMIN_CONTEXT,
+    publishable.post.id,
+    publishable.mediaId,
+    `bytes=0-${PREVIEW.length - 1}`
+  );
+  assert.equal(rangedPreview.statusCode, 206);
+  assert.equal(observedRanges.at(-1), `bytes=0-${PREVIEW.length - 1}`);
+
   const preview = await fetch(
     `${baseUrl}/api/admin/blog-posts/${publishable.post.id}/media/${publishable.mediaId}/preview`,
-    {
-      headers: {
-        Authorization: `Bearer ${ADMIN_TOKEN}`,
-        Range: `bytes=0-${PREVIEW.length - 1}`
-      }
-    }
+    { headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } }
   );
-  assert.equal(preview.status, 206);
+  assert.equal(preview.status, 200);
   assert.equal(preview.headers.get("content-type"), "image/webp");
+  assert.match(preview.headers.get("cache-control"), /private/);
   assert.deepEqual(Buffer.from(await preview.arrayBuffer()), PREVIEW);
 
   const approved = await requestJson(
