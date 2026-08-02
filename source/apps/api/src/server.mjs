@@ -31,6 +31,8 @@ import { createProductsApiHandler } from "./products-api.mjs";
 import { createProductsService } from "./products-service.mjs";
 import { createProviderAuthService } from "./provider-auth-service.mjs";
 import { createProviderOnboardingService } from "./provider-onboarding-service.mjs";
+import { createProviderOrdersApiHandler } from "./provider-orders-api.mjs";
+import { createProviderOrdersService } from "./provider-orders-service.mjs";
 import { createProvidersService } from "./providers-service.mjs";
 import { createPublicBlogApiHandler } from "./public-blog-api.mjs";
 import { createPublicBlogService } from "./public-blog-service.mjs";
@@ -103,6 +105,9 @@ const productsService = database.enabled ? createProductsService({ database }) :
 const productMediaService = database.enabled
   ? createProductMediaService({ database, storage: mediaStorage })
   : null;
+const providerOrdersService = database.enabled
+  ? createProviderOrdersService({ database })
+  : null;
 const adminBlogService = database.enabled
   ? createAdminBlogService({ database, storage: mediaStorage })
   : null;
@@ -162,8 +167,13 @@ const productMediaHandler = createProductMediaApiHandler({
   productMediaService,
   providerAuthService
 });
-const adminBlogHandler = createAdminBlogApiHandler({
+const providerOrdersHandler = createProviderOrdersApiHandler({
   baseHandler: productMediaHandler,
+  providerOrdersService,
+  providerAuthService
+});
+const adminBlogHandler = createAdminBlogApiHandler({
+  baseHandler: providerOrdersHandler,
   adminBlogService,
   authenticateRequest
 });
