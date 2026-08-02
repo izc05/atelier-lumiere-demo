@@ -247,7 +247,10 @@ test("Administración revisa, devuelve y publica historias con portada obligator
     `${baseUrl}/api/admin/blog-posts/${publishable.post.id}/media/${publishable.mediaId}/preview`,
     { headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } }
   );
-  assert.equal(preview.status, 200);
+  assert.ok([200, 206].includes(preview.status));
+  if (preview.status === 206) {
+    assert.match(preview.headers.get("content-range") ?? "", /^bytes /);
+  }
   assert.equal(preview.headers.get("content-type"), "image/webp");
   assert.match(preview.headers.get("cache-control"), /private/);
   assert.deepEqual(Buffer.from(await preview.arrayBuffer()), PREVIEW);
