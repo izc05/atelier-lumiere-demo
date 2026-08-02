@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Mis publicaciones · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/publicaciones/blog.css">
+  <script defer src="/proveedor/publicaciones/posts.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/proveedor/panel/" aria-label="Volver al panel del proveedor">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Blog del taller</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/proveedor/panel/"><span>Volver al panel</span></a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section class="page-head">
+      <div>
+        <p class="eyebrow">Editorial privada</p>
+        <h1>Mis publicaciones</h1>
+        <p class="lead">Cuenta el proceso, la inspiración y las personas que hay detrás de tu trabajo. Atelier Lumière revisará cada historia antes de publicarla.</p>
+      </div>
+      <a class="button primary" href="/proveedor/publicaciones/editar/">Crear publicación</a>
+    </section>
+
+    <section class="metrics" aria-label="Resumen editorial">
+      <article class="metric"><span>Total</span><strong id="metric-total">0</strong><small>Historias del taller</small></article>
+      <article class="metric"><span>Editables</span><strong id="metric-drafts">0</strong><small>Borradores o cambios</small></article>
+      <article class="metric"><span>En revisión</span><strong id="metric-review">0</strong><small>Pendientes de Administración</small></article>
+      <article class="metric"><span>Publicadas</span><strong id="metric-published">0</strong><small>Visibles en el blog</small></article>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros">
+      <input id="search-input" type="search" placeholder="Buscar por título, categoría o introducción" autocomplete="off">
+      <select id="status-filter">
+        <option value="ALL">Todos los estados</option>
+        <option value="DRAFT">Borradores</option>
+        <option value="IN_REVIEW">En revisión</option>
+        <option value="CHANGES_REQUESTED">Cambios solicitados</option>
+        <option value="APPROVED">Aprobadas</option>
+        <option value="PUBLISHED">Publicadas</option>
+        <option value="ARCHIVED">Archivadas</option>
+      </select>
+    </section>
+
+    <section id="posts-loading" class="loading"><p>Cargando las publicaciones privadas…</p></section>
+
+    <section id="posts-empty" class="empty" hidden>
+      <div>
+        <h2>El blog del taller está vacío</h2>
+        <p>Crea una historia sobre una pieza, una técnica o el proceso que sigues en el taller.</p>
+        <a class="button primary" href="/proveedor/publicaciones/editar/">Crear mi primera publicación</a>
+      </div>
+    </section>
+
+    <section id="posts-no-results" class="empty" hidden>
+      <div><h2>No hay coincidencias</h2><p>Cambia la búsqueda o selecciona otro estado.</p></div>
+    </section>
+
+    <section id="posts-list" class="posts-list" aria-live="polite" hidden></section>
+
+    <section id="posts-error" class="error-card" hidden>
+      <div>
+        <h2>No se pudo abrir el blog</h2>
+        <p id="posts-error-message"></p>
+        <button id="retry-button" class="button primary" type="button">Volver a intentar</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

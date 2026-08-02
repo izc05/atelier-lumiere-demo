@@ -27,25 +27,23 @@ async function requestSession(method = "GET") {
   return payload;
 }
 
-async function loadProductCount() {
+async function loadPrivateSummary(path, countId, noteId, itemKey, emptyText, readyText) {
   try {
-    const response = await fetch("/internal/provider/products", {
-      headers: { Accept: "application/json" }
-    });
+    const response = await fetch(path, { headers: { Accept: "application/json" } });
     if (response.status === 401) {
       window.location.replace("/proveedor/acceso/");
       return;
     }
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error();
-    const products = Array.isArray(payload.products) ? payload.products : [];
-    byId("articles-count").textContent = String(products.length);
-    const pending = products.filter((item) => item.status === "IN_REVIEW").length;
-    byId("articles-note").textContent = pending > 0
+    const items = Array.isArray(payload[itemKey]) ? payload[itemKey] : [];
+    byId(countId).textContent = String(items.length);
+    const pending = items.filter((item) => item.status === "IN_REVIEW").length;
+    byId(noteId).textContent = pending > 0
       ? `${pending} pendiente${pending === 1 ? "" : "s"} de revisión`
-      : products.length > 0 ? "Catálogo privado preparado" : "Crea el primer artículo";
+      : items.length > 0 ? readyText : emptyText;
   } catch {
-    byId("articles-note").textContent = "No se pudo cargar el resumen";
+    byId(noteId).textContent = "No se pudo cargar el resumen";
   }
 }
 
@@ -59,7 +57,24 @@ async function loadPanel() {
     byId("session-expiry").textContent = formatDate(data.session.expiresAt);
     byId("panel-loading").hidden = true;
     byId("panel-content").hidden = false;
-    void loadProductCount();
+    void Promise.all([
+      loadPrivateSummary(
+        "/internal/provider/products",
+        "articles-count",
+        "articles-note",
+        "products",
+        "Crea el primer artículo",
+        "Catálogo privado preparado"
+      ),
+      loadPrivateSummary(
+        "/internal/provider/blog-posts",
+        "posts-count",
+        "posts-note",
+        "posts",
+        "Crea la primera historia",
+        "Blog privado preparado"
+      )
+    ]);
   } catch {
     window.location.replace("/proveedor/acceso/");
   }

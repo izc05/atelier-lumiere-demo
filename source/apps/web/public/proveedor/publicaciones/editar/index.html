@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Editor del blog · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/publicaciones/blog.css">
+  <script defer src="/proveedor/publicaciones/editor.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/proveedor/publicaciones/" aria-label="Volver a Mis publicaciones">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Editor del blog</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/proveedor/publicaciones/"><span>Mis publicaciones</span></a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section class="page-head">
+      <div>
+        <p class="eyebrow">Historia del taller</p>
+        <h1 id="page-title">Nueva publicación</h1>
+        <p class="lead">Redacta con calma. Puedes guardar el borrador tantas veces como necesites antes de enviarlo a revisión.</p>
+      </div>
+    </section>
+
+    <section id="editor-loading" class="loading"><p>Preparando el editor…</p></section>
+    <section id="editor-error" class="error-card" hidden>
+      <div>
+        <h2>No se pudo abrir la publicación</h2>
+        <p id="editor-error-message"></p>
+        <a class="button primary" href="/proveedor/publicaciones/">Volver a Mis publicaciones</a>
+      </div>
+    </section>
+
+    <section id="editor-content" hidden>
+      <div id="locked-banner" class="locked-banner" hidden></div>
+      <div class="editor-layout">
+        <form id="post-form" class="editor-main">
+          <section class="panel-card">
+            <header>
+              <p class="eyebrow">01 · Presentación</p>
+              <h2>Título e introducción</h2>
+              <p>La introducción aparecerá en el listado del blog y debe explicar por qué merece la pena leer la historia.</p>
+            </header>
+            <div class="form-grid">
+              <label class="field full">Título
+                <input id="title" type="text" minlength="4" maxlength="180" required placeholder="Cómo nace una pieza bordada a mano">
+              </label>
+              <label class="field">Categoría
+                <input id="category" type="text" minlength="2" maxlength="80" placeholder="Procesos artesanales">
+              </label>
+              <label class="field">Etiquetas
+                <input id="tags" type="text" maxlength="600" placeholder="bordado, hecho a mano, inspiración">
+                <small>Hasta doce, separadas por comas.</small>
+              </label>
+              <label class="field full">Introducción
+                <textarea id="excerpt" maxlength="420" placeholder="Resume la historia en dos o tres frases."></textarea>
+                <span class="counter-row"><span>Para revisión: mínimo 40 caracteres</span><strong><span id="excerpt-count">0</span>/420</strong></span>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel-card">
+            <header>
+              <p class="eyebrow">02 · Contenido</p>
+              <h2>Escribe la historia</h2>
+              <p>Puedes usar títulos con <code>##</code> y listas con <code>-</code>. La vista previa se actualiza sin ejecutar HTML.</p>
+            </header>
+            <label class="field full">Contenido en Markdown
+              <textarea id="body-markdown" class="body-editor" maxlength="50000" placeholder="## La idea inicial&#10;&#10;Cada pieza comienza...&#10;&#10;## El trabajo manual&#10;&#10;- Selección de materiales&#10;- Elaboración&#10;- Acabado"></textarea>
+              <span class="counter-row"><span>Para revisión: mínimo 200 caracteres</span><strong><span id="body-count">0</span>/50.000 · <span id="word-count">0</span> palabras</strong></span>
+            </label>
+          </section>
+
+          <section class="panel-card">
+            <header>
+              <p class="eyebrow">03 · Vista previa</p>
+              <h2>Así se leerá</h2>
+              <p>Esta previsualización es orientativa. La maquetación pública definitiva se añadirá al cerrar el Bloque 5.</p>
+            </header>
+            <article id="markdown-preview" class="preview-card" aria-live="polite"></article>
+            <div id="tags-preview" class="tags-preview"></div>
+          </section>
+
+          <section class="panel-card">
+            <header>
+              <p class="eyebrow">04 · Artículos relacionados</p>
+              <h2>Conecta la historia con tu catálogo</h2>
+              <p>Selecciona hasta ocho piezas del mismo taller. Las archivadas no se pueden relacionar.</p>
+            </header>
+            <div id="products-loading" class="notice">Cargando artículos del taller…</div>
+            <div id="products-selector" class="products-selector" hidden></div>
+            <p id="products-message" class="message"></p>
+          </section>
+
+          <section class="panel-card">
+            <header>
+              <p class="eyebrow">05 · Portada e imágenes</p>
+              <h2>Preparado para la siguiente fase</h2>
+              <p>La base de datos ya admite portada e imágenes, pero la carga privada y las previews se conectarán en el siguiente tramo.</p>
+            </header>
+            <div class="notice">Esta publicación puede guardarse y enviarse a revisión sin imágenes durante esta fase. No se mostrará públicamente hasta completar la galería y la aprobación administrativa.</div>
+          </section>
+        </form>
+
+        <aside class="editor-side">
+          <section class="panel-card">
+            <p class="eyebrow">Estado</p>
+            <h2 id="status-title">Borrador nuevo</h2>
+            <div class="summary-list">
+              <div class="summary-item"><span>Versión</span><strong id="version-label">—</strong></div>
+              <div class="summary-item"><span>Etiquetas</span><strong id="tag-count">0/12</strong></div>
+              <div class="summary-item"><span>Artículos</span><strong id="product-count">0/8</strong></div>
+              <div class="summary-item"><span>Último guardado</span><strong id="updated-label">Sin guardar</strong></div>
+            </div>
+            <button id="save-button" class="button primary full-width" type="submit" form="post-form">Guardar borrador</button>
+            <p id="save-message" class="message" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="panel-card">
+            <p class="eyebrow">Revisión editorial</p>
+            <h2>Enviar a Atelier Lumière</h2>
+            <p class="notice">La publicación quedará bloqueada mientras se revisa. La introducción necesita 40 caracteres y el texto al menos 200.</p>
+            <label class="field section-gap">Nota para Administración
+              <textarea id="review-note" maxlength="4000" placeholder="Aclara el enfoque de la historia o cualquier detalle importante."></textarea>
+            </label>
+            <button id="submit-review-button" class="button secondary full-width section-gap" type="button">Enviar a revisión</button>
+            <p id="review-message" class="message" role="status" aria-live="polite"></p>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
