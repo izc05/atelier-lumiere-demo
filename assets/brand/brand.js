@@ -137,7 +137,13 @@
     applyBrand();
     createPublicIntro();
     const observer = new MutationObserver(scheduleApply);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    window.addEventListener('scroll', scheduleApply, { passive: true });
   };
 
   if (document.readyState === 'loading') {
