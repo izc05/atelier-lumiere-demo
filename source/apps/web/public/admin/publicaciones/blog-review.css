@@ -1,0 +1,56 @@
+.blog-card-title { margin-top: 7px; }
+.cover-state {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: .66rem;
+  font-weight: 800;
+}
+.cover-state.ready { color: var(--success); background: rgba(35, 107, 72, .1); }
+.cover-state.missing { color: var(--danger); background: rgba(158, 48, 65, .1); }
+.markdown-review {
+  min-height: 260px;
+  padding: clamp(20px, 4vw, 42px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: white;
+}
+.markdown-review h1,
+.markdown-review h2,
+.markdown-review h3 {
+  margin: 1.25em 0 .45em;
+  letter-spacing: -.02em;
+}
+.markdown-review h1:first-child,
+.markdown-review h2:first-child,
+.markdown-review h3:first-child { margin-top: 0; }
+.markdown-review p,
+.markdown-review li { color: #493a3e; line-height: 1.75; }
+.markdown-review ul { padding-left: 1.35rem; }
+.blog-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.blog-image {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: white;
+}
+.blog-image figure { margin: 0; }
+.blog-image img { display: block; width: 100%; height: 190px; object-fit: cover; background: var(--cream); }
+.blog-image figcaption { display: grid; gap: 4px; padding: 11px; color: var(--muted); font-size: .68rem; }
+.blog-image figcaption strong { color: var(--ink); font-size: .72rem; }
+.related-products { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.related-product { padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+.related-product strong, .related-product small { display: block; }
+.related-product small { margin-top: 5px; color: var(--muted); }
+.cover-warning { color: var(--danger); background: rgba(158, 48, 65, .09); }
+.full-width { width: 100%; }
+.section-gap-small { margin-top: 10px; }
+.section-gap { margin-top: 18px; }
+@media (max-width: 900px) {
+  .blog-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .blog-gallery, .related-products { grid-template-columns: 1fr; }
+  .blog-image img { height: 230px; }
+}
