@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { createWebHandler } from "./app.mjs";
 import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
+import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.WEB_PORT ?? "3000", 10);
@@ -10,8 +11,13 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 }
 
 const baseWebHandler = createWebHandler();
+const accountRecoveryHandler = createAccountRecoveryWebHandler({
+  baseHandler: baseWebHandler
+});
 const server = createServer(
-  createAccountRecoveryWebHandler({ baseHandler: baseWebHandler })
+  createProviderProductsWebHandler({
+    baseHandler: accountRecoveryHandler
+  })
 );
 
 server.listen(port, host, () => {

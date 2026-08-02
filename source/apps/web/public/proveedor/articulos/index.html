@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Mis artículos · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/articulos/products.css">
+  <script defer src="/proveedor/articulos/products.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/proveedor/panel/" aria-label="Volver al panel del proveedor">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Catálogo del taller</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/proveedor/panel/"><span>Volver al panel</span></a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section class="page-head">
+      <div>
+        <p class="eyebrow">Catálogo privado</p>
+        <h1>Mis artículos</h1>
+        <p class="lead">Crea las fichas de tu taller, añade fotografías y vídeo y envíalas a Atelier Lumière para su revisión.</p>
+      </div>
+      <a class="button primary" href="/proveedor/articulos/editar/">Crear artículo</a>
+    </section>
+
+    <section class="metrics" aria-label="Resumen del catálogo">
+      <article class="metric"><span>Total</span><strong id="metric-total">0</strong><small>Artículos del taller</small></article>
+      <article class="metric"><span>Borradores</span><strong id="metric-drafts">0</strong><small>Se pueden editar</small></article>
+      <article class="metric"><span>En revisión</span><strong id="metric-review">0</strong><small>Pendientes de Atelier Lumière</small></article>
+      <article class="metric"><span>Publicados</span><strong id="metric-published">0</strong><small>Visibles en la tienda</small></article>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros">
+      <input id="search-input" type="search" placeholder="Buscar por nombre, categoría o descripción" autocomplete="off">
+      <select id="status-filter">
+        <option value="ALL">Todos los estados</option>
+        <option value="DRAFT">Borradores</option>
+        <option value="IN_REVIEW">En revisión</option>
+        <option value="CHANGES_REQUESTED">Cambios solicitados</option>
+        <option value="APPROVED">Aprobados</option>
+        <option value="PUBLISHED">Publicados</option>
+        <option value="ARCHIVED">Archivados</option>
+      </select>
+    </section>
+
+    <section id="products-loading" class="loading">
+      <p>Cargando el catálogo privado…</p>
+    </section>
+
+    <section id="products-empty" class="empty" hidden>
+      <div>
+        <h2>Tu catálogo está vacío</h2>
+        <p>Crea el primer artículo y guárdalo como borrador. Nada se publicará sin revisión.</p>
+        <a class="button primary" href="/proveedor/articulos/editar/">Crear mi primer artículo</a>
+      </div>
+    </section>
+
+    <section id="products-no-results" class="empty" hidden>
+      <div>
+        <h2>No hay coincidencias</h2>
+        <p>Cambia el texto de búsqueda o selecciona otro estado.</p>
+      </div>
+    </section>
+
+    <section id="products-list" class="products-grid" aria-live="polite" hidden></section>
+
+    <section id="products-error" class="error-card" hidden>
+      <div>
+        <h2>No se pudo abrir el catálogo</h2>
+        <p id="products-error-message"></p>
+        <button id="retry-button" class="button primary" type="button">Volver a intentar</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
