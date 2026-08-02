@@ -32,6 +32,8 @@ import { createProductsService } from "./products-service.mjs";
 import { createProviderAuthService } from "./provider-auth-service.mjs";
 import { createProviderOnboardingService } from "./provider-onboarding-service.mjs";
 import { createProvidersService } from "./providers-service.mjs";
+import { createPublicBlogApiHandler } from "./public-blog-api.mjs";
+import { createPublicBlogService } from "./public-blog-service.mjs";
 import { createPublicCatalogApiHandler } from "./public-catalog-api.mjs";
 import { createPublicCatalogService } from "./public-catalog-service.mjs";
 import { createTwoFactorService } from "./two-factor-service.mjs";
@@ -107,6 +109,9 @@ const adminBlogService = database.enabled
 const adminProductsService = database.enabled
   ? createAdminProductsService({ database, storage: mediaStorage })
   : null;
+const publicBlogService = database.enabled
+  ? createPublicBlogService({ database, storage: mediaStorage })
+  : null;
 const publicCatalogService = database.enabled
   ? createPublicCatalogService({ database, storage: mediaStorage })
   : null;
@@ -167,8 +172,12 @@ const adminProductsHandler = createAdminProductsApiHandler({
   adminProductsService,
   authenticateRequest
 });
-const server = createServer(createPublicCatalogApiHandler({
+const publicBlogHandler = createPublicBlogApiHandler({
   baseHandler: adminProductsHandler,
+  publicBlogService
+});
+const server = createServer(createPublicCatalogApiHandler({
+  baseHandler: publicBlogHandler,
   publicCatalogService
 }));
 
