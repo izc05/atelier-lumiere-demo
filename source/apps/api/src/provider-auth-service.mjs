@@ -86,7 +86,8 @@ function secureEquals(left, right) {
 
 async function verifyPassword(password, credential) {
   const salt = credential?.password_salt ?? "AAAAAAAAAAAAAAAAAAAAAA";
-  const expected = credential?.password_hash ?? "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  const expected = credential?.password_hash
+    ?? "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   const derived = await scryptAsync(password, salt, 64, {
     N: 16384,
     r: 8,
@@ -274,7 +275,10 @@ export function createProviderAuthService({
   loginPepper = process.env.AUTH_LOGIN_PEPPER,
   twoFactorEncryptionKey = process.env.TWO_FACTOR_ENCRYPTION_KEY_BASE64,
   recoveryPepper = process.env.TWO_FACTOR_RECOVERY_PEPPER,
-  challengeTtlMinutes = Number.parseInt(process.env.PROVIDER_LOGIN_CHALLENGE_TTL_MINUTES ?? "10", 10),
+  challengeTtlMinutes = Number.parseInt(
+    process.env.PROVIDER_LOGIN_CHALLENGE_TTL_MINUTES ?? "10",
+    10
+  ),
   sessionTtlHours = Number.parseInt(process.env.PROVIDER_SESSION_TTL_HOURS ?? "12", 10),
   now = () => new Date()
 } = {}) {
@@ -296,7 +300,11 @@ export function createProviderAuthService({
   if (typeof recoveryPepper !== "string" || recoveryPepper.length < 32) {
     throw new TypeError("TWO_FACTOR_RECOVERY_PEPPER debe tener al menos 32 caracteres.");
   }
-  if (!Number.isInteger(challengeTtlMinutes) || challengeTtlMinutes < 5 || challengeTtlMinutes > 30) {
+  if (
+    !Number.isInteger(challengeTtlMinutes)
+    || challengeTtlMinutes < 5
+    || challengeTtlMinutes > 30
+  ) {
     throw new TypeError("El desafío de acceso debe durar entre 5 y 30 minutos.");
   }
   if (!Number.isInteger(sessionTtlHours) || sessionTtlHours < 1 || sessionTtlHours > 24) {
@@ -310,7 +318,7 @@ export function createProviderAuthService({
       const currentTime = now();
       const throttleKey = hashKey(email, loginPepper);
 
-      return database.withContext(systemContext, async (transaction) => {
+      const outcome = await database.withContext(systemContext, async (transaction) => {
         const throttle = await checkThrottle(transaction, throttleKey, currentTime);
         const account = await loadAccount(transaction, email);
         const passwordValid = await verifyPassword(password, account);
@@ -326,12 +334,12 @@ export function createProviderAuthService({
               entityId: account.user_id
             });
           }
-          throw invalidCredentials();
+          return { invalidCredentials: true };
         }
 
         await transaction.query("DELETE FROM login_throttles WHERE key_hash = $1", [throttleKey]);
-        if (!accountSecurityReady(account)) throw accountNotReady();
-        if (account.provider_status !== "ACTIVE") throw providerPendingApproval();
+        if (!accountSecurityReady(account)) return { notReady: true };
+        if (account.provider_status !== "ACTIVE") return { pendingApproval: true };
 
         await transaction.query(
           `UPDATE provider_login_challenges
@@ -377,6 +385,11 @@ export function createProviderAuthService({
           attemptsRemaining: MAX_CHALLENGE_FAILURES
         };
       });
+
+      if (outcome.invalidCredentials) throw invalidCredentials();
+      if (outcome.notReady) throw accountNotReady();
+      if (outcome.pendingApproval) throw providerPendingApproval();
+      return outcome;
     },
 
     async complete(input = {}, metadata = {}) {
@@ -471,7 +484,9 @@ export function createProviderAuthService({
         );
 
         const sessionToken = randomBytes(32).toString("base64url");
-        const sessionExpiresAt = new Date(currentTime.getTime() + sessionTtlHours * 60 * 60 * 1000);
+        const sessionExpiresAt = new Date(
+          currentTime.getTime() + sessionTtlHours * 60 * 60 * 1000
+        );
         const sessionResult = await transaction.query(
           `INSERT INTO sessions
             (user_id, provider_id, role, token_hash, user_agent, expires_at, last_seen_at, created_at)
