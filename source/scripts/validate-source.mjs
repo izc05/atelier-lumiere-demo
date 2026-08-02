@@ -143,7 +143,9 @@ for (const expected of [
   "Administración de talleres invitados",
   "Crear proveedor",
   "Enlace provisional",
-  "Auditoría del taller"
+  "Auditoría del taller",
+  "Estado de activación",
+  "En producción el token no se mostrará"
 ]) {
   if (!adminHtml.includes(expected)) failures.push(`La administración fuente no contiene: ${expected}`);
 }
@@ -152,8 +154,7 @@ const adminJs = contents.get("apps/web/public/admin/proveedores/providers.js") ?
 for (const expected of [
   "/internal/admin/session",
   "/internal/admin/providers",
-  "activationToken",
-  "La pantalla para que el proveedor"
+  "activationToken"
 ]) {
   if (!adminJs.includes(expected) && !adminHtml.includes(expected)) {
     failures.push(`Falta un flujo administrativo: ${expected}`);
@@ -194,16 +195,20 @@ for (const capability of [
   "providerManagementApi",
   "providerInvitationAcceptance",
   "emailVerification: Boolean(emailVerificationService)",
-  "emailDelivery: false",
+  "emailDelivery: Boolean(mailService?.enabled)",
   "twoFactorAuthentication: false"
 ]) {
   if (!api.includes(capability)) failures.push(`La API no declara correctamente: ${capability}`);
 }
 for (const expected of [
-  "const { verificationToken, ...safeResult }",
+  "const { verificationToken, emailDelivery, ...safeResult }",
+  "const { token, emailDelivery, ...safeResult }",
   "environment !== \"production\"",
   "manual-development",
-  "pending-email-service"
+  "deliveryLabel",
+  "SENT",
+  "FAILED",
+  "disabled"
 ]) {
   if (!api.includes(expected)) failures.push(`Falta una protección de entrega de correo: ${expected}`);
 }
