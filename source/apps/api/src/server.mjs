@@ -30,6 +30,8 @@ import { createEmailVerificationService } from "./email-verification-service.mjs
 import { createMailService } from "./mail-service.mjs";
 import { createMediaPreviewStorage } from "./media-preview-storage.mjs";
 import { createLocalMediaStorage } from "./media-storage-service.mjs";
+import { createOrderLogisticsApiHandler } from "./order-logistics-api.mjs";
+import { createOrderLogisticsService } from "./order-logistics-service.mjs";
 import { createProductMediaApiHandler } from "./product-media-api.mjs";
 import { createProductMediaService } from "./product-media-service.mjs";
 import { createProductsApiHandler } from "./products-api.mjs";
@@ -124,6 +126,9 @@ const customerOrdersService = database.enabled
 const customRequestFilesService = database.enabled
   ? createCustomRequestFilesService({ database, storage: requestFileStorage })
   : null;
+const orderLogisticsService = database.enabled
+  ? createOrderLogisticsService({ database })
+  : null;
 const adminBlogService = database.enabled
   ? createAdminBlogService({ database, storage: mediaStorage })
   : null;
@@ -199,8 +204,14 @@ const customRequestFilesHandler = createCustomRequestFilesApiHandler({
   providerAuthService,
   customerAuthService
 });
-const adminBlogHandler = createAdminBlogApiHandler({
+const orderLogisticsHandler = createOrderLogisticsApiHandler({
   baseHandler: customRequestFilesHandler,
+  orderLogisticsService,
+  providerAuthService,
+  customerAuthService
+});
+const adminBlogHandler = createAdminBlogApiHandler({
+  baseHandler: orderLogisticsHandler,
   adminBlogService,
   authenticateRequest
 });
