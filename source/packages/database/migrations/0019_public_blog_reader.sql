@@ -10,14 +10,6 @@ USING (
     WHERE provider.id = blog_posts.provider_id
       AND provider.status = 'ACTIVE'
   )
-  AND EXISTS (
-    SELECT 1 FROM blog_post_media cover
-    WHERE cover.post_id = blog_posts.id
-      AND cover.provider_id = blog_posts.provider_id
-      AND cover.placement = 'COVER'
-      AND cover.status = 'READY'
-      AND cover.preview_mime_type = 'image/webp'
-  )
 );
 
 CREATE POLICY blog_post_tags_catalog_reader_select ON blog_post_tags
