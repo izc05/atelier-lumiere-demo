@@ -4,6 +4,8 @@ import { constants } from "node:fs";
 const requiredFiles = [
   "package.json",
   ".env.example",
+  ".gitignore",
+  ".dockerignore",
   "apps/web/package.json",
   "apps/web/src/server.mjs",
   "apps/web/public/index.html",
@@ -16,6 +18,9 @@ const requiredFiles = [
   "packages/auth/src/policy.mjs",
   "packages/storage/src/policy.mjs",
   "packages/database/src/schema-plan.mjs",
+  "infra/docker/Dockerfile.web",
+  "infra/docker/Dockerfile.api",
+  "infra/docker/docker-compose.yml",
   "tests/contracts.test.mjs"
 ];
 
@@ -70,12 +75,25 @@ if (!web.includes("Atelier Lumière") || !web.includes("noindex,nofollow")) {
   failures.push("La pantalla fuente debe conservar la marca y permanecer fuera de buscadores.");
 }
 
+const webServer = contents.get("apps/web/src/server.mjs") ?? "";
+if (!webServer.includes("/internal/api-health") || !webServer.includes("API_INTERNAL_URL")) {
+  failures.push("La web fuente debe consultar la API por el canal interno, no por el localhost del navegador.");
+}
+
 const api = contents.get("apps/api/src/app.mjs") ?? "";
 for (const route of ["/health", "/api/meta"]) {
   if (!api.includes(route)) failures.push(`Falta la ruta técnica ${route}`);
 }
 for (const disabled of ["database: false", "authentication: false", "providerIsolation: false"]) {
   if (!api.includes(disabled)) failures.push(`La API no declara correctamente una capacidad pendiente: ${disabled}`);
+}
+
+const compose = contents.get("infra/docker/docker-compose.yml") ?? "";
+for (const service of ["web:", "api:", "database:", "database_data:", "media_data:"]) {
+  if (!compose.includes(service)) failures.push(`Docker Compose no contiene: ${service}`);
+}
+if (!compose.includes("API_INTERNAL_URL: http://api:4000")) {
+  failures.push("Docker Compose no conecta la web con la API mediante la red interna.");
 }
 
 const combined = [...contents.entries()]
@@ -86,7 +104,7 @@ const combined = [...contents.entries()]
 for (const secretPattern of [
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
   /sk-[A-Za-z0-9_-]{20,}/,
-  /postgresql:\/\/[^:\s]+:[^@\s]+@(?:[^\s]+)/
+  /postgresql:\/\/[^:\s$]+:[^@\s$]+@[^\s]+/
 ]) {
   if (secretPattern.test(combined)) failures.push("Se ha detectado un posible secreto en el código fuente.");
 }
