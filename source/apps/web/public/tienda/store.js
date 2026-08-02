@@ -118,5 +118,6 @@ byId("search-input").addEventListener("input", () => {
 byId("category-filter").addEventListener("change", () => void load());
 byId("event-filter").addEventListener("change", () => void load());
 byId("retry-button").addEventListener("click", () => void load());
+window.AtelierCart.wireCount(byId("cart-count"));
 
 void load({ refreshCategories: true });
