@@ -8,6 +8,8 @@
   <meta name="theme-color" content="#59101f">
   <title>Artículo · Atelier Lumière</title>
   <link rel="stylesheet" href="/tienda/store.css">
+  <link rel="stylesheet" href="/tienda/cart.css">
+  <script defer src="/tienda/cart-store.js"></script>
   <script defer src="/tienda/product.js"></script>
 </head>
 <body>
@@ -15,50 +17,70 @@
     <header class="topbar">
       <a class="brand" href="/tienda/">
         <span class="brand-mark" aria-hidden="true">AL</span>
-        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+        <span><strong>Atelier Lumière</strong><small>Ficha de la pieza</small></span>
       </a>
-      <nav class="nav"><a class="button ghost" href="/tienda/">Volver a la tienda</a><a class="button secondary" href="/proveedor/acceso/">Acceso de talleres</a></nav>
+      <nav class="nav" aria-label="Navegación de la tienda">
+        <a class="button ghost" href="/tienda/">Volver a la tienda</a>
+        <a class="button secondary cart-link" href="/carrito/">Carrito <span id="cart-count" class="cart-count">0</span></a>
+      </nav>
     </header>
 
-    <section id="loading-view" class="loading"><p>Preparando la pieza…</p></section>
-    <section id="error-view" class="error" hidden><div><h2>No se pudo abrir el artículo</h2><p id="error-message"></p><a class="button primary" href="/tienda/">Volver a la tienda</a></div></section>
+    <section id="loading-view" class="loading"><p>Abriendo la pieza publicada…</p></section>
+    <section id="error-view" class="error" hidden><div><h2>No se pudo abrir la pieza</h2><p id="error-message"></p><a class="button primary" href="/tienda/">Volver a la tienda</a></div></section>
 
-    <section id="detail-view" class="detail" hidden>
-      <div class="gallery">
-        <div id="main-media" class="main-media"></div>
-        <div id="thumbs" class="thumbs"></div>
-      </div>
+    <section id="product-view" hidden>
+      <section class="product-hero">
+        <div id="hero-media" class="hero-media"></div>
+        <div class="product-copy">
+          <p id="product-provider" class="eyebrow"></p>
+          <h1 id="product-name"></h1>
+          <p id="product-short" class="lead"></p>
+          <strong id="product-price" class="product-price"></strong>
+          <div id="product-facts" class="chips"></div>
+          <div id="product-events" class="chips"></div>
 
-      <aside class="product-panel">
-        <section class="panel">
-          <p id="provider-name" class="eyebrow">Taller</p>
-          <h1 id="product-name">Artículo</h1>
-          <p id="short-description" class="lead"></p>
-          <strong id="price-value" class="price">—</strong>
-          <div class="facts">
-            <div class="fact"><span>Preparación</span><strong id="preparation-value">—</strong></div>
-            <div class="fact"><span>Disponibilidad</span><strong id="stock-value">—</strong></div>
-            <div class="fact"><span>Categoría</span><strong id="category-value">—</strong></div>
-          </div>
-          <div id="events-list" class="tags"></div>
-          <p class="pilot">Piloto privado: el proceso de compra todavía no está activado. La ficha permite revisar el catálogo real antes de conectar pedidos y pagos.</p>
-        </section>
+          <form id="purchase-form" class="purchase-box">
+            <div>
+              <h2>Preparar esta pieza</h2>
+              <p class="lead">Selecciona cantidad y personalizaciones. El precio definitivo se recalcula en el servidor.</p>
+            </div>
+            <div id="purchase-options" class="option-grid"></div>
+            <div class="quantity-row">
+              <label class="field">Cantidad
+                <input id="purchase-quantity" type="number" inputmode="numeric" min="1" max="10" value="1" required>
+              </label>
+              <div id="custom-request-container" class="custom-request-box" hidden>
+                <label class="custom-request-toggle"><input id="custom-request-toggle" type="checkbox"> Solicitar un diseño propio</label>
+                <div id="custom-request-fields" hidden>
+                  <label class="field">Título del encargo
+                    <input id="custom-request-title" maxlength="180" placeholder="Ejemplo: versión con nombre y fecha">
+                  </label>
+                  <label class="field">Qué necesitas
+                    <textarea id="custom-request-brief" minlength="20" maxlength="12000" placeholder="Describe medidas, colores, texto, acabado y cualquier referencia"></textarea>
+                  </label>
+                  <label class="field">Fecha deseada
+                    <input id="custom-request-date" type="date">
+                  </label>
+                </div>
+              </div>
+            </div>
+            <button id="add-cart-button" class="button primary" type="submit">Añadir al carrito</button>
+            <p id="purchase-result" class="message" role="status" aria-live="polite"></p>
+            <p class="pilot-warning">Checkout piloto sin cobro real. Cada taller recibirá su pedido por separado.</p>
+          </form>
+        </div>
+      </section>
 
-        <section class="panel">
-          <p class="eyebrow">La historia de la pieza</p>
-          <h2>Proceso artesanal</h2>
-          <p id="story-value" class="copy"></p>
-          <h3 class="section-gap">Envío y preparación</h3>
-          <p id="shipping-value" class="copy"></p>
-        </section>
+      <section class="content-grid">
+        <article class="story-card"><p class="eyebrow">La pieza</p><h2>Historia y proceso</h2><p id="product-story" class="story"></p></article>
+        <aside class="info-stack">
+          <article class="info-card"><h2>Preparación y disponibilidad</h2><div id="availability-data" class="key-values"></div></article>
+          <article class="info-card"><h2>Personalización</h2><p id="personalization-notes"></p><div id="personalization-options" class="option-list"></div></article>
+          <article class="info-card"><h2>Envío</h2><p id="shipping-notes"></p></article>
+        </aside>
+      </section>
 
-        <section id="personalization-panel" class="panel" hidden>
-          <p class="eyebrow">Diseñada para ti</p>
-          <h2>Personalización</h2>
-          <div id="options-list" class="options section-gap"></div>
-          <p id="personalization-notes" class="copy"></p>
-        </section>
-      </aside>
+      <section class="gallery-section"><p class="eyebrow">Galería publicada</p><h2>Detalles de la pieza</h2><div id="media-gallery" class="media-gallery"></div></section>
     </section>
   </main>
 </body>
