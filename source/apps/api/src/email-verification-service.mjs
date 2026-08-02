@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { ServiceError } from "./providers-service.mjs";
+import { issueTwoFactorContinuation } from "./two-factor-service.mjs";
 
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,180}$/;
 
@@ -142,6 +143,10 @@ export function createEmailVerificationService({
     process.env.EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS ?? "60",
     10
   ),
+  twoFactorSetupTtlMinutes = Number.parseInt(
+    process.env.TWO_FACTOR_SETUP_TTL_MINUTES ?? "15",
+    10
+  ),
   now = () => new Date()
 } = {}) {
   if (!database || typeof database.withContext !== "function") {
@@ -161,6 +166,13 @@ export function createEmailVerificationService({
     throw new TypeError(
       "EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS debe estar entre 30 y 3600."
     );
+  }
+  if (
+    !Number.isInteger(twoFactorSetupTtlMinutes)
+    || twoFactorSetupTtlMinutes < 5
+    || twoFactorSetupTtlMinutes > 60
+  ) {
+    throw new TypeError("TWO_FACTOR_SETUP_TTL_MINUTES debe estar entre 5 y 60.");
   }
 
   return Object.freeze({
@@ -210,12 +222,22 @@ export function createEmailVerificationService({
           [row.user_id, currentTime]
         );
 
+        const continuation = await issueTwoFactorContinuation(transaction, {
+          userId: row.user_id,
+          providerId: row.provider_id,
+          currentTime,
+          ttlMinutes: twoFactorSetupTtlMinutes
+        });
+
         await writeAudit(transaction, {
           actorUserId: row.user_id,
           providerId: row.provider_id,
           action: "PROVIDER_EMAIL_VERIFIED",
           tokenId: row.id,
-          metadata: { nextRequiredStep: "ENABLE_2FA" }
+          metadata: {
+            nextRequiredStep: "ENABLE_2FA",
+            setupExpiresAt: continuation.expiresAt
+          }
         });
 
         const user = userResult.rows[0];
@@ -238,6 +260,8 @@ export function createEmailVerificationService({
             role: row.membership_role,
             status: row.membership_status
           },
+          twoFactorSetupToken: continuation.token,
+          twoFactorSetupExpiresAt: continuation.expiresAt,
           nextSteps: ["ENABLE_2FA"],
           accessGranted: false
         };

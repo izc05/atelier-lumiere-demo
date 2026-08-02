@@ -116,13 +116,14 @@ function resendResponse(result, environment) {
 }
 
 export function createApiHandler({
-  version = "0.4.0",
+  version = "0.5.0",
   environment = process.env.NODE_ENV ?? "development",
   now = () => new Date(),
   database,
   providersService,
   onboardingService,
   emailVerificationService,
+  twoFactorService,
   authenticateRequest = async () => null,
   logger = console
 } = {}) {
@@ -166,7 +167,8 @@ export function createApiHandler({
             providerInvitationAcceptance: Boolean(onboardingService),
             emailVerification: Boolean(emailVerificationService),
             emailDelivery: false,
-            twoFactorAuthentication: false,
+            // Transición desde la fase anterior: twoFactorAuthentication: false.
+            twoFactorAuthentication: Boolean(twoFactorService),
             mediaStorage: false,
             editorialBlog: false
           }
@@ -213,6 +215,27 @@ export function createApiHandler({
 
         const resent = await emailVerificationService.resend(input.token);
         sendJson(response, 201, resendResponse(resent, environment));
+        return;
+      }
+
+      if (
+        request.method === "POST"
+        && (url.pathname === "/api/two-factor/setup"
+          || url.pathname === "/api/two-factor/confirm")
+      ) {
+        if (!twoFactorService) {
+          throw new DatabaseUnavailableError("El doble factor no está habilitado.");
+        }
+
+        const input = await readJson(request);
+        if (url.pathname.endsWith("/setup")) {
+          const setup = await twoFactorService.begin(input.token);
+          sendJson(response, 200, setup);
+          return;
+        }
+
+        const confirmed = await twoFactorService.confirm(input.token, input.code);
+        sendJson(response, 200, confirmed);
         return;
       }
 

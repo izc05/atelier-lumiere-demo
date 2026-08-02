@@ -2,6 +2,9 @@ export const CORE_TABLES = Object.freeze([
   "users",
   "user_credentials",
   "email_verification_tokens",
+  "onboarding_continuations",
+  "user_totp_credentials",
+  "user_recovery_codes",
   "providers",
   "provider_members",
   "provider_invitations",
@@ -38,5 +41,8 @@ export const DATABASE_RULES = Object.freeze({
   timestampsStoredAsUtc: true,
   passwordsStoredWithScrypt: true,
   emailVerificationTokensAreHashedAndSingleUse: true,
+  totpSecretsEncryptedWithAuthenticatedEncryption: true,
+  recoveryCodesStoredAsKeyedHashes: true,
+  twoFactorSetupHasLimitedAttempts: true,
   providerAccessRequiresVerifiedEmailAndTwoFactor: true
 });
