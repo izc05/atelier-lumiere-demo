@@ -15,6 +15,8 @@ import {
 } from "./email-delivery-services.mjs";
 import { createEmailVerificationService } from "./email-verification-service.mjs";
 import { createMailService } from "./mail-service.mjs";
+import { createProductsApiHandler } from "./products-api.mjs";
+import { createProductsService } from "./products-service.mjs";
 import { createProviderAuthService } from "./provider-auth-service.mjs";
 import { createProviderOnboardingService } from "./provider-onboarding-service.mjs";
 import { createProvidersService } from "./providers-service.mjs";
@@ -95,6 +97,10 @@ const accountRecoveryService = database.enabled && developmentAdminContext
     })
   : null;
 
+const productsService = database.enabled
+  ? createProductsService({ database })
+  : null;
+
 if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
   try {
     await mailService.verify();
@@ -118,10 +124,16 @@ const baseApiHandler = createApiHandler({
   authenticateRequest
 });
 
+const accountRecoveryHandler = createAccountRecoveryApiHandler({
+  baseHandler: baseApiHandler,
+  accountRecoveryService
+});
+
 const server = createServer(
-  createAccountRecoveryApiHandler({
-    baseHandler: baseApiHandler,
-    accountRecoveryService
+  createProductsApiHandler({
+    baseHandler: accountRecoveryHandler,
+    productsService,
+    providerAuthService
   })
 );
 
