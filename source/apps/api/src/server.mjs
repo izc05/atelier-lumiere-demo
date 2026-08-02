@@ -13,6 +13,9 @@ import { createBlogPostsService } from "./blog-posts-service.mjs";
 import { createCustomerAuthService } from "./customer-auth-service.mjs";
 import { createCustomerOrdersApiHandler } from "./customer-orders-api.mjs";
 import { createCustomerOrdersService } from "./customer-orders-service.mjs";
+import { createCustomRequestFileStorage } from "./custom-request-file-storage.mjs";
+import { createCustomRequestFilesApiHandler } from "./custom-request-files-api.mjs";
+import { createCustomRequestFilesService } from "./custom-request-files-service.mjs";
 import { createDatabase } from "./database.mjs";
 import {
   createDevelopmentAdminContext,
@@ -55,6 +58,7 @@ const database = createDatabase();
 const mailService = createMailService();
 const localMediaStorage = createLocalMediaStorage();
 const mediaStorage = createMediaPreviewStorage({ baseStorage: localMediaStorage });
+const customRequestFileStorage = createCustomRequestFileStorage();
 const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
 const authenticateRequest = createRequestAuthenticator({ environment });
 const developmentAdminContext = createDevelopmentAdminContext({ environment });
@@ -116,6 +120,9 @@ const providerOrdersService = database.enabled
   : null;
 const customerOrdersService = database.enabled
   ? createCustomerOrdersService({ database })
+  : null;
+const customRequestFilesService = database.enabled
+  ? createCustomRequestFilesService({ database, storage: customRequestFileStorage })
   : null;
 const adminBlogService = database.enabled
   ? createAdminBlogService({ database, storage: mediaStorage })
@@ -186,8 +193,14 @@ const customerOrdersHandler = createCustomerOrdersApiHandler({
   customerAuthService,
   customerOrdersService
 });
-const adminBlogHandler = createAdminBlogApiHandler({
+const customRequestFilesHandler = createCustomRequestFilesApiHandler({
   baseHandler: customerOrdersHandler,
+  customRequestFilesService,
+  providerAuthService,
+  customerAuthService
+});
+const adminBlogHandler = createAdminBlogApiHandler({
+  baseHandler: customRequestFilesHandler,
   adminBlogService,
   authenticateRequest
 });
