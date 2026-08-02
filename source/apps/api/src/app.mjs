@@ -84,11 +84,12 @@ function errorPayload(error) {
 }
 
 export function createApiHandler({
-  version = "0.2.0",
+  version = "0.3.0",
   environment = process.env.NODE_ENV ?? "development",
   now = () => new Date(),
   database,
   providersService,
+  onboardingService,
   authenticateRequest = async () => null,
   logger = console
 } = {}) {
@@ -129,10 +130,34 @@ export function createApiHandler({
             developmentAdminAccess: environment !== "production",
             providerIsolation: Boolean(database?.enabled),
             providerManagementApi: Boolean(providersService),
+            providerInvitationAcceptance: Boolean(onboardingService),
+            emailVerification: false,
+            twoFactorAuthentication: false,
             mediaStorage: false,
             editorialBlog: false
           }
         });
+        return;
+      }
+
+      if (
+        request.method === "POST"
+        && (url.pathname === "/api/provider-invitations/preview"
+          || url.pathname === "/api/provider-invitations/accept")
+      ) {
+        if (!onboardingService) {
+          throw new DatabaseUnavailableError("La incorporación de proveedores no está habilitada.");
+        }
+
+        const input = await readJson(request);
+        if (url.pathname.endsWith("/preview")) {
+          const preview = await onboardingService.preview(input.token);
+          sendJson(response, 200, preview);
+          return;
+        }
+
+        const accepted = await onboardingService.accept(input);
+        sendJson(response, 201, accepted);
         return;
       }
 

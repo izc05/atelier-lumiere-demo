@@ -22,7 +22,9 @@ const requiredFiles = [
   "apps/api/src/database.mjs",
   "apps/api/src/auth-context.mjs",
   "apps/api/src/providers-service.mjs",
+  "apps/api/src/provider-onboarding-service.mjs",
   "apps/api/tests/providers-api.test.mjs",
+  "apps/api/tests/provider-onboarding.test.mjs",
   "packages/shared/src/domain.mjs",
   "packages/auth/src/policy.mjs",
   "packages/storage/src/policy.mjs",
@@ -30,6 +32,7 @@ const requiredFiles = [
   "packages/database/src/schema-plan.mjs",
   "packages/database/migrations/0001_core_identity.sql",
   "packages/database/migrations/0002_runtime_role.sql",
+  "packages/database/migrations/0003_provider_onboarding.sql",
   "packages/database/seeds/0001_two_providers.sql",
   "packages/database/tests/tenant_isolation.sql",
   "infra/docker/Dockerfile.web",
@@ -155,11 +158,24 @@ for (const expected of [
 }
 
 const api = contents.get("apps/api/src/app.mjs") ?? "";
-for (const route of ["/health", "/api/meta", "/api/admin/providers", "status|invitations|audit"]) {
+for (const route of [
+  "/health",
+  "/api/meta",
+  "/api/admin/providers",
+  "status|invitations|audit",
+  "/api/provider-invitations/preview",
+  "/api/provider-invitations/accept"
+]) {
   if (!api.includes(route)) failures.push(`Falta una ruta o contrato de API: ${route}`);
 }
-if (!api.includes("authentication: false") || !api.includes("providerManagementApi")) {
-  failures.push("La API debe declarar que la autenticación definitiva sigue pendiente.");
+for (const capability of [
+  "authentication: false",
+  "providerManagementApi",
+  "providerInvitationAcceptance",
+  "emailVerification: false",
+  "twoFactorAuthentication: false"
+]) {
+  if (!api.includes(capability)) failures.push(`La API no declara correctamente: ${capability}`);
 }
 
 const databaseClient = contents.get("apps/api/src/database.mjs") ?? "";
@@ -180,6 +196,27 @@ if (!providerService.includes("VALUES ($1, $2") || providerService.includes("tok
   failures.push("Las operaciones de proveedores deben parametrizar SQL y no exponer hashes.");
 }
 
+const onboardingService = contents.get("apps/api/src/provider-onboarding-service.mjs") ?? "";
+for (const expected of [
+  "scryptAsync",
+  "randomBytes(16)",
+  "createHash(\"sha256\")",
+  "INVITATION_UNAVAILABLE",
+  "FOR UPDATE OF pi",
+  "PROVIDER_INVITATION_ACCEPTED",
+  "accessGranted: false",
+  "VERIFY_EMAIL",
+  "ENABLE_2FA"
+]) {
+  if (!onboardingService.includes(expected)) failures.push(`Falta una protección de incorporación: ${expected}`);
+}
+for (const forbidden of ["password: rawPassword", "token: token", "passwordHash:", "passwordSalt:"]) {
+  if (forbidden === "passwordHash:" || forbidden === "passwordSalt:") continue;
+  if (onboardingService.includes(forbidden)) {
+    failures.push(`La incorporación no debe serializar secretos: ${forbidden}`);
+  }
+}
+
 const migration = contents.get("packages/database/migrations/0001_core_identity.sql") ?? "";
 for (const table of ["users", "providers", "provider_members", "provider_invitations", "sessions", "audit_events"]) {
   if (!migration.includes(`CREATE TABLE ${table}`)) failures.push(`La migración no crea la tabla ${table}.`);
@@ -196,9 +233,30 @@ for (const expected of ["atelier_app_runtime", "NOBYPASSRLS", "NOLOGIN", "GRANT 
   if (!runtimeRole.includes(expected)) failures.push(`Falta una restricción del rol de API: ${expected}`);
 }
 
+const onboardingMigration = contents.get("packages/database/migrations/0003_provider_onboarding.sql") ?? "";
+for (const expected of [
+  "CREATE TABLE user_credentials",
+  "password_algorithm = 'scrypt-v1'",
+  "ALTER TABLE user_credentials FORCE ROW LEVEL SECURITY",
+  "GRANT SELECT, INSERT, UPDATE, DELETE ON user_credentials TO atelier_app_runtime"
+]) {
+  if (!onboardingMigration.includes(expected)) failures.push(`Falta una protección de credenciales: ${expected}`);
+}
+
 const tenantTest = contents.get("packages/database/tests/tenant_isolation.sql") ?? "";
 for (const expected of ["Taller A puede ver el Taller B", "Taller B puede ver el Taller A", "Un cliente puede leer proveedores privados", "Administración ve"]) {
   if (!tenantTest.includes(expected)) failures.push(`Falta una comprobación RLS: ${expected}`);
+}
+
+const onboardingTest = contents.get("apps/api/tests/provider-onboarding.test.mjs") ?? "";
+for (const expected of [
+  "weakPassword.response.status, 422",
+  "accepted.payload.accessGranted, false",
+  "stored.password_algorithm, \"scrypt-v1\"",
+  "stored.invitation_status, \"ACCEPTED\"",
+  "reused.response.status, 410"
+]) {
+  if (!onboardingTest.includes(expected)) failures.push(`Falta una prueba de incorporación: ${expected}`);
 }
 
 const compose = contents.get("infra/docker/docker-compose.yml") ?? "";
