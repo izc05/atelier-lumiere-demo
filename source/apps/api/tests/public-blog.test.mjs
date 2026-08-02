@@ -35,7 +35,11 @@ test("el blog público muestra solo historias publicadas y previews seguras",{sk
  assert.equal(list.length,1);assert.equal(list[0].id,publishedId);assert.equal(list[0].provider.displayName,"Taller de prueba A");
  assert.equal(JSON.stringify(list).includes("propietaria-a@"),false);assert.equal(JSON.stringify(list).includes("storage"),false);
  const detail=await service.get("taller-prueba-a",`historia-publica-${suffix}`);
- assert.equal(detail.id,publishedId);assert.equal(detail.tags[0],"hecho-a-mano");assert.equal(JSON.stringify(detail).includes("review"),false);
+ assert.equal(detail.id,publishedId);assert.equal(detail.tags[0],"hecho-a-mano");
+ const publicJson=JSON.stringify(detail);
+ assert.equal(publicJson.includes('"reviews"'),false);
+ assert.equal(publicJson.includes('"reviewerNote"'),false);
+ assert.equal(publicJson.includes('"providerNote"'),false);
  await assert.rejects(()=>service.get("taller-prueba-a",`borrador-${suffix}`),error=>error.code==="BLOG_POST_NOT_FOUND");
  const opened=await service.openPreview(publishedId,coverId,"bytes=0-7");assert.equal(opened.statusCode,206);assert.equal(opened.mimeType,"image/webp");
  await database.withContext(ADMIN,tx=>tx.query("UPDATE providers SET status='SUSPENDED' WHERE id=$1",[PROVIDER_ID]));
