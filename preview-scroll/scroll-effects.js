@@ -7,7 +7,8 @@
 
   if (!frame) return;
 
-  setTimeout(() => badge?.classList.add("is-muted"), 4200);
+  if (badge) badge.textContent = "Efectos reforzados";
+  setTimeout(() => badge?.classList.add("is-muted"), 4800);
 
   frame.addEventListener("load", () => {
     let win;
@@ -35,18 +36,18 @@
 
     const stylesheet = doc.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = `${PREVIEW_BASE}scroll-effects.css`;
+    stylesheet.href = `${PREVIEW_BASE}scroll-effects.css?v=2`;
     doc.head.append(stylesheet);
 
     doc.documentElement.dataset.lumierePreviewReady = "true";
 
     const thread = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
     thread.setAttribute("class", "lumiere-scroll-thread");
-    thread.setAttribute("viewBox", "0 0 100 340");
+    thread.setAttribute("viewBox", "0 0 120 440");
     thread.setAttribute("aria-hidden", "true");
     thread.innerHTML = `
-      <path pathLength="1" d="M72 0 C 35 50, 92 87, 54 132 S 18 212, 62 247 S 86 304, 48 340" />
-      <circle cx="48" cy="340" r="2.7" />`;
+      <path pathLength="1" d="M88 0 C 28 66, 108 118, 52 170 S 10 270, 78 314 S 104 386, 52 438" />
+      <circle cx="52" cy="438" r="3.3" />`;
     storySection.prepend(thread);
 
     const revealTargets = [
@@ -57,7 +58,7 @@
 
     revealTargets.forEach((element, index) => {
       element.classList.add("lumiere-reveal");
-      element.style.setProperty("--lumiere-delay", `${Math.min(index, 5) * 85}ms`);
+      element.style.setProperty("--lumiere-delay", `${Math.min(index, 6) * 110}ms`);
     });
 
     const reducedMotion = win.matchMedia("(prefers-reduced-motion: reduce)");
@@ -70,7 +71,7 @@
           entry.target.classList.add("is-visible");
           observer.unobserve(entry.target);
         });
-      }, { rootMargin: "0px 0px -7% 0px", threshold: 0.12 });
+      }, { rootMargin: "0px 0px -11% 0px", threshold: 0.16 });
 
       revealTargets.forEach((element) => observer.observe(element));
     } else {
@@ -78,30 +79,34 @@
     }
 
     let ticking = false;
-
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const easeOutCubic = value => 1 - Math.pow(1 - value, 3);
+    const smoothstep = value => value * value * (3 - 2 * value);
 
     const update = () => {
       ticking = false;
+      doc.documentElement.classList.add("lumiere-effects-preview");
 
-      if (reducedMotion.matches) {
-        doc.documentElement.classList.add("lumiere-effects-preview");
-        return;
-      }
+      if (reducedMotion.matches) return;
 
       const scrollY = win.scrollY || doc.documentElement.scrollTop || 0;
       const heroTop = hero.offsetTop;
       const heroHeight = Math.max(hero.offsetHeight, 1);
-      const heroProgress = clamp((scrollY - heroTop) / (heroHeight * 0.9), 0, 1);
+      const rawProgress = clamp((scrollY - heroTop) / (heroHeight * 0.92), 0, 1);
+      const heroProgress = easeOutCubic(rawProgress);
       const isMobile = mobile.matches;
 
-      const imageShift = heroProgress * (isMobile ? 28 : 58);
-      const imageScale = 1.025 + heroProgress * (isMobile ? 0.026 : 0.045);
-      const copyShift = heroProgress * (isMobile ? -7 : -15);
-      const copyOpacity = 1 - heroProgress * (isMobile ? 0.12 : 0.22);
+      const imageShift = heroProgress * (isMobile ? 82 : 138);
+      const imageScale = 1.025 + heroProgress * (isMobile ? 0.072 : 0.105);
 
-      const storyStart = storySection.offsetTop - win.innerHeight * 0.9;
-      const threadProgress = clamp((scrollY - storyStart) / (win.innerHeight * 0.7), 0, 1);
+      // El texto se mueve a menor velocidad que la página, dando una sensación de fijación.
+      const copyHold = rawProgress < 0.64 ? rawProgress / 0.64 : 1;
+      const copyShift = smoothstep(copyHold) * (isMobile ? 112 : 176);
+      const fadeProgress = clamp((rawProgress - 0.62) / 0.38, 0, 1);
+      const copyOpacity = 1 - fadeProgress * (isMobile ? 0.52 : 0.66);
+
+      const storyStart = storySection.offsetTop - win.innerHeight * 0.92;
+      const threadProgress = clamp((scrollY - storyStart) / (win.innerHeight * 0.72), 0, 1);
 
       const rootStyle = doc.documentElement.style;
       rootStyle.setProperty("--lumiere-hero-shift", `${imageShift.toFixed(2)}px`);
@@ -109,6 +114,7 @@
       rootStyle.setProperty("--lumiere-copy-shift", `${copyShift.toFixed(2)}px`);
       rootStyle.setProperty("--lumiere-copy-opacity", copyOpacity.toFixed(3));
       rootStyle.setProperty("--lumiere-thread-progress", threadProgress.toFixed(3));
+      rootStyle.setProperty("--lumiere-hero-progress", rawProgress.toFixed(3));
     };
 
     const requestUpdate = () => {
@@ -122,9 +128,6 @@
     mobile.addEventListener?.("change", requestUpdate);
     reducedMotion.addEventListener?.("change", requestUpdate);
 
-    setTimeout(() => {
-      doc.documentElement.classList.add("lumiere-effects-preview");
-      requestUpdate();
-    }, 850);
+    setTimeout(requestUpdate, 900);
   });
 })();
