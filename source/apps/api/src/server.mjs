@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { createApiHandler } from "./app.mjs";
 import { createAccountRecoveryApiHandler } from "./account-recovery-api.mjs";
 import { createAccountRecoveryService } from "./account-recovery-service.mjs";
+import { createAdminBlogApiHandler } from "./admin-blog-api.mjs";
+import { createAdminBlogService } from "./admin-blog-service.mjs";
 import { createAdminProductsApiHandler } from "./admin-products-api.mjs";
 import { createAdminProductsService } from "./admin-products-service.mjs";
 import { createBlogMediaApiHandler } from "./blog-media-api.mjs";
@@ -99,6 +101,9 @@ const productsService = database.enabled ? createProductsService({ database }) :
 const productMediaService = database.enabled
   ? createProductMediaService({ database, storage: mediaStorage })
   : null;
+const adminBlogService = database.enabled
+  ? createAdminBlogService({ database, storage: mediaStorage })
+  : null;
 const adminProductsService = database.enabled
   ? createAdminProductsService({ database, storage: mediaStorage })
   : null;
@@ -152,8 +157,13 @@ const productMediaHandler = createProductMediaApiHandler({
   productMediaService,
   providerAuthService
 });
-const adminProductsHandler = createAdminProductsApiHandler({
+const adminBlogHandler = createAdminBlogApiHandler({
   baseHandler: productMediaHandler,
+  adminBlogService,
+  authenticateRequest
+});
+const adminProductsHandler = createAdminProductsApiHandler({
+  baseHandler: adminBlogHandler,
   adminProductsService,
   authenticateRequest
 });

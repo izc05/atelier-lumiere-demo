@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Revisar publicación · Atelier Lumière</title>
+  <link rel="stylesheet" href="/admin/articulos/review.css">
+  <link rel="stylesheet" href="/admin/publicaciones/blog-review.css">
+  <script defer src="/admin/publicaciones/detail.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/admin/publicaciones/" aria-label="Volver a la revisión del blog">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Ficha del blog</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/admin/publicaciones/">Volver a la bandeja</a>
+        <button id="logout-button" class="button ghost" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section id="loading-view" class="loading"><p>Cargando la historia completa…</p></section>
+    <section id="error-view" class="error-card" hidden>
+      <div><h2>No se pudo abrir la publicación</h2><p id="error-message"></p><a class="button primary" href="/admin/publicaciones/">Volver a la bandeja</a></div>
+    </section>
+
+    <section id="detail-view" hidden>
+      <section class="page-head">
+        <div>
+          <p id="provider-eyebrow" class="eyebrow">Taller</p>
+          <h1 id="post-title">Publicación</h1>
+          <p id="post-excerpt" class="lead"></p>
+        </div>
+        <span id="post-status" class="status review">En revisión</span>
+      </section>
+
+      <div class="detail-grid">
+        <div class="detail-main">
+          <section class="panel">
+            <header><p class="eyebrow">Información editorial</p><h2>Resumen de la historia</h2></header>
+            <div class="facts">
+              <div class="fact"><span>Categoría</span><strong id="category-value">—</strong></div>
+              <div class="fact"><span>Versión</span><strong id="version-value">—</strong></div>
+              <div class="fact"><span>Actualizada</span><strong id="updated-value">—</strong></div>
+              <div class="fact"><span>Imágenes</span><strong id="images-value">—</strong></div>
+              <div class="fact"><span>Productos</span><strong id="products-value">—</strong></div>
+              <div class="fact"><span>Portada</span><strong id="cover-value">—</strong></div>
+            </div>
+            <h3 class="section-gap">Etiquetas</h3>
+            <div id="tags-list" class="tags section-gap-small"></div>
+          </section>
+
+          <section class="panel">
+            <header><p class="eyebrow">Lectura</p><h2>Contenido completo</h2></header>
+            <article id="markdown-content" class="markdown-review"></article>
+          </section>
+
+          <section class="panel">
+            <header><p class="eyebrow">Contenido visual</p><h2>Portada y galería</h2></header>
+            <div id="media-grid" class="blog-gallery"></div>
+          </section>
+
+          <section class="panel">
+            <header><p class="eyebrow">Conexión comercial</p><h2>Artículos relacionados</h2></header>
+            <div id="related-products" class="related-products"></div>
+          </section>
+
+          <section class="panel">
+            <header><p class="eyebrow">Trazabilidad</p><h2>Historial de revisión</h2></header>
+            <div id="history-list" class="history"></div>
+          </section>
+        </div>
+
+        <aside class="detail-side">
+          <section class="panel">
+            <p class="eyebrow">Taller responsable</p>
+            <h2 id="provider-name">Proveedor</h2>
+            <p id="provider-contact" class="copy"></p>
+          </section>
+
+          <section class="panel">
+            <p class="eyebrow">Nota del proveedor</p>
+            <p id="provider-note" class="notice">Sin nota adicional.</p>
+          </section>
+
+          <section id="decision-panel" class="panel">
+            <p class="eyebrow">Decisión editorial</p>
+            <h2>Resolver revisión</h2>
+            <p class="copy">Solicitar cambios debe indicar qué parte del texto o de las imágenes necesita mejorar. Aprobar no publica automáticamente.</p>
+            <label class="section-gap-small">Observaciones
+              <textarea id="reviewer-note" maxlength="4000" placeholder="Escribe una valoración o los cambios concretos que debe realizar el taller."></textarea>
+            </label>
+            <div class="action-stack section-gap-small">
+              <button id="request-changes-button" class="button warning" type="button">Solicitar cambios</button>
+              <button id="approve-button" class="button approve" type="button">Aprobar publicación</button>
+            </div>
+            <p id="decision-message" class="message" role="status" aria-live="polite"></p>
+          </section>
+
+          <section id="publish-panel" class="panel" hidden>
+            <p class="eyebrow">Publicación</p>
+            <h2>Historia aprobada</h2>
+            <p id="publish-notice" class="notice">La aprobación está registrada. Publica solo cuando la historia y su portada estén listas.</p>
+            <button id="publish-button" class="button primary full-width section-gap-small" type="button">Publicar historia</button>
+            <p id="publish-message" class="message" role="status" aria-live="polite"></p>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
