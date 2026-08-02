@@ -10,7 +10,10 @@ function parseCookies(header) {
     const separator = part.indexOf("=");
     if (separator < 1) continue;
     try {
-      cookies.set(part.slice(0, separator).trim(), decodeURIComponent(part.slice(separator + 1).trim()));
+      cookies.set(
+        part.slice(0, separator).trim(),
+        decodeURIComponent(part.slice(separator + 1).trim())
+      );
     } catch {
       // Se ignoran cookies corruptas.
     }
@@ -57,7 +60,10 @@ function sendJson(response, statusCode, payload, extra = {}) {
 }
 
 function methodAllowed(actor, resource, resourceId, method) {
-  if (actor === "customer") return resource === "incidents" && !resourceId && method === "POST";
+  if (!resourceId && method === "GET") return true;
+  if (actor === "customer") {
+    return resource === "incidents" && !resourceId && method === "POST";
+  }
   if (!resourceId) return method === "POST";
   return method === "PATCH";
 }
@@ -99,51 +105,71 @@ export function createOrderLogisticsWebHandler({
     const actor = rawActor.toLowerCase();
     const method = request.method ?? "GET";
     if (!methodAllowed(actor, resource, resourceId, method)) {
-      sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." }, {
-        Allow: actor === "customer" ? "POST" : "POST,PATCH"
-      });
+      sendJson(response, 405, {
+        error: "METHOD_NOT_ALLOWED",
+        message: "Método no permitido."
+      }, { Allow: actor === "customer" ? "GET,POST" : "GET,POST,PATCH" });
       return;
     }
 
     const token = tokenFromRequest(request, actor);
     const secure = actor === "provider" ? providerCookieSecure : customerCookieSecure;
     if (!token) {
-      sendJson(response, 401, { error: "UNAUTHORIZED", message: "La sesión no es válida o ha caducado." }, {
-        "Set-Cookie": expiredCookie(actor, secure)
-      });
+      sendJson(response, 401, {
+        error: "UNAUTHORIZED",
+        message: "La sesión no es válida o ha caducado."
+      }, { "Set-Cookie": expiredCookie(actor, secure) });
       return;
     }
 
     try {
-      const body = await readBody(request);
-      const upstream = await fetchImpl(new URL(url.pathname.replace(/^\/internal/, "/api"), apiBase), {
-        method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Content-Length": String(body.length),
-          "User-Agent": String(request.headers["user-agent"] ?? "Atelier-Lumiere-Web")
-        },
-        body,
-        signal: AbortSignal.timeout(30000)
-      });
+      const hasBody = method === "POST" || method === "PATCH";
+      const body = hasBody ? await readBody(request) : null;
+      const upstream = await fetchImpl(
+        new URL(url.pathname.replace(/^\/internal/, "/api") + url.search, apiBase),
+        {
+          method,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            ...(hasBody ? {
+              "Content-Type": "application/json",
+              "Content-Length": String(body.length)
+            } : {}),
+            "User-Agent": String(request.headers["user-agent"] ?? "Atelier-Lumiere-Web")
+          },
+          ...(hasBody ? { body } : {}),
+          signal: AbortSignal.timeout(30000)
+        }
+      );
       const text = await upstream.text();
       let payload;
-      try { payload = text ? JSON.parse(text) : {}; }
-      catch { payload = { error: "INVALID_UPSTREAM_RESPONSE", message: "La API no devolvió una respuesta válida." }; }
+      try {
+        payload = text ? JSON.parse(text) : {};
+      } catch {
+        payload = {
+          error: "INVALID_UPSTREAM_RESPONSE",
+          message: "La API no devolvió una respuesta válida."
+        };
+      }
       sendJson(response, upstream.status, payload, upstream.status === 401 ? {
         "Set-Cookie": expiredCookie(actor, secure)
       } : {});
     } catch (error) {
       if (error?.statusCode === 413) {
-        sendJson(response, 413, { error: "BODY_TOO_LARGE", message: "La solicitud es demasiado grande." });
+        sendJson(response, 413, {
+          error: "BODY_TOO_LARGE",
+          message: "La solicitud es demasiado grande."
+        });
         return;
       }
       logger.error("No se pudo completar el proxy de seguimiento e incidencias.", {
         code: typeof error?.code === "string" ? error.code : "ORDER_LOGISTICS_PROXY_FAILED"
       });
-      sendJson(response, 502, { error: "API_UNAVAILABLE", message: "El seguimiento no responde en este momento." });
+      sendJson(response, 502, {
+        error: "API_UNAVAILABLE",
+        message: "El seguimiento no responde en este momento."
+      });
     }
   };
 }
