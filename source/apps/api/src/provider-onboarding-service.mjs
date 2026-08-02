@@ -15,11 +15,7 @@ const COMMON_PASSWORDS = new Set([
 function invitationToken(value) {
   const token = typeof value === "string" ? value.trim() : "";
   if (!TOKEN_PATTERN.test(token)) {
-    throw new ServiceError(
-      "INVITATION_UNAVAILABLE",
-      "La invitación no es válida, ha caducado o ya se ha utilizado.",
-      410
-    );
+    throw unavailableInvitation();
   }
   return token;
 }
@@ -48,13 +44,14 @@ function password(value, { emailAddress, displayNameValue }) {
   }
 
   const lower = value.toLocaleLowerCase("es");
+  const compact = lower.replace(/\s+/g, "");
   const emailLocalPart = String(emailAddress).split("@", 1)[0].toLocaleLowerCase("es");
   const normalizedName = displayNameValue.toLocaleLowerCase("es").replace(/\s+/g, "");
 
   if (
     COMMON_PASSWORDS.has(lower)
     || (emailLocalPart.length >= 4 && lower.includes(emailLocalPart))
-    || (normalizedName.length >= 4 && lower.replace(/\s+/g, "").includes(normalizedName))
+    || (normalizedName.length >= 4 && compact.includes(normalizedName))
   ) {
     throw new ServiceError(
       "VALIDATION_ERROR",
@@ -105,6 +102,7 @@ function isInvitationAvailable(row, currentTime) {
   return Boolean(
     row
     && row.status === "PENDING"
+    && row.provider_status !== "SUSPENDED"
     && new Date(row.expires_at).getTime() > currentTime.getTime()
   );
 }
@@ -137,40 +135,40 @@ export function createProviderOnboardingService({
     throw new TypeError("La incorporación necesita un contexto interno de administración.");
   }
 
+  async function loadAvailableInvitation(tokenHash) {
+    return database.withContext(systemContext, async (transaction) => {
+      const invitation = await findInvitation(transaction, tokenHash);
+      if (!isInvitationAvailable(invitation, now())) throw unavailableInvitation();
+      return invitation;
+    });
+  }
+
   return Object.freeze({
     async preview(rawToken) {
       const token = invitationToken(rawToken);
-      const tokenHash = hashToken(token);
+      const invitation = await loadAvailableInvitation(hashToken(token));
 
-      return database.withContext(systemContext, async (transaction) => {
-        const invitation = await findInvitation(transaction, tokenHash);
-        if (!isInvitationAvailable(invitation, now())) throw unavailableInvitation();
-
-        return {
-          provider: {
-            id: invitation.provider_id,
-            displayName: invitation.provider_display_name,
-            specialty: invitation.provider_specialty,
-            status: invitation.provider_status
-          },
-          invitation: {
-            role: invitation.role,
-            emailMasked: maskEmail(invitation.email),
-            expiresAt: invitation.expires_at
-          },
-          requiredSteps: ["CREATE_PASSWORD", "VERIFY_EMAIL", "ENABLE_2FA"]
-        };
-      });
+      return {
+        provider: {
+          displayName: invitation.provider_display_name,
+          specialty: invitation.provider_specialty
+        },
+        invitation: {
+          role: invitation.role,
+          emailMasked: maskEmail(invitation.email),
+          expiresAt: invitation.expires_at
+        },
+        requiredSteps: ["CREATE_PASSWORD", "VERIFY_EMAIL", "ENABLE_2FA"]
+      };
     },
 
     async accept(input = {}) {
       const token = invitationToken(input.token);
       const name = displayName(input.displayName);
       const tokenHash = hashToken(token);
-
-      const preview = await this.preview(token);
+      const preflightInvitation = await loadAvailableInvitation(tokenHash);
       const rawPassword = password(input.password, {
-        emailAddress: preview.invitation.emailMasked,
+        emailAddress: preflightInvitation.email,
         displayNameValue: name
       });
       const credential = await hashPassword(rawPassword);
