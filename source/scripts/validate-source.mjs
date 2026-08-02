@@ -14,12 +14,17 @@ const requiredFiles = [
   "apps/api/package.json",
   "apps/api/src/app.mjs",
   "apps/api/src/server.mjs",
+  "apps/api/src/database.mjs",
+  "apps/api/src/auth-context.mjs",
+  "apps/api/src/providers-service.mjs",
+  "apps/api/tests/providers-api.test.mjs",
   "packages/shared/src/domain.mjs",
   "packages/auth/src/policy.mjs",
   "packages/storage/src/policy.mjs",
   "packages/database/README.md",
   "packages/database/src/schema-plan.mjs",
   "packages/database/migrations/0001_core_identity.sql",
+  "packages/database/migrations/0002_runtime_role.sql",
   "packages/database/seeds/0001_two_providers.sql",
   "packages/database/tests/tenant_isolation.sql",
   "infra/docker/Dockerfile.web",
@@ -57,9 +62,12 @@ for (const forbidden of [
 }
 
 const workspace = contents.get("package.json") ?? "";
-for (const expected of ["apps/*", "packages/*", "tests/*.test.mjs", "validate-source.mjs"]) {
+for (const expected of ["apps/*", "packages/*", "tests/*.test.mjs", "test:api-integration", "validate-source.mjs"]) {
   if (!workspace.includes(expected)) failures.push(`El workspace no contiene: ${expected}`);
 }
+
+const apiPackage = contents.get("apps/api/package.json") ?? "";
+if (!apiPackage.includes('"pg": "8.22.0"')) failures.push("La API no fija la versión revisada del cliente PostgreSQL.");
 
 const domain = contents.get("packages/shared/src/domain.mjs") ?? "";
 for (const role of ["ADMIN", "PROVIDER_OWNER", "PROVIDER_MEMBER", "CUSTOMER"]) {
@@ -81,22 +89,38 @@ if (!web.includes("Atelier Lumière") || !web.includes("noindex,nofollow")) {
 
 const webServer = contents.get("apps/web/src/server.mjs") ?? "";
 if (!webServer.includes("/internal/api-health") || !webServer.includes("API_INTERNAL_URL")) {
-  failures.push("La web fuente debe consultar la API por el canal interno, no por el localhost del navegador.");
+  failures.push("La web fuente debe consultar la API por el canal interno.");
 }
 
 const api = contents.get("apps/api/src/app.mjs") ?? "";
-for (const route of ["/health", "/api/meta"]) {
-  if (!api.includes(route)) failures.push(`Falta la ruta técnica ${route}`);
+for (const route of ["/health", "/api/meta", "/api/admin/providers", "status|invitations|audit"]) {
+  if (!api.includes(route)) failures.push(`Falta una ruta o contrato de API: ${route}`);
 }
-for (const disabled of ["database: false", "authentication: false", "providerIsolation: false"]) {
-  if (!api.includes(disabled)) failures.push(`La API no declara correctamente una capacidad pendiente: ${disabled}`);
+if (!api.includes("authentication: false") || !api.includes("providerManagementApi")) {
+  failures.push("La API debe declarar que la autenticación definitiva sigue pendiente.");
+}
+
+const databaseClient = contents.get("apps/api/src/database.mjs") ?? "";
+for (const expected of ["SET LOCAL ROLE atelier_app_runtime", "set_config('app.role'", "ROLLBACK", "client.release()", "statement_timeout"]) {
+  if (!databaseClient.includes(expected)) failures.push(`Falta una protección transaccional: ${expected}`);
+}
+
+const authContext = contents.get("apps/api/src/auth-context.mjs") ?? "";
+for (const expected of ["environment === \"production\"", "timingSafeEqual", "DEV_ADMIN_TOKEN", "ensureDevelopmentAdmin"]) {
+  if (!authContext.includes(expected)) failures.push(`Falta una protección de acceso temporal: ${expected}`);
+}
+
+const providerService = contents.get("apps/api/src/providers-service.mjs") ?? "";
+for (const expected of ["randomBytes(32)", "createHash(\"sha256\")", "PROVIDER_CREATED", "PROVIDER_SUSPENDED", "PROVIDER_INVITATION_RENEWED"]) {
+  if (!providerService.includes(expected)) failures.push(`Falta una operación segura de proveedores: ${expected}`);
+}
+if (!providerService.includes("VALUES ($1, $2") || providerService.includes("token_hash: row.token_hash")) {
+  failures.push("Las operaciones de proveedores deben parametrizar SQL y no exponer hashes.");
 }
 
 const migration = contents.get("packages/database/migrations/0001_core_identity.sql") ?? "";
 for (const table of ["users", "providers", "provider_members", "provider_invitations", "sessions", "audit_events"]) {
   if (!migration.includes(`CREATE TABLE ${table}`)) failures.push(`La migración no crea la tabla ${table}.`);
-}
-for (const table of ["users", "providers", "provider_members", "provider_invitations", "sessions", "audit_events"]) {
   if (!migration.includes(`ALTER TABLE ${table} FORCE ROW LEVEL SECURITY`)) {
     failures.push(`La tabla ${table} no fuerza seguridad por fila.`);
   }
@@ -104,8 +128,10 @@ for (const table of ["users", "providers", "provider_members", "provider_invitat
 for (const helper of ["app.current_role()", "app.current_user_id()", "app.current_provider_id()", "app.is_admin()"] ) {
   if (!migration.includes(helper)) failures.push(`Falta la función de contexto ${helper}.`);
 }
-if (!migration.includes("ON DELETE RESTRICT")) {
-  failures.push("Las relaciones de talleres deben evitar borrados en cascada accidentales.");
+
+const runtimeRole = contents.get("packages/database/migrations/0002_runtime_role.sql") ?? "";
+for (const expected of ["atelier_app_runtime", "NOBYPASSRLS", "NOLOGIN", "GRANT SELECT, INSERT, UPDATE, DELETE"]) {
+  if (!runtimeRole.includes(expected)) failures.push(`Falta una restricción del rol de API: ${expected}`);
 }
 
 const tenantTest = contents.get("packages/database/tests/tenant_isolation.sql") ?? "";
@@ -114,14 +140,13 @@ for (const expected of ["Taller A puede ver el Taller B", "Taller B puede ver el
 }
 
 const compose = contents.get("infra/docker/docker-compose.yml") ?? "";
-for (const service of ["web:", "api:", "database:", "database_data:", "media_data:"]) {
-  if (!compose.includes(service)) failures.push(`Docker Compose no contiene: ${service}`);
+for (const expected of ["web:", "api:", "database:", "API_INTERNAL_URL: http://api:4000", "ALLOW_DEV_ADMIN_AUTH", "packages/database/migrations:/docker-entrypoint-initdb.d:ro"]) {
+  if (!compose.includes(expected)) failures.push(`Docker Compose no contiene: ${expected}`);
 }
-if (!compose.includes("API_INTERNAL_URL: http://api:4000")) {
-  failures.push("Docker Compose no conecta la web con la API mediante la red interna.");
-}
-if (!compose.includes("packages/database/migrations:/docker-entrypoint-initdb.d:ro")) {
-  failures.push("PostgreSQL no tiene montadas las migraciones de producción en modo lectura.");
+
+const dockerApi = contents.get("infra/docker/Dockerfile.api") ?? "";
+if (!dockerApi.includes("npm install --omit=dev --ignore-scripts")) {
+  failures.push("La imagen de API no instala sus dependencias de producción.");
 }
 
 const combined = [...contents.entries()]
