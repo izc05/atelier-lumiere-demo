@@ -222,7 +222,7 @@ export function createProvidersService({
             role,
             invitedBy: context.userId,
             invitationTtlHours,
-            now: now()
+            now
           });
 
           await writeAudit(transaction, {
@@ -315,7 +315,7 @@ export function createProvidersService({
           role,
           invitedBy: context.userId,
           invitationTtlHours,
-          now: now()
+          now
         });
 
         await writeAudit(transaction, {
