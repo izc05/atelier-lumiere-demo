@@ -14,15 +14,15 @@ const SAFE_REQUEST_HEADERS = new Set([
   "range",
   "user-agent"
 ]);
-const SAFE_RESPONSE_HEADERS = new Set([
-  "content-type",
-  "content-length",
-  "content-disposition",
-  "accept-ranges",
-  "content-range",
-  "cache-control",
-  "x-content-type-options",
-  "content-security-policy"
+const SAFE_RESPONSE_HEADERS = new Map([
+  ["content-type", "Content-Type"],
+  ["content-length", "Content-Length"],
+  ["content-disposition", "Content-Disposition"],
+  ["accept-ranges", "Accept-Ranges"],
+  ["content-range", "Content-Range"],
+  ["cache-control", "Cache-Control"],
+  ["x-content-type-options", "X-Content-Type-Options"],
+  ["content-security-policy", "Content-Security-Policy"]
 ]);
 
 function parseCookies(header) {
@@ -103,14 +103,14 @@ function upstreamHeaders(request, token) {
 
 async function pipeUpstream(upstream, response, { clearCookieHeader } = {}) {
   const responseHeaders = securityHeaders();
-  for (const name of SAFE_RESPONSE_HEADERS) {
-    const value = upstream.headers.get(name);
-    if (value !== null) responseHeaders[name] = value;
+  for (const [sourceName, targetName] of SAFE_RESPONSE_HEADERS) {
+    const value = upstream.headers.get(sourceName);
+    if (value !== null) responseHeaders[targetName] = value;
   }
-  if (!responseHeaders["content-type"]) {
-    responseHeaders["content-type"] = "application/json; charset=utf-8";
+  if (!responseHeaders["Content-Type"]) {
+    responseHeaders["Content-Type"] = "application/json; charset=utf-8";
   }
-  if (clearCookieHeader) responseHeaders["set-cookie"] = clearCookieHeader;
+  if (clearCookieHeader) responseHeaders["Set-Cookie"] = clearCookieHeader;
   response.writeHead(upstream.status, responseHeaders);
   if (!upstream.body) {
     response.end();
