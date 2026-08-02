@@ -1,0 +1,185 @@
+:root {
+  --atelier-burgundy: #5a0f1f;
+  --atelier-gold: #c6a352;
+  --atelier-cream: #f3e9d7;
+  --atelier-ivory: #fbf6ee;
+}
+
+.brand[data-atelier-brand="true"] {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.atelier-header-logo {
+  display: block;
+  width: clamp(154px, 18vw, 215px);
+  height: auto;
+  max-height: 54px;
+}
+
+.entry-content .entry-brand-logo {
+  display: block;
+  width: min(88vw, 460px);
+  height: auto;
+  margin: 0 auto clamp(16px, 3vh, 28px);
+  filter: drop-shadow(0 8px 26px rgba(0, 0, 0, .28));
+}
+
+.atelier-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.atelier-site-intro {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #1b0d0d;
+  color: var(--atelier-ivory);
+  isolation: isolate;
+}
+
+.atelier-intro-panel {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  width: 50.25%;
+  overflow: hidden;
+  transition: transform 1.15s cubic-bezier(.72, 0, .18, 1);
+  will-change: transform;
+}
+
+.atelier-intro-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100vw;
+  background:
+    linear-gradient(90deg, rgba(17, 7, 7, .73), rgba(34, 13, 13, .35) 48%, rgba(14, 5, 5, .66)),
+    url('/atelier-lumiere-demo/images/hero-hilo-celebracion.webp') center/cover no-repeat;
+  transform: scale(1.055);
+  animation: atelierIntroBreath 8s ease-in-out infinite alternate;
+}
+
+.atelier-intro-panel-left { left: 0; }
+.atelier-intro-panel-left::before { left: 0; }
+.atelier-intro-panel-right { right: 0; }
+.atelier-intro-panel-right::before { right: 0; }
+
+.atelier-intro-seam {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(217, 185, 104, .9) 18%, rgba(217, 185, 104, .5) 82%, transparent);
+  box-shadow: 0 0 24px rgba(217, 185, 104, .34);
+  transition: opacity .45s ease;
+}
+
+.atelier-intro-content {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(92vw, 580px);
+  padding: 28px 20px;
+  text-align: center;
+  transition: opacity .42s ease, transform .62s cubic-bezier(.22, .61, .36, 1);
+}
+
+.atelier-intro-logo {
+  display: block;
+  width: min(92vw, 440px);
+  height: auto;
+  filter: drop-shadow(0 12px 34px rgba(0, 0, 0, .34));
+}
+
+.atelier-intro-copy {
+  max-width: 520px;
+  margin: 4px 0 25px;
+  color: rgba(255, 249, 238, .84);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(15px, 2.2vw, 19px);
+  line-height: 1.65;
+}
+
+.atelier-intro-enter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-width: min(82vw, 270px);
+  padding: 15px 25px;
+  border: 1px solid rgba(217, 185, 104, .86);
+  border-radius: 0;
+  background: var(--atelier-burgundy);
+  color: #fff9ee;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .24);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+}
+
+.atelier-intro-enter:hover,
+.atelier-intro-enter:focus-visible {
+  background: #70152a;
+  box-shadow: 0 15px 42px rgba(0, 0, 0, .32);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.atelier-intro-skip {
+  margin-top: 17px;
+  padding: 7px 12px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 249, 238, .76);
+  font: 600 11px/1.2 Arial, sans-serif;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.atelier-site-intro.is-opening .atelier-intro-panel-left { transform: translateX(-102%); }
+.atelier-site-intro.is-opening .atelier-intro-panel-right { transform: translateX(102%); }
+.atelier-site-intro.is-opening .atelier-intro-content { opacity: 0; transform: scale(.96); }
+.atelier-site-intro.is-opening .atelier-intro-seam { opacity: 0; }
+
+body.atelier-intro-locked { overflow: hidden !important; }
+
+@keyframes atelierIntroBreath {
+  from { transform: scale(1.045) translate3d(-.3%, 0, 0); }
+  to { transform: scale(1.095) translate3d(.3%, -.4%, 0); }
+}
+
+@media (max-width: 680px) {
+  .atelier-header-logo { width: 145px; max-height: 46px; }
+  .atelier-intro-copy { max-width: 340px; margin-top: -2px; }
+  .atelier-intro-content { padding-inline: 16px; }
+  .atelier-intro-panel::before { background-position: 62% center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atelier-intro-panel,
+  .atelier-intro-content,
+  .atelier-intro-seam { transition-duration: .2s !important; }
+  .atelier-intro-panel::before { animation: none !important; }
+}
