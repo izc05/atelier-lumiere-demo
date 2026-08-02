@@ -1,0 +1,14 @@
+node_modules/
+coverage/
+*.log
+.DS_Store
+
+.env
+.env.*
+!.env.example
+
+/data/
+/backups/*.sql
+/backups/*.dump
+/backups/*.tar
+/backups/*.tar.gz
