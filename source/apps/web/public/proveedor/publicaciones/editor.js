@@ -1,5 +1,8 @@
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EDITABLE = new Set(["DRAFT", "CHANGES_REQUESTED"]);
+const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
+const MAX_IMAGES = 12;
 const STATUS_LABELS = Object.freeze({
   DRAFT: "Borrador",
   IN_REVIEW: "En revisión",
@@ -13,7 +16,8 @@ const state = {
   post: null,
   products: [],
   selectedProductIds: new Set(),
-  saving: false
+  saving: false,
+  uploading: false
 };
 
 function byId(id) { return document.getElementById(id); }
@@ -42,6 +46,12 @@ function formatDate(value) {
     }).format(new Date(value));
   } catch { return "Sin guardar"; }
 }
+function formatBytes(value) {
+  const bytes = Number(value);
+  if (!Number.isFinite(bytes) || bytes < 1) return "0 KB";
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 function slugify(value) {
   return String(value ?? "")
     .normalize("NFKD")
@@ -61,6 +71,17 @@ function formInput() {
     bodyMarkdown: byId("body-markdown").value.trim(),
     category: byId("category").value.trim() || null
   };
+}
+function mediaItems() {
+  return Array.isArray(state.post?.media)
+    ? state.post.media.filter((item) => item.status === "READY")
+    : [];
+}
+function hasCover() {
+  return mediaItems().some((item) => item.placement === "COVER");
+}
+function mediaUrl(item, variant = "preview") {
+  return `/internal/provider/blog-posts/${state.post.id}/media/${item.id}/${variant}`;
 }
 
 async function api(path, options = {}) {
@@ -146,12 +167,17 @@ function updateCounters() {
 }
 
 function updateSummary() {
+  const images = mediaItems();
   byId("status-title").textContent = state.post
     ? STATUS_LABELS[state.post.status] ?? state.post.status
     : "Borrador nuevo";
   byId("version-label").textContent = state.post ? `v${state.post.version}` : "—";
   byId("tag-count").textContent = `${selectedTags().length}/12`;
   byId("product-count").textContent = `${state.selectedProductIds.size}/8`;
+  byId("image-count").textContent = `${images.length}/12`;
+  byId("cover-label").textContent = images.some((item) => item.placement === "COVER")
+    ? "Preparada"
+    : "Pendiente";
   byId("updated-label").textContent = formatDate(state.post?.updatedAt);
 }
 
@@ -193,6 +219,117 @@ function renderProducts() {
   updateSummary();
 }
 
+function mediaCard(item) {
+  const card = node("article", "blog-media-card");
+  const visual = node("div", "blog-media-visual");
+  const image = document.createElement("img");
+  image.src = mediaUrl(item, "preview");
+  image.alt = item.altText || item.originalFilename;
+  image.loading = "lazy";
+  visual.append(image, node(
+    "span",
+    "placement-badge",
+    item.placement === "COVER" ? "Portada" : "Interior"
+  ));
+
+  const body = node("div", "blog-media-body");
+  body.append(
+    node("div", "media-name", item.originalFilename),
+    node("div", "media-meta", `${formatBytes(item.sizeBytes)} · ${item.width || "?"} × ${item.height || "?"} px`)
+  );
+
+  const alt = document.createElement("input");
+  alt.type = "text";
+  alt.maxLength = 240;
+  alt.placeholder = "Describe la fotografía";
+  alt.value = item.altText || "";
+  alt.disabled = !isEditable();
+
+  const selectedPlacement = document.createElement("select");
+  for (const [value, label] of [["COVER", "Portada"], ["INLINE", "Imagen interior"]]) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    option.selected = item.placement === value;
+    selectedPlacement.append(option);
+  }
+  selectedPlacement.disabled = !isEditable();
+
+  const order = document.createElement("input");
+  order.type = "number";
+  order.min = "0";
+  order.max = "1000";
+  order.step = "1";
+  order.value = String(item.sortOrder ?? 0);
+  order.disabled = !isEditable();
+
+  const actions = node("div", "blog-media-actions");
+  const save = node("button", "button secondary", "Guardar datos");
+  save.type = "button";
+  save.disabled = !isEditable();
+  save.addEventListener("click", async () => {
+    save.disabled = true;
+    setMessage("media-message", "Guardando información de la imagen…");
+    try {
+      const response = await api(
+        `/internal/provider/blog-posts/${state.post.id}/media/${item.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            altText: alt.value.trim(),
+            placement: selectedPlacement.value,
+            sortOrder: Number(order.value) || 0
+          })
+        }
+      );
+      Object.assign(item, response.media);
+      renderMedia();
+      setMessage("media-message", "Información guardada.", "success");
+    } catch (error) {
+      selectedPlacement.value = item.placement;
+      setMessage("media-message", error.message, "error");
+      save.disabled = !isEditable();
+    }
+  });
+
+  const remove = node("button", "button ghost", "Retirar");
+  remove.type = "button";
+  remove.disabled = !isEditable();
+  remove.addEventListener("click", async () => {
+    if (!window.confirm(`¿Retirar ${item.originalFilename} de la publicación?`)) return;
+    remove.disabled = true;
+    try {
+      await api(`/internal/provider/blog-posts/${state.post.id}/media/${item.id}`, {
+        method: "DELETE"
+      });
+      state.post.media = (state.post.media ?? []).filter((media) => media.id !== item.id);
+      renderMedia();
+      setMessage("media-message", "Imagen retirada.", "success");
+    } catch (error) {
+      setMessage("media-message", error.message, "error");
+      remove.disabled = false;
+    }
+  });
+
+  actions.append(save, remove);
+  body.append(alt, selectedPlacement, order, actions);
+  card.append(visual, body);
+  return card;
+}
+
+function renderMedia() {
+  const images = mediaItems().sort((a, b) => {
+    if (a.placement !== b.placement) return a.placement === "COVER" ? -1 : 1;
+    return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+  });
+  byId("media-grid").replaceChildren(...images.map(mediaCard));
+  byId("media-grid").hidden = images.length === 0;
+  byId("media-empty").hidden = images.length !== 0;
+  byId("cover-input").disabled = !isEditable() || state.uploading || hasCover();
+  byId("inline-input").disabled = !isEditable() || state.uploading || images.length >= MAX_IMAGES;
+  updateSummary();
+}
+
 function applyEditableState() {
   const editable = isEditable();
   for (const control of byId("post-form").querySelectorAll("input,select,textarea,button")) {
@@ -200,6 +337,8 @@ function applyEditableState() {
   }
   byId("save-button").disabled = !editable;
   byId("submit-review-button").disabled = !editable || !state.post;
+  byId("media-needs-save").hidden = Boolean(state.post);
+  byId("media-controls").hidden = !state.post;
   byId("locked-banner").hidden = editable;
   if (!editable) {
     byId("locked-banner").textContent = state.post.status === "IN_REVIEW"
@@ -213,6 +352,7 @@ function applyEditableState() {
     }
   }
   renderProducts();
+  renderMedia();
 }
 
 function fillPost(post) {
@@ -222,6 +362,7 @@ function fillPost(post) {
   byId("excerpt").value = post.excerpt ?? "";
   byId("body-markdown").value = post.bodyMarkdown ?? "";
   state.selectedProductIds = new Set((post.relatedProducts ?? []).map((product) => product.id));
+  state.post.media = Array.isArray(post.media) ? post.media : [];
   updateCounters();
   renderMarkdown();
   renderTagsPreview();
@@ -302,6 +443,80 @@ async function savePost({ quiet = false } = {}) {
   }
 }
 
+async function uploadOne(file, selectedPlacement) {
+  if (!IMAGE_TYPES.has(file.type)) {
+    throw new Error(`${file.name}: solo se admiten JPEG, PNG o WebP.`);
+  }
+  if (file.size < 1 || file.size > MAX_IMAGE_BYTES) {
+    throw new Error(`${file.name}: supera el límite de 12 MB.`);
+  }
+  const response = await fetch(`/internal/provider/blog-posts/${state.post.id}/media`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": file.type,
+      "X-File-Name": encodeURIComponent(file.name),
+      "X-Alt-Text": "",
+      "X-Media-Placement": selectedPlacement
+    },
+    body: file
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (response.status === 401) {
+    window.location.replace("/proveedor/acceso/");
+    throw new Error("La sesión ha caducado.");
+  }
+  if (!response.ok) throw new Error(payload.message || `No se pudo subir ${file.name}.`);
+  state.post.media ??= [];
+  state.post.media.push(payload.media);
+}
+
+async function uploadFiles(files, selectedPlacement) {
+  if (!state.post || !isEditable() || state.uploading || files.length === 0) return;
+  if (selectedPlacement === "COVER" && hasCover()) {
+    setMessage("media-message", "Ya existe una portada. Retírala o conviértela en imagen interior.", "warning");
+    return;
+  }
+  const freeSlots = MAX_IMAGES - mediaItems().length;
+  const selected = files.slice(0, Math.max(0, freeSlots));
+  if (selected.length === 0) {
+    setMessage("media-message", "La publicación ya tiene doce imágenes.", "warning");
+    return;
+  }
+
+  state.uploading = true;
+  const status = byId("upload-status");
+  const progress = byId("upload-progress");
+  status.hidden = false;
+  progress.value = 0;
+  setMessage("media-message");
+  renderMedia();
+
+  for (let index = 0; index < selected.length; index += 1) {
+    const file = selected[index];
+    byId("upload-label").textContent = `Subiendo ${index + 1} de ${selected.length}: ${file.name}`;
+    progress.value = Math.round((index / selected.length) * 100);
+    try {
+      await uploadOne(file, selectedPlacement === "COVER" ? "COVER" : "INLINE");
+      renderMedia();
+    } catch (error) {
+      setMessage("media-message", error.message, "error");
+      break;
+    }
+  }
+
+  progress.value = 100;
+  byId("upload-label").textContent = "Carga terminada.";
+  state.uploading = false;
+  byId("cover-input").value = "";
+  byId("inline-input").value = "";
+  renderMedia();
+  window.setTimeout(() => {
+    status.hidden = true;
+    progress.value = 0;
+  }, 1200);
+}
+
 async function submitReview() {
   if (!isEditable()) return;
   setMessage("review-message", "Guardando antes de enviar…");
@@ -376,6 +591,7 @@ async function loadEditor() {
     byId("editor-content").hidden = false;
     await productsPromise;
     renderProducts();
+    renderMedia();
   } catch (error) {
     byId("editor-loading").hidden = true;
     byId("editor-error-message").textContent = error.message;
@@ -394,6 +610,12 @@ for (const id of ["excerpt", "body-markdown"]) {
   });
 }
 byId("tags").addEventListener("input", renderTagsPreview);
+byId("cover-input").addEventListener("change", (event) => {
+  void uploadFiles([...event.target.files].slice(0, 1), "COVER");
+});
+byId("inline-input").addEventListener("change", (event) => {
+  void uploadFiles([...event.target.files], "INLINE");
+});
 byId("submit-review-button").addEventListener("click", () => void submitReview());
 byId("logout-button").addEventListener("click", async () => {
   try { await fetch("/internal/provider/session", { method: "DELETE" }); }
