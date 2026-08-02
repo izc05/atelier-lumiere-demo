@@ -1,0 +1,36 @@
+name: Validar aplicación fuente
+
+on:
+  pull_request:
+    paths:
+      - "source/**"
+      - ".github/workflows/validate-source-runtime.yml"
+  push:
+    branches: [main]
+    paths:
+      - "source/**"
+      - ".github/workflows/validate-source-runtime.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-source:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: source
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Probar contratos y políticas
+        run: npm test
+
+      - name: Validar Docker Compose
+        run: docker compose -f infra/docker/docker-compose.yml config
