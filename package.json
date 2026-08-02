@@ -1,0 +1,13 @@
+{
+  "name": "atelier-lumiere-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/validate-public-demo.mjs",
+    "validate:public": "node scripts/validate-public-demo.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
