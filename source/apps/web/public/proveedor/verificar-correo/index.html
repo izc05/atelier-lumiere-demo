@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Verifica tu correo · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/onboarding.css">
+  <script defer src="/proveedor/onboarding.js"></script>
+</head>
+<body data-page="email-verification">
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Atelier Lumière">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <span class="secure-badge">Correo protegido</span>
+    </header>
+
+    <section class="layout">
+      <div class="story">
+        <p class="eyebrow">Confirma tu identidad</p>
+        <h1>Verifica tu correo.</h1>
+        <p>Este paso confirma que controlas la dirección utilizada para invitarte. El enlace es temporal, de un solo uso y queda invalidado al solicitar uno nuevo.</p>
+        <div class="progress" aria-label="Paso 2 de 4">
+          <span class="done"></span><span class="current"></span><span></span><span></span>
+        </div>
+        <p class="progress-label">Paso 2 de 4 · Verificar correo</p>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <p class="eyebrow">Verificación</p>
+          <h2>Confirma el enlace</h2>
+          <p>Al verificarlo se abrirá una sesión temporal para configurar el doble factor.</p>
+        </div>
+        <div class="card-body">
+          <div class="notice">La verificación del correo no concede por sí sola acceso al panel del proveedor.</div>
+          <div id="email-actions" class="form">
+            <button id="verify-email-button" class="button primary full" type="button">Verificar mi correo</button>
+            <button id="resend-email-button" class="button secondary full" type="button">Solicitar un enlace nuevo</button>
+          </div>
+          <p id="email-message" class="message" role="status" aria-live="polite"></p>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
