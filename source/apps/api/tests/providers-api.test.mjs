@@ -48,7 +48,7 @@ test("la API administra proveedores sin filtrar secretos ni saltarse RLS", {
     connectionString,
     maxConnections: 4,
     statementTimeoutMs: 5000,
-    logger: { error() {} }
+    logger: console
   });
   const adminContext = createDevelopmentAdminContext(authOptions);
   await ensureDevelopmentAdmin(database, adminContext, {
@@ -66,7 +66,7 @@ test("la API administra proveedores sin filtrar secretos ni saltarse RLS", {
     database,
     providersService,
     authenticateRequest: createRequestAuthenticator(authOptions),
-    logger: { error() {} }
+    logger: console
   });
   const server = createServer(handler);
   server.listen(0, "127.0.0.1");
@@ -97,7 +97,7 @@ test("la API administra proveedores sin filtrar secretos ni saltarse RLS", {
     }
   });
 
-  assert.equal(createResult.response.status, 201);
+  assert.equal(createResult.response.status, 201, JSON.stringify(createResult.payload));
   assert.equal(createResult.payload.provider.status, "INVITED");
   assert.equal(createResult.payload.invitation.status, "PENDING");
   assert.equal(createResult.payload.delivery, "manual-development");
