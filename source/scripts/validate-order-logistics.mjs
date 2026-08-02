@@ -59,9 +59,8 @@ assert.match(service, /Esta operación está reservada al taller/);
 assert.doesNotMatch(service, /stripe|paypal|card_number|payment_intent/i);
 
 assert.match(api, /\/api\\\/\(provider\|customer\)\\\/orders/);
-assert.match(api, /providerAuthService\.authenticate/);
-assert.match(api, /customerAuthService\.authenticate/);
-assert.match(api, /actor\.toLowerCase\(\) === "provider"/);
+assert.match(api, /actor\.toLowerCase\(\) === "provider" \? providerAuthService : customerAuthService/);
+assert.match(api, /authService\.authenticate\(token\)/);
 assert.match(apiServer, /createOrderLogisticsApiHandler/);
 assert.match(apiServer, /createOrderLogisticsService/);
 
