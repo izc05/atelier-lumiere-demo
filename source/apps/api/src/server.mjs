@@ -4,6 +4,8 @@ import { createAccountRecoveryApiHandler } from "./account-recovery-api.mjs";
 import { createAccountRecoveryService } from "./account-recovery-service.mjs";
 import { createAdminProductsApiHandler } from "./admin-products-api.mjs";
 import { createAdminProductsService } from "./admin-products-service.mjs";
+import { createBlogPostsApiHandler } from "./blog-posts-api.mjs";
+import { createBlogPostsService } from "./blog-posts-service.mjs";
 import { createDatabase } from "./database.mjs";
 import {
   createDevelopmentAdminContext,
@@ -87,6 +89,7 @@ const accountRecoveryService = database.enabled && developmentAdminContext
       environment
     })
   : null;
+const blogPostsService = database.enabled ? createBlogPostsService({ database }) : null;
 const productsService = database.enabled ? createProductsService({ database }) : null;
 const productMediaService = database.enabled
   ? createProductMediaService({ database, storage: mediaStorage })
@@ -124,8 +127,13 @@ const accountRecoveryHandler = createAccountRecoveryApiHandler({
   baseHandler: baseApiHandler,
   accountRecoveryService
 });
-const productsHandler = createProductsApiHandler({
+const blogPostsHandler = createBlogPostsApiHandler({
   baseHandler: accountRecoveryHandler,
+  blogPostsService,
+  providerAuthService
+});
+const productsHandler = createProductsApiHandler({
+  baseHandler: blogPostsHandler,
   productsService,
   providerAuthService
 });
