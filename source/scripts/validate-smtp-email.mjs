@@ -9,6 +9,9 @@ const required = [
   "apps/api/src/email-delivery-services.mjs",
   "apps/api/tests/mail-service.test.mjs",
   "apps/api/tests/email-delivery-services.test.mjs",
+  "apps/web/public/admin/proveedores/index.html",
+  "apps/web/public/admin/proveedores/provider-status.css",
+  "apps/web/public/admin/proveedores/provider-status.js",
   "infra/docker/docker-compose.yml",
   ".env.example"
 ];
@@ -19,7 +22,7 @@ for (const path of required) {
   try {
     contents.set(path, await readFile(path, "utf8"));
   } catch {
-    failures.push(`Falta el archivo SMTP: ${path}`);
+    failures.push(`Falta el archivo SMTP o de estado: ${path}`);
   }
 }
 
@@ -67,16 +70,19 @@ if (templates.includes("innerHTML")) failures.push("Las plantillas no deben depe
 
 const delivery = contents.get("apps/api/src/email-delivery-services.mjs") ?? "";
 for (const expected of [
-  "database-committed",
   "No se pudo entregar un correo transaccional",
   "SMTP_DELIVERY_FAILED",
   "withProviderInvitationDelivery",
   "withOnboardingEmailDelivery",
   "withVerificationEmailDelivery",
-  "emailDelivery"
+  "emailDelivery",
+  "loadProviderAccounts",
+  "PENDING_APPROVAL",
+  "email_verified_at",
+  "two_factor_enabled",
+  "membership_status"
 ]) {
-  if (expected === "database-committed") continue;
-  if (!delivery.includes(expected)) failures.push(`Falta una garantía de entrega: ${expected}`);
+  if (!delivery.includes(expected)) failures.push(`Falta una garantía de entrega o estado: ${expected}`);
 }
 for (const forbidden of ["token:", "verificationToken:"]) {
   const loggerBlock = delivery.slice(0, delivery.indexOf("export function withProviderInvitationDelivery"));
@@ -102,7 +108,8 @@ for (const expected of [
   "withOnboardingEmailDelivery",
   "withVerificationEmailDelivery",
   "SMTP_VERIFY_ON_START",
-  "mailService.close()"
+  "mailService.close()",
+  "database"
 ]) {
   if (!server.includes(expected)) failures.push(`Falta una conexión SMTP del servidor: ${expected}`);
 }
@@ -123,19 +130,68 @@ for (const expected of [
   if (!compose.includes(expected)) failures.push(`Docker no incluye ${expected}.`);
 }
 
+const adminHtml = contents.get("apps/web/public/admin/proveedores/index.html") ?? "";
+for (const expected of [
+  "provider-status.css",
+  "provider-status.js",
+  "Estado de activación",
+  "activation-status-list",
+  "invitación, cuenta, correo, doble factor y aprobación final"
+]) {
+  if (!adminHtml.includes(expected)) failures.push(`Falta un elemento de estado administrativo: ${expected}`);
+}
+
+const adminStatus = contents.get("apps/web/public/admin/proveedores/provider-status.js") ?? "";
+for (const expected of [
+  "INVITED",
+  "ACCOUNT_CREATED",
+  "EMAIL_VERIFIED",
+  "TWO_FACTOR_ENABLED",
+  "PENDING_APPROVAL",
+  "ACTIVE",
+  "SUSPENDED",
+  "provider.onboarding",
+  "/internal/admin/providers",
+  "MutationObserver"
+]) {
+  if (!adminStatus.includes(expected)) failures.push(`Falta una etapa visible: ${expected}`);
+}
+for (const forbidden of [
+  "innerHTML",
+  "localStorage",
+  "document.cookie",
+  "SMTP_PASSWORD",
+  "Authorization"
+]) {
+  if (adminStatus.includes(forbidden)) failures.push(`El estado administrativo no puede contener: ${forbidden}`);
+}
+
+const adminCss = contents.get("apps/web/public/admin/proveedores/provider-status.css") ?? "";
+for (const expected of [
+  ".activation-card",
+  ".activation-steps",
+  ".activation-step.done",
+  ".activation-step.current",
+  "@media (max-width: 720px)"
+]) {
+  if (!adminCss.includes(expected)) failures.push(`Falta una regla visual de activación: ${expected}`);
+}
+
 const tests = `${contents.get("apps/api/tests/mail-service.test.mjs") ?? ""}\n${contents.get("apps/api/tests/email-delivery-services.test.mjs") ?? ""}`;
 for (const expected of [
   "SMTP permanece desactivado",
   "HTML escapado",
   "fallo SMTP no revierte",
-  "includes(result.token), false"
+  "includes(result.token), false",
+  "calcula el progreso desde PostgreSQL",
+  'stage, "PENDING_APPROVAL"'
 ]) {
-  if (!tests.includes(expected)) failures.push(`Falta una prueba SMTP: ${expected}`);
+  if (!tests.includes(expected)) failures.push(`Falta una prueba SMTP o de estado: ${expected}`);
 }
 
 if (failures.length) {
-  console.error("Validación SMTP fallida:\n- " + failures.join("\n- "));
+  console.error("Validación SMTP y estado de proveedores fallida:\n- " + failures.join("\n- "));
   process.exit(1);
 }
 
-console.log("SMTP, plantillas y privacidad de tokens validados.");
+console.log("SMTP, plantillas, privacidad y progreso de proveedores validados.");
