@@ -1,0 +1,78 @@
+name: Validar asistente del mini PC
+
+on:
+  pull_request:
+    paths:
+      - "source/**"
+      - ".github/workflows/validate-mini-pc-operator.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "source/**"
+      - ".github/workflows/validate-mini-pc-operator.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-mini-pc-operator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Crear configuración válida de prueba
+        working-directory: source
+        run: |
+          cat > .env <<'EOF'
+          NODE_ENV=production
+          APP_URL=http://localhost:3000
+          WEB_PORT=3000
+          API_PORT=4000
+          POSTGRES_USER=atelier
+          POSTGRES_PASSWORD=preflight-postgres-password-2026
+          POSTGRES_DB=atelier_lumiere
+          AUTH_LOGIN_PEPPER=preflight-login-pepper-with-more-than-thirty-two-characters
+          AUTH_SERVICE_USER_ID=00000000-0000-4000-8000-000000000008
+          ALLOW_DEV_ADMIN_AUTH=false
+          DEV_ADMIN_TOKEN=
+          ENABLE_ADMIN_UI=false
+          WEB_COOKIE_SECURE=false
+          PROVIDER_COOKIE_SECURE=false
+          TWO_FACTOR_ENCRYPTION_KEY_BASE64=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+          TWO_FACTOR_RECOVERY_PEPPER=preflight-recovery-pepper-with-more-than-thirty-two-characters
+          SMTP_ENABLED=false
+          PILOT_CHECKOUT_ENABLED=false
+          MIGRATION_STATEMENT_TIMEOUT_MS=120000
+          MIGRATION_LOCK_TIMEOUT_MS=10000
+          EOF
+          chmod 600 .env
+
+      - name: Ejecutar preflight sin modificar servicios
+        working-directory: source
+        run: |
+          bash scripts/mini-pc-preflight.sh --mode check
+          test -z "$(docker compose --env-file .env -f infra/docker/docker-compose.yml ps -q)"
+
+      - name: Comprobar que permisos inseguros bloquean el preflight
+        working-directory: source
+        run: |
+          chmod 644 .env
+          if bash scripts/mini-pc-preflight.sh --mode check; then
+            echo "El preflight aceptó un .env legible por otros usuarios." >&2
+            exit 1
+          fi
+          chmod 600 .env
+
+      - name: Simular instalación y actualización
+        working-directory: source
+        run: |
+          bash scripts/mini-pc-deploy.sh install --dry-run
+          bash scripts/mini-pc-deploy.sh update --dry-run
+          test -z "$(docker compose --env-file .env -f infra/docker/docker-compose.yml ps -q)"
+
+      - name: Verificar que la simulación no cambió el repositorio
+        run: test -z "$(git status --porcelain --untracked-files=normal)"
