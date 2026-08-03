@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Preferencias de privacidad · Atelier Lumière</title>
+  <link rel="stylesheet" href="/legal/legal.css">
+  <script defer src="/legal/privacy.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/legal/">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Privacidad</small></span>
+      </a>
+      <nav class="top-actions">
+        <a class="button outline" href="/legal/cookies/">Política de cookies</a>
+        <a class="button secondary" href="/legal/">Centro legal</a>
+      </nav>
+    </header>
+
+    <section class="page-head">
+      <p class="eyebrow">Centro de privacidad</p>
+      <h1>Controla las categorías opcionales</h1>
+      <p class="lead">La aplicación funciona con almacenamiento necesario para seguridad, sesiones y carrito. En este momento no hay servicios externos de analítica, publicidad o preferencias conectados.</p>
+    </section>
+
+    <section id="privacy-loading" class="loading"><p>Cargando tus preferencias…</p></section>
+    <section id="privacy-content" class="privacy-layout" hidden>
+      <article class="privacy-card">
+        <div class="preference-row">
+          <div><h3>Necesarias</h3><p>Sesiones privadas, seguridad, carrito piloto y recuerdo de esta elección. No pueden desactivarse desde la aplicación.</p></div>
+          <label class="switch" aria-label="Necesarias activadas"><input id="necessary" type="checkbox" checked disabled><span></span></label>
+        </div>
+        <div class="preference-row">
+          <div><h3>Preferencias</h3><p>Funciones opcionales de presentación. No hay un proveedor externo conectado actualmente.</p></div>
+          <label class="switch" aria-label="Preferencias"><input id="preferences" type="checkbox"><span></span></label>
+        </div>
+        <div class="preference-row">
+          <div><h3>Analítica</h3><p>Medición agregada del uso. Está desactivada y no se carga ninguna herramienta de analítica.</p></div>
+          <label class="switch" aria-label="Analítica"><input id="analytics" type="checkbox"><span></span></label>
+        </div>
+        <div class="preference-row">
+          <div><h3>Marketing</h3><p>Publicidad o seguimiento entre sitios. Está desactivado y no se carga ninguna red publicitaria.</p></div>
+          <label class="switch" aria-label="Marketing"><input id="marketing" type="checkbox"><span></span></label>
+        </div>
+
+        <div class="preference-actions">
+          <button id="reject-optional" class="button outline equal" data-privacy-action="reject" type="button">Rechazar opcionales</button>
+          <button id="accept-optional" class="button outline equal" data-privacy-action="accept" type="button">Aceptar opcionales</button>
+          <button id="save-preferences" class="button primary equal" data-privacy-action="save" type="button">Guardar selección</button>
+        </div>
+        <p id="privacy-version" class="technical-note"></p>
+        <p id="privacy-message" class="message" role="status" aria-live="polite"></p>
+      </article>
+
+      <p class="technical-note">Aceptar una categoría no activa por sí mismo ningún servicio externo. Antes de conectar uno, deberá aparecer identificado en la política y respetar esta elección.</p>
+    </section>
+
+    <footer class="legal-footer">
+      <a href="/legal/privacidad/">Política de privacidad</a>
+      <a href="/legal/cookies/">Política de cookies</a>
+      <a href="/legal/">Todos los documentos</a>
+    </footer>
+  </main>
+</body>
+</html>

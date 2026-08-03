@@ -27,6 +27,8 @@ import {
   withVerificationEmailDelivery
 } from "./email-delivery-services.mjs";
 import { createEmailVerificationService } from "./email-verification-service.mjs";
+import { createLegalApiHandler } from "./legal-api.mjs";
+import { createLegalService } from "./legal-service.mjs";
 import { createMailService } from "./mail-service.mjs";
 import { createMediaPreviewStorage } from "./media-preview-storage.mjs";
 import { createLocalMediaStorage } from "./media-storage-service.mjs";
@@ -66,6 +68,11 @@ const requestFileStorage = createRequestFileStorage();
 const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
 const authenticateRequest = createRequestAuthenticator({ environment });
 const developmentAdminContext = createDevelopmentAdminContext({ environment });
+const legalSystemContext = Object.freeze({
+  role: "LEGAL_SERVICE",
+  userId: process.env.LEGAL_SERVICE_USER_ID ?? "00000000-0000-4000-8000-000000000007",
+  providerId: null
+});
 
 if (database.enabled && developmentAdminContext) {
   await ensureDevelopmentAdmin(database, developmentAdminContext);
@@ -108,6 +115,13 @@ const accountRecoveryService = database.enabled && developmentAdminContext
       database,
       systemContext: developmentAdminContext,
       mailService,
+      environment
+    })
+  : null;
+const legalService = database.enabled
+  ? createLegalService({
+      database,
+      systemContext: legalSystemContext,
       environment
     })
   : null;
@@ -239,9 +253,13 @@ const publicBlogHandler = createPublicBlogApiHandler({
   baseHandler: adminProductsHandler,
   publicBlogService
 });
-const server = createServer(createPublicCatalogApiHandler({
+const publicCatalogHandler = createPublicCatalogApiHandler({
   baseHandler: publicBlogHandler,
   publicCatalogService
+});
+const server = createServer(createLegalApiHandler({
+  baseHandler: publicCatalogHandler,
+  legalService
 }));
 
 server.listen(port, host, () => {
