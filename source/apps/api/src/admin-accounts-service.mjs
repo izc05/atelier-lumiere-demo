@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { ServiceError } from "./providers-service.mjs";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -22,11 +23,7 @@ function ownerContext(context) {
       403
     );
   }
-  return {
-    role: "ADMIN",
-    userId: context.userId.toLowerCase(),
-    providerId: null
-  };
+  return { role: "ADMIN", userId: context.userId.toLowerCase(), providerId: null };
 }
 
 function uuid(value, field = "id") {
@@ -103,8 +100,7 @@ function serializeSession(row) {
     userAgent: row.user_agent,
     createdAt: row.created_at,
     lastSeenAt: row.last_seen_at,
-    expiresAt: row.expires_at,
-    current: false
+    expiresAt: row.expires_at
   };
 }
 
@@ -117,7 +113,7 @@ async function audit(transaction, context, action, entityType, entityId, metadat
   );
 }
 
-async function accountRow(transaction, userId, { lock = false } = {}) {
+async function accountRow(transaction, userId) {
   const result = await transaction.query(
     `SELECT
        u.id AS user_id, u.email, u.display_name, u.status AS user_status,
@@ -140,15 +136,27 @@ async function accountRow(transaction, userId, { lock = false } = {}) {
        AND s.provider_id IS NULL
        AND s.role IN ('PLATFORM_OWNER', 'PROVIDER_MANAGER', 'EDITORIAL_REVIEWER')
      WHERE u.id = $1
-     GROUP BY u.id, am.user_id, t.user_id
-     ${lock ? "FOR UPDATE OF u, am" : ""}`,
+     GROUP BY u.id, am.user_id, t.user_id`,
     [userId]
   );
   return result.rows[0] ?? null;
 }
 
-async function requireAccount(transaction, userId, options) {
-  const row = await accountRow(transaction, userId, options);
+async function requireAccount(transaction, userId, { lock = false } = {}) {
+  if (lock) {
+    const locked = await transaction.query(
+      `SELECT u.id
+       FROM users u
+       INNER JOIN admin_memberships am ON am.user_id = u.id
+       WHERE u.id = $1
+       FOR UPDATE OF u, am`,
+      [userId]
+    );
+    if (locked.rowCount !== 1) {
+      throw new ServiceError("ADMIN_ACCOUNT_NOT_FOUND", "No se ha encontrado la cuenta administrativa.", 404);
+    }
+  }
+  const row = await accountRow(transaction, userId);
   if (!row) {
     throw new ServiceError("ADMIN_ACCOUNT_NOT_FOUND", "No se ha encontrado la cuenta administrativa.", 404);
   }
@@ -229,10 +237,7 @@ export function createAdminAccountsService({
       const currentTime = now();
 
       const account = await database.withContext(context, async (transaction) => {
-        const existing = await transaction.query(
-          "SELECT id FROM users WHERE email = $1 LIMIT 1",
-          [email]
-        );
+        const existing = await transaction.query("SELECT id FROM users WHERE email = $1 LIMIT 1", [email]);
         if (existing.rowCount > 0) {
           throw new ServiceError(
             "ADMIN_EMAIL_IN_USE",
@@ -255,6 +260,27 @@ export function createAdminAccountsService({
             (user_id, role, status, created_by, created_at, updated_at)
            VALUES ($1, $2, 'ACTIVE', $3, $4, $4)`,
           [userId, role, context.userId, currentTime]
+        );
+        await transaction.query(
+          `INSERT INTO user_credentials
+            (user_id, password_hash, password_salt, password_algorithm)
+           VALUES ($1, $2, $3, 'scrypt-v1')`,
+          [
+            userId,
+            randomBytes(64).toString("base64url"),
+            randomBytes(18).toString("base64url")
+          ]
+        );
+        await transaction.query(
+          `INSERT INTO admin_totp_credentials
+            (user_id, secret_ciphertext, secret_iv, secret_auth_tag, status)
+           VALUES ($1, $2, $3, $4, 'PENDING')`,
+          [
+            userId,
+            randomBytes(32).toString("base64url"),
+            randomBytes(12).toString("base64url"),
+            randomBytes(16).toString("base64url")
+          ]
         );
         await audit(transaction, context, "ADMIN_ACCOUNT_CREATED", "user", userId, {
           email,
@@ -431,13 +457,14 @@ export function createAdminAccountsService({
             409
           );
         }
+        const serialized = serializeAccount(target);
         await audit(transaction, context, "ADMIN_SETUP_LINK_REQUESTED", "user", userId, {
-          securityReady: Boolean(target.two_factor_enabled && target.totp_status === "ACTIVE" && target.has_password)
+          securityReady: serialized.securityReady
         });
-        return target;
+        return serialized;
       });
       const setup = await sendSetup(account.email, account.securityReady ? "RECOVERY" : "INVITATION");
-      return { account: serializeAccount(account), setup };
+      return { account, setup };
     }
   });
 }
