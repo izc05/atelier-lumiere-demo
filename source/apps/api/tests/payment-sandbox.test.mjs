@@ -80,6 +80,7 @@ test("el sandbox registra un único cobro lógico y webhooks idempotentes", { sk
     statementTimeoutMs: 5000,
     logger: { error() {} }
   });
+  t.after(() => database.close());
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();
   const order = await createOrder(database, suffix);
   const service = createPaymentSandboxService({
@@ -90,14 +91,6 @@ test("el sandbox registra un único cobro lógico y webhooks idempotentes", { sk
     sessionSecret: SESSION_SECRET,
     ttlMinutes: 30,
     now: () => new Date(FIXED_TIME)
-  });
-
-  t.after(async () => {
-    await database.withContext(ADMIN, async (transaction) => {
-      await transaction.query("DELETE FROM audit_events WHERE entity_id IN (SELECT id FROM payment_attempts WHERE checkout_id=$1)", [order.checkoutId]);
-      await transaction.query("DELETE FROM users WHERE id=$1", [order.customerId]);
-    });
-    await database.close();
   });
 
   const created = await service.createForCheckout(order.checkoutId);
@@ -178,6 +171,7 @@ test("el sandbox puede simular un rechazo sin afectar a otro checkout", { skip: 
     statementTimeoutMs: 5000,
     logger: { error() {} }
   });
+  t.after(() => database.close());
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();
   const order = await createOrder(database, suffix, 3600);
   const service = createPaymentSandboxService({
@@ -187,14 +181,6 @@ test("el sandbox puede simular un rechazo sin afectar a otro checkout", { skip: 
     environment: "development",
     sessionSecret: SESSION_SECRET,
     now: () => new Date(FIXED_TIME)
-  });
-
-  t.after(async () => {
-    await database.withContext(ADMIN, async (transaction) => {
-      await transaction.query("DELETE FROM audit_events WHERE entity_id IN (SELECT id FROM payment_attempts WHERE checkout_id=$1)", [order.checkoutId]);
-      await transaction.query("DELETE FROM users WHERE id=$1", [order.customerId]);
-    });
-    await database.close();
   });
 
   const created = await service.createForCheckout(order.checkoutId);
