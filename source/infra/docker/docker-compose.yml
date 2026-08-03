@@ -90,10 +90,18 @@ services:
       migrate:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:4000/health')
+          .then((response) => process.exit(response.ok ? 0 : 1))
+          .catch(() => process.exit(1))
       interval: 10s
-      timeout: 3s
-      retries: 5
+      timeout: 5s
+      retries: 6
+      start_period: 10s
     restart: unless-stopped
 
   database:
