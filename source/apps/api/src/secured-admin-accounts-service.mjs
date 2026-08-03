@@ -150,6 +150,18 @@ async function revokeAccess(transaction, userId, currentTime, { revokeRecovery =
   return sessions.rowCount;
 }
 
+async function revokePendingRecovery(database, context, userId, currentTime, action, metadata) {
+  await database.withContext(context, async (transaction) => {
+    await transaction.query(
+      `UPDATE admin_account_recovery_tokens
+       SET status = 'REVOKED', revoked_at = $2
+       WHERE user_id = $1 AND status = 'PENDING'`,
+      [userId, currentTime]
+    );
+    await audit(transaction, context, action, userId, metadata);
+  });
+}
+
 function confirmation(input) {
   return input && typeof input.confirmation === "object" && !Array.isArray(input.confirmation)
     ? input.confirmation
@@ -177,7 +189,10 @@ export function createSecuredAdminAccountsService({
   async function target(rawContext, rawUserId) {
     const context = ownerContext(rawContext);
     const userId = uuid(rawUserId);
-    const account = await database.withContext(context, (transaction) => requireAccount(transaction, userId));
+    const account = await database.withContext(
+      context,
+      (transaction) => requireAccount(transaction, userId)
+    );
     return { context, userId, account };
   }
 
@@ -242,7 +257,7 @@ export function createSecuredAdminAccountsService({
       });
       const currentTime = now();
 
-      const result = await database.withContext(context, async (transaction) => {
+      return database.withContext(context, async (transaction) => {
         const current = await requireAccount(transaction, userId, { lock: true });
         if (current.admin_role === nextRole) {
           return { account: serializeAccount(current), revokedSessions: 0, unchanged: true };
@@ -282,7 +297,6 @@ export function createSecuredAdminAccountsService({
           unchanged: false
         };
       });
-      return result;
     },
 
     async resetSecurity(rawContext, rawUserId, input = {}) {
@@ -307,18 +321,22 @@ export function createSecuredAdminAccountsService({
       });
 
       const setup = await adminRecoveryService.request(account.email);
-      if (!new Set(["sent", "manual-development"]).has(setup.delivery)) {
-        await database.withContext(context, async (transaction) => {
-          await transaction.query(
-            `UPDATE admin_account_recovery_tokens
-             SET status = 'REVOKED', revoked_at = $2
-             WHERE user_id = $1 AND status = 'PENDING'`,
-            [userId, now()]
-          );
-          await audit(transaction, context, "ADMIN_SECURITY_RESET_DELIVERY_FAILED", userId, {
-            delivery: setup.delivery
-          });
-        });
+      const usableDelivery = setup.delivery === "sent"
+        || (
+          setup.delivery === "manual-development"
+          && typeof setup.recoveryPath === "string"
+          && setup.recoveryPath.length > 0
+        );
+      if (!usableDelivery) {
+        const failureTime = now();
+        await revokePendingRecovery(
+          database,
+          context,
+          userId,
+          failureTime,
+          "ADMIN_SECURITY_RESET_DELIVERY_FAILED",
+          { delivery: setup.delivery }
+        );
         throw new ServiceError(
           "ADMIN_SECURITY_RESET_DELIVERY_REQUIRED",
           "No se ha bloqueado la cuenta porque el enlace de recuperación no pudo entregarse.",
@@ -328,40 +346,51 @@ export function createSecuredAdminAccountsService({
       }
 
       const currentTime = now();
-      const outcome = await database.withContext(context, async (transaction) => {
-        const current = await requireAccount(transaction, userId, { lock: true });
-        if (current.membership_status !== "ACTIVE" || current.user_status !== "ACTIVE") {
-          throw new ServiceError(
-            "ADMIN_ACCOUNT_SUSPENDED",
-            "La cuenta ha cambiado de estado antes de completar el restablecimiento.",
-            409
+      try {
+        const outcome = await database.withContext(context, async (transaction) => {
+          const current = await requireAccount(transaction, userId, { lock: true });
+          if (current.membership_status !== "ACTIVE" || current.user_status !== "ACTIVE") {
+            throw new ServiceError(
+              "ADMIN_ACCOUNT_SUSPENDED",
+              "La cuenta ha cambiado de estado antes de completar el restablecimiento.",
+              409
+            );
+          }
+          const revokedSessions = await revokeAccess(transaction, userId, currentTime, {
+            revokeRecovery: false
+          });
+          await transaction.query(
+            `UPDATE admin_totp_credentials
+             SET status = 'REVOKED', revoked_at = $2, activated_at = NULL, last_used_step = NULL
+             WHERE user_id = $1`,
+            [userId, currentTime]
           );
-        }
-        const revokedSessions = await revokeAccess(transaction, userId, currentTime, {
-          revokeRecovery: false
+          await transaction.query(
+            "UPDATE users SET two_factor_enabled = false, updated_at = $2 WHERE id = $1",
+            [userId, currentTime]
+          );
+          await audit(transaction, context, "ADMIN_SECURITY_RESET_FORCED", userId, {
+            role: current.admin_role,
+            revokedSessions,
+            delivery: setup.delivery
+          });
+          return {
+            account: serializeAccount(await requireAccount(transaction, userId)),
+            revokedSessions
+          };
         });
-        await transaction.query(
-          `UPDATE admin_totp_credentials
-           SET status = 'REVOKED', revoked_at = $2, activated_at = NULL, last_used_step = NULL
-           WHERE user_id = $1`,
-          [userId, currentTime]
+        return { ...outcome, setup };
+      } catch (error) {
+        await revokePendingRecovery(
+          database,
+          context,
+          userId,
+          now(),
+          "ADMIN_SECURITY_RESET_ABORTED",
+          { code: typeof error?.code === "string" ? error.code : "RESET_ABORTED" }
         );
-        await transaction.query(
-          "UPDATE users SET two_factor_enabled = false, updated_at = $2 WHERE id = $1",
-          [userId, currentTime]
-        );
-        await audit(transaction, context, "ADMIN_SECURITY_RESET_FORCED", userId, {
-          role: current.admin_role,
-          revokedSessions,
-          delivery: setup.delivery
-        });
-        return {
-          account: serializeAccount(await requireAccount(transaction, userId)),
-          revokedSessions
-        };
-      });
-
-      return { ...outcome, setup };
+        throw error;
+      }
     }
   });
 }
