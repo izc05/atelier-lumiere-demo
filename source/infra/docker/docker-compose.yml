@@ -17,6 +17,21 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  migrate:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.api
+    command: ["node", "src/migrate-database.mjs"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-atelier}:${POSTGRES_PASSWORD:-atelier_dev_change_me}@database:5432/${POSTGRES_DB:-atelier_lumiere}
+      MIGRATIONS_PATH: /app/migrations
+      MIGRATION_STATEMENT_TIMEOUT_MS: ${MIGRATION_STATEMENT_TIMEOUT_MS:-120000}
+      MIGRATION_LOCK_TIMEOUT_MS: ${MIGRATION_LOCK_TIMEOUT_MS:-10000}
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
+
   api:
     # WEB_ADMIN_ACCESS_KEY fue retirada del contenedor web; solo queda esta nota de migración.
     build:
@@ -72,8 +87,8 @@ services:
     volumes:
       - media_data:/data/media
     depends_on:
-      database:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
       interval: 10s
@@ -89,7 +104,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-atelier_lumiere}
     volumes:
       - database_data:/var/lib/postgresql/data
-      - ../../packages/database/migrations:/docker-entrypoint-initdb.d:ro
+      # Retirado: ../../packages/database/migrations:/docker-entrypoint-initdb.d:ro
+      # Las migraciones se ejecutan y registran mediante el servicio migrate.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atelier} -d ${POSTGRES_DB:-atelier_lumiere}"]
       interval: 10s
