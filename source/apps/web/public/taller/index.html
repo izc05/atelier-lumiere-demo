@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#59101f">
+  <title>Taller artesano · Atelier Lumière</title>
+  <link rel="stylesheet" href="/tienda/store.css">
+  <link rel="stylesheet" href="/tienda/cart.css">
+  <link rel="stylesheet" href="/taller/provider.css">
+  <script defer src="/tienda/cart-store.js"></script>
+  <script defer src="/taller/provider.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <nav class="nav" aria-label="Navegación principal">
+        <a class="button ghost" href="/">Inicio</a>
+        <a class="button ghost" href="/tienda/">Tienda</a>
+        <a class="button ghost" href="/blog/">Historias</a>
+        <a class="button ghost cart-link" href="/carrito/">Carrito <span id="cart-count" class="cart-count">0</span></a>
+      </nav>
+    </header>
+
+    <section id="provider-hero" class="provider-hero" hidden>
+      <div>
+        <p class="eyebrow">Taller invitado</p>
+        <h1 id="provider-name"></h1>
+        <p id="provider-specialty" class="lead"></p>
+        <div class="provider-signals" aria-label="Información del taller">
+          <span>Selección revisada</span>
+          <span>Compra directa por taller</span>
+          <span>Envío compartido</span>
+        </div>
+      </div>
+      <aside class="provider-note">
+        <strong>Una compra, un taller</strong>
+        <p>Puedes combinar varias piezas de este artesano en el mismo carrito y compartir el envío.</p>
+      </aside>
+    </section>
+
+    <section id="loading-view" class="loading"><p>Preparando el escaparate del taller…</p></section>
+    <section id="error-view" class="error" hidden><div><h2>No se pudo abrir este taller</h2><p id="error-message"></p><a class="button primary" href="/tienda/">Volver a la tienda</a></div></section>
+    <section id="empty-view" class="empty" hidden><div><h2>Este taller todavía no tiene piezas publicadas</h2><p>Vuelve pronto o descubre otros artesanos invitados.</p><a class="button primary" href="/tienda/">Explorar la tienda</a></div></section>
+
+    <section id="collection" hidden>
+      <div class="collection-heading">
+        <div><p class="eyebrow">Colección disponible</p><h2>Piezas publicadas</h2></div>
+        <label class="provider-search">Buscar en este taller<input id="search-input" type="search" autocomplete="off" placeholder="Nombre o categoría"></label>
+      </div>
+      <div id="products-view" class="products" aria-live="polite"></div>
+    </section>
+  </main>
+</body>
+</html>
