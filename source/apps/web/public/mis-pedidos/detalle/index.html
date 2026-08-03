@@ -14,17 +14,29 @@
 </head>
 <body>
   <main class="shell">
-    <header class="topbar">
+    <header class="topbar no-print">
       <a class="brand" href="/mis-pedidos/"><span class="brand-mark" aria-hidden="true">AL</span><span><strong>Atelier Lumière</strong><small>Detalle del pedido</small></span></a>
-      <div class="top-actions"><a class="button ghost" href="/mis-pedidos/">Mis pedidos</a><button id="logout-button" class="button secondary" type="button">Cerrar acceso</button></div>
+      <div class="top-actions">
+        <a id="provider-link" class="button ghost" href="/tienda/" hidden>Ver taller</a>
+        <button id="print-button" class="button secondary" type="button">Imprimir resumen</button>
+        <a class="button ghost" href="/mis-pedidos/">Mis pedidos</a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar acceso</button>
+      </div>
     </header>
 
     <section id="detail-loading" class="loading"><p>Cargando el pedido…</p></section>
     <section id="detail-content" hidden>
-      <section class="page-head">
+      <section class="page-head order-detail-head">
         <div><p class="eyebrow">Pedido de <span id="provider-name"></span></p><div class="detail-title"><h1 id="order-number"></h1><span id="order-status"></span></div><p id="order-summary" class="lead"></p></div>
-        <strong id="order-total" class="price"></strong>
+        <div class="order-total-block"><small>Total del pedido</small><strong id="order-total" class="price"></strong></div>
       </section>
+
+      <section class="journey-panel" aria-labelledby="journey-title">
+        <div class="journey-heading"><div><p class="eyebrow">Seguimiento</p><h2 id="journey-title">Avance del pedido</h2></div><p id="journey-summary"></p></div>
+        <ol id="order-journey" class="journey-stages"></ol>
+        <article id="next-step-card" class="next-step-card"><span>Próxima actuación</span><strong id="next-step-title"></strong><p id="next-step-message"></p></article>
+      </section>
+
       <section class="detail-grid">
         <div class="detail-main">
           <article class="panel-card"><header><h2>Artículos</h2><p>Detalle y personalización registrados al realizar la compra.</p></header><div id="items-list" class="item-list"></div></article>
@@ -42,7 +54,7 @@
                 <header><h3>Incidencias</h3><p>El taller verá el aviso y podrá informar de la resolución.</p></header>
                 <div id="incidents-list" class="compact-list"></div>
                 <p id="incidents-empty" hidden>No hay incidencias registradas.</p>
-                <form id="incident-form" class="logistics-form">
+                <form id="incident-form" class="logistics-form no-print">
                   <label class="field">Tipo
                     <select id="incident-type" required>
                       <option value="DELAY">Retraso</option>
@@ -65,10 +77,11 @@
           </article>
         </div>
         <aside class="detail-side">
-          <article class="panel-card"><header><h2>Resumen</h2></header><div id="order-data" class="key-values"></div></article>
-          <article id="cancel-card" class="panel-card" hidden><header><h2>Cancelar pedido</h2><p>Solo es posible mientras el taller todavía no lo haya aceptado.</p></header><button id="cancel-button" class="button danger" type="button">Cancelar este pedido</button><p id="cancel-result" class="message" role="status" aria-live="polite"></p></article>
+          <article class="panel-card print-summary"><header><h2>Resumen</h2><p>Este bloque puede imprimirse o guardarse como PDF desde el navegador.</p></header><div id="order-data" class="key-values"></div></article>
+          <article id="cancel-card" class="panel-card no-print" hidden><header><h2>Cancelar pedido</h2><p>Solo es posible mientras el taller todavía no lo haya aceptado.</p></header><button id="cancel-button" class="button danger" type="button">Cancelar este pedido</button><p id="cancel-result" class="message" role="status" aria-live="polite"></p></article>
         </aside>
       </section>
+      <footer class="print-footer">Atelier Lumière · Resumen privado generado desde el área de cliente.</footer>
     </section>
     <section id="detail-error" class="error-card" hidden><div><h2>No se pudo abrir el pedido</h2><p id="detail-error-message"></p><a class="button primary" href="/mis-pedidos/">Volver a mis pedidos</a></div></section>
   </main>

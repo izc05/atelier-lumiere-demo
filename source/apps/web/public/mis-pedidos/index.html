@@ -18,15 +18,19 @@
         <span class="brand-mark" aria-hidden="true">AL</span>
         <span><strong>Atelier Lumière</strong><small>Seguimiento privado</small></span>
       </a>
-      <div class="top-actions"><button id="logout-button" class="button secondary" type="button">Cerrar acceso</button></div>
+      <div class="top-actions">
+        <a class="button ghost" href="/tienda/">Seguir comprando</a>
+        <button id="logout-button" class="button secondary" type="button">Cerrar acceso</button>
+      </div>
     </header>
 
-    <section class="page-head">
+    <section class="page-head customer-home-head">
       <div>
-        <p class="eyebrow">Compra separada por taller</p>
+        <p class="eyebrow">Tu espacio privado</p>
         <h1>Mis pedidos</h1>
-        <p id="welcome-text" class="lead">Cada taller prepara y envía su parte de forma independiente. Aquí puedes seguirlas juntas sin mezclar sus estados.</p>
+        <p id="welcome-text" class="lead">Consulta cada compra, conversación, envío e incidencia sin mezclar los talleres.</p>
       </div>
+      <aside class="privacy-note"><strong>Acceso protegido</strong><span>La sesión se guarda en una cookie privada y puede cerrarse desde cualquier pantalla.</span></aside>
     </section>
 
     <section class="metrics" aria-label="Resumen">
@@ -36,8 +40,21 @@
       <article class="metric"><span>Atención</span><strong id="metric-attention">0</strong><small>Presupuestos o incidencias</small></article>
     </section>
 
+    <section class="orders-toolbar" aria-label="Buscar y filtrar pedidos">
+      <label class="orders-search">Buscar pedido o taller
+        <input id="orders-search" type="search" autocomplete="off" placeholder="Ej. AL-2026 o Cerámica Luna">
+      </label>
+      <div class="order-filters" role="group" aria-label="Filtrar por situación">
+        <button class="filter-button active" type="button" data-filter="all" aria-pressed="true">Todos</button>
+        <button class="filter-button" type="button" data-filter="active" aria-pressed="false">En curso</button>
+        <button class="filter-button" type="button" data-filter="attention" aria-pressed="false">Necesitan atención</button>
+        <button class="filter-button" type="button" data-filter="completed" aria-pressed="false">Finalizados</button>
+      </div>
+      <p id="orders-result-count" class="result-count" aria-live="polite"></p>
+    </section>
+
     <section id="orders-loading" class="loading"><p>Cargando tus pedidos…</p></section>
-    <section id="orders-empty" class="empty" hidden><div><h2>No hay pedidos vinculados</h2><p>Este acceso no tiene compras disponibles.</p></div></section>
+    <section id="orders-empty" class="empty" hidden><div><h2 id="orders-empty-title">No hay pedidos vinculados</h2><p id="orders-empty-message">Este acceso no tiene compras disponibles.</p><button id="clear-filters-button" class="button secondary" type="button" hidden>Mostrar todos</button></div></section>
     <section id="orders-list" class="orders-grid" hidden aria-live="polite"></section>
     <section id="orders-error" class="error-card" hidden><div><h2>No se pudieron cargar tus pedidos</h2><p id="orders-error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div></section>
   </main>

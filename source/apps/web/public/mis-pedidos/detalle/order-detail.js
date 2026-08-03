@@ -6,6 +6,14 @@
 
   const orderId = queryUuid("id");
   let detail = null;
+  const JOURNEY = Object.freeze([
+    { status: "PENDING_CONFIRMATION", label: "Pedido recibido", dateField: "placedAt" },
+    { status: "ACCEPTED", label: "Aceptado", dateField: "acceptedAt" },
+    { status: "IN_PRODUCTION", label: "En elaboración", dateField: "productionStartedAt" },
+    { status: "READY_TO_SHIP", label: "Preparado", dateField: "readyToShipAt" },
+    { status: "SHIPPED", label: "Enviado", dateField: "shippedAt" },
+    { status: "DELIVERED", label: "Entregado", dateField: "deliveredAt" }
+  ]);
   const EVENT_LABELS = Object.freeze({
     ORDER_CREATED: "Pedido recibido",
     ORDER_STATUS_ACCEPTED: "Pedido aceptado",
@@ -123,18 +131,65 @@
     return row;
   }
 
+  function journeyIndex(order) {
+    let index = 0;
+    for (let position = 0; position < JOURNEY.length; position += 1) {
+      if (order[JOURNEY[position].dateField]) index = position;
+    }
+    const statusIndex = JOURNEY.findIndex((stage) => stage.status === order.status);
+    return Math.max(index, statusIndex);
+  }
+
+  function renderJourney(order) {
+    const current = journeyIndex(order);
+    const cancelled = order.status === "CANCELLED";
+    const stages = JOURNEY.map((stage, index) => {
+      const item = element("li", `journey-stage ${index < current ? "complete" : index === current ? "current" : "upcoming"}`);
+      if (cancelled && index > 0) item.className = "journey-stage upcoming cancelled";
+      const marker = element("span", "journey-marker", index < current ? "✓" : String(index + 1));
+      const copy = element("div", "journey-copy");
+      copy.append(element("strong", "", stage.label), element("small", "", order[stage.dateField] ? date(order[stage.dateField], true) : "Pendiente"));
+      item.append(marker, copy);
+      return item;
+    });
+    byId("order-journey").replaceChildren(...stages);
+    byId("journey-summary").textContent = cancelled
+      ? "El pedido se canceló antes de completar el recorrido."
+      : `${Math.min(current + 1, JOURNEY.length)} de ${JOURNEY.length} etapas alcanzadas.`;
+  }
+
+  function nextStep() {
+    const order = detail.order;
+    const activeIncident = detail.incidents.find((incident) => !["RESOLVED", "CLOSED"].includes(incident.status));
+    const quotedRequest = detail.customRequests.find((request) => request.status === "QUOTED");
+    const needsInfo = detail.customRequests.find((request) => ["OPEN", "NEEDS_INFO"].includes(request.status));
+    if (activeIncident) return { title: "Revisar la incidencia", message: "El taller tiene un aviso abierto. Consulta aquí cualquier respuesta o resolución." };
+    if (quotedRequest) return { title: "Aprobar o comentar el presupuesto", message: `El encargo “${quotedRequest.title}” tiene un importe pendiente de tu decisión.` };
+    if (needsInfo) return { title: "Completar detalles del encargo", message: `Abre “${needsInfo.title}” para revisar mensajes, medidas, colores o archivos.` };
+    const steps = {
+      PENDING_CONFIRMATION: { title: "Esperar la confirmación", message: "El taller revisará disponibilidad, preparación y personalización antes de aceptar." },
+      ACCEPTED: { title: "Preparación pendiente", message: "El pedido está aceptado. La siguiente actualización será el inicio de elaboración." },
+      IN_PRODUCTION: { title: "El taller está elaborando", message: "No necesitas hacer nada salvo que el taller solicite información adicional." },
+      READY_TO_SHIP: { title: "Preparar el envío", message: "Las piezas están terminadas. El taller añadirá el transportista y seguimiento cuando estén disponibles." },
+      SHIPPED: { title: "Seguir la entrega", message: detail.shipments.length ? "Abre el enlace seguro del transportista en el apartado de seguimiento." : "El pedido está enviado; el código de seguimiento puede aparecer próximamente." },
+      DELIVERED: { title: "Pedido completado", message: "Puedes imprimir o guardar este resumen como justificante privado de la compra." },
+      INCIDENT: { title: "Consultar el problema", message: "Revisa la incidencia y la respuesta del taller antes de realizar otra actuación." },
+      CANCELLED: { title: "Pedido cancelado", message: "El pedido no continuará. Conserva este resumen si necesitas consultar sus datos." }
+    };
+    return steps[order.status] ?? { title: "Consultar el detalle", message: "Toda la información disponible se encuentra en esta página." };
+  }
+
   function updateIncidentForm() {
     const enabled = !["PENDING_CONFIRMATION", "CANCELLED"].includes(detail.order.status);
     byId("incident-type").disabled = !enabled;
     byId("incident-description").disabled = !enabled;
     byId("incident-button").disabled = !enabled;
-    if (!enabled) {
-      setMessage(byId("incident-result"), "Este pedido todavía no admite incidencias o está cancelado.", "warning");
-    }
+    if (!enabled) setMessage(byId("incident-result"), "Este pedido todavía no admite incidencias o está cancelado.", "warning");
   }
 
   function render() {
     const order = detail.order;
+    document.title = `${order.orderNumber} · Atelier Lumière`;
     byId("provider-name").textContent = order.provider.displayName;
     byId("order-number").textContent = order.orderNumber;
     byId("order-status").replaceChildren(badge(order.status));
@@ -149,14 +204,28 @@
     byId("incidents-list").replaceChildren(...detail.incidents.map(incidentNode));
     byId("incidents-empty").hidden = detail.incidents.length !== 0;
     byId("order-data").replaceChildren(
+      keyValue("Número", order.orderNumber),
       keyValue("Taller", order.provider.displayName),
       keyValue("Estado", ORDER_LABELS[order.status] ?? order.status),
+      keyValue("Fecha", date(order.placedAt, true)),
       keyValue("Artículos", money(order.subtotalCents, order.currency)),
       keyValue("Envío", money(order.shippingCents, order.currency)),
       keyValue("Total", money(order.totalCents, order.currency)),
       keyValue("Nota del cliente", order.customerNote || "Sin observaciones"),
       keyValue("Nota del taller", order.providerNote || "Sin actualizaciones")
     );
+    const providerLink = byId("provider-link");
+    if (order.provider.slug) {
+      providerLink.href = `/taller/?slug=${encodeURIComponent(order.provider.slug)}`;
+      providerLink.hidden = false;
+    } else {
+      providerLink.hidden = true;
+    }
+    renderJourney(order);
+    const next = nextStep();
+    byId("next-step-title").textContent = next.title;
+    byId("next-step-message").textContent = next.message;
+    byId("next-step-card").classList.toggle("attention", detail.incidents.some((incident) => !["RESOLVED", "CLOSED"].includes(incident.status)) || detail.customRequests.some((request) => ["QUOTED", "NEEDS_INFO"].includes(request.status)));
     byId("cancel-card").hidden = order.status !== "PENDING_CONFIRMATION";
     updateIncidentForm();
   }
@@ -183,6 +252,8 @@
       byId("detail-error").hidden = false;
     }
   }
+
+  byId("print-button").addEventListener("click", () => window.print());
 
   byId("incident-form").addEventListener("submit", async (event) => {
     event.preventDefault();
