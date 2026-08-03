@@ -177,8 +177,8 @@ BEGIN
     RAISE EXCEPTION 'El servicio de pagos no está aislado en su propia identidad técnica.';
   END IF;
   SELECT count(*) INTO visible_providers FROM providers;
-  IF visible_providers <> 0 THEN
-    RAISE EXCEPTION 'El servicio de pagos puede leer talleres privados.';
+  IF visible_providers <> 2 THEN
+    RAISE EXCEPTION 'El servicio de pagos ve % talleres operativos; debería ver los 2 necesarios para resolver pedidos.', visible_providers;
   END IF;
   SELECT count(*) INTO visible_members FROM provider_members;
   IF visible_members <> 0 THEN
