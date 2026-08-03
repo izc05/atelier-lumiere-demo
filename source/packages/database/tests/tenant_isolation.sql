@@ -145,16 +145,25 @@ SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000001', false);
 DO $$
 DECLARE
   visible_providers integer;
-  visible_users integer;
+  visible_demo_users integer;
+  visible_technical_users integer;
 BEGIN
   SELECT count(*) INTO visible_providers FROM providers;
-  SELECT count(*) INTO visible_users FROM users;
+  SELECT count(*) INTO visible_demo_users
+    FROM users
+   WHERE email::text NOT LIKE '%@atelier.invalid';
+  SELECT count(*) INTO visible_technical_users
+    FROM users
+   WHERE email::text LIKE '%@atelier.invalid';
 
   IF visible_providers <> 2 THEN
     RAISE EXCEPTION 'Administración ve % proveedores; debería ver 2.', visible_providers;
   END IF;
-  IF visible_users <> 3 THEN
-    RAISE EXCEPTION 'Administración ve % usuarios; debería ver 3.', visible_users;
+  IF visible_demo_users <> 3 THEN
+    RAISE EXCEPTION 'Administración ve % usuarios de demostración; debería ver 3.', visible_demo_users;
+  END IF;
+  IF visible_technical_users <> 1 THEN
+    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 1.', visible_technical_users;
   END IF;
 END;
 $$;

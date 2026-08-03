@@ -34,22 +34,25 @@ INSERT INTO checkout_batches (
 
 INSERT INTO legal_documents (
   id, document_type, locale, version, title, content_markdown,
-  content_sha256, status, review_status, effective_at, published_at, created_by
+  content_sha256, status, review_status, reviewed_by, reviewed_at,
+  effective_at, published_at, created_by
 ) VALUES
 (
   '70000000-0000-4000-8000-000000000001',
   'PRIVACY_POLICY', 'es-ES', '1.0.0',
-  'Política de privacidad técnica',
-  '# Borrador técnico\n\nContenido sujeto a revisión profesional antes de apertura.',
-  repeat('a', 64), 'ACTIVE', 'TECHNICAL_DRAFT', now(), now(),
+  'Política de privacidad revisada',
+  '# Política revisada\n\nContenido validado profesionalmente para la prueba.',
+  repeat('a', 64), 'ACTIVE', 'PROFESSIONAL_REVIEWED',
+  'Revisor jurídico de prueba', now(), now(), now(),
   '00000000-0000-4000-8000-000000000001'
 ),
 (
   '70000000-0000-4000-8000-000000000002',
   'PURCHASE_TERMS', 'es-ES', '1.0.0',
-  'Condiciones de compra técnicas',
-  '# Borrador técnico\n\nCondiciones pendientes de validación jurídica profesional.',
-  repeat('b', 64), 'ACTIVE', 'TECHNICAL_DRAFT', now(), now(),
+  'Condiciones de compra revisadas',
+  '# Condiciones revisadas\n\nContenido validado profesionalmente para la prueba.',
+  repeat('b', 64), 'ACTIVE', 'PROFESSIONAL_REVIEWED',
+  'Revisor jurídico de prueba', now(), now(), now(),
   '00000000-0000-4000-8000-000000000001'
 );
 
@@ -58,11 +61,13 @@ BEGIN
   BEGIN
     INSERT INTO legal_documents (
       document_type, locale, version, title, content_markdown,
-      content_sha256, status, review_status, effective_at, published_at, created_by
+      content_sha256, status, review_status, reviewed_by, reviewed_at,
+      effective_at, published_at, created_by
     ) VALUES (
       'PRIVACY_POLICY', 'es-ES', '1.1.0', 'Otra privacidad activa',
       '# Documento incompatible\n\nNo puede haber dos versiones activas.',
-      repeat('c', 64), 'ACTIVE', 'TECHNICAL_DRAFT', now(), now(),
+      repeat('c', 64), 'ACTIVE', 'PROFESSIONAL_REVIEWED',
+      'Revisor jurídico de prueba', now(), now(), now(),
       '00000000-0000-4000-8000-000000000001'
     );
     RAISE EXCEPTION 'La restricción de documento activo no funcionó';
@@ -77,14 +82,27 @@ BEGIN
   BEGIN
     INSERT INTO legal_documents (
       document_type, locale, version, title, content_markdown,
-      content_sha256, review_status, created_by
+      content_sha256, status, review_status, effective_at, published_at, created_by
     ) VALUES (
       'COOKIE_POLICY', 'es-ES', '1.0.0', 'Cookies falsamente revisadas',
       '# Revisión incompleta\n\nNo existe revisor ni fecha de revisión.',
-      repeat('d', 64), 'PROFESSIONAL_REVIEWED',
+      repeat('d', 64), 'ACTIVE', 'TECHNICAL_DRAFT', now(), now(),
       '00000000-0000-4000-8000-000000000001'
     );
-    RAISE EXCEPTION 'Se permitió fingir una revisión profesional';
+    RAISE EXCEPTION 'Se permitió publicar un borrador técnico';
+  EXCEPTION WHEN check_violation THEN
+    NULL;
+  END;
+END;
+$$;
+
+DO $$
+BEGIN
+  BEGIN
+    UPDATE legal_documents
+       SET status = 'DRAFT'
+     WHERE id = '70000000-0000-4000-8000-000000000001';
+    RAISE EXCEPTION 'Se permitió devolver a borrador un documento activo';
   EXCEPTION WHEN check_violation THEN
     NULL;
   END;
@@ -129,18 +147,21 @@ INSERT INTO checkout_legal_snapshots (
   'PURCHASE_CONTRACT', repeat('b', 64)
 );
 
-UPDATE legal_consent_events
-   SET decision = 'REJECTED'
- WHERE id = '71000000-0000-4000-8000-000000000001';
-
 DO $$
 DECLARE
-  stored_decision text;
+  changed_rows integer;
+  current_decision text;
 BEGIN
-  SELECT decision INTO stored_decision
+  UPDATE legal_consent_events
+     SET decision = 'REJECTED'
+   WHERE id = '71000000-0000-4000-8000-000000000001';
+  GET DIAGNOSTICS changed_rows = ROW_COUNT;
+
+  SELECT decision INTO current_decision
     FROM legal_consent_events
    WHERE id = '71000000-0000-4000-8000-000000000001';
-  IF stored_decision <> 'ACCEPTED' THEN
+
+  IF changed_rows <> 0 OR current_decision <> 'ACCEPTED' THEN
     RAISE EXCEPTION 'Se modificó un consentimiento histórico';
   END IF;
 END;
@@ -204,10 +225,25 @@ DECLARE
   withdrawals integer;
   snapshots integer;
 BEGIN
-  SELECT count(*) INTO active_docs FROM legal_documents WHERE status = 'ACTIVE';
-  SELECT count(*) INTO accepted_events FROM legal_consent_events WHERE decision = 'ACCEPTED';
-  SELECT count(*) INTO withdrawals FROM legal_consent_events WHERE decision = 'WITHDRAWN';
-  SELECT count(*) INTO snapshots FROM checkout_legal_snapshots;
+  SELECT count(*) INTO active_docs
+    FROM legal_documents
+   WHERE id IN (
+     '70000000-0000-4000-8000-000000000001',
+     '70000000-0000-4000-8000-000000000002'
+   ) AND status = 'ACTIVE';
+  SELECT count(*) INTO accepted_events
+    FROM legal_consent_events
+   WHERE id IN (
+     '71000000-0000-4000-8000-000000000001',
+     '71000000-0000-4000-8000-000000000002'
+   ) AND decision = 'ACCEPTED';
+  SELECT count(*) INTO withdrawals
+    FROM legal_consent_events
+   WHERE id = '71000000-0000-4000-8000-000000000003'
+     AND decision = 'WITHDRAWN';
+  SELECT count(*) INTO snapshots
+    FROM checkout_legal_snapshots
+   WHERE checkout_id = '50000000-0000-4000-8000-000000000004';
 
   IF active_docs <> 2 OR accepted_events <> 2 OR withdrawals <> 1 OR snapshots <> 2 THEN
     RAISE EXCEPTION 'Resultado legal inesperado: docs %, aceptados %, retiradas %, copias %',
