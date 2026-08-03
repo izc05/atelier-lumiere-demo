@@ -27,6 +27,8 @@ import {
   withVerificationEmailDelivery
 } from "./email-delivery-services.mjs";
 import { createEmailVerificationService } from "./email-verification-service.mjs";
+import { createLegalApiHandler } from "./legal-api.mjs";
+import { createLegalService } from "./legal-service.mjs";
 import { createMailService } from "./mail-service.mjs";
 import { createMediaPreviewStorage } from "./media-preview-storage.mjs";
 import { createLocalMediaStorage } from "./media-storage-service.mjs";
@@ -108,6 +110,13 @@ const accountRecoveryService = database.enabled && developmentAdminContext
       database,
       systemContext: developmentAdminContext,
       mailService,
+      environment
+    })
+  : null;
+const legalService = database.enabled && developmentAdminContext
+  ? createLegalService({
+      database,
+      systemContext: developmentAdminContext,
       environment
     })
   : null;
@@ -239,9 +248,13 @@ const publicBlogHandler = createPublicBlogApiHandler({
   baseHandler: adminProductsHandler,
   publicBlogService
 });
-const server = createServer(createPublicCatalogApiHandler({
+const publicCatalogHandler = createPublicCatalogApiHandler({
   baseHandler: publicBlogHandler,
   publicCatalogService
+});
+const server = createServer(createLegalApiHandler({
+  baseHandler: publicCatalogHandler,
+  legalService
 }));
 
 server.listen(port, host, () => {
