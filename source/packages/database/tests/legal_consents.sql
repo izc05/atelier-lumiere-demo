@@ -148,15 +148,22 @@ INSERT INTO checkout_legal_snapshots (
 );
 
 DO $$
+DECLARE
+  changed_rows integer;
+  current_decision text;
 BEGIN
-  BEGIN
-    UPDATE legal_consent_events
-       SET decision = 'REJECTED'
-     WHERE id = '71000000-0000-4000-8000-000000000001';
+  UPDATE legal_consent_events
+     SET decision = 'REJECTED'
+   WHERE id = '71000000-0000-4000-8000-000000000001';
+  GET DIAGNOSTICS changed_rows = ROW_COUNT;
+
+  SELECT decision INTO current_decision
+    FROM legal_consent_events
+   WHERE id = '71000000-0000-4000-8000-000000000001';
+
+  IF changed_rows <> 0 OR current_decision <> 'ACCEPTED' THEN
     RAISE EXCEPTION 'Se modificó un consentimiento histórico';
-  EXCEPTION WHEN insufficient_privilege THEN
-    NULL;
-  END;
+  END IF;
 END;
 $$;
 
