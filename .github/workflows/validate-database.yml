@@ -50,22 +50,42 @@ jobs:
       SMTP_ENABLED: "false"
       PILOT_CHECKOUT_ENABLED: "true"
       PILOT_SHIPPING_CENTS: "500"
+      MIGRATION_STATEMENT_TIMEOUT_MS: "120000"
+      MIGRATION_LOCK_TIMEOUT_MS: "10000"
 
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: Instalar cliente PostgreSQL
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Aplicar migraciones
+      - name: Instalar dependencias de la aplicación fuente
+        working-directory: source
+        run: npm install --ignore-scripts
+
+      - name: Aplicar migraciones con el ejecutor real
+        working-directory: source
+        run: npm run migrate
+
+      - name: Comprobar idempotencia e historial de migraciones
+        working-directory: source
         run: |
-          for migration in source/packages/database/migrations/*.sql; do
-            echo "Aplicando ${migration}"
-            psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f "${migration}"
-          done
+          npm run migrate
+
+          expected="$(find packages/database/migrations -maxdepth 1 -type f -name '*.sql' | wc -l | tr -d ' ')"
+          actual="$(psql -h 127.0.0.1 -U postgres -d atelier_test -tAc 'SELECT count(*) FROM schema_migrations' | tr -d ' ')"
+
+          test "${actual}" = "${expected}"
+          psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 \
+            -c "SELECT filename, version, checksum_sha256 FROM schema_migrations ORDER BY filename"
 
       - name: Cargar dos talleres ficticios
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/seeds/0001_two_providers.sql
@@ -90,10 +110,6 @@ jobs:
 
       - name: Verificar documentos y consentimientos legales
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/legal_consents.sql
-
-      - name: Instalar dependencias de la aplicación fuente
-        working-directory: source
-        run: npm install --ignore-scripts
 
       - name: Probar API administrativa y auditoría
         working-directory: source

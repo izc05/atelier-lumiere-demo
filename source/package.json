@@ -7,6 +7,7 @@
   "scripts": {
     "dev:web": "npm --workspace @atelier-lumiere/web run dev",
     "dev:api": "npm --workspace @atelier-lumiere/api run dev",
+    "migrate": "npm --workspace @atelier-lumiere/api run migrate",
     "bootstrap:platform-owner": "npm --workspace @atelier-lumiere/api run bootstrap:platform-owner",
     "test": "node --test tests/*.test.mjs && npm run test:web-integration && node scripts/run-validations.mjs",
     "test:web-integration": "npm --workspace @atelier-lumiere/web run test:integration",
