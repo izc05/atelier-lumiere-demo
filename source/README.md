@@ -15,7 +15,7 @@ source/
 │   ├── storage/   # Límites y reglas de multimedia
 │   └── shared/    # Estados y permisos compartidos
 ├── infra/
-│   └── docker/    # Web, API, PostgreSQL y volúmenes persistentes
+│   └── docker/    # Web, API, migraciones, PostgreSQL y volúmenes persistentes
 ├── legal/         # Alcance y límites de los borradores legales
 ├── scripts/       # Validaciones estáticas y de seguridad
 ├── tests/         # Contratos de dominio
@@ -45,6 +45,17 @@ source/
 - BFF administrativo único: el navegador nunca recibe el token interno.
 - Creador local e interactivo de la primera cuenta `PLATFORM_OWNER`.
 - Bloqueo automático del bootstrap cuando ya existe un propietario.
+
+### Base de datos y actualizaciones
+
+- Migraciones SQL ordenadas y versionadas.
+- Historial persistente en `schema_migrations`.
+- SHA-256 de cada migración aplicada.
+- Rechazo de archivos históricos modificados, eliminados o con huecos.
+- Bloqueo PostgreSQL para impedir dos actualizaciones simultáneas.
+- Registro de la migración dentro de la misma transacción que sus cambios.
+- La API no arranca hasta que el servicio `migrate` termina correctamente.
+- Una base antigua sin historial se bloquea y nunca se adopta por suposición.
 
 ### Catálogo y multimedia
 
@@ -88,12 +99,13 @@ source/
 
 ## Ejecutar sin Docker
 
-Requiere Node.js 22 o posterior.
+Requiere Node.js 22 o posterior y una `DATABASE_URL` válida para migraciones y funciones persistentes.
 
 ```bash
 cd source
 npm install
 npm test
+npm run migrate
 npm run dev:api
 ```
 
@@ -109,26 +121,24 @@ npm run dev:web
 - Salud: `http://localhost:4000/health`
 - Metadatos técnicos: `http://localhost:4000/api/meta`
 
-Sin `DATABASE_URL`, la aplicación puede mostrar el estado técnico, pero las funciones persistentes quedan desactivadas.
-
 ## Ejecutar con Docker
 
 ```bash
 cd source
 cp .env.example .env
 # Cambiar todas las contraseñas, claves y secretos.
-docker compose -f infra/docker/docker-compose.yml up --build
+docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --build
 ```
 
-Docker Compose levanta:
+Docker Compose levanta, en este orden:
 
-- web en el puerto configurado;
+- PostgreSQL 17 con volumen persistente;
+- servicio `migrate` de una sola ejecución;
 - API expuesta solo en `127.0.0.1`;
-- PostgreSQL 17;
-- volumen persistente de base de datos;
+- web en el puerto configurado;
 - volumen privado de multimedia.
 
-Las migraciones montadas en `/docker-entrypoint-initdb.d` se aplican únicamente al crear una base vacía. Antes del piloto real sobre una base existente debe añadirse un ejecutor de migraciones versionado.
+`migrate` aplica solo los SQL pendientes y termina con código `0`. La API depende de ese resultado y no arranca cuando una migración falla.
 
 ### Instalación en el mini PC
 
@@ -155,6 +165,8 @@ La batería comprueba, entre otros puntos:
 - contratos y permisos;
 - autenticación y doble factor;
 - bootstrap seguro del primer propietario;
+- descubrimiento, checksum, orden y bloqueo de migraciones;
+- rechazo de una base antigua sin historial;
 - correo y recuperación;
 - catálogo y blog;
 - archivos privados;
@@ -167,12 +179,12 @@ GitHub Actions añade pruebas reales sobre PostgreSQL aplicando todas las migrac
 
 ## Configuración pendiente de producción
 
+- Procedimiento revisado de adopción para bases antiguas sin `schema_migrations`.
 - Recuperación específica de cuentas administrativas.
 - Permisos efectivos y mínimos por cada rol administrativo.
 - Modelo comercial, vendedor contractual, comisiones y facturación.
 - Decisión final del modelo de carrito antes de integrar pagos.
 - Pasarela de pago en sandbox y webhooks firmados.
-- Ejecutor de migraciones incrementales.
 - Copias automáticas y prueba de restauración.
 - SMTP real.
 - HTTPS, cookies `Secure` y Cloudflare Tunnel.
@@ -186,5 +198,6 @@ GitHub Actions añade pruebas reales sobre PostgreSQL aplicando todas las migrac
 - El navegador nunca recibe tokens internos de API.
 - Los datos personales no se guardan en `localStorage`.
 - Las imágenes, vídeos y documentos reales no se almacenan en GitHub.
+- Las migraciones aplicadas nunca se editan; los cambios se añaden en un archivo nuevo.
 - Toda funcionalidad nueva debe incluir pruebas antes de fusionarse.
 - La demo pública no será sustituida hasta que la aplicación real iguale su calidad visual y supere el piloto.
