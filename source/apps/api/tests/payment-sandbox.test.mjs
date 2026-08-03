@@ -45,7 +45,7 @@ async function createOrder(database, suffix, totalCents = 5500) {
          id,customer_user_id,checkout_reference,currency,customer_name,
          contact_email,shipping_address,status,submitted_at
        ) VALUES ($1,$2,$3,'EUR','Cliente Sandbox',$4,$5::jsonb,'SUBMITTED',now())`,
-      [checkoutId, customerId, `AL-SANDBOX-CHECKOUT-${suffix}`, email, JSON.stringify(address())]
+      [checkoutId, customerId, `AL-CHECKOUT-SANDBOX-${suffix}`, email, JSON.stringify(address())]
     );
     await transaction.query(
       `INSERT INTO provider_orders (
