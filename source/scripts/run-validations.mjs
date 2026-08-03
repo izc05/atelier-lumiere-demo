@@ -24,7 +24,8 @@ const validations = [
   "validate-pilot-checkout.mjs",
   "validate-legal-privacy.mjs",
   "validate-admin-auth-web.mjs",
-  "validate-admin-bootstrap.mjs"
+  "validate-admin-bootstrap.mjs",
+  "validate-database-migrations.mjs"
 ];
 
 for (const validation of validations) {
