@@ -29,6 +29,7 @@ fi
 TMP_ARCHIVE=""
 cleanup() {
   local exit_code=$?
+  trap - EXIT INT TERM
   [[ -n "${TMP_ARCHIVE}" && -f "${TMP_ARCHIVE}" ]] && rm -f -- "${TMP_ARCHIVE}"
   rmdir -- "${LOCK_DIR}" 2>/dev/null || true
   exit "${exit_code}"
@@ -105,5 +106,5 @@ printf '\nCopia creada y validada correctamente.\n'
 printf 'Archivo: %s\n' "${ARCHIVE_PATH}"
 printf 'SHA-256: %s\n' "${ARCHIVE_SHA256}"
 printf 'Metadatos: %s\n' "${METADATA_PATH}"
-printf 'Siguiente comprobación recomendada:\n  %q %q\n' \
-  "${ROOT_DIR}/scripts/verify-database-backup.sh" "${ARCHIVE_PATH}"
+printf 'Siguiente comprobación recomendada:\n'
+printf '  npm run verify:backup -- %q\n' "${ARCHIVE_PATH}"
