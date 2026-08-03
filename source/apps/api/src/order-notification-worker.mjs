@@ -81,40 +81,7 @@ export function createOrderNotificationWorker({
   async function loadDelivery(notificationId) {
     return database.withContext(systemContext, async (transaction) => {
       const result = await transaction.query(
-        `SELECT
-           notification.id,
-           notification.attempts,
-           notification.event_type,
-           notification.template_key,
-           notification.recipient_user_id,
-           notification.payload,
-           order_row.id AS order_id,
-           order_row.order_number,
-           order_row.customer_user_id,
-           provider.display_name AS provider_name,
-           COALESCE(direct_recipient.email, provider_owner.email) AS recipient_email,
-           COALESCE(direct_recipient.display_name, provider_owner.display_name) AS recipient_name,
-           CASE
-             WHEN notification.recipient_user_id IS NULL THEN 'PROVIDER'
-             ELSE 'CUSTOMER'
-           END AS recipient_kind
-         FROM order_notifications notification
-         INNER JOIN provider_orders order_row ON order_row.id = notification.order_id
-         INNER JOIN providers provider ON provider.id = notification.provider_id
-         LEFT JOIN users direct_recipient ON direct_recipient.id = notification.recipient_user_id
-         LEFT JOIN LATERAL (
-           SELECT owner_user.email, owner_user.display_name
-           FROM provider_members membership
-           INNER JOIN users owner_user ON owner_user.id = membership.user_id
-           WHERE membership.provider_id = notification.provider_id
-             AND membership.role = 'PROVIDER_OWNER'
-             AND membership.status = 'ACTIVE'
-             AND owner_user.status = 'ACTIVE'
-           ORDER BY membership.created_at, membership.id
-           LIMIT 1
-         ) provider_owner ON notification.recipient_user_id IS NULL
-         WHERE notification.id = $1
-           AND notification.channel = 'EMAIL'`,
+        "SELECT * FROM app.notification_delivery($1)",
         [notificationId]
       );
       return result.rows[0] ?? null;
