@@ -158,13 +158,27 @@ SELECT set_config('app.provider_id', '', false);
 DO $$
 DECLARE
   visible_users integer;
+  visible_providers integer;
   visible_members integer;
   visible_invitations integer;
   changed_rows integer;
 BEGIN
   SELECT count(*) INTO visible_users FROM users;
-  IF visible_users <> 0 THEN
-    RAISE EXCEPTION 'El servicio de pagos puede leer % usuarios; debería ver 0.', visible_users;
+  IF visible_users <> 1 THEN
+    RAISE EXCEPTION 'El servicio de pagos puede leer % usuarios; debería ver solo su cuenta técnica.', visible_users;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM users
+    WHERE id = '00000000-0000-4000-8000-000000000009'
+  ) OR EXISTS (
+    SELECT 1 FROM users
+    WHERE id <> '00000000-0000-4000-8000-000000000009'
+  ) THEN
+    RAISE EXCEPTION 'El servicio de pagos no está aislado en su propia identidad técnica.';
+  END IF;
+  SELECT count(*) INTO visible_providers FROM providers;
+  IF visible_providers <> 0 THEN
+    RAISE EXCEPTION 'El servicio de pagos puede leer talleres privados.';
   END IF;
   SELECT count(*) INTO visible_members FROM provider_members;
   IF visible_members <> 0 THEN
