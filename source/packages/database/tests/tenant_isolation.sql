@@ -12,6 +12,7 @@ $$;
 
 GRANT USAGE ON SCHEMA public, app TO atelier_rls_test;
 GRANT SELECT, INSERT, UPDATE, DELETE ON users, providers, provider_members, provider_invitations, sessions, audit_events TO atelier_rls_test;
+GRANT SELECT, INSERT, UPDATE, DELETE ON payment_attempts, payment_webhook_events TO atelier_rls_test;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO atelier_rls_test;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA app TO atelier_rls_test;
 
@@ -28,6 +29,7 @@ DECLARE
   visible_invitations integer;
   visible_audit integer;
   visible_users integer;
+  visible_payments integer;
   changed_rows integer;
 BEGIN
   SELECT count(*) INTO visible_providers FROM providers;
@@ -67,6 +69,11 @@ BEGIN
   SELECT count(*) INTO visible_users FROM users;
   IF visible_users <> 1 THEN
     RAISE EXCEPTION 'La propietaria A puede ver % usuarios; debería verse solo a sí misma.', visible_users;
+  END IF;
+
+  SELECT count(*) INTO visible_payments FROM payment_attempts;
+  IF visible_payments <> 0 THEN
+    RAISE EXCEPTION 'El taller puede leer intentos de pago internos.';
   END IF;
 
   UPDATE providers
@@ -131,10 +138,62 @@ SELECT set_config('app.provider_id', '', false);
 DO $$
 DECLARE
   visible_providers integer;
+  visible_payments integer;
 BEGIN
   SELECT count(*) INTO visible_providers FROM providers;
   IF visible_providers <> 0 THEN
     RAISE EXCEPTION 'Un cliente puede leer proveedores privados.';
+  END IF;
+  SELECT count(*) INTO visible_payments FROM payment_attempts;
+  IF visible_payments <> 0 THEN
+    RAISE EXCEPTION 'Un cliente anónimo puede leer intentos de pago.';
+  END IF;
+END;
+$$;
+
+SELECT set_config('app.role', 'PAYMENT_SERVICE', false);
+SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000009', false);
+SELECT set_config('app.provider_id', '', false);
+
+DO $$
+DECLARE
+  visible_users integer;
+  visible_providers integer;
+  visible_members integer;
+  visible_invitations integer;
+  changed_rows integer;
+BEGIN
+  SELECT count(*) INTO visible_users FROM users;
+  IF visible_users <> 1 THEN
+    RAISE EXCEPTION 'El servicio de pagos puede leer % usuarios; debería ver solo su cuenta técnica.', visible_users;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM users
+    WHERE id = '00000000-0000-4000-8000-000000000009'
+  ) OR EXISTS (
+    SELECT 1 FROM users
+    WHERE id <> '00000000-0000-4000-8000-000000000009'
+  ) THEN
+    RAISE EXCEPTION 'El servicio de pagos no está aislado en su propia identidad técnica.';
+  END IF;
+  SELECT count(*) INTO visible_providers FROM providers;
+  IF visible_providers <> 2 THEN
+    RAISE EXCEPTION 'El servicio de pagos ve % talleres operativos; debería ver los 2 necesarios para resolver pedidos.', visible_providers;
+  END IF;
+  SELECT count(*) INTO visible_members FROM provider_members;
+  IF visible_members <> 0 THEN
+    RAISE EXCEPTION 'El servicio de pagos puede leer miembros de talleres.';
+  END IF;
+  SELECT count(*) INTO visible_invitations FROM provider_invitations;
+  IF visible_invitations <> 0 THEN
+    RAISE EXCEPTION 'El servicio de pagos puede leer invitaciones.';
+  END IF;
+  UPDATE providers
+  SET display_name = 'Cambio desde pagos'
+  WHERE id = '00000000-0000-4000-8000-000000000201';
+  GET DIAGNOSTICS changed_rows = ROW_COUNT;
+  IF changed_rows <> 0 THEN
+    RAISE EXCEPTION 'El servicio de pagos ha modificado un taller.';
   END IF;
 END;
 $$;
@@ -162,8 +221,8 @@ BEGIN
   IF visible_demo_users <> 3 THEN
     RAISE EXCEPTION 'Administración ve % usuarios de demostración; debería ver 3.', visible_demo_users;
   END IF;
-  IF visible_technical_users <> 2 THEN
-    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 2.', visible_technical_users;
+  IF visible_technical_users <> 3 THEN
+    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 3.', visible_technical_users;
   END IF;
 END;
 $$;

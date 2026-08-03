@@ -160,6 +160,15 @@
       );
       return row;
     }));
+
+    const payment = byId("sandbox-payment-link");
+    if (result.payment?.mode === "SANDBOX" && typeof result.payment.sessionPath === "string") {
+      payment.href = result.payment.sessionPath;
+      payment.hidden = false;
+    } else {
+      payment.hidden = true;
+    }
+
     const manual = byId("manual-access-link");
     if (result.access.manualAccessUrl) {
       manual.href = result.access.manualAccessUrl;

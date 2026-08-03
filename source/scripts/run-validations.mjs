@@ -23,6 +23,7 @@ const validations = [
   "validate-request-files-ui.mjs",
   "validate-order-logistics.mjs",
   "validate-pilot-checkout.mjs",
+  "validate-payment-sandbox.mjs",
   "validate-legal-privacy.mjs",
   "validate-admin-auth-web.mjs",
   "validate-admin-recovery.mjs",

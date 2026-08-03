@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#4b1020">
+  <title>Pago sandbox · Atelier Lumière</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/pago/sandbox/payment.css">
+  <script defer src="/pago/sandbox/payment.js"></script>
+</head>
+<body class="payment-page">
+  <main class="payment-shell">
+    <header class="payment-header">
+      <a class="wordmark" href="/" aria-label="Atelier Lumière, inicio">
+        <span>Atelier</span><strong>Lumière</strong>
+      </a>
+      <span class="sandbox-badge">Entorno de prueba</span>
+    </header>
+
+    <section class="payment-layout" aria-labelledby="payment-title">
+      <div class="payment-story">
+        <p class="eyebrow">Sandbox de pagos</p>
+        <h1 id="payment-title">Prueba el cobro sin mover dinero.</h1>
+        <p>Esta pantalla comprueba el flujo técnico que utilizará la futura pasarela: importe, pedido, resultado, evento firmado e idempotencia. No solicita ni acepta datos bancarios.</p>
+        <div class="payment-safety">
+          <strong>Nunca introduzcas una tarjeta aquí</strong>
+          <p>Los dos botones solo generan eventos simulados dentro del servidor local de Atelier Lumière.</p>
+        </div>
+      </div>
+
+      <div class="payment-card">
+        <section id="loading-view" role="status">
+          <p class="eyebrow">Preparando sesión</p>
+          <h2>Comprobando el pedido…</h2>
+          <p class="muted">Validamos el importe guardado por el servidor.</p>
+        </section>
+
+        <section id="payment-view" hidden>
+          <div class="payment-card-head">
+            <div><p class="eyebrow">Pedido listo</p><h2 id="provider-name">Taller</h2></div>
+            <span id="payment-status" class="payment-status created">Creado</span>
+          </div>
+          <dl class="payment-summary">
+            <div><dt>Pedido</dt><dd id="order-number">—</dd></div>
+            <div><dt>Referencia sandbox</dt><dd id="provider-reference">—</dd></div>
+            <div class="payment-total"><dt>Total simulado</dt><dd id="payment-amount">—</dd></div>
+          </dl>
+          <div id="payment-actions" class="payment-actions">
+            <button id="approve-button" class="button payment-approve" type="button">Simular pago aprobado</button>
+            <button id="decline-button" class="button payment-decline" type="button">Simular pago rechazado</button>
+          </div>
+          <p id="payment-message" class="payment-message" role="status" aria-live="polite"></p>
+          <p class="payment-fine-print">La confirmación se registra como <strong>sandbox</strong> y no representa un ingreso, una autorización bancaria ni una liquidación al taller.</p>
+        </section>
+
+        <section id="result-view" hidden>
+          <p class="eyebrow">Simulación terminada</p>
+          <h2 id="result-title">Resultado registrado</h2>
+          <p id="result-message" class="muted"></p>
+          <div class="result-mark" id="result-mark" aria-hidden="true">✓</div>
+          <a class="button button-outline full-button" href="/tienda/">Volver a la tienda</a>
+        </section>
+
+        <section id="error-view" hidden>
+          <p class="eyebrow">Sesión no disponible</p>
+          <h2>No se puede abrir este pago</h2>
+          <p id="error-message" class="muted">La sesión ha caducado o ya no existe.</p>
+          <a class="button button-outline full-button" href="/tienda/">Volver a la tienda</a>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
