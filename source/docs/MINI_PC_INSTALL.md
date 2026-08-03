@@ -142,7 +142,7 @@ Antes de actualizar una instalación con datos:
 mkdir -p /opt/atelier-backups
 
 docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T database \
-  pg_dump -U "${POSTGRES_USER:-atelier}" "${POSTGRES_DB:-atelier_lumiere}" \
+  sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
   > "/opt/atelier-backups/atelier-$(date +%Y%m%d-%H%M%S).sql"
 ```
 
