@@ -12,6 +12,9 @@ export const CORE_TABLES = Object.freeze([
   "sessions",
   "login_throttles",
   "provider_login_challenges",
+  "admin_memberships",
+  "admin_totp_credentials",
+  "admin_login_challenges",
   "audit_events"
 ]);
 
@@ -59,6 +62,11 @@ export const DATABASE_RULES = Object.freeze({
   providerSessionsStoreOnlyTokenHashes: true,
   providerLoginHasPasswordAndChallengeThrottling: true,
   providerAccessRequiresVerifiedEmailAndTwoFactor: true,
+  adminAccountsRequireMembership: true,
+  adminLoginRequiresTwoIndependentFactors: true,
+  adminSessionsStoreOnlyTokenHashes: true,
+  adminRolesAreSeparatedByResponsibility: true,
+  authenticationServiceCannotAdoptProviderContext: true,
   productsAreTenantIsolated: true,
   providersCanEditOnlyDraftOrReturnedProducts: true,
   productReviewRequiresAtLeastOneReadyImage: true,
