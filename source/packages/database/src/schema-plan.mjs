@@ -40,8 +40,9 @@ export const COMMERCE_TABLES = Object.freeze([
 
 export const LEGAL_TABLES = Object.freeze([
   "legal_documents",
-  "privacy_preference_records",
-  "legal_consent_events"
+  "legal_consent_events",
+  "checkout_legal_snapshots",
+  "privacy_preference_records"
 ]);
 
 export const DATABASE_RULES = Object.freeze({
@@ -71,8 +72,11 @@ export const DATABASE_RULES = Object.freeze({
   productMediaAllowsAtMostEightImagesAndOneVideo: true,
   publishedProductsRequireAdministrativeApproval: true,
   legalDocumentsAreVersionedAndHashed: true,
+  publishedLegalDocumentsRequireProfessionalReview: true,
   publishedLegalDocumentsAreImmutable: true,
+  retiredLegalDocumentsAreImmutable: true,
   legalDraftsAreHiddenInProduction: true,
+  checkoutLegalSnapshotsAreImmutable: true,
   privacyKeysAreStoredOnlyAsHashes: true,
   consentEventsAreAppendOnly: true,
   optionalPrivacyCategoriesDefaultToDisabled: true,
