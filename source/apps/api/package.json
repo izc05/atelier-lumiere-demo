@@ -1,11 +1,12 @@
 {
   "name": "@atelier-lumiere/api",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.mjs",
     "start": "node src/server.mjs",
+    "bootstrap:platform-owner": "node src/bootstrap-platform-owner.mjs",
     "test:integration": "node --test tests/*.test.mjs"
   },
   "dependencies": {
