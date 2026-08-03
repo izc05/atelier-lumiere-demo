@@ -96,7 +96,8 @@ test("la plantilla no incluye datos privados y escapa contenido", () => {
   assert.match(template.html, /Ana &lt;script&gt;/);
   assert.match(template.html, /Taller &amp; Barro/);
   assert.equal(template.html.includes("<script>"), false);
-  assert.doesNotMatch(template.text, /dirección de envío|tarjeta|CVV|IBAN/i);
+  assert.doesNotMatch(template.text, /dirección de envío|número de tarjeta|fecha de caducidad|CVV|IBAN/i);
+  assert.match(template.text, /nunca solicita datos de tarjeta por email/i);
 });
 
 test("el trabajador entrega una vez y marca la cola como enviada", async () => {
