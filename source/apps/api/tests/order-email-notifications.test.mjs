@@ -61,12 +61,6 @@ test("los eventos crean avisos únicos para cliente y taller", { skip: !connecti
       [orderId, checkoutId, PROVIDER_ID, customerId, `AL-NOTIFY-${suffix}`, email, JSON.stringify(address())]
     );
     await tx.query(
-      `INSERT INTO order_events(
-         order_id,provider_id,customer_user_id,actor_user_id,actor_role,event_type
-       ) VALUES($1,$2,$3,$4,'ADMIN','ORDER_CREATED')`,
-      [orderId, PROVIDER_ID, customerId, ADMIN.userId]
-    );
-    await tx.query(
       `INSERT INTO custom_requests(
          id,order_id,provider_id,customer_user_id,title,brief,status,currency
        ) VALUES($1,$2,$3,$4,'Diseño personalizado',
