@@ -1,4 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
+import { authorizeAdminRequest } from "./admin-permissions.mjs";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DEFAULT_AUTH_SERVICE_USER_ID = "00000000-0000-4000-8000-000000000008";
@@ -113,11 +114,11 @@ export function createRequestAuthenticator({
 
     if (adminAuthService) {
       const authenticated = await adminAuthService.authenticate(token);
-      if (authenticated) return authenticated;
+      if (authenticated) return authorizeAdminRequest(authenticated, request);
     }
 
     if (developmentContext && secureEquals(token, developmentAdminToken)) {
-      return developmentContext;
+      return authorizeAdminRequest(developmentContext, request);
     }
     return null;
   };

@@ -26,6 +26,7 @@ const validations = [
   "validate-legal-privacy.mjs",
   "validate-admin-auth-web.mjs",
   "validate-admin-recovery.mjs",
+  "validate-admin-permissions.mjs",
   "validate-admin-bootstrap.mjs",
   "validate-database-migrations.mjs",
   "validate-backup-restore.mjs",

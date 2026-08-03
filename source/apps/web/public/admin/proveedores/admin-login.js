@@ -106,6 +106,25 @@ function errorText(payload, fallback) {
   return payload?.message || fallback;
 }
 
+function applyRoleInterface(role) {
+  const productLink = document.querySelector('a[href="/admin/articulos/"]');
+  const blogLink = document.querySelector('a[href="/admin/publicaciones/"]');
+  if (role === "PROVIDER_MANAGER") {
+    if (productLink) productLink.hidden = true;
+    if (blogLink) blogLink.hidden = true;
+    return;
+  }
+  if (role === "EDITORIAL_REVIEWER") {
+    window.location.replace("/admin/articulos/");
+    return;
+  }
+  if (role !== "PLATFORM_OWNER") {
+    const adminView = document.querySelector("#admin-view");
+    if (adminView) adminView.hidden = true;
+    message(loginElements.passwordMessage, "El rol administrativo no está reconocido.", "error");
+  }
+}
+
 loginElements.passwordForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (submitting) return;
@@ -184,10 +203,11 @@ loginElements.backButton?.addEventListener("click", () => {
 async function updateAccountBadge() {
   try {
     const { response, payload } = await request("/internal/admin/session", { method: "GET" });
-    if (!response.ok || payload.authenticated !== true || !loginElements.adminAccount) return;
+    if (!response.ok || payload.authenticated !== true) return;
     const name = payload.account?.displayName || payload.account?.email || "Administración";
     const role = roleLabels[payload.account?.role] || payload.account?.role || "Sesión verificada";
-    loginElements.adminAccount.textContent = `${name} · ${role}`;
+    if (loginElements.adminAccount) loginElements.adminAccount.textContent = `${name} · ${role}`;
+    applyRoleInterface(payload.account?.role);
   } catch {
     // La pantalla principal ya gestiona una sesión no disponible.
   }
