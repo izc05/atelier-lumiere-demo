@@ -122,15 +122,15 @@ test("los borradores legales y preferencias están versionados y aislados", {
     assert.equal(events.rows[1].categories.analytics, true);
     assert.equal(events.rows[1].evidence.source, "privacy-center");
     assert.equal(JSON.stringify(events.rows).includes(preferenceKey), false);
-
-    await assert.rejects(
-      () => transaction.query(
-        "UPDATE legal_consent_events SET decision='WITHDRAWN' WHERE preference_key_hash=$1",
-        [keyHash]
-      ),
-      (error) => error?.code === "42501"
-    );
   });
+
+  await assert.rejects(
+    () => database.withContext(LEGAL, (transaction) => transaction.query(
+      "UPDATE legal_consent_events SET decision='WITHDRAWN' WHERE preference_key_hash=$1",
+      [keyHash]
+    )),
+    (error) => error?.code === "42501"
+  );
 
   await database.withContext(CUSTOMER, async (transaction) => {
     const documentsResult = await transaction.query("SELECT id FROM legal_documents");
