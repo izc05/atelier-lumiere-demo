@@ -24,32 +24,23 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Crear configuración válida de prueba
+      - name: Generar configuración privada de prueba
         working-directory: source
         run: |
-          cat > .env <<'EOF'
-          NODE_ENV=production
-          APP_URL=http://localhost:3000
-          WEB_PORT=3000
-          API_PORT=4000
-          POSTGRES_USER=atelier
-          POSTGRES_PASSWORD=preflight-postgres-password-2026
-          POSTGRES_DB=atelier_lumiere
-          AUTH_LOGIN_PEPPER=preflight-login-pepper-with-more-than-thirty-two-characters
-          AUTH_SERVICE_USER_ID=00000000-0000-4000-8000-000000000008
-          ALLOW_DEV_ADMIN_AUTH=false
-          DEV_ADMIN_TOKEN=
-          ENABLE_ADMIN_UI=false
-          WEB_COOKIE_SECURE=false
-          PROVIDER_COOKIE_SECURE=false
-          TWO_FACTOR_ENCRYPTION_KEY_BASE64=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
-          TWO_FACTOR_RECOVERY_PEPPER=preflight-recovery-pepper-with-more-than-thirty-two-characters
-          SMTP_ENABLED=false
-          PILOT_CHECKOUT_ENABLED=false
-          MIGRATION_STATEMENT_TIMEOUT_MS=120000
-          MIGRATION_LOCK_TIMEOUT_MS=10000
-          EOF
-          chmod 600 .env
+          bash scripts/mini-pc-init-env.sh --app-url http://localhost:3000
+          test "$(stat -c '%a' .env)" = "600"
+          grep -q '^NODE_ENV=production$' .env
+          grep -q '^ALLOW_DEV_ADMIN_AUTH=false$' .env
+          grep -q '^WEB_COOKIE_SECURE=false$' .env
+          ! grep -Eq '(GENERAR_|CAMBIAR_|atelier_dev_change_me)' .env
+
+      - name: Impedir sobrescribir la configuración
+        working-directory: source
+        run: |
+          if bash scripts/mini-pc-init-env.sh --app-url http://localhost:3000; then
+            echo "El generador sobrescribió un .env existente." >&2
+            exit 1
+          fi
 
       - name: Ejecutar preflight sin modificar servicios
         working-directory: source
