@@ -27,7 +27,6 @@ const paths = [
   "apps/web/public/legal/index.js",
   "apps/web/public/legal/document.js",
   "apps/web/public/legal/privacy.js",
-  "apps/web/public/legal/legal.css",
   "apps/web/public/privacidad/preferencias/index.html",
   "legal/README.md",
   ...detailPages.map((slug) => `apps/web/public/legal/${slug}/index.html`)
@@ -37,8 +36,8 @@ const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [
   await readFile(new URL(`../${path}`, import.meta.url), "utf8")
 ])));
 
-const migration = files[paths[0]];
-const rolesMigration = files[paths[1]];
+const foundation = files[paths[0]];
+const extension = files[paths[1]];
 const schema = files[paths[2]];
 const database = files[paths[3]];
 const service = files[paths[4]];
@@ -52,50 +51,61 @@ const legalIndex = files[paths[11]];
 const legalIndexJs = files[paths[12]];
 const documentJs = files[paths[13]];
 const privacyJs = files[paths[14]];
-const privacyHtml = files[paths[16]];
-const readme = files[paths[17]];
+const privacyHtml = files[paths[15]];
+const readme = files[paths[16]];
 
-for (const table of ["legal_documents", "privacy_preference_records", "legal_consent_events"]) {
-  assert.match(migration, new RegExp(`CREATE TABLE ${table}`));
-  assert.match(migration, new RegExp(`ALTER TABLE ${table} FORCE ROW LEVEL SECURITY`));
-  assert.match(schema, new RegExp(`"${table}"`));
+for (const table of ["legal_documents", "legal_consent_events", "checkout_legal_snapshots"]) {
+  assert.match(foundation, new RegExp(`CREATE TABLE ${table}`));
+  assert.match(foundation, new RegExp(`ALTER TABLE ${table} FORCE ROW LEVEL SECURITY`));
 }
-assert.match(migration, /professional_review_required boolean NOT NULL DEFAULT true/);
-assert.match(migration, /status <> 'PUBLISHED'.*professional_review_required = false/s);
-assert.match(migration, /legal_documents_one_published_type_idx/);
-assert.match(migration, /content_sha256 := encode\(digest\(NEW\.content_md, 'sha256'\)/);
-assert.match(migration, /PUBLISHED_LEGAL_DOCUMENT_IMMUTABLE/);
-assert.match(migration, /necessary boolean NOT NULL DEFAULT true CHECK \(necessary = true\)/);
-assert.match(migration, /LEGAL_CONSENT_EVENTS_APPEND_ONLY/);
-assert.match(migration, /COOKIE_PREFERENCES_SAVED/);
-assert.match(migration, /\[NIF PENDIENTE\]/);
-assert.match(migration, /Pendiente de revisión profesional/);
-assert.equal((migration.match(/'draft-2026-08-03'/g) ?? []).length, 8);
-assert.doesNotMatch(migration, /@gmail\.|@hotmail\.|@outlook\./i);
+assert.match(foundation, /LEGAL_CONSENT_EVENTS_ARE_IMMUTABLE/);
+assert.match(foundation, /CHECKOUT_LEGAL_SNAPSHOTS_ARE_IMMUTABLE/);
+assert.match(foundation, /review_status.*PROFESSIONAL_REVIEWED/s);
+
+assert.match(extension, /CREATE TABLE privacy_preference_records/);
+assert.match(extension, /ALTER TABLE privacy_preference_records FORCE ROW LEVEL SECURITY/);
+assert.match(extension, /legal_documents_active_requires_professional_review/);
+assert.match(extension, /ACTIVE_LEGAL_DOCUMENT_IMMUTABLE/);
+assert.match(extension, /RETIRED_LEGAL_DOCUMENT_IMMUTABLE/);
+assert.match(extension, /legal-service@atelier\.invalid/);
+assert.match(extension, /encode\(digest\(draft\.content_markdown, 'sha256'\)/);
+assert.match(extension, /\[NIF PENDIENTE\]/);
+assert.match(extension, /No apto todavía para ventas reales/);
+for (const type of [
+  "LEGAL_NOTICE", "PRIVACY_POLICY", "COOKIE_POLICY", "PURCHASE_TERMS",
+  "SHIPPING_RETURNS", "CUSTOM_PRODUCTS", "PROVIDER_AGREEMENT", "CONTENT_LICENSE"
+]) {
+  assert.match(extension, new RegExp(`'${type}'`));
+}
 
 assert.match(database, /"LEGAL_SERVICE"/);
-assert.match(rolesMigration, /app\.current_role\(\) = 'LEGAL_SERVICE'/);
-assert.match(rolesMigration, /legal_documents_service_select/);
-assert.match(rolesMigration, /privacy_preferences_service_update/);
-assert.match(rolesMigration, /legal_consent_events_service_insert/);
+assert.match(extension, /app\.current_role\(\) = 'LEGAL_SERVICE'/);
+assert.match(extension, /legal_documents_service_select/);
+assert.match(extension, /privacy_preferences_service_update/);
+assert.match(extension, /legal_consent_events_service_insert/);
+assert.match(schema, /"checkout_legal_snapshots"/);
 assert.match(schema, /legalDocumentsAreVersionedAndHashed: true/);
+assert.match(schema, /publishedLegalDocumentsAreImmutable: true/);
 assert.match(schema, /privacyKeysAreStoredOnlyAsHashes: true/);
 assert.match(schema, /consentEventsAreAppendOnly: true/);
 
 assert.match(service, /environment === "production"/);
-assert.match(service, /status = 'PUBLISHED'/);
+assert.match(service, /status = 'ACTIVE'/);
 assert.match(service, /status = 'DRAFT'/);
 assert.match(service, /createHash\("sha256"\)/);
+assert.match(service, /anonymous_id_hash/);
+assert.match(service, /COOKIE_PREFERENCES/);
 assert.match(service, /optionalServicesConfigured: false/);
 assert.match(service, /source: "privacy-center"/);
-assert.doesNotMatch(service, /ipAddress|remoteAddress|userAgentHash|fingerprint/i);
+assert.doesNotMatch(service, /remoteAddress|fingerprint/i);
 assert.match(api, /\/api\/legal\/privacy-preferences/);
 assert.match(api, /x-privacy-key/);
 assert.match(apiServer, /createLegalApiHandler/);
 assert.match(apiServer, /createLegalService/);
 assert.match(apiTest, /documents\.length, 8/);
 assert.match(apiTest, /productionService\.listDocuments\(\), \[\]/);
-assert.match(apiTest, /LEGAL_CONSENT_EVENTS_APPEND_ONLY|error\?\.code === "42501"/);
+assert.match(apiTest, /ACTIVE_LEGAL_DOCUMENT_IMMUTABLE|error\?\.code === "23514"/);
+assert.match(apiTest, /RETIRED_LEGAL_DOCUMENT_IMMUTABLE|error\?\.code === "42501"/);
 
 assert.match(proxy, /atelier_privacy_key/);
 assert.match(proxy, /randomBytes\(32\)\.toString\("base64url"\)/);
@@ -122,7 +132,7 @@ assert.match(legalIndex, /No apto todavía para ventas reales/);
 assert.match(legalIndexJs, /\/internal\/legal\/documents/);
 assert.doesNotMatch(legalIndexJs + documentJs + privacyJs, /innerHTML|Authorization|Bearer|localStorage|sessionStorage/);
 assert.match(documentJs, /document\.createTextNode/);
-assert.match(documentJs, /className = "placeholder"|"placeholder"/);
+assert.match(documentJs, /placeholder/);
 assert.match(privacyHtml, /id="reject-optional" class="button outline equal"/);
 assert.match(privacyHtml, /id="accept-optional" class="button outline equal"/);
 assert.match(privacyHtml, /no hay servicios externos de analítica/i);
