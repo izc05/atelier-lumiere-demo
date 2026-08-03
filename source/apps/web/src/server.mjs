@@ -1,8 +1,7 @@
 import { createServer } from "node:http";
 import { createWebHandler } from "./app.mjs";
 import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
-import { createAdminBlogWebHandler } from "./admin-blog-proxy.mjs";
-import { createAdminProductsWebHandler } from "./admin-products-proxy.mjs";
+import { createAdminAuthenticationWebHandler } from "./admin-auth-proxy.mjs";
 import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
 import { createLegalPrivacyWebHandler } from "./legal-privacy-proxy.mjs";
 import { createOrderLogisticsWebHandler } from "./order-logistics-proxy.mjs";
@@ -16,12 +15,19 @@ import { createRequestFilesWebHandler } from "./request-files-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.WEB_PORT ?? "3000", 10);
+const enableAdminUi = process.env.ENABLE_ADMIN_UI === "true";
+const DISABLED_LEGACY_ADMIN_TOKEN = "legacy-admin-token-disabled-000000000000000000000000";
+const DISABLED_LEGACY_ADMIN_KEY = "legacy-admin-key-disabled-000000000000";
 
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error("WEB_PORT debe ser un puerto válido.");
 }
 
-const baseWebHandler = createWebHandler();
+const baseWebHandler = createWebHandler({
+  enableAdminUi,
+  apiAdminToken: process.env.DEV_ADMIN_TOKEN ?? DISABLED_LEGACY_ADMIN_TOKEN,
+  adminAccessKey: process.env.WEB_ADMIN_ACCESS_KEY ?? DISABLED_LEGACY_ADMIN_KEY
+});
 const accountRecoveryHandler = createAccountRecoveryWebHandler({ baseHandler: baseWebHandler });
 const providerProductsHandler = createProviderProductsWebHandler({ baseHandler: accountRecoveryHandler });
 const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: providerProductsHandler });
@@ -30,11 +36,13 @@ const customerOrdersHandler = createCustomerOrdersWebHandler({ baseHandler: prov
 const requestFilesHandler = createRequestFilesWebHandler({ baseHandler: customerOrdersHandler });
 const orderLogisticsHandler = createOrderLogisticsWebHandler({ baseHandler: requestFilesHandler });
 const pilotCheckoutHandler = createPilotCheckoutWebHandler({ baseHandler: orderLogisticsHandler });
-const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: pilotCheckoutHandler });
-const adminProductsHandler = createAdminProductsWebHandler({ baseHandler: adminBlogHandler });
-const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: adminProductsHandler });
+const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: pilotCheckoutHandler });
 const publicCatalogHandler = createPublicCatalogWebHandler({ baseHandler: publicBlogHandler });
-const server = createServer(createLegalPrivacyWebHandler({ baseHandler: publicCatalogHandler }));
+const legalPrivacyHandler = createLegalPrivacyWebHandler({ baseHandler: publicCatalogHandler });
+const server = createServer(createAdminAuthenticationWebHandler({
+  baseHandler: legalPrivacyHandler,
+  enableAdminUi
+}));
 
 server.listen(port, host, () => {
   console.log(`Atelier Lumière web fuente disponible en http://${host}:${port}`);
