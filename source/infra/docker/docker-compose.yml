@@ -8,9 +8,6 @@ services:
       WEB_PORT: 3000
       API_INTERNAL_URL: http://api:4000
       ENABLE_ADMIN_UI: ${ENABLE_ADMIN_UI:-false}
-      DEV_ADMIN_TOKEN: ${DEV_ADMIN_TOKEN:-}
-      WEB_ADMIN_ACCESS_KEY: ${WEB_ADMIN_ACCESS_KEY:-}
-      WEB_ADMIN_SESSION_TTL_MINUTES: ${WEB_ADMIN_SESSION_TTL_MINUTES:-480}
       WEB_COOKIE_SECURE: ${WEB_COOKIE_SECURE:-false}
       PROVIDER_COOKIE_SECURE: ${PROVIDER_COOKIE_SECURE:-false}
     ports:
@@ -21,6 +18,7 @@ services:
     restart: unless-stopped
 
   api:
+    # WEB_ADMIN_ACCESS_KEY fue retirada del contenedor web; solo queda esta nota de migración.
     build:
       context: ../..
       dockerfile: infra/docker/Dockerfile.api

@@ -4,12 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#5a0f1f">
   <title>Proveedores · Atelier Lumière</title>
   <link rel="stylesheet" href="/admin/proveedores/admin.css">
   <link rel="stylesheet" href="/admin/proveedores/provider-status.css">
   <script src="/admin/proveedores/providers.js" defer></script>
   <script src="/admin/proveedores/provider-status.js" defer></script>
+  <script src="/admin/proveedores/admin-login.js" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -18,7 +20,7 @@
   <main class="page-shell">
     <section id="login-view" class="login-layout" aria-labelledby="login-title">
       <div class="login-story">
-        <p class="eyebrow">Entorno privado de pruebas</p>
+        <p class="eyebrow">Administración privada</p>
         <a class="brand" href="/" aria-label="Atelier Lumière, estado técnico">
           <span class="brand-mark">AL</span>
           <span>
@@ -27,26 +29,48 @@
           </span>
         </a>
         <h1 id="login-title">Administración de talleres invitados</h1>
-        <p>Gestiona altas, estados e invitaciones desde la nueva aplicación fuente. La demostración pública permanece separada y protegida.</p>
+        <p>Accede con una cuenta administrativa personal. La contraseña, el doble factor y cada sesión se validan en PostgreSQL.</p>
         <ul class="login-points">
-          <li>Sesión local mediante cookie segura.</li>
-          <li>El token interno de la API nunca llega al navegador.</li>
-          <li>Cada acción queda registrada en auditoría.</li>
+          <li>Contraseña derivada con <code>scrypt</code>.</li>
+          <li>Doble factor obligatorio o código de recuperación.</li>
+          <li>Sesión revocable y auditoría de accesos.</li>
         </ul>
       </div>
 
-      <form id="login-form" class="login-card">
-        <p class="eyebrow">Acceso administrativo</p>
-        <h2>Entrar al panel privado</h2>
-        <p class="muted">Utiliza la clave temporal configurada en el servidor de pruebas.</p>
-        <label>
-          Clave de acceso
-          <input id="access-key" name="accessKey" type="password" autocomplete="current-password" minlength="24" required>
-        </label>
-        <p id="login-message" class="form-message" role="status" aria-live="polite"></p>
-        <button class="button primary full" type="submit">Entrar en administración</button>
-        <p class="security-note">Este acceso queda desactivado cuando el entorno se configura como producción.</p>
-      </form>
+      <div class="login-card">
+        <div id="password-step">
+          <p class="eyebrow">Primer paso</p>
+          <h2>Acceder al panel privado</h2>
+          <p class="muted">Introduce el correo y la contraseña de tu cuenta administrativa.</p>
+          <form id="admin-password-form" class="stack-form" novalidate>
+            <label>Correo administrativo<input id="admin-email" name="email" type="email" autocomplete="username" maxlength="254" required placeholder="administracion@atelier.es"></label>
+            <label>Contraseña<input id="admin-password" name="password" type="password" autocomplete="current-password" maxlength="128" required placeholder="Tu contraseña segura"></label>
+            <p id="admin-password-message" class="form-message" role="status" aria-live="polite"></p>
+            <button class="button primary full" type="submit">Continuar</button>
+          </form>
+        </div>
+
+        <div id="factor-step" hidden>
+          <p class="eyebrow">Segundo paso</p>
+          <h2>Confirmar identidad</h2>
+          <p id="factor-account" class="muted">Introduce el código de tu aplicación autenticadora.</p>
+          <form id="admin-factor-form" class="stack-form" novalidate>
+            <label>Método de verificación<select id="factor-method" name="method"><option value="totp">Aplicación autenticadora</option><option value="recovery">Código de recuperación</option></select></label>
+            <label><span id="factor-label">Código de seis dígitos</span><input id="admin-factor-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="19" required placeholder="000000"></label>
+            <p id="admin-factor-message" class="form-message" role="status" aria-live="polite"></p>
+            <button class="button primary full" type="submit">Entrar en administración</button>
+            <button id="back-to-password" class="text-button full" type="button">Volver al correo y contraseña</button>
+          </form>
+        </div>
+
+        <p class="security-note">La sesión se guarda únicamente en una cookie técnica <code>HttpOnly</code>. El navegador no recibe el token interno de la API.</p>
+
+        <form id="login-form" hidden aria-hidden="true">
+          <input id="access-key" name="accessKey" type="password" tabindex="-1" autocomplete="off">
+          <button type="submit" tabindex="-1">Acceso heredado desactivado</button>
+        </form>
+        <p id="login-message" class="form-message" hidden></p>
+      </div>
     </section>
 
     <section id="admin-view" class="admin-layout" hidden>
@@ -59,8 +83,9 @@
           </span>
         </a>
         <div class="topbar-actions">
-          <span class="environment-badge">Piloto privado</span>
+          <span id="admin-account" class="environment-badge" aria-live="polite">Sesión verificada</span>
           <a class="button secondary" href="/admin/articulos/">Revisar artículos</a>
+          <a class="button secondary" href="/admin/publicaciones/">Revisar blog</a>
           <button id="refresh-button" class="icon-button" type="button">Actualizar</button>
           <button id="logout-button" class="text-button" type="button">Cerrar sesión</button>
         </div>
