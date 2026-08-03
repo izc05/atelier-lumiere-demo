@@ -129,16 +129,20 @@ INSERT INTO checkout_legal_snapshots (
   'PURCHASE_CONTRACT', repeat('b', 64)
 );
 
+UPDATE legal_consent_events
+   SET decision = 'REJECTED'
+ WHERE id = '71000000-0000-4000-8000-000000000001';
+
 DO $$
+DECLARE
+  stored_decision text;
 BEGIN
-  BEGIN
-    UPDATE legal_consent_events
-       SET decision = 'REJECTED'
-     WHERE id = '71000000-0000-4000-8000-000000000001';
+  SELECT decision INTO stored_decision
+    FROM legal_consent_events
+   WHERE id = '71000000-0000-4000-8000-000000000001';
+  IF stored_decision <> 'ACCEPTED' THEN
     RAISE EXCEPTION 'Se modificó un consentimiento histórico';
-  EXCEPTION WHEN insufficient_privilege THEN
-    NULL;
-  END;
+  END IF;
 END;
 $$;
 
