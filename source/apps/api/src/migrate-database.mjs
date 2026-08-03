@@ -76,7 +76,7 @@ export async function loadMigrations(directory = DEFAULT_MIGRATIONS_PATH) {
   const filenames = entries
     .filter((entry) => entry.isFile() && MIGRATION_PATTERN.test(entry.name))
     .map((entry) => entry.name)
-    .sort((left, right) => left.localeCompare(right, "en"));
+    .sort();
 
   if (filenames.length === 0) {
     throw new MigrationError(
@@ -86,19 +86,9 @@ export async function loadMigrations(directory = DEFAULT_MIGRATIONS_PATH) {
     );
   }
 
-  const versions = new Set();
   const migrations = [];
   for (const filename of filenames) {
     const version = filename.match(MIGRATION_PATTERN)[1];
-    if (versions.has(version)) {
-      throw new MigrationError(
-        "DUPLICATE_MIGRATION_VERSION",
-        `La versión ${version} aparece en más de una migración.`,
-        { version }
-      );
-    }
-    versions.add(version);
-
     const absolutePath = path.join(directory, filename);
     const bytes = await readFile(absolutePath);
     migrations.push(Object.freeze({
@@ -124,7 +114,7 @@ async function ensureHistoryTable(client) {
   await client.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       filename text PRIMARY KEY,
-      version text NOT NULL UNIQUE,
+      version text NOT NULL,
       checksum_sha256 char(64) NOT NULL,
       execution_ms integer NOT NULL CHECK (execution_ms >= 0),
       applied_at timestamptz NOT NULL DEFAULT now()
@@ -168,7 +158,7 @@ function verifyHistory(migrations, appliedRows) {
     if (migration.version !== row.version) {
       throw new MigrationError(
         "MIGRATION_VERSION_CHANGED",
-        `La versión registrada de ${row.filename} no coincide con el archivo actual.`,
+        `El prefijo registrado de ${row.filename} no coincide con el archivo actual.`,
         { filename: row.filename }
       );
     }
@@ -188,7 +178,7 @@ function verifyHistory(migrations, appliedRows) {
     if (pendingSeen && isApplied) {
       throw new MigrationError(
         "MIGRATION_HISTORY_GAP",
-        `El historial contiene ${migration.filename} pero falta una migración anterior.`,
+        `El historial contiene ${migration.filename} pero falta un archivo anterior.`,
         { filename: migration.filename }
       );
     }
