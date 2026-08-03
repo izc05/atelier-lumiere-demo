@@ -28,13 +28,13 @@
 
     <section class="hero">
       <div>
-        <p class="eyebrow">Compra separada por taller</p>
-        <h1>Un carrito, varios pedidos independientes.</h1>
-        <p class="lead">Al confirmar, cada taller recibirá únicamente sus artículos, personalizaciones y datos de entrega necesarios.</p>
+        <p class="eyebrow">Compra directa a un taller</p>
+        <h1>Un pedido, un proveedor y un único envío.</h1>
+        <p class="lead">Puedes combinar varias piezas del mismo taller y compartir sus gastos de envío. Para comprar a otro proveedor, primero debes finalizar o vaciar este pedido.</p>
       </div>
       <aside class="hero-note">
         <strong>Sin cobro real</strong>
-        <p>Este checkout piloto registra los pedidos y reserva el stock, pero todavía no procesa tarjetas ni transferencias.</p>
+        <p>Este checkout piloto registra el pedido y reserva el stock, pero todavía no procesa tarjetas ni transferencias.</p>
       </aside>
     </section>
 
@@ -45,7 +45,7 @@
     <section id="cart-content" class="cart-layout" hidden>
       <div id="cart-groups" class="cart-groups"></div>
       <aside class="checkout-panel">
-        <div><p class="eyebrow">Datos de entrega</p><h2>Confirmar el piloto</h2></div>
+        <div><p class="eyebrow">Datos de entrega</p><h2>Confirmar el pedido piloto</h2></div>
         <form id="checkout-form" class="checkout-form">
           <label class="field">Nombre completo
             <input id="customer-name" autocomplete="name" minlength="2" maxlength="120" required>
@@ -76,21 +76,21 @@
               <select id="address-country" autocomplete="country" required><option value="ES">España</option></select>
             </label>
           </div>
-          <label class="field">Nota para los talleres
+          <label class="field">Nota para el taller
             <textarea id="customer-note" maxlength="4000" placeholder="Indicaciones generales de entrega o preparación"></textarea>
           </label>
           <label class="field" hidden>Web<input id="website-field" tabindex="-1" autocomplete="off"></label>
           <div id="checkout-summary" class="checkout-summary"></div>
-          <p class="pilot-warning">No introduzcas datos bancarios. Se enviará por correo un enlace privado de un solo uso para consultar los pedidos.</p>
+          <p class="pilot-warning">No introduzcas datos bancarios. Se enviará por correo un enlace privado de un solo uso para consultar el pedido.</p>
           <p class="pilot-warning">Los textos legales siguen en borrador técnico. Revisa <a href="/legal/privacidad/">privacidad</a>, <a href="/legal/condiciones-compra/">condiciones de compra</a>, <a href="/legal/envios-devoluciones/">envíos y devoluciones</a> y <a href="/legal/productos-personalizados/">productos personalizados</a>.</p>
-          <button id="checkout-button" class="button primary" type="submit">Registrar pedidos sin pagar</button>
+          <button id="checkout-button" class="button primary" type="submit">Registrar pedido sin pagar</button>
           <p id="checkout-result" class="message" role="status" aria-live="polite"></p>
         </form>
         <section id="checkout-success" class="checkout-success" hidden>
-          <h2>Pedidos registrados</h2>
+          <h2>Pedido registrado</h2>
           <p id="success-message"></p>
           <div id="order-results" class="order-result-list"></div>
-          <a id="manual-access-link" class="button primary" href="/pedido/acceso/" hidden>Abrir mis pedidos</a>
+          <a id="manual-access-link" class="button primary" href="/pedido/acceso/" hidden>Abrir mi pedido</a>
           <a class="button secondary" href="/tienda/">Volver a la tienda</a>
         </section>
       </aside>
