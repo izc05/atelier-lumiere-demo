@@ -202,5 +202,17 @@ if (loginElements.loginView) {
   }).observe(loginElements.loginView, { attributes: true, attributeFilter: ["hidden"] });
 }
 
+function addRecoveryLink() {
+  const form = loginElements.passwordForm;
+  if (!form || document.querySelector("#admin-recovery-link")) return;
+  const link = document.createElement("a");
+  link.id = "admin-recovery-link";
+  link.className = "text-button full";
+  link.href = "/admin/recuperar/";
+  link.textContent = "He olvidado la contraseña o perdido el autenticador";
+  form.append(link);
+}
+
+addRecoveryLink();
 configureFactorInput();
 void updateAccountBadge();

@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { createWebHandler } from "./app.mjs";
 import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
 import { createAdminAuthenticationWebHandler } from "./admin-auth-proxy.mjs";
+import { createAdminRecoveryWebHandler } from "./admin-recovery-proxy.mjs";
 import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
 import { createLegalPrivacyWebHandler } from "./legal-privacy-proxy.mjs";
 import { createOrderLogisticsWebHandler } from "./order-logistics-proxy.mjs";
@@ -39,8 +40,12 @@ const pilotCheckoutHandler = createPilotCheckoutWebHandler({ baseHandler: orderL
 const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: pilotCheckoutHandler });
 const publicCatalogHandler = createPublicCatalogWebHandler({ baseHandler: publicBlogHandler });
 const legalPrivacyHandler = createLegalPrivacyWebHandler({ baseHandler: publicCatalogHandler });
-const server = createServer(createAdminAuthenticationWebHandler({
+const adminRecoveryHandler = createAdminRecoveryWebHandler({
   baseHandler: legalPrivacyHandler,
+  enableAdminUi
+});
+const server = createServer(createAdminAuthenticationWebHandler({
+  baseHandler: adminRecoveryHandler,
   enableAdminUi
 }));
 

@@ -4,6 +4,8 @@ import { createAccountRecoveryApiHandler } from "./account-recovery-api.mjs";
 import { createAccountRecoveryService } from "./account-recovery-service.mjs";
 import { createAdminAuthApiHandler } from "./admin-auth-api.mjs";
 import { createAdminAuthService } from "./admin-auth-service.mjs";
+import { createAdminRecoveryApiHandler } from "./admin-recovery-api.mjs";
+import { createAdminRecoveryService } from "./admin-recovery-service.mjs";
 import { createAdminBlogApiHandler } from "./admin-blog-api.mjs";
 import { createAdminBlogService } from "./admin-blog-service.mjs";
 import { createAdminProductsApiHandler } from "./admin-products-api.mjs";
@@ -83,6 +85,14 @@ if (database.enabled && developmentAdminContext) {
 
 const adminAuthService = database.enabled
   ? createAdminAuthService({ database, systemContext: authenticationSystemContext })
+  : null;
+const adminRecoveryService = database.enabled
+  ? createAdminRecoveryService({
+      database,
+      systemContext: authenticationSystemContext,
+      mailService,
+      environment
+    })
   : null;
 const authenticateRequest = createRequestAuthenticator({
   environment,
@@ -203,8 +213,12 @@ const adminAuthHandler = createAdminAuthApiHandler({
   baseHandler: baseApiHandler,
   adminAuthService
 });
-const accountRecoveryHandler = createAccountRecoveryApiHandler({
+const adminRecoveryHandler = createAdminRecoveryApiHandler({
   baseHandler: adminAuthHandler,
+  adminRecoveryService
+});
+const accountRecoveryHandler = createAccountRecoveryApiHandler({
+  baseHandler: adminRecoveryHandler,
   accountRecoveryService
 });
 const blogPostsHandler = createBlogPostsApiHandler({

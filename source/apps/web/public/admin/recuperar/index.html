@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Recuperar Administración · Atelier Lumière</title>
+  <link rel="stylesheet" href="/admin/proveedores/admin.css">
+  <link rel="stylesheet" href="/admin/recuperar/recovery.css">
+  <script defer src="/admin/recuperar/recovery.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <main class="recovery-shell">
+    <header class="recovery-header">
+      <a class="brand" href="/">
+        <span class="brand-mark">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Recuperación administrativa</small></span>
+      </a>
+      <a class="button secondary" href="/admin/proveedores/">Volver al acceso</a>
+    </header>
+
+    <section class="recovery-layout" aria-labelledby="recovery-title">
+      <div class="recovery-story">
+        <p class="eyebrow">Acceso protegido</p>
+        <h1 id="recovery-title">Recupera la cuenta sin conservar ningún secreto anterior.</h1>
+        <p>El proceso sustituye la contraseña, el autenticador y los códigos de recuperación. Todas las sesiones administrativas abiertas se cerrarán.</p>
+        <ol class="recovery-points">
+          <li><span>01</span><div><strong>Recibe un enlace único</strong><p>El enlace caduca y su contenido no se guarda en claro.</p></div></li>
+          <li><span>02</span><div><strong>Configura un autenticador nuevo</strong><p>Escanea un QR distinto al anterior y confirma un código.</p></div></li>
+          <li><span>03</span><div><strong>Guarda los códigos nuevos</strong><p>Se muestran una sola vez después de completar la recuperación.</p></div></li>
+        </ol>
+      </div>
+
+      <div class="recovery-card">
+        <section id="request-view">
+          <p class="eyebrow">Solicitar enlace</p>
+          <h2>¿No puedes entrar?</h2>
+          <p class="muted">Introduce el correo de la cuenta administrativa. La respuesta será la misma exista o no la cuenta.</p>
+          <form id="request-form" class="stack-form" novalidate>
+            <label>Correo administrativo
+              <input id="recovery-email" type="email" autocomplete="username" maxlength="254" required placeholder="administracion@atelier.es">
+            </label>
+            <p id="request-message" class="form-message" role="status" aria-live="polite"></p>
+            <button class="button primary full" type="submit">Enviar enlace de recuperación</button>
+          </form>
+          <div id="development-link-box" class="development-link" hidden>
+            <p>En desarrollo, puedes continuar con este enlace manual:</p>
+            <a id="development-link" class="button secondary full" href="/admin/recuperar/">Abrir recuperación</a>
+          </div>
+        </section>
+
+        <section id="setup-view" hidden>
+          <p class="eyebrow">Nuevo acceso</p>
+          <h2>Configura tu seguridad</h2>
+          <p id="account-label" class="muted"></p>
+          <div class="qr-panel">
+            <img id="recovery-qr" alt="Código QR para configurar el nuevo autenticador" width="280" height="280">
+            <div>
+              <p>Escanea el QR con Google Authenticator, Microsoft Authenticator, 2FAS o una aplicación compatible.</p>
+              <details>
+                <summary>No puedo escanearlo</summary>
+                <p>Introduce esta clave manual en el autenticador:</p>
+                <code id="manual-key" class="manual-key"></code>
+              </details>
+            </div>
+          </div>
+          <form id="confirm-form" class="stack-form" novalidate>
+            <label>Nueva contraseña
+              <input id="new-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+            </label>
+            <label>Repite la contraseña
+              <input id="repeat-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+            </label>
+            <label>Código del autenticador nuevo
+              <input id="totp-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="000000">
+            </label>
+            <p id="confirm-message" class="form-message" role="status" aria-live="polite"></p>
+            <button class="button primary full" type="submit">Sustituir acceso y cerrar sesiones</button>
+          </form>
+        </section>
+
+        <section id="success-view" hidden>
+          <p class="eyebrow">Recuperación completada</p>
+          <h2>Guarda estos códigos ahora</h2>
+          <p class="muted">Cada código puede utilizarse una sola vez. La plataforma no volverá a mostrarlos.</p>
+          <div id="recovery-codes" class="recovery-codes" aria-label="Códigos de recuperación"></div>
+          <button id="copy-codes" class="button secondary full" type="button">Copiar todos los códigos</button>
+          <p id="copy-message" class="form-message" role="status" aria-live="polite"></p>
+          <a class="button primary full" href="/admin/proveedores/">Entrar con el acceso nuevo</a>
+        </section>
+
+        <section id="invalid-view" hidden>
+          <p class="eyebrow">Enlace no disponible</p>
+          <h2>Solicita una recuperación nueva</h2>
+          <p id="invalid-message" class="muted">El enlace ha caducado o ya ha sido utilizado.</p>
+          <button id="restart-button" class="button primary full" type="button">Solicitar otro enlace</button>
+        </section>
+
+        <p class="security-note">No se aceptan datos bancarios en este proceso. Atelier Lumière nunca te pedirá que envíes tu contraseña o códigos por correo.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

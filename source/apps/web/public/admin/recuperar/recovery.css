@@ -1,0 +1,225 @@
+.recovery-shell {
+  position: relative;
+  z-index: 1;
+  width: min(1220px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 30px 0 70px;
+}
+
+.recovery-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 54px;
+}
+
+.recovery-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(440px, 0.72fr);
+  align-items: center;
+  gap: clamp(48px, 9vw, 130px);
+}
+
+.recovery-story h1 {
+  max-width: 730px;
+  margin: 0;
+  color: var(--wine-dark, #310812);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3.2rem, 6vw, 6.4rem);
+  font-weight: 400;
+  line-height: 0.94;
+  letter-spacing: -0.05em;
+}
+
+.recovery-story > p:not(.eyebrow) {
+  max-width: 650px;
+  margin: 28px 0 0;
+  color: #716368;
+  font-size: 1.04rem;
+  line-height: 1.75;
+}
+
+.recovery-points {
+  display: grid;
+  gap: 18px;
+  margin: 42px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recovery-points li {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(90, 15, 31, 0.16);
+}
+
+.recovery-points li > span {
+  color: #b8944f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+}
+
+.recovery-points strong {
+  color: #3b0914;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.recovery-points p {
+  margin: 6px 0 0;
+  color: #786b6f;
+  line-height: 1.55;
+}
+
+.recovery-card {
+  padding: clamp(28px, 5vw, 48px);
+  border: 1px solid rgba(90, 15, 31, 0.14);
+  border-radius: 30px;
+  background: rgba(255, 253, 249, 0.94);
+  box-shadow: 0 28px 80px rgba(49, 8, 18, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.recovery-card h2 {
+  margin: 0 0 12px;
+  color: #3b0914;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  font-weight: 400;
+}
+
+.development-link {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px dashed rgba(90, 15, 31, 0.34);
+  border-radius: 18px;
+  background: #fbf5eb;
+}
+
+.development-link p {
+  margin: 0 0 12px;
+  color: #716368;
+  line-height: 1.55;
+}
+
+.qr-panel {
+  display: grid;
+  grid-template-columns: minmax(170px, 240px) 1fr;
+  align-items: center;
+  gap: 24px;
+  margin: 26px 0 30px;
+  padding: 20px;
+  border-radius: 22px;
+  color: #fffaf4;
+  background: #3b0914;
+}
+
+.qr-panel img {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  background: white;
+}
+
+.qr-panel p {
+  color: rgba(255, 250, 244, 0.74);
+  line-height: 1.6;
+}
+
+.qr-panel details {
+  margin-top: 18px;
+}
+
+.qr-panel summary {
+  cursor: pointer;
+  color: #e7d3a2;
+  font-weight: 700;
+}
+
+.manual-key {
+  display: block;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  border-radius: 10px;
+  color: #3b0914;
+  background: #fffaf4;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.recovery-codes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 24px 0 18px;
+}
+
+.recovery-codes code {
+  padding: 12px 10px;
+  border: 1px solid rgba(90, 15, 31, 0.16);
+  border-radius: 10px;
+  color: #3b0914;
+  background: #f8efe3;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.recovery-card .button + .button {
+  margin-top: 12px;
+}
+
+@media (max-width: 920px) {
+  .recovery-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .recovery-story {
+    max-width: 760px;
+  }
+}
+
+@media (max-width: 620px) {
+  .recovery-shell {
+    width: min(100% - 24px, 1220px);
+    padding-top: 18px;
+  }
+
+  .recovery-header {
+    align-items: flex-start;
+    margin-bottom: 34px;
+  }
+
+  .recovery-header > .button {
+    min-height: 42px;
+    padding-inline: 14px;
+    font-size: 0.68rem;
+  }
+
+  .recovery-story h1 {
+    font-size: clamp(3rem, 15vw, 4.7rem);
+  }
+
+  .recovery-card {
+    padding: 26px 20px;
+    border-radius: 22px;
+  }
+
+  .qr-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-panel img {
+    max-width: 240px;
+    justify-self: center;
+  }
+
+  .recovery-codes {
+    grid-template-columns: 1fr;
+  }
+}
