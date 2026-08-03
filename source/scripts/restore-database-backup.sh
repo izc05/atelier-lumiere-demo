@@ -12,6 +12,7 @@ RESTORE_DATABASE=""
 CURRENT_DATABASE=""
 ROLLBACK_DATABASE=""
 SWAP_COMPLETED=false
+APPS_STOPPED=false
 
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
@@ -37,12 +38,19 @@ cleanup() {
     ' sh "${RESTORE_DATABASE}" >/dev/null 2>&1 || true
   fi
 
+  if [[ ${exit_code} -ne 0 && "${APPS_STOPPED}" == "true" && "${SWAP_COMPLETED}" != "true" ]]; then
+    printf 'Reiniciando la aplicación con la base original...\n' >&2
+    "${COMPOSE[@]}" up -d api web >/dev/null 2>&1 || true
+  fi
+
   if [[ ${exit_code} -ne 0 ]]; then
     printf '\nLa restauración no se completó.\n' >&2
-    if [[ -n "${ROLLBACK_DATABASE}" ]]; then
-      printf 'Base anterior conservada como: %s\n' "${ROLLBACK_DATABASE}" >&2
+    if [[ "${SWAP_COMPLETED}" == "true" ]]; then
+      printf 'La base anterior está conservada como: %s\n' "${ROLLBACK_DATABASE}" >&2
+    else
+      printf 'La base activa original no fue intercambiada.\n' >&2
     fi
-    printf 'Revisa los logs antes de volver a iniciar la aplicación.\n' >&2
+    printf 'Revisa los logs antes de repetir la operación.\n' >&2
   fi
   exit "${exit_code}"
 }
@@ -58,7 +66,7 @@ CURRENT_DATABASE="$("${COMPOSE[@]}" exec -T database sh -ec 'printf %s "$POSTGRE
 
 TIMESTAMP="$(date -u +%Y%m%d%H%M%S)"
 RESTORE_DATABASE="atelier_restore_${TIMESTAMP}_${RANDOM}"
-ROLLBACK_DATABASE="atelier_before_${TIMESTAMP}"
+ROLLBACK_DATABASE="atelier_before_${TIMESTAMP}_${RANDOM}"
 
 printf '\nATENCIÓN: se detendrán web y API.\n'
 printf 'Base activa: %s\n' "${CURRENT_DATABASE}"
@@ -66,6 +74,7 @@ printf 'Base restaurada temporal: %s\n' "${RESTORE_DATABASE}"
 printf 'Rollback que se conservará: %s\n' "${ROLLBACK_DATABASE}"
 
 "${COMPOSE[@]}" stop web api >/dev/null 2>&1 || true
+APPS_STOPPED=true
 
 printf 'Creando base de restauración...\n'
 "${COMPOSE[@]}" exec -T database sh -ec '
@@ -127,6 +136,7 @@ printf 'Verificando migraciones sobre la base restaurada...\n'
 
 printf 'Arrancando API y web...\n'
 "${COMPOSE[@]}" up -d api web
+APPS_STOPPED=false
 
 printf '\nRESTAURACIÓN COMPLETADA\n'
 printf 'Base activa restaurada: %s\n' "${CURRENT_DATABASE}"
