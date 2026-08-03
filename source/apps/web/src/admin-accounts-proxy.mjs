@@ -4,7 +4,9 @@ import { pipeline } from "node:stream/promises";
 const ADMIN_SESSION_COOKIE = "atelier_admin_session";
 const COLLECTION_PATH = "/internal/admin/accounts";
 const STATUS_PATTERN = /^\/internal\/admin\/accounts\/([0-9a-f-]{36})\/status$/i;
+const ROLE_PATTERN = /^\/internal\/admin\/accounts\/([0-9a-f-]{36})\/role$/i;
 const SETUP_PATTERN = /^\/internal\/admin\/accounts\/([0-9a-f-]{36})\/setup-link$/i;
+const SECURITY_RESET_PATTERN = /^\/internal\/admin\/accounts\/([0-9a-f-]{36})\/security-reset$/i;
 const SESSIONS_PATTERN = /^\/internal\/admin\/accounts\/([0-9a-f-]{36})\/sessions$/i;
 const SESSION_PATTERN = /^\/internal\/admin\/accounts\/([0-9a-f-]{36})\/sessions\/([0-9a-f-]{36})$/i;
 const PROTECTED_PAGES = new Set(["/admin/cuentas", "/admin/cuentas/"]);
@@ -75,7 +77,9 @@ function redirect(response) {
 function matches(pathname) {
   return pathname === COLLECTION_PATH
     || STATUS_PATTERN.test(pathname)
+    || ROLE_PATTERN.test(pathname)
     || SETUP_PATTERN.test(pathname)
+    || SECURITY_RESET_PATTERN.test(pathname)
     || SESSIONS_PATTERN.test(pathname)
     || SESSION_PATTERN.test(pathname);
 }
@@ -83,7 +87,9 @@ function matches(pathname) {
 function methodAllowed(pathname, method) {
   if (pathname === COLLECTION_PATH) return method === "GET" || method === "POST";
   if (STATUS_PATTERN.test(pathname)) return method === "PATCH";
+  if (ROLE_PATTERN.test(pathname)) return method === "PATCH";
   if (SETUP_PATTERN.test(pathname)) return method === "POST";
+  if (SECURITY_RESET_PATTERN.test(pathname)) return method === "POST";
   if (SESSIONS_PATTERN.test(pathname)) return method === "GET" || method === "DELETE";
   if (SESSION_PATTERN.test(pathname)) return method === "DELETE";
   return false;
