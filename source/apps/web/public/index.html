@@ -3,36 +3,165 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>Atelier Lumière · Entorno fuente</title>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#4b1020">
+  <meta name="description" content="Piezas artesanales seleccionadas para bodas, comuniones, nacimientos y celebraciones especiales.">
+  <title>Atelier Lumière · Artesanía para celebrar</title>
   <link rel="stylesheet" href="/styles.css">
-  <script src="/status.js" defer></script>
+  <link rel="stylesheet" href="/tienda/cart.css">
+  <script defer src="/tienda/cart-store.js"></script>
+  <script defer src="/home.js"></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="hero">
-      <p class="eyebrow">Entorno privado de desarrollo</p>
-      <h1>Atelier Lumière</h1>
-      <p class="lead">Aplicación mantenible separada de la demostración pública. Aquí se prueban proveedores, catálogo, revisión y publicación antes de llevarlos al mini PC.</p>
-      <div class="actions">
-        <a class="button primary" href="/tienda/">Abrir tienda fuente</a>
-        <a class="button" href="/admin/proveedores/">Gestionar proveedores</a>
-        <a class="button" href="/admin/articulos/">Revisar artículos</a>
-        <a class="button" href="/internal/api-health">Comprobar API</a>
-        <a class="button" href="https://izc05.github.io/atelier-lumiere-demo/">Abrir demo protegida</a>
-      </div>
-    </header>
+  <header class="site-header" id="site-header">
+    <a class="wordmark" href="/" aria-label="Atelier Lumière, inicio">
+      <span>Atelier</span>
+      <strong>Lumière</strong>
+    </a>
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a href="#talleres">Talleres</a>
+      <a href="/tienda/">Tienda</a>
+      <a href="/blog/">Historias</a>
+      <a href="/legal/">Legal</a>
+    </nav>
+    <div class="header-actions">
+      <a class="header-link" href="/proveedor/acceso/">Acceso talleres</a>
+      <a class="bag-link" href="/carrito/" aria-label="Abrir carrito">
+        <span>Carrito</span>
+        <strong id="cart-count">0</strong>
+      </a>
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav">Menú</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Navegación móvil" hidden>
+      <a href="#talleres">Talleres</a>
+      <a href="/tienda/">Tienda</a>
+      <a href="/blog/">Historias</a>
+      <a href="/carrito/">Carrito</a>
+      <a href="/proveedor/acceso/">Acceso talleres</a>
+    </nav>
+  </header>
 
-    <section class="status-card" aria-labelledby="service-title">
-      <div><p class="eyebrow">Estado técnico</p><h2 id="service-title">Servicios locales</h2></div>
-      <p id="api-status" class="status pending" role="status">Comprobando la API…</p>
+  <main>
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-thread" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <p class="eyebrow">El hilo de la celebración</p>
+        <h1 id="hero-title">Cada pieza guarda un instante.</h1>
+        <p class="hero-lead">Artesanía seleccionada para bodas, comuniones, nacimientos y momentos que merecen recordarse sin prisas.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="/tienda/">Encontrar una pieza</a>
+          <a class="button button-quiet" href="#como-funciona">Crear algo propio</a>
+        </div>
+        <dl class="hero-facts" aria-label="Compromisos de Atelier Lumière">
+          <div><dt>Selección</dt><dd>Talleres invitados</dd></div>
+          <div><dt>Origen</dt><dd>Hecho en pequeñas series</dd></div>
+          <div><dt>Cuidado</dt><dd>Acompañamiento humano</dd></div>
+        </dl>
+      </div>
+      <div class="hero-composition" aria-label="Composición inspirada en un taller artesanal">
+        <div class="hero-card hero-card-main">
+          <span class="hero-card-label">Pieza 01</span>
+          <div class="hero-object hero-object-fan" aria-hidden="true"></div>
+          <p>Detalles que comienzan en una conversación y terminan formando parte de tu historia.</p>
+        </div>
+        <div class="hero-card hero-card-note">
+          <span>Edición limitada</span>
+          <strong>Hecho despacio</strong>
+        </div>
+        <div class="hero-seal" aria-hidden="true"><span>AL</span></div>
+      </div>
+      <a class="scroll-cue" href="#talleres">Descubrir los talleres <span aria-hidden="true">↓</span></a>
     </section>
 
-    <section class="grid" aria-label="Ruta de activación">
-      <article><span>01</span><h2>Base técnica</h2><p>Web, API, validaciones y contenedores separados de la demo pública.</p><strong>Completado</strong></article>
-      <article><span>02</span><h2>Usuarios y talleres</h2><p>PostgreSQL, roles, invitaciones, auditoría y aislamiento real entre proveedores.</p><strong>Completado</strong></article>
-      <article><span>03</span><h2>Catálogo editorial</h2><p>Artículos, multimedia, revisión administrativa y tienda limitada a piezas publicadas.</p><strong>En pruebas</strong></article>
+    <section class="manifesto-section" id="talleres">
+      <div class="section-heading split-heading">
+        <div>
+          <p class="eyebrow">Una selección con criterio</p>
+          <h2>Del taller a tu celebración.</h2>
+        </div>
+        <p>No somos un catálogo infinito. Invitamos a creadores independientes cuya técnica, materiales y forma de trabajar merecen ser conocidos.</p>
+      </div>
+      <div class="atelier-grid">
+        <article class="atelier-card atelier-card-light">
+          <span class="card-number">01</span>
+          <p class="eyebrow">Materia</p>
+          <h3>Textiles que guardan nombres</h3>
+          <p>Bordados, lino y fibras elegidas para convertirse en recuerdos que puedan tocarse.</p>
+          <a href="/tienda/?category=textil">Explorar textiles <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="atelier-card atelier-card-wine">
+          <span class="card-number">02</span>
+          <p class="eyebrow">Papel</p>
+          <h3>Historias que empiezan con una invitación</h3>
+          <p>Ilustración, caligrafía y papelería de autor creada para dar tono a cada celebración.</p>
+          <a href="/tienda/?category=papeleria">Explorar papelería <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="atelier-card atelier-card-gold">
+          <span class="card-number">03</span>
+          <p class="eyebrow">Forma</p>
+          <h3>Objetos pequeños, gestos inolvidables</h3>
+          <p>Piezas decorativas y detalles personalizados pensados para quedarse después del evento.</p>
+          <a href="/tienda/">Ver todos los talleres <span aria-hidden="true">→</span></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="featured-section" aria-labelledby="featured-title">
+      <div class="section-heading">
+        <p class="eyebrow">Selección actual</p>
+        <h2 id="featured-title">Piezas recién salidas del taller.</h2>
+        <p>Solo aparecen artículos publicados, disponibles y revisados por Atelier Lumière.</p>
+      </div>
+      <div id="featured-loading" class="featured-status" role="status">Preparando la selección…</div>
+      <div id="featured-products" class="featured-grid" hidden></div>
+      <div id="featured-empty" class="featured-empty" hidden>
+        <p>Los talleres están preparando sus primeras piezas.</p>
+        <a class="button button-outline" href="/tienda/">Abrir el catálogo</a>
+      </div>
+      <div class="section-action"><a class="text-link" href="/tienda/">Ver toda la tienda <span aria-hidden="true">→</span></a></div>
+    </section>
+
+    <section class="process-section" id="como-funciona" aria-labelledby="process-title">
+      <div class="process-intro">
+        <p class="eyebrow">Diseño propio</p>
+        <h2 id="process-title">Una idea también puede convertirse en pieza.</h2>
+        <p>Cuando no encuentres exactamente lo que imaginas, puedes partir de una pieza publicada y explicar al taller qué necesitas.</p>
+        <a class="button button-light" href="/tienda/">Elegir un punto de partida</a>
+      </div>
+      <ol class="process-list">
+        <li><span>01</span><div><h3>Encuentra un lenguaje</h3><p>Elige la pieza, técnica o taller que se acerca a tu idea.</p></div></li>
+        <li><span>02</span><div><h3>Cuéntanos el momento</h3><p>Describe nombres, fecha, colores, cantidades y cualquier detalle importante.</p></div></li>
+        <li><span>03</span><div><h3>Recibe una propuesta</h3><p>El taller prepara un presupuesto versionado que solo tú puedes aprobar.</p></div></li>
+        <li><span>04</span><div><h3>Sigue el proceso</h3><p>Consulta mensajes, avances e incidencias desde tu acceso privado.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="story-section">
+      <div class="story-mark" aria-hidden="true">“</div>
+      <blockquote>
+        <p>Lo artesanal no consiste solo en hacer algo a mano. Consiste en saber para quién se está haciendo.</p>
+        <footer>La filosofía de Atelier Lumière</footer>
+      </blockquote>
+      <a class="text-link light-link" href="/blog/">Leer historias de los talleres <span aria-hidden="true">→</span></a>
+    </section>
+
+    <section class="closing-section">
+      <p class="eyebrow">Tu celebración empieza aquí</p>
+      <h2>Encuentra una pieza que ya se sienta tuya.</h2>
+      <a class="button button-primary" href="/tienda/">Entrar en la tienda</a>
     </section>
   </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand"><strong>Atelier Lumière</strong><span>Artesanía para celebrar</span></div>
+    <nav aria-label="Enlaces del pie">
+      <a href="/tienda/">Tienda</a>
+      <a href="/blog/">Historias</a>
+      <a href="/legal/">Legal y privacidad</a>
+      <a href="/proveedor/acceso/">Acceso talleres</a>
+    </nav>
+    <p>Plataforma privada en preparación. El checkout piloto no realiza cobros reales.</p>
+  </footer>
 </body>
 </html>
