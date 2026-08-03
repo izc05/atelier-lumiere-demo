@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { createApiHandler } from "./app.mjs";
 import { createAccountRecoveryApiHandler } from "./account-recovery-api.mjs";
 import { createAccountRecoveryService } from "./account-recovery-service.mjs";
+import { createAdminAuthApiHandler } from "./admin-auth-api.mjs";
+import { createAdminAuthService } from "./admin-auth-service.mjs";
 import { createAdminBlogApiHandler } from "./admin-blog-api.mjs";
 import { createAdminBlogService } from "./admin-blog-service.mjs";
 import { createAdminProductsApiHandler } from "./admin-products-api.mjs";
@@ -17,6 +19,7 @@ import { createCustomRequestFilesApiHandler } from "./custom-request-files-api.m
 import { createCustomRequestFilesService } from "./custom-request-files-service.mjs";
 import { createDatabase } from "./database.mjs";
 import {
+  createAuthenticationServiceContext,
   createDevelopmentAdminContext,
   createRequestAuthenticator,
   ensureDevelopmentAdmin
@@ -66,8 +69,8 @@ const localMediaStorage = createLocalMediaStorage();
 const mediaStorage = createMediaPreviewStorage({ baseStorage: localMediaStorage });
 const requestFileStorage = createRequestFileStorage();
 const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
-const authenticateRequest = createRequestAuthenticator({ environment });
 const developmentAdminContext = createDevelopmentAdminContext({ environment });
+const authenticationSystemContext = createAuthenticationServiceContext();
 const legalSystemContext = Object.freeze({
   role: "LEGAL_SERVICE",
   userId: process.env.LEGAL_SERVICE_USER_ID ?? "00000000-0000-4000-8000-000000000007",
@@ -78,6 +81,13 @@ if (database.enabled && developmentAdminContext) {
   await ensureDevelopmentAdmin(database, developmentAdminContext);
 }
 
+const adminAuthService = database.enabled
+  ? createAdminAuthService({ database, systemContext: authenticationSystemContext })
+  : null;
+const authenticateRequest = createRequestAuthenticator({
+  environment,
+  adminAuthService
+});
 const baseOnboardingService = database.enabled && developmentAdminContext
   ? createProviderOnboardingService({ database, systemContext: developmentAdminContext })
   : null;
@@ -189,8 +199,12 @@ const baseApiHandler = createApiHandler({
   mailService,
   authenticateRequest
 });
-const accountRecoveryHandler = createAccountRecoveryApiHandler({
+const adminAuthHandler = createAdminAuthApiHandler({
   baseHandler: baseApiHandler,
+  adminAuthService
+});
+const accountRecoveryHandler = createAccountRecoveryApiHandler({
+  baseHandler: adminAuthHandler,
   accountRecoveryService
 });
 const blogPostsHandler = createBlogPostsApiHandler({
