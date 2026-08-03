@@ -6,8 +6,8 @@ Este documento reduce la instalación y las actualizaciones de Atelier Lumière 
 
 ### Codex puede ejecutar
 
+- generación inicial del archivo `.env` sin mostrar secretos;
 - comprobación previa del mini PC;
-- revisión de `.env` sin mostrar sus valores;
 - construcción de imágenes Docker;
 - creación y verificación de copias;
 - actualización `fast-forward` de la rama `main`;
@@ -25,9 +25,42 @@ Este documento reduce la instalación y las actualizaciones de Atelier Lumière 
 
 Nunca se debe copiar al chat el contenido completo de `.env`, una contraseña, el secreto TOTP o los códigos de recuperación.
 
-## 1. Comprobación previa
+## 1. Generar la configuración privada
 
-Desde `/opt/atelier-lumiere/source`:
+En una instalación nueva, desde `/opt/atelier-lumiere/source`:
+
+```bash
+npm run init:mini-pc -- --app-url http://IP_DEL_MINI_PC:3000
+```
+
+Para una publicación que ya vaya a funcionar exclusivamente mediante HTTPS:
+
+```bash
+npm run init:mini-pc -- --app-url https://atelier.example.com
+```
+
+El generador:
+
+- crea `.env` con permisos `600`;
+- genera contraseñas y peppers aleatorios;
+- genera una clave TOTP Base64 de 32 bytes;
+- configura `NODE_ENV=production`;
+- desactiva el acceso administrativo temporal;
+- desactiva SMTP y checkout piloto;
+- activa cookies `Secure` únicamente cuando la URL comienza por `https://`;
+- no imprime los secretos;
+- se niega a sobrescribir un `.env` existente.
+
+Opciones adicionales:
+
+```bash
+npm run init:mini-pc -- \
+  --app-url http://IP_DEL_MINI_PC:3000 \
+  --web-port 3000 \
+  --api-port 4000
+```
+
+## 2. Comprobación previa
 
 ```bash
 npm run preflight:mini-pc -- --mode check
@@ -62,7 +95,7 @@ El preflight no modifica Git, Docker ni PostgreSQL. Revisa:
 
 Un error bloquea el despliegue. Un aviso permite continuar, pero debe revisarse.
 
-## 2. Simular el despliegue
+## 3. Simular el despliegue
 
 Antes de ejecutar cambios se puede mostrar la secuencia prevista:
 
@@ -78,9 +111,9 @@ npm run deploy:mini-pc -- update --dry-run
 
 La simulación no modifica Git, Docker ni PostgreSQL.
 
-## 3. Instalar por primera vez
+## 4. Instalar por primera vez
 
-Después de configurar `.env` y superar el preflight:
+Después de generar `.env` y superar el preflight:
 
 ```bash
 npm run deploy:mini-pc -- install
@@ -91,25 +124,39 @@ El asistente:
 1. valida el mini PC;
 2. construye las imágenes;
 3. arranca PostgreSQL;
-4. aplica todas las migraciones;
-5. arranca API y web;
-6. comprueba la salud de los servicios;
-7. registra el commit desplegado.
+4. comprueba que la base esté realmente vacía;
+5. aplica todas las migraciones;
+6. arranca API y web;
+7. comprueba la salud de los servicios;
+8. registra el commit desplegado.
 
-Después se crea presencialmente la cuenta propietaria:
+Si la base ya contiene tablas, `install` se detiene y exige usar `update`, porque solo ese modo crea y verifica una copia previa.
+
+## 5. Crear y activar el primer administrador
+
+Este paso se realiza contigo presente:
 
 ```bash
 docker compose --env-file .env -f infra/docker/docker-compose.yml \
   exec -it api npm run bootstrap:platform-owner
 ```
 
-Tras crearla, se cambia `ENABLE_ADMIN_UI=true` en `.env` y se ejecuta de nuevo:
+Después de guardar los códigos de recuperación, editar `.env`:
 
-```bash
-npm run deploy:mini-pc -- install
+```dotenv
+ENABLE_ADMIN_UI=true
 ```
 
-## 4. Actualizar una instalación existente
+Recrear únicamente la API y la web:
+
+```bash
+docker compose --env-file .env -f infra/docker/docker-compose.yml \
+  up -d --build api web
+```
+
+No se vuelve a ejecutar el modo `install`, porque PostgreSQL ya contiene la aplicación.
+
+## 6. Actualizar una instalación existente
 
 ```bash
 npm run deploy:mini-pc -- update
@@ -138,7 +185,7 @@ La copia se crea **antes** de descargar código nuevo. Si una migración o un se
 
 No ejecuta `git reset --hard`, no borra volúmenes y no restaura automáticamente una base.
 
-## 5. Registros de despliegue
+## 7. Registros de despliegue
 
 Los despliegues correctos generan un archivo privado en:
 
@@ -157,7 +204,7 @@ Contiene:
 
 No contiene contraseñas ni secretos.
 
-## 6. Cuando algo falla
+## 8. Cuando algo falla
 
 No ejecutar `docker compose down -v` ni borrar `database_data`.
 
@@ -184,7 +231,7 @@ npm run restore:database -- \
   RESTORE_ACTIVE_DATABASE
 ```
 
-## 7. Comando recomendado para Codex
+## 9. Comando recomendado para Codex
 
 Cuando el repositorio ya esté clonado en el mini PC, la instrucción segura para Codex es:
 
