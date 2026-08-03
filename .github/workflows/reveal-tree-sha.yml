@@ -1,0 +1,23 @@
+name: Revelar árbol para reconciliación
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/reveal-tree-sha.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  reveal-tree:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar historial necesario
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mostrar árboles objetivo
+        run: |
+          echo "OLD_TREE=$(git rev-parse b1474c4fd16b1a332ea255e39785798fc6480ebc^{tree})"
+          echo "MAIN_TREE=$(git rev-parse 148d0444ccbd9e8ab75d4b938c8e59213713a56a^{tree})"
