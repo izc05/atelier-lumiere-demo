@@ -39,6 +39,7 @@ import { createMediaPreviewStorage } from "./media-preview-storage.mjs";
 import { createLocalMediaStorage } from "./media-storage-service.mjs";
 import { createOrderLogisticsApiHandler } from "./order-logistics-api.mjs";
 import { createOrderLogisticsService } from "./order-logistics-service.mjs";
+import { createOrderNotificationWorker } from "./order-notification-worker.mjs";
 import { withSandboxPayment } from "./payment-checkout-integration.mjs";
 import { createPaymentSandboxApiHandler } from "./payment-sandbox-api.mjs";
 import { createPaymentSandboxService } from "./payment-sandbox-service.mjs";
@@ -84,6 +85,11 @@ const legalSystemContext = Object.freeze({
 const paymentSystemContext = Object.freeze({
   role: "PAYMENT_SERVICE",
   userId: process.env.PAYMENT_SERVICE_USER_ID ?? "00000000-0000-4000-8000-000000000009",
+  providerId: null
+});
+const notificationSystemContext = Object.freeze({
+  role: "NOTIFICATION_SERVICE",
+  userId: process.env.NOTIFICATION_SERVICE_USER_ID ?? "00000000-0000-4000-8000-000000000010",
   providerId: null
 });
 
@@ -173,6 +179,14 @@ const customRequestFilesService = database.enabled
 const orderLogisticsService = database.enabled
   ? createOrderLogisticsService({ database })
   : null;
+const orderNotificationWorker = database.enabled
+  ? createOrderNotificationWorker({
+      database,
+      systemContext: notificationSystemContext,
+      mailService,
+      enabled: process.env.ORDER_EMAIL_NOTIFICATIONS_ENABLED === "true"
+    })
+  : null;
 const paymentSandboxService = database.enabled
   && environment !== "production"
   && process.env.PAYMENT_SANDBOX_ENABLED === "true"
@@ -217,6 +231,10 @@ if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
       code: typeof error?.code === "string" ? error.code : "SMTP_VERIFY_FAILED"
     });
   }
+}
+
+if (orderNotificationWorker?.start()) {
+  console.log("Avisos automáticos de pedidos activados.");
 }
 
 const baseApiHandler = createApiHandler({
@@ -333,6 +351,7 @@ async function shutdown(signal) {
       resolve();
     });
   });
+  await orderNotificationWorker?.stop();
   mailService.close();
   await database.close();
 }
