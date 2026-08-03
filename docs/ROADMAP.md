@@ -1,6 +1,6 @@
 # Hoja de ruta de Atelier Lumière
 
-Actualizada después de integrar el centro legal y de privacidad.
+Actualizada después de integrar Administración real, migraciones incrementales, copias verificadas y el asistente operativo del mini PC.
 
 ## Estado global
 
@@ -14,8 +14,11 @@ Actualizada después de integrar el centro legal y de privacidad.
 | 5 | Blog editorial | Completado |
 | 6 | Pedidos, encargos, archivos y logística | Completado sin pago real |
 | 7 | Legal y privacidad | Base técnica completada; textos pendientes de revisión profesional |
-| 8 | Administración, modelo comercial y pagos | Pendiente |
-| 9 | Mini PC y piloto privado | Parcialmente preparado |
+| 8A | Administración real | Base operativa completada; recuperación y permisos finos pendientes |
+| 8B | Modelo comercial y contractual | Pendiente de decisión |
+| 8C | Pagos sandbox | Pendiente |
+| 8D | Migraciones y recuperación operativa | Completado para instalaciones nuevas |
+| 9 | Mini PC y piloto privado | Herramientas preparadas; instalación real pendiente |
 | 10 | Unificación visual y apertura | Pendiente |
 
 ## Bloques completados
@@ -93,21 +96,52 @@ Actualizada después de integrar el centro legal y de privacidad.
 - Historial append-only.
 - Sin analítica ni marketing conectado.
 
+### Bloque 8A · Administración real
+
+Completado:
+
+- Cuentas administrativas persistentes en PostgreSQL.
+- Roles `PLATFORM_OWNER`, `PROVIDER_MANAGER` y `EDITORIAL_REVIEWER`.
+- Servicio interno `AUTH_SERVICE` sin taller.
+- Contraseña `scrypt`, TOTP y códigos de recuperación.
+- Desafíos de acceso, sesiones revocables y auditoría.
+- Panel web mediante BFF y cookie `HttpOnly`.
+- Eliminación de claves provisionales del contenedor web.
+- Creador interactivo y único del primer `PLATFORM_OWNER`.
+
+Pendiente:
+
+- [ ] Recuperación específica de cuentas administrativas.
+- [ ] Gestión de administradores desde el panel.
+- [ ] Aplicar permisos mínimos efectivos a cada rol.
+- [ ] Revocación y rotación operativa de 2FA desde Administración.
+
+**Criterio de cierre restante:** recuperar y administrar cuentas sin recurrir a SQL ni a secretos provisionales.
+
+### Bloque 8D · Migraciones, copias y recuperación
+
+Completado:
+
+- Tabla `schema_migrations`.
+- Nombre completo y SHA-256 de cada migración.
+- Detección de pendientes e historiales alterados.
+- Bloqueo de ejecuciones simultáneas.
+- Servicio Docker `migrate` previo a la API.
+- Instalación y segunda ejecución idempotente probadas sobre PostgreSQL real.
+- Copia PostgreSQL comprimida con SHA-256 y metadatos.
+- Restauración temporal obligatoria para validar cada copia.
+- Restauración activa mediante intercambio de bases.
+- Conservación de la base anterior como rollback.
+- Ciclo completo probado automáticamente en Docker.
+- Generador privado de `.env`.
+- Preflight del mini PC.
+- Instalación y actualización guiadas con registro de despliegue.
+
+Pendiente para instalaciones antiguas:
+
+- [ ] Procedimiento revisado de adopción de una base con tablas pero sin `schema_migrations`.
+
 ## Siguiente trabajo recomendado
-
-### Paso 8A · Administración real
-
-Objetivo: eliminar la dependencia de secretos administrativos provisionales.
-
-- [ ] Crear cuentas administrativas en PostgreSQL.
-- [ ] Añadir contraseña, verificación de correo y 2FA.
-- [ ] Recuperación de cuenta.
-- [ ] Sesiones administrativas revocables.
-- [ ] Roles: propietario de plataforma, gestor de proveedores y revisor editorial.
-- [ ] Auditoría de inicios de sesión y acciones.
-- [ ] Desactivar `DEV_ADMIN_TOKEN` y `WEB_ADMIN_ACCESS_KEY` en producción.
-
-**Criterio de cierre:** el panel puede publicarse mediante HTTPS sin autenticación provisional.
 
 ### Paso 8B · Decisión comercial y contractual
 
@@ -115,9 +149,7 @@ Este paso debe cerrarse antes de programar pagos.
 
 - [ ] Definir quién es el vendedor contractual.
 - [ ] Definir si Atelier Lumière actúa como intermediario o revendedor.
-- [ ] Decidir el modelo de carrito:
-  - un taller por checkout; o
-  - carrito visual multi-taller con pagos/pedidos separados.
+- [ ] Confirmar un taller por checkout o diseñar separación visible multi-taller.
 - [ ] Definir comisión, costes de pasarela y liquidaciones.
 - [ ] Definir quién factura al cliente.
 - [ ] Definir reembolsos, devoluciones y productos personalizados.
@@ -128,7 +160,7 @@ Este paso debe cerrarse antes de programar pagos.
 
 ### Paso 8C · Pagos sandbox
 
-- [ ] Elegir proveedor de pagos compatible con el modelo comercial.
+- [ ] Elegir proveedor compatible con el modelo comercial aprobado.
 - [ ] Crear pagos mediante redirección segura.
 - [ ] No recibir tarjetas, CVV ni credenciales bancarias.
 - [ ] Validar webhooks firmados.
@@ -138,43 +170,39 @@ Este paso debe cerrarse antes de programar pagos.
 - [ ] Justificantes y comunicaciones.
 - [ ] Pruebas de fallo, repetición y webhook tardío.
 
-**Criterio de cierre:** una compra sandbox completa puede pagarse, confirmarse, cancelarse y reembolsarse sin confiar en el navegador.
-
-### Paso 8D · Migraciones de producción
-
-- [ ] Crear tabla `schema_migrations`.
-- [ ] Añadir comando `npm run db:migrate`.
-- [ ] Detectar migraciones pendientes.
-- [ ] Bloquear ejecuciones simultáneas.
-- [ ] Crear copia previa a cada actualización.
-- [ ] Documentar rollback o recuperación.
-
-**Criterio de cierre:** una base existente puede actualizarse sin recrear el volumen.
+**Criterio de cierre:** una compra sandbox puede pagarse, confirmarse, cancelarse y reembolsarse sin confiar en el navegador.
 
 ## Bloque 9 · Mini PC y piloto privado
 
-### Preparación ya existente
+### Preparación completada en el repositorio
 
-- Docker Compose.
-- Web, API y PostgreSQL.
+- Docker Compose con PostgreSQL, migraciones, API y web.
 - Volúmenes persistentes.
-- Health checks.
+- Healthchecks reales.
 - API limitada a localhost.
-- Variables de entorno documentadas.
+- Generación automática de secretos y `.env` privado.
+- Preflight del equipo y configuración.
+- Instalación guiada sobre base vacía.
+- Actualización guiada con copia verificada previa.
+- Copia, restauración de prueba y rollback.
+- Registros privados de despliegue.
+- Guías específicas para la persona responsable y para Codex.
 
-### Trabajo pendiente
+### Trabajo pendiente en el mini PC real
 
-- [ ] Configurar secretos reales.
-- [ ] Configurar SMTP.
+- [ ] Clonar o actualizar `main` en `/opt/atelier-lumiere`.
+- [ ] Generar `.env` con la URL local inicial.
+- [ ] Ejecutar preflight e instalación.
+- [ ] Crear el primer `PLATFORM_OWNER` presencialmente.
+- [ ] Configurar SMTP real.
 - [ ] Activar HTTPS y cookies `Secure`.
 - [ ] Configurar Cloudflare Tunnel.
 - [ ] Asignar dominio o subdominio.
-- [ ] Copia diaria de PostgreSQL.
-- [ ] Copia del volumen multimedia.
-- [ ] Prueba documentada de restauración.
+- [ ] Programar copia diaria y retención.
+- [ ] Copiar backups fuera del mini PC.
+- [ ] Copiar el volumen multimedia.
 - [ ] Rotación de logs.
 - [ ] Monitorización de espacio y servicios.
-- [ ] Actualización desplegable por versión.
 
 ### Piloto
 
@@ -186,7 +214,7 @@ Este paso debe cerrarse antes de programar pagos.
 - [ ] Cancelación e incidencia.
 - [ ] Recuperación de contraseña y 2FA.
 - [ ] Prueba móvil y escritorio.
-- [ ] Restauración de una copia.
+- [ ] Restauración de una copia del mini PC.
 
 **Criterio de cierre:** el MVP privado funciona desde fuera de casa y puede recuperarse ante un fallo.
 
@@ -208,11 +236,10 @@ Este paso debe cerrarse antes de programar pagos.
 
 No se abrirán ventas hasta cumplir conjuntamente:
 
-1. administración real y segura;
+1. recuperación y permisos administrativos completados;
 2. modelo comercial y contractual aprobado;
 3. pagos sandbox validados;
 4. textos legales revisados profesionalmente;
-5. migraciones incrementales;
-6. copias y restauración probadas;
-7. piloto privado satisfactorio;
-8. aplicación pública con calidad visual y móvil suficiente.
+5. mini PC con copias externas y monitorización;
+6. piloto privado satisfactorio;
+7. aplicación pública con calidad visual y móvil suficiente.
