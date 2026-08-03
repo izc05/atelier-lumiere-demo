@@ -65,4 +65,12 @@ CREATE TRIGGER legal_documents_enforce_version
 BEFORE INSERT OR UPDATE OR DELETE ON legal_documents
 FOR EACH ROW EXECUTE FUNCTION app.enforce_legal_document_version();
 
+CREATE POLICY legal_documents_catalog_reader_select ON legal_documents
+FOR SELECT USING (
+  app.current_role() = 'CATALOG_READER'
+  AND status = 'ACTIVE'
+  AND review_status = 'PROFESSIONAL_REVIEWED'
+  AND effective_at <= now()
+);
+
 COMMIT;
