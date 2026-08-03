@@ -68,6 +68,11 @@ const requestFileStorage = createRequestFileStorage();
 const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
 const authenticateRequest = createRequestAuthenticator({ environment });
 const developmentAdminContext = createDevelopmentAdminContext({ environment });
+const legalSystemContext = Object.freeze({
+  role: "LEGAL_SERVICE",
+  userId: process.env.LEGAL_SERVICE_USER_ID ?? "00000000-0000-4000-8000-000000000007",
+  providerId: null
+});
 
 if (database.enabled && developmentAdminContext) {
   await ensureDevelopmentAdmin(database, developmentAdminContext);
@@ -113,10 +118,10 @@ const accountRecoveryService = database.enabled && developmentAdminContext
       environment
     })
   : null;
-const legalService = database.enabled && developmentAdminContext
+const legalService = database.enabled
   ? createLegalService({
       database,
-      systemContext: developmentAdminContext,
+      systemContext: legalSystemContext,
       environment
     })
   : null;
