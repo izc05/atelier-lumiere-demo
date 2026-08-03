@@ -1,6 +1,6 @@
 # Hoja de ruta de Atelier Lumière
 
-Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente y la cola segura de avisos transaccionales.
+Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente, los avisos transaccionales y la gestión operativa de administradores.
 
 ## Estado global
 
@@ -14,7 +14,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 | 5 | Blog editorial | Completado |
 | 6 | Pedidos, encargos, archivos y logística | Completado para piloto |
 | 7 | Legal y privacidad | Base técnica completada; revisión profesional pendiente |
-| 8A | Administración real | Acceso, recuperación y permisos completados |
+| 8A | Administración real | Acceso, recuperación, permisos y operación completados |
 | 8B | Modelo comercial y contractual | Pendiente de decisión |
 | 8C | Pago sandbox genérico | Completado y desactivado por defecto |
 | 8D | Migraciones, copias y recuperación | Completado para instalaciones nuevas |
@@ -48,6 +48,10 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Revocación de sesiones y rotación de códigos de recuperación.
 - Permisos efectivos por ruta y rol, aplicados también en servidor.
 - Creador interactivo y único del primer `PLATFORM_OWNER`.
+- Alta de administradores desde el panel mediante enlace de activación de un solo uso.
+- Suspensión y reactivación con revocación de sesiones, desafíos y enlaces pendientes.
+- Consulta de sesiones activas y cierre remoto individual o total.
+- Protección transaccional para conservar al menos un propietario activo.
 
 ### Compra y posventa
 
@@ -97,9 +101,10 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 
 ### Administración operativa
 
-- [ ] Crear, suspender y reactivar administradores desde el panel.
+- [x] Crear, suspender y reactivar administradores desde el panel.
 - [ ] Rotar o revocar 2FA de otra cuenta con autorización reforzada.
-- [ ] Historial visual de sesiones y cierres remotos.
+- [x] Historial visual de sesiones activas y cierres remotos.
+- [ ] Segundo paso de confirmación reforzada para acciones de alto impacto.
 
 ### Área del cliente
 
