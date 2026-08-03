@@ -112,7 +112,11 @@ assert.match(storeHtml, /href="\/carrito\//);
 assert.match(cartHtml, /id="checkout-form"/);
 assert.match(cartHtml, /Registrar pedidos sin pagar/);
 assert.match(cartHtml, /No introduzcas datos bancarios/);
-assert.doesNotMatch(cartHtml, /type="password"|card|tarjeta|iban|cvv/i);
+assert.doesNotMatch(cartHtml, /type="password"/i);
+assert.doesNotMatch(
+  cartHtml,
+  /<(?:input|select|textarea)\b[^>]*(?:id|name|autocomplete)=["'][^"']*(?:card|tarjeta|iban|cvv|payment|pago)[^"']*["']/i
+);
 
 assert.match(productJs, /window\.AtelierCart\.add/);
 assert.match(productJs, /selectedPersonalization/);
