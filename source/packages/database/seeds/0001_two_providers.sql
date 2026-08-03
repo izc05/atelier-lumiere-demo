@@ -8,6 +8,19 @@ INSERT INTO users (
   ('00000000-0000-4000-8000-000000000102', 'propietaria-b@atelier-lumiere.example', 'Propietaria Taller B', 'ACTIVE', now(), true)
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO admin_memberships (
+  user_id, role, status, created_by
+) VALUES (
+  '00000000-0000-4000-8000-000000000001',
+  'PLATFORM_OWNER',
+  'ACTIVE',
+  '00000000-0000-4000-8000-000000000001'
+)
+ON CONFLICT (user_id) DO UPDATE
+SET role = 'PLATFORM_OWNER',
+    status = 'ACTIVE',
+    updated_at = now();
+
 INSERT INTO providers (
   id, slug, display_name, status, contact_name, contact_email, specialty, created_by
 ) VALUES
