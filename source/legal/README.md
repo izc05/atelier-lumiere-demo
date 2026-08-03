@@ -4,7 +4,7 @@ Esta carpeta documenta la procedencia y los límites de los borradores legales d
 
 ## Estado
 
-Los documentos creados en el Bloque 7 son **borradores técnicos**. No constituyen asesoramiento jurídico ni deben marcarse como `PUBLISHED` mientras:
+Los documentos creados en el Bloque 7 son **borradores técnicos**. No constituyen asesoramiento jurídico ni deben cambiar de `DRAFT` a `ACTIVE` mientras:
 
 - existan marcadores pendientes;
 - no se haya decidido el titular y el modelo contractual;
@@ -12,7 +12,7 @@ Los documentos creados en el Bloque 7 son **borradores técnicos**. No constituy
 - no se hayan definido pagos, fiscalidad, comisiones, facturación y reembolsos;
 - no se haya realizado una revisión profesional.
 
-La base de datos impide publicar un documento mientras `professional_review_required` sea `true`.
+La base de datos exige `review_status = 'PROFESSIONAL_REVIEWED'`, junto con revisor y fecha, antes de activar un documento. Una vez activo, su versión, título, resumen, contenido, hash y datos de revisión quedan bloqueados. Solo puede pasar a `RETIRED`, y un documento retirado tampoco puede modificarse.
 
 ## Fuentes oficiales consultadas
 
@@ -24,15 +24,18 @@ La base de datos impide publicar un documento mientras `professional_review_requ
 
 ## Criterios técnicos aplicados
 
-- Versiones y SHA-256 de cada documento.
-- Una única versión publicada por tipo.
-- Inmutabilidad del contenido una vez publicado.
+- Versiones semánticas y SHA-256 de cada documento.
+- Una única versión activa por tipo e idioma.
+- Revisión profesional obligatoria antes de activar.
+- Inmutabilidad de documentos activos y retirados.
 - Borradores visibles en desarrollo y ocultos en producción.
+- Copia exacta de las condiciones aceptadas en cada checkout.
 - Categorías opcionales desactivadas por defecto.
 - Aceptar y rechazar opcionales con la misma presencia visual.
 - Clave de preferencias aleatoria, guardada en cookie técnica `HttpOnly`.
 - Solo se almacena el hash de la clave en PostgreSQL.
-- Historial de decisiones inmutable y sin IP ni huella del dispositivo.
+- Historial de decisiones append-only.
+- El centro de privacidad no registra IP, agente del dispositivo ni huella.
 - Ninguna herramienta de analítica, publicidad o marketing conectada en esta fase.
 
 ## Pendiente para la revisión profesional
@@ -44,4 +47,4 @@ La base de datos impide publicar un documento mientras `professional_review_requ
 - Textos de información por capas en formularios.
 - Modelo de desistimiento, devoluciones y garantías.
 - Acuerdo contractual de proveedores y licencia de contenido.
-- Integración de los consentimientos con checkout y alta de proveedores.
+- Integración definitiva de consentimientos con checkout y alta de proveedores.
