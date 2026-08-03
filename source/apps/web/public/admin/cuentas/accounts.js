@@ -119,7 +119,11 @@ function accountCard(account) {
   const meta = document.createElement("div");
   meta.className = "account-meta";
   const sessions = document.createElement("div");
-  sessions.innerHTML = `<span>Sesiones activas</span><strong>${Number(account.activeSessions || 0)}</strong>`;
+  const sessionsLabel = document.createElement("span");
+  sessionsLabel.textContent = "Sesiones activas";
+  const sessionsValue = document.createElement("strong");
+  sessionsValue.textContent = String(Number(account.activeSessions || 0));
+  sessions.append(sessionsLabel, sessionsValue);
   const activity = document.createElement("div");
   const activityLabel = document.createElement("span");
   activityLabel.textContent = "Última actividad";
@@ -213,7 +217,7 @@ function showSetup(account, setup = {}) {
   const path = setup.recoveryPath || setup.setupPath || "";
   elements.setupLinkField.hidden = !path;
   elements.setupLink.value = path ? new URL(path, window.location.origin).toString() : "";
-  elements.setupDialog.showModal();
+  if (!elements.setupDialog.open) elements.setupDialog.showModal();
 }
 
 async function updateStatus(account, status) {
@@ -278,7 +282,7 @@ async function openSessions(account) {
   setMessage(elements.sessionsMessage, "Cargando sesiones…");
   elements.sessionsList.replaceChildren();
   elements.revokeAll.hidden = true;
-  elements.sessionsDialog.showModal();
+  if (!elements.sessionsDialog.open) elements.sessionsDialog.showModal();
   try {
     const payload = await request(`/internal/admin/accounts/${account.id}/sessions`);
     renderSessions(Array.isArray(payload.sessions) ? payload.sessions : []);
