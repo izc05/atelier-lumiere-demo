@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { createWebHandler } from "./app.mjs";
 import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
+import { createAdminAccountsWebHandler } from "./admin-accounts-proxy.mjs";
 import { createAdminAuthenticationWebHandler } from "./admin-auth-proxy.mjs";
 import { createAdminRecoveryWebHandler } from "./admin-recovery-proxy.mjs";
 import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
@@ -46,8 +47,12 @@ const adminRecoveryHandler = createAdminRecoveryWebHandler({
   baseHandler: legalPrivacyHandler,
   enableAdminUi
 });
-const server = createServer(createAdminAuthenticationWebHandler({
+const adminAccountsHandler = createAdminAccountsWebHandler({
   baseHandler: adminRecoveryHandler,
+  enableAdminUi
+});
+const server = createServer(createAdminAuthenticationWebHandler({
+  baseHandler: adminAccountsHandler,
   enableAdminUi
 }));
 
