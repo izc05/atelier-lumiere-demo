@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const paths = [
   "packages/database/migrations/0034_payment_sandbox.sql",
+  "apps/api/src/database.mjs",
   "apps/api/src/payment-sandbox-service.mjs",
   "apps/api/src/payment-sandbox-api.mjs",
   "apps/api/src/payment-checkout-integration.mjs",
@@ -29,24 +30,25 @@ const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [
 ])));
 
 const migration = files[paths[0]];
-const service = files[paths[1]];
-const api = files[paths[2]];
-const integration = files[paths[3]];
-const apiServer = files[paths[4]];
-const serviceTest = files[paths[5]];
-const apiTest = files[paths[6]];
-const integrationTest = files[paths[7]];
-const proxy = files[paths[8]];
-const webServer = files[paths[9]];
-const html = files[paths[10]];
-const browser = files[paths[11]];
-const css = files[paths[12]];
-const cartHtml = files[paths[13]];
-const cartJs = files[paths[14]];
-const proxyTest = files[paths[15]];
-const docs = files[paths[16]];
-const compose = files[paths[17]];
-const env = files[paths[18]];
+const database = files[paths[1]];
+const service = files[paths[2]];
+const api = files[paths[3]];
+const integration = files[paths[4]];
+const apiServer = files[paths[5]];
+const serviceTest = files[paths[6]];
+const apiTest = files[paths[7]];
+const integrationTest = files[paths[8]];
+const proxy = files[paths[9]];
+const webServer = files[paths[10]];
+const html = files[paths[11]];
+const browser = files[paths[12]];
+const css = files[paths[13]];
+const cartHtml = files[paths[14]];
+const cartJs = files[paths[15]];
+const proxyTest = files[paths[16]];
+const docs = files[paths[17]];
+const compose = files[paths[18]];
+const env = files[paths[19]];
 
 assert.match(migration, /CREATE TABLE payment_attempts/);
 assert.match(migration, /CREATE TABLE payment_webhook_events/);
@@ -59,13 +61,17 @@ assert.match(migration, /order_events_payment_service_insert/);
 assert.match(migration, /audit_events_payment_service_insert/);
 assert.match(migration, /FORCE ROW LEVEL SECURITY/);
 
+assert.match(database, /"PAYMENT_SERVICE"/);
+assert.match(database, /context\.role === "PAYMENT_SERVICE" && providerId/);
+assert.match(database, /El servicio de pagos no puede adoptar el contexto de un proveedor/);
+
 assert.match(service, /createPaymentSandboxService/);
 assert.match(service, /environment !== "production"/);
 assert.match(service, /createHmac\("sha256", secret\)/);
 assert.match(service, /ON CONFLICT \(payment_provider, event_id\) DO NOTHING/);
 assert.match(service, /PAYMENT_WEBHOOK_IDEMPOTENCY_CONFLICT/);
 assert.match(service, /PAYMENT_AMOUNT_MISMATCH/);
-assert.match(service, /PAYMENT_CAPTURED/);
+assert.match(service, /return `PAYMENT_\$\{status\}`/);
 assert.match(service, /paymentCollected: false/);
 assert.doesNotMatch(service, /card_number|cardholder|cvv|iban|payment_intent|stripe|paypal/i);
 
