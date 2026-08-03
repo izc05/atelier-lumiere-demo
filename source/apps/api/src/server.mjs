@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { createApiHandler } from "./app.mjs";
 import { createAccountRecoveryApiHandler } from "./account-recovery-api.mjs";
 import { createAccountRecoveryService } from "./account-recovery-service.mjs";
+import { createAdminAccountsApiHandler } from "./admin-accounts-api.mjs";
+import { createAdminAccountsService } from "./admin-accounts-service.mjs";
 import { createAdminAuthApiHandler } from "./admin-auth-api.mjs";
 import { createAdminAuthService } from "./admin-auth-service.mjs";
 import { createAdminRecoveryApiHandler } from "./admin-recovery-api.mjs";
@@ -108,6 +110,9 @@ const adminRecoveryService = database.enabled
       environment
     })
   : null;
+const adminAccountsService = database.enabled && adminRecoveryService
+  ? createAdminAccountsService({ database, adminRecoveryService })
+  : null;
 const authenticateRequest = createRequestAuthenticator({
   environment,
   adminAuthService
@@ -153,11 +158,7 @@ const accountRecoveryService = database.enabled && developmentAdminContext
     })
   : null;
 const legalService = database.enabled
-  ? createLegalService({
-      database,
-      systemContext: legalSystemContext,
-      environment
-    })
+  ? createLegalService({ database, systemContext: legalSystemContext, environment })
   : null;
 const blogPostsService = database.enabled ? createBlogPostsService({ database }) : null;
 const blogMediaService = database.enabled
@@ -167,18 +168,12 @@ const productsService = database.enabled ? createProductsService({ database }) :
 const productMediaService = database.enabled
   ? createProductMediaService({ database, storage: mediaStorage })
   : null;
-const providerOrdersService = database.enabled
-  ? createProviderOrdersService({ database })
-  : null;
-const customerOrdersService = database.enabled
-  ? createCustomerOrdersService({ database })
-  : null;
+const providerOrdersService = database.enabled ? createProviderOrdersService({ database }) : null;
+const customerOrdersService = database.enabled ? createCustomerOrdersService({ database }) : null;
 const customRequestFilesService = database.enabled
   ? createCustomRequestFilesService({ database, storage: requestFileStorage })
   : null;
-const orderLogisticsService = database.enabled
-  ? createOrderLogisticsService({ database })
-  : null;
+const orderLogisticsService = database.enabled ? createOrderLogisticsService({ database }) : null;
 const orderNotificationWorker = database.enabled
   ? createOrderNotificationWorker({
       database,
@@ -190,11 +185,7 @@ const orderNotificationWorker = database.enabled
 const paymentSandboxService = database.enabled
   && environment !== "production"
   && process.env.PAYMENT_SANDBOX_ENABLED === "true"
-  ? createPaymentSandboxService({
-      database,
-      systemContext: paymentSystemContext,
-      environment
-    })
+  ? createPaymentSandboxService({ database, systemContext: paymentSystemContext, environment })
   : null;
 const basePilotCheckoutService = database.enabled && developmentAdminContext && customerAuthService
   ? createPilotCheckoutService({
@@ -256,8 +247,13 @@ const adminRecoveryHandler = createAdminRecoveryApiHandler({
   baseHandler: adminAuthHandler,
   adminRecoveryService
 });
-const accountRecoveryHandler = createAccountRecoveryApiHandler({
+const adminAccountsHandler = createAdminAccountsApiHandler({
   baseHandler: adminRecoveryHandler,
+  adminAccountsService,
+  authenticateRequest
+});
+const accountRecoveryHandler = createAccountRecoveryApiHandler({
+  baseHandler: adminAccountsHandler,
   accountRecoveryService
 });
 const blogPostsHandler = createBlogPostsApiHandler({
