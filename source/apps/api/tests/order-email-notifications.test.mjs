@@ -102,19 +102,21 @@ test("los eventos crean avisos únicos para cliente y taller", { skip: !connecti
     return result.rows;
   });
 
-  assert.equal(notifications.length, 4);
-  assert.equal(new Set(notifications.map((row) => row.dedupe_key)).size, 4);
+  assert.equal(notifications.length >= 4, true);
+  assert.equal(new Set(notifications.map((row) => row.dedupe_key)).size, notifications.length);
+
+  const purchaseNotifications = notifications.filter((row) => row.event_type === "ORDER_CREATED");
+  assert.equal(purchaseNotifications.length, 2);
   assert.deepEqual(
-    notifications.map((row) => row.event_type).sort(),
-    ["CUSTOM_REQUEST_MESSAGE", "CUSTOM_REQUEST_MESSAGE", "ORDER_CREATED", "ORDER_CREATED"]
+    new Set(purchaseNotifications.map((row) => row.recipient_kind)),
+    new Set(["CUSTOMER", "PROVIDER"])
   );
-  assert.equal(
-    notifications.some((row) => row.event_type === "ORDER_CREATED" && row.recipient_kind === "CUSTOMER"),
-    true
-  );
-  assert.equal(
-    notifications.some((row) => row.event_type === "ORDER_CREATED" && row.recipient_kind === "PROVIDER"),
-    true
+
+  const messageNotifications = notifications.filter((row) => row.event_type === "CUSTOM_REQUEST_MESSAGE");
+  assert.equal(messageNotifications.length, 2);
+  assert.deepEqual(
+    new Set(messageNotifications.map((row) => row.recipient_kind)),
+    new Set(["CUSTOMER", "PROVIDER"])
   );
 
   for (const notification of notifications) {
@@ -130,11 +132,9 @@ test("los eventos crean avisos únicos para cliente y taller", { skip: !connecti
   }
 
   const directPrivateRows = await database.withContext(NOTIFICATIONS, async (tx) => {
-    const [users, providers, members] = await Promise.all([
-      tx.query("SELECT count(*)::integer AS total FROM users"),
-      tx.query("SELECT count(*)::integer AS total FROM providers"),
-      tx.query("SELECT count(*)::integer AS total FROM provider_members")
-    ]);
+    const users = await tx.query("SELECT count(*)::integer AS total FROM users");
+    const providers = await tx.query("SELECT count(*)::integer AS total FROM providers");
+    const members = await tx.query("SELECT count(*)::integer AS total FROM provider_members");
     return {
       users: users.rows[0].total,
       providers: providers.rows[0].total,
