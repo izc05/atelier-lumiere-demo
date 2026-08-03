@@ -28,6 +28,7 @@ COMPOSE=(docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}")
 
 cleanup() {
   local exit_code=$?
+  trap - EXIT INT TERM
   if [[ -n "${VERIFY_DATABASE}" ]]; then
     "${COMPOSE[@]}" exec -T database sh -ec '
       dropdb --if-exists --force --username="$POSTGRES_USER" "$1"
@@ -68,7 +69,7 @@ printf 'Restaurando la copia en la base temporal...\n'
 
 printf 'Comprobando estructura restaurada...\n'
 STRUCTURE_RESULT="$("${COMPOSE[@]}" exec -T database sh -ec '
-  psql --username="$POSTGRES_USER" --dbname="$1" --tuples-only --no-align --command="
+  psql --username="$POSTGRES_USER" --dbname="$1" --tuples-only --no-align --set=ON_ERROR_STOP=1 --command="
     SELECT
       (to_regclass('\''public.users'\'') IS NOT NULL)::int || '\'':'\'' ||
       (to_regclass('\''public.providers'\'') IS NOT NULL)::int || '\'':'\'' ||
