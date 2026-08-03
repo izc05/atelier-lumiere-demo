@@ -112,5 +112,22 @@
     <div id="sessions-list" class="sessions-list"></div>
     <button id="revoke-all-button" class="button danger full" type="button">Cerrar todas las sesiones</button>
   </dialog>
+
+  <dialog id="confirmation-dialog" class="dialog-card account-dialog confirmation-dialog">
+    <form method="dialog" class="dialog-close-row"><button class="icon-button" value="cancel" aria-label="Cancelar">Cancelar</button></form>
+    <p class="eyebrow">Confirmación reforzada</p>
+    <h2 id="confirmation-title">Confirmar operación crítica</h2>
+    <p id="confirmation-description">Vuelve a verificar tu identidad antes de continuar.</p>
+    <div class="critical-notice">
+      <strong>Necesitas un código TOTP nuevo.</strong>
+      <span>El código utilizado al iniciar sesión no se puede reutilizar. Espera al siguiente código de tu autenticador cuando sea necesario.</span>
+    </div>
+    <form id="confirmation-form" class="stack-form" novalidate>
+      <label>Tu contraseña<input id="confirmation-password" name="password" type="password" maxlength="128" autocomplete="current-password" required></label>
+      <label>Código del autenticador<input id="confirmation-code" name="code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="000000" required></label>
+      <p id="confirmation-message" class="form-message" role="status" aria-live="polite"></p>
+      <button id="confirmation-submit" class="button danger full" type="submit">Confirmar operación</button>
+    </form>
+  </dialog>
 </body>
 </html>
