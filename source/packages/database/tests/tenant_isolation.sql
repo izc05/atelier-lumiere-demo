@@ -162,8 +162,8 @@ BEGIN
   IF visible_demo_users <> 3 THEN
     RAISE EXCEPTION 'Administración ve % usuarios de demostración; debería ver 3.', visible_demo_users;
   END IF;
-  IF visible_technical_users <> 1 THEN
-    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 1.', visible_technical_users;
+  IF visible_technical_users <> 2 THEN
+    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 2.', visible_technical_users;
   END IF;
 END;
 $$;
