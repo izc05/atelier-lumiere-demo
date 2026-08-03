@@ -1,0 +1,42 @@
+import { spawnSync } from "node:child_process";
+
+const validations = [
+  "validate-source.mjs",
+  "validate-two-factor.mjs",
+  "validate-provider-onboarding-ui.mjs",
+  "validate-provider-session.mjs",
+  "validate-smtp-email.mjs",
+  "validate-account-recovery.mjs",
+  "validate-provider-products-ui.mjs",
+  "validate-admin-products-review.mjs",
+  "validate-public-catalog.mjs",
+  "validate-blog-editorial.mjs",
+  "validate-provider-blog-ui.mjs",
+  "validate-blog-media.mjs",
+  "validate-admin-blog-review.mjs",
+  "validate-public-blog.mjs",
+  "validate-provider-orders.mjs",
+  "validate-provider-orders-ui.mjs",
+  "validate-customer-orders.mjs",
+  "validate-request-files.mjs",
+  "validate-request-files-ui.mjs",
+  "validate-order-logistics.mjs",
+  "validate-pilot-checkout.mjs",
+  "validate-legal-privacy.mjs",
+  "validate-admin-auth-web.mjs"
+];
+
+for (const validation of validations) {
+  console.log(`\n==> ${validation}`);
+  const result = spawnSync(process.execPath, [`scripts/${validation}`], {
+    cwd: new URL("..", import.meta.url),
+    stdio: "inherit"
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    console.error(`\nFalló ${validation}.`);
+    process.exit(result.status ?? 1);
+  }
+}
+
+console.log("\nTodas las validaciones estáticas han finalizado correctamente.");
