@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { createCustomerOrderAccessEmail } from "./customer-order-email-templates.mjs";
 import {
   createInvitationEmail,
   createVerificationEmail
@@ -55,6 +56,12 @@ function actionUrl(baseUrl, pathname, token) {
   return url.toString();
 }
 
+function customerAccessUrl(baseUrl, token) {
+  const url = new URL("/pedido/acceso/", `${baseUrl.toString().replace(/\/$/, "")}/`);
+  url.hash = `token=${encodeURIComponent(requiredString(token, "token", 32, 180))}`;
+  return url.toString();
+}
+
 function disabledService() {
   const disabled = async () => ({ status: "DISABLED", messageId: null, accepted: [] });
   return Object.freeze({
@@ -66,6 +73,7 @@ function disabledService() {
     sendEmailVerification: disabled,
     sendPasswordReset: disabled,
     sendTwoFactorReset: disabled,
+    sendCustomerOrderAccess: disabled,
     close() {}
   });
 }
@@ -225,6 +233,24 @@ export function createMailService({
           providerName,
           token,
           expiresAt
+        })
+      });
+    },
+
+    async sendCustomerOrderAccess({
+      to,
+      displayName,
+      token,
+      expiresAt,
+      orderNumbers
+    }) {
+      return send({
+        to,
+        template: createCustomerOrderAccessEmail({
+          displayName,
+          accessLink: customerAccessUrl(baseUrl, token),
+          expiresAt,
+          orderNumbers
         })
       });
     },

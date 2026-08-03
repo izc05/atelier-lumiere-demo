@@ -8,6 +8,8 @@
   <meta name="theme-color" content="#59101f">
   <title>Tienda · Atelier Lumière</title>
   <link rel="stylesheet" href="/tienda/store.css">
+  <link rel="stylesheet" href="/tienda/cart.css">
+  <script defer src="/tienda/cart-store.js"></script>
   <script defer src="/tienda/store.js"></script>
 </head>
 <body>
@@ -19,6 +21,7 @@
       </a>
       <nav class="nav" aria-label="Navegación principal">
         <a class="button ghost" href="/">Inicio técnico</a>
+        <a class="button ghost cart-link" href="/carrito/">Carrito <span id="cart-count" class="cart-count">0</span></a>
         <a class="button secondary" href="/proveedor/acceso/">Acceso de talleres</a>
       </nav>
     </header>

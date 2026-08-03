@@ -32,6 +32,8 @@ import { createMediaPreviewStorage } from "./media-preview-storage.mjs";
 import { createLocalMediaStorage } from "./media-storage-service.mjs";
 import { createOrderLogisticsApiHandler } from "./order-logistics-api.mjs";
 import { createOrderLogisticsService } from "./order-logistics-service.mjs";
+import { createPilotCheckoutApiHandler } from "./pilot-checkout-api.mjs";
+import { createPilotCheckoutService } from "./pilot-checkout-service.mjs";
 import { createProductMediaApiHandler } from "./product-media-api.mjs";
 import { createProductMediaService } from "./product-media-service.mjs";
 import { createProductsApiHandler } from "./products-api.mjs";
@@ -129,6 +131,15 @@ const customRequestFilesService = database.enabled
 const orderLogisticsService = database.enabled
   ? createOrderLogisticsService({ database })
   : null;
+const pilotCheckoutService = database.enabled && developmentAdminContext && customerAuthService
+  ? createPilotCheckoutService({
+      database,
+      systemContext: developmentAdminContext,
+      customerAuthService,
+      mailService,
+      environment
+    })
+  : null;
 const adminBlogService = database.enabled
   ? createAdminBlogService({ database, storage: mediaStorage })
   : null;
@@ -210,8 +221,12 @@ const orderLogisticsHandler = createOrderLogisticsApiHandler({
   providerAuthService,
   customerAuthService
 });
-const adminBlogHandler = createAdminBlogApiHandler({
+const pilotCheckoutHandler = createPilotCheckoutApiHandler({
   baseHandler: orderLogisticsHandler,
+  pilotCheckoutService
+});
+const adminBlogHandler = createAdminBlogApiHandler({
+  baseHandler: pilotCheckoutHandler,
   adminBlogService,
   authenticateRequest
 });

@@ -11,139 +11,241 @@ function element(tag, className, text) {
   return node;
 }
 
-function mediaPath(path) {
-  return typeof path === "string" ? path.replace(/^\/api\//, "/internal/") : null;
-}
-
 function money(cents, currency = "EUR") {
-  if (!Number.isInteger(cents)) return "Consultar";
-  return new Intl.NumberFormat("es-ES", { style: "currency", currency }).format(cents / 100);
+  return new Intl.NumberFormat("es-ES", { style: "currency", currency }).format(Number(cents) / 100);
 }
 
-function querySlugs() {
-  const params = new URL(window.location.href).searchParams;
-  const provider = params.get("taller")?.trim().toLowerCase() ?? "";
-  const item = params.get("articulo")?.trim().toLowerCase() ?? "";
-  const valid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-  return valid.test(provider) && valid.test(item) ? { provider, item } : null;
+function mediaUrl(path) {
+  return path.replace(/^\/api\/catalog/, "/internal/catalog");
 }
 
-function preparationLabel() {
-  if (!Number.isInteger(product.preparationMinDays) || !Number.isInteger(product.preparationMaxDays)) return "Consultar";
-  return product.preparationMinDays === product.preparationMaxDays
-    ? `${product.preparationMinDays} días`
-    : `${product.preparationMinDays}–${product.preparationMaxDays} días`;
+function safeMessage(node, text, type = "") {
+  node.textContent = text;
+  node.className = `message${type ? ` ${type}` : ""}`;
 }
 
-function stockLabel() {
-  if (product.stockMode === "MADE_TO_ORDER") return "Fabricado bajo pedido";
-  if (product.stockMode === "UNLIMITED") return "Disponible";
-  return product.stockQuantity > 0 ? `${product.stockQuantity} unidades` : "Agotado";
+function stockLabel(item) {
+  if (item.stockMode === "UNLIMITED") return "Disponible";
+  if (item.stockMode === "MADE_TO_ORDER") return "Bajo pedido";
+  return `${item.stockQuantity ?? 0} unidades`;
+}
+
+function optionDescription(item) {
+  const parts = [item.required ? "Obligatoria" : "Opcional"];
+  if (item.priceDeltaCents > 0) parts.push(`+ ${money(item.priceDeltaCents, product.currency)}`);
+  if (Array.isArray(item.choices) && item.choices.length) parts.push(item.choices.join(" · "));
+  return parts.join(" · ");
+}
+
+function optionNode(item) {
+  const row = element("article", "option-item");
+  row.append(element("strong", "", item.name), element("small", "", optionDescription(item)));
+  return row;
+}
+
+function purchaseOptionNode(item) {
+  const label = element("label", "field");
+  label.append(document.createTextNode(item.name));
+  let control;
+  if (["SELECT", "COLOR"].includes(item.optionType)) {
+    control = element("select");
+    const empty = element("option", "", item.required ? "Selecciona una opción" : "Sin selección");
+    empty.value = "";
+    control.append(empty);
+    for (const choice of Array.isArray(item.choices) ? item.choices : []) {
+      const option = element("option", "", String(choice));
+      option.value = String(choice);
+      control.append(option);
+    }
+  } else {
+    control = element("input");
+    control.type = item.optionType === "NUMBER" ? "number" : "text";
+    control.maxLength = 500;
+    control.placeholder = item.optionType === "NUMBER" ? "Introduce un número" : "Escribe el texto o detalle";
+  }
+  control.required = Boolean(item.required);
+  control.dataset.optionId = item.id;
+  control.dataset.optionName = item.name;
+  control.dataset.priceDeltaCents = String(item.priceDeltaCents ?? 0);
+  label.append(control);
+  if (item.priceDeltaCents > 0) {
+    label.append(element("small", "option-price", `Suplemento: ${money(item.priceDeltaCents, product.currency)}`));
+  }
+  return label;
+}
+
+function mediaNode(item) {
+  if (item.kind === "VIDEO") {
+    const card = element("article", "media-card");
+    const video = document.createElement("video");
+    video.controls = true;
+    video.preload = "metadata";
+    video.playsInline = true;
+    video.src = mediaUrl(item.path);
+    video.setAttribute("aria-label", item.altText || "Vídeo de la pieza");
+    card.append(video, element("footer", "", item.altText || "Vídeo del proceso artesanal"));
+    return card;
+  }
+  const card = element("article", "media-card");
+  const image = document.createElement("img");
+  image.src = mediaUrl(item.path);
+  image.alt = item.altText || "Detalle de la pieza artesanal";
+  image.loading = "lazy";
+  image.decoding = "async";
+  if (item.width) image.width = item.width;
+  if (item.height) image.height = item.height;
+  card.append(image, element("footer", "", item.altText || "Detalle artesanal"));
+  return card;
+}
+
+function renderProduct() {
+  document.title = `${product.name} · Atelier Lumière`;
+  byId("product-provider").textContent = `${product.provider.displayName} · ${product.provider.specialty || "Taller artesanal"}`;
+  byId("product-name").textContent = product.name;
+  byId("product-short").textContent = product.shortDescription;
+  byId("product-price").textContent = money(product.priceCents, product.currency);
+  byId("product-story").textContent = product.story;
+  byId("personalization-notes").textContent = product.personalizationNotes || "Esta pieza no necesita instrucciones adicionales.";
+  byId("shipping-notes").textContent = product.shippingNotes || "El taller confirmará las condiciones de envío antes de la expedición.";
+  byId("product-facts").replaceChildren(
+    element("span", "", stockLabel(product)),
+    element("span", "", `${product.preparationMinDays ?? "?"}–${product.preparationMaxDays ?? "?"} días`),
+    ...(product.category ? [element("span", "", product.category)] : []),
+    ...(product.customizable ? [element("span", "", "Personalizable")] : [])
+  );
+  byId("product-events").replaceChildren(...(product.events ?? []).map((value) => element("span", "", value.replaceAll("-", " "))));
+  byId("availability-data").replaceChildren(
+    keyValue("Disponibilidad", stockLabel(product)),
+    keyValue("Preparación", `${product.preparationMinDays ?? "?"}–${product.preparationMaxDays ?? "?"} días`),
+    keyValue("Modalidad", product.stockMode === "MADE_TO_ORDER" ? "Elaboración bajo pedido" : product.stockMode === "FINITE" ? "Stock limitado" : "Disponibilidad continua")
+  );
+  byId("personalization-options").replaceChildren(...product.personalizations.map(optionNode));
+  byId("purchase-options").replaceChildren(...product.personalizations.map(purchaseOptionNode));
+  byId("custom-request-container").hidden = !product.customizable;
+
+  const images = product.media.filter((item) => item.kind === "IMAGE");
+  const hero = byId("hero-media");
+  if (images[0]) {
+    const image = document.createElement("img");
+    image.src = mediaUrl(images[0].path);
+    image.alt = images[0].altText || product.name;
+    image.decoding = "async";
+    hero.replaceChildren(image);
+  } else {
+    hero.replaceChildren(element("span", "hero-placeholder", "Pieza artesanal"));
+  }
+  byId("media-gallery").replaceChildren(...product.media.map(mediaNode));
+  byId("loading-view").hidden = true;
+  byId("product-view").hidden = false;
+}
+
+function keyValue(label, value) {
+  const row = element("div");
+  row.append(element("span", "", label), element("strong", "", value));
+  return row;
 }
 
 async function requestJson(path) {
-  const response = await fetch(path, { headers: { Accept: "application/json" } });
+  const response = await fetch(path, { headers: { Accept: "application/json" }, cache: "no-store" });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.message || "No se pudo abrir el artículo.");
+  if (!response.ok) {
+    const error = new Error(payload.message || "No se pudo abrir la pieza.");
+    error.code = payload.error;
+    throw error;
+  }
   return payload;
 }
 
-function showMedia(item) {
-  const main = byId("main-media");
-  if (item.kind === "VIDEO") {
-    const video = document.createElement("video");
-    video.src = mediaPath(item.path);
-    video.controls = true;
-    video.preload = "metadata";
-    video.setAttribute("playsinline", "");
-    main.replaceChildren(video);
-    return;
-  }
-  const image = document.createElement("img");
-  image.src = mediaPath(item.path);
-  image.alt = item.altText || product.name;
-  main.replaceChildren(image);
+async function loadProduct() {
+  const params = new URLSearchParams(window.location.search);
+  const provider = params.get("taller") || "";
+  const slug = params.get("articulo") || "";
+  if (!provider || !slug) throw new Error("La dirección de esta pieza no es válida.");
+  const payload = await requestJson(`/internal/catalog/products/${encodeURIComponent(provider)}/${encodeURIComponent(slug)}`);
+  product = payload.product;
+  renderProduct();
 }
 
-function renderGallery() {
-  const media = Array.isArray(product.media) ? product.media : [];
-  if (media.length === 0) {
-    byId("main-media").replaceChildren(element("p", "copy", "La pieza todavía no tiene imágenes disponibles."));
-    return;
-  }
-  showMedia(media[0]);
-  const thumbs = media.map((item, index) => {
-    const button = element("button", "thumb");
-    button.type = "button";
-    button.setAttribute("aria-label", item.kind === "VIDEO" ? "Ver vídeo" : `Ver imagen ${index + 1}`);
-    if (item.kind === "IMAGE") {
-      const image = document.createElement("img");
-      image.src = mediaPath(item.path);
-      image.alt = "";
-      image.loading = "lazy";
-      button.append(image);
-    } else {
-      button.append(element("span", "", "Vídeo"));
+function selectedPersonalization() {
+  const values = {};
+  const labels = [];
+  for (const control of byId("purchase-options").querySelectorAll("[data-option-id]")) {
+    const value = String(control.value ?? "").trim();
+    if (!value) {
+      if (control.required) {
+        control.focus();
+        throw new Error(`Completa la opción “${control.dataset.optionName}”.`);
+      }
+      continue;
     }
-    button.addEventListener("click", () => showMedia(item));
-    return button;
-  });
-  byId("thumbs").replaceChildren(...thumbs);
-}
-
-function renderOptions() {
-  const options = Array.isArray(product.personalizations) ? product.personalizations : [];
-  const panel = byId("personalization-panel");
-  panel.hidden = !product.customizable && options.length === 0;
-  if (panel.hidden) return;
-  const items = options.map((option) => {
-    const wrapper = element("article", "option");
-    wrapper.append(element("strong", "", `${option.name}${option.required ? " · obligatoria" : ""}`));
-    const details = [];
-    if (Array.isArray(option.choices) && option.choices.length > 0) details.push(option.choices.join(", "));
-    if (option.priceDeltaCents > 0) details.push(`Suplemento ${money(option.priceDeltaCents, product.currency)}`);
-    wrapper.append(element("small", "", details.join(" · ") || "Se concretará al realizar el encargo."));
-    return wrapper;
-  });
-  byId("options-list").replaceChildren(...items);
-  byId("personalization-notes").textContent = product.personalizationNotes || "Consulta con el taller las posibilidades disponibles.";
-}
-
-function render() {
-  document.title = `${product.name} · Atelier Lumière`;
-  byId("provider-name").textContent = product.provider.displayName;
-  byId("product-name").textContent = product.name;
-  byId("short-description").textContent = product.shortDescription || "Pieza artesanal revisada por Atelier Lumière.";
-  byId("price-value").textContent = money(product.priceCents, product.currency);
-  byId("preparation-value").textContent = preparationLabel();
-  byId("stock-value").textContent = stockLabel();
-  byId("category-value").textContent = product.category || "Artesanía";
-  byId("story-value").textContent = product.story || "El taller no ha añadido todavía la historia de esta pieza.";
-  byId("shipping-value").textContent = product.shippingNotes || "Las condiciones se confirmarán antes del pedido.";
-  byId("events-list").replaceChildren(...(product.events ?? []).map((value) => element("span", "tag", value.replaceAll("-", " "))));
-  renderGallery();
-  renderOptions();
-}
-
-async function load() {
-  const slugs = querySlugs();
-  if (!slugs) {
-    byId("loading-view").hidden = true;
-    byId("error-message").textContent = "El enlace del artículo no es válido.";
-    byId("error-view").hidden = false;
-    return;
+    values[control.dataset.optionId] = value;
+    labels.push({
+      name: control.dataset.optionName,
+      value,
+      priceDeltaCents: Number(control.dataset.priceDeltaCents) || 0
+    });
   }
+  return { values, labels };
+}
+
+function selectedCustomRequest() {
+  if (!product.customizable || !byId("custom-request-toggle").checked) return null;
+  const title = byId("custom-request-title").value.trim();
+  const brief = byId("custom-request-brief").value.trim();
+  const desiredDate = byId("custom-request-date").value;
+  if (title.length < 3) throw new Error("Escribe un título para el diseño propio.");
+  if (brief.length < 20) throw new Error("Describe el diseño propio con al menos veinte caracteres.");
+  return { title, brief, desiredDate };
+}
+
+byId("custom-request-toggle").addEventListener("change", () => {
+  const enabled = byId("custom-request-toggle").checked;
+  byId("custom-request-fields").hidden = !enabled;
+  byId("custom-request-title").required = enabled;
+  byId("custom-request-brief").required = enabled;
+});
+
+byId("purchase-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const result = byId("purchase-result");
+  safeMessage(result, "");
   try {
-    const payload = await requestJson(`/internal/catalog/products/${encodeURIComponent(slugs.provider)}/${encodeURIComponent(slugs.item)}`);
-    product = payload.product;
-    render();
-    byId("loading-view").hidden = true;
-    byId("detail-view").hidden = false;
+    if (!product) throw new Error("La pieza todavía no está preparada.");
+    const quantity = Number(byId("purchase-quantity").value);
+    if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 10) {
+      throw new Error("La cantidad debe estar entre 1 y 10.");
+    }
+    if (product.stockMode === "FINITE" && quantity > Number(product.stockQuantity ?? 0)) {
+      throw new Error("No hay suficientes unidades disponibles.");
+    }
+    const selected = selectedPersonalization();
+    window.AtelierCart.add({
+      lineId: crypto.randomUUID(),
+      productId: product.id,
+      productSlug: product.slug,
+      productName: product.name,
+      providerSlug: product.provider.slug,
+      providerName: product.provider.displayName,
+      quantity,
+      basePriceCents: product.priceCents,
+      currency: product.currency,
+      personalization: selected.values,
+      personalizationLabels: selected.labels,
+      customRequest: selectedCustomRequest()
+    });
+    const link = element("a", "button secondary", "Abrir carrito");
+    link.href = "/carrito/";
+    result.replaceChildren(document.createTextNode("Pieza añadida. "), link);
+    result.className = "message success";
   } catch (error) {
-    byId("loading-view").hidden = true;
-    byId("error-message").textContent = error.message;
-    byId("error-view").hidden = false;
+    safeMessage(result, error.message, "error");
   }
-}
+});
 
-void load();
+window.AtelierCart.wireCount(byId("cart-count"));
+
+loadProduct().catch((error) => {
+  byId("loading-view").hidden = true;
+  byId("error-message").textContent = error.message;
+  byId("error-view").hidden = false;
+});
