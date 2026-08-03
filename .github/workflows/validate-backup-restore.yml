@@ -1,0 +1,136 @@
+name: Validar copias y restauración
+
+on:
+  pull_request:
+    paths:
+      - "source/**"
+      - ".github/workflows/validate-backup-restore.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "source/**"
+      - ".github/workflows/validate-backup-restore.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-backup-restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Crear configuración privada de prueba
+        working-directory: source
+        run: |
+          cat > .env <<'EOF'
+          NODE_ENV=test
+          APP_URL=http://localhost:3000
+          POSTGRES_USER=atelier
+          POSTGRES_PASSWORD=atelier-backup-test-password
+          POSTGRES_DB=atelier_lumiere
+          DATABASE_POOL_MAX=5
+          DATABASE_STATEMENT_TIMEOUT_MS=5000
+          AUTH_SERVICE_USER_ID=00000000-0000-4000-8000-000000000008
+          AUTH_LOGIN_PEPPER=test-login-pepper-with-at-least-thirty-two-characters
+          ADMIN_LOGIN_CHALLENGE_TTL_MINUTES=10
+          ADMIN_SESSION_TTL_HOURS=8
+          ALLOW_DEV_ADMIN_AUTH=false
+          DEV_ADMIN_TOKEN=
+          PILOT_CHECKOUT_ENABLED=false
+          SMTP_ENABLED=false
+          TWO_FACTOR_ENCRYPTION_KEY_BASE64=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+          TWO_FACTOR_RECOVERY_PEPPER=test-recovery-pepper-with-at-least-thirty-two-characters
+          ENABLE_ADMIN_UI=false
+          WEB_COOKIE_SECURE=false
+          PROVIDER_COOKIE_SECURE=false
+          MIGRATION_STATEMENT_TIMEOUT_MS=120000
+          MIGRATION_LOCK_TIMEOUT_MS=10000
+          EOF
+          chmod 600 .env
+
+      - name: Instalar dependencias
+        working-directory: source
+        run: npm install --ignore-scripts
+
+      - name: Crear base y aplicar migraciones
+        working-directory: source
+        run: |
+          docker compose --env-file .env -f infra/docker/docker-compose.yml up -d database
+          docker compose --env-file .env -f infra/docker/docker-compose.yml run --rm migrate
+
+      - name: Crear dato de control
+        working-directory: source
+        run: |
+          docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T database \
+            sh -ec 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1' <<'SQL'
+          CREATE TABLE backup_restore_probe (value text NOT NULL);
+          INSERT INTO backup_restore_probe (value) VALUES ('original');
+          SQL
+
+      - name: Crear copia verificada
+        working-directory: source
+        env:
+          ATELIER_BACKUP_DIR: ${{ runner.temp }}/atelier-backups
+        run: |
+          mkdir -p "$ATELIER_BACKUP_DIR"
+          npm run backup:database -- "$ATELIER_BACKUP_DIR"
+          archive="$(find "$ATELIER_BACKUP_DIR" -maxdepth 1 -type f -name 'atelier-*.dump' -print -quit)"
+          test -n "$archive"
+          test -s "$archive"
+          test -s "$archive.sha256"
+          test -s "$archive.meta"
+          echo "ARCHIVE_PATH=$archive" >> "$GITHUB_ENV"
+
+      - name: Probar restauración temporal
+        working-directory: source
+        run: npm run verify:backup -- "$ARCHIVE_PATH"
+
+      - name: Modificar la base activa después de la copia
+        working-directory: source
+        run: |
+          docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T database \
+            sh -ec 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1' <<'SQL'
+          UPDATE backup_restore_probe SET value = 'modified-after-backup';
+          SQL
+
+      - name: Restaurar la base activa con intercambio seguro
+        working-directory: source
+        run: npm run restore:database -- "$ARCHIVE_PATH" RESTORE_ACTIVE_DATABASE
+
+      - name: Comprobar dato restaurado y rollback conservado
+        working-directory: source
+        run: |
+          value="$(docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T database \
+            sh -ec 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT value FROM backup_restore_probe"' \
+            | tr -d '\r[:space:]')"
+          test "$value" = "original"
+
+          rollback_count="$(docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T database \
+            sh -ec 'psql -U "$POSTGRES_USER" -d postgres -tAc "SELECT count(*) FROM pg_database WHERE datname LIKE '\''atelier_before_%'\''"' \
+            | tr -d '\r[:space:]')"
+          test "$rollback_count" -ge 1
+
+          curl --fail --silent --show-error http://127.0.0.1:4000/health >/dev/null
+          curl --fail --silent --show-error http://127.0.0.1:3000/ >/dev/null
+
+      - name: Mostrar estado al fallar
+        if: failure()
+        working-directory: source
+        run: |
+          docker compose --env-file .env -f infra/docker/docker-compose.yml ps -a || true
+          docker compose --env-file .env -f infra/docker/docker-compose.yml logs --tail=200 database migrate api web || true
+
+      - name: Eliminar entorno de prueba
+        if: always()
+        working-directory: source
+        run: docker compose --env-file .env -f infra/docker/docker-compose.yml down -v --remove-orphans

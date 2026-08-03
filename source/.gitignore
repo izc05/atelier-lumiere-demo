@@ -8,7 +8,4 @@ coverage/
 !.env.example
 
 /data/
-/backups/*.sql
-/backups/*.dump
-/backups/*.tar
-/backups/*.tar.gz
+/backups/*
