@@ -44,7 +44,10 @@ function card(product) {
   }
 
   const body = element("div", "product-body");
-  body.append(element("span", "provider", product.provider.displayName));
+  const providerLink = element("a", "provider provider-link", product.provider.displayName);
+  providerLink.href = `/taller/?slug=${encodeURIComponent(product.provider.slug)}`;
+  providerLink.setAttribute("aria-label", `Ver el taller ${product.provider.displayName}`);
+  body.append(providerLink);
   body.append(element("h2", "", product.name));
   body.append(element("p", "", product.shortDescription || "Pieza artesanal revisada por Atelier Lumière."));
   const tags = element("div", "tags");
