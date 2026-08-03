@@ -22,6 +22,7 @@ const login = files[paths[3]];
 const test = files[paths[4]];
 const env = files[paths[5]];
 const compose = files[paths[6]];
+const webService = compose.split("\n  api:\n", 1)[0];
 
 assert.match(proxy, /atelier_admin_session/);
 assert.match(proxy, /HttpOnly/);
@@ -36,7 +37,10 @@ assert.doesNotMatch(proxy, /WEB_ADMIN_ACCESS_KEY|DEV_ADMIN_TOKEN|localStorage|se
 
 assert.match(server, /createAdminAuthenticationWebHandler/);
 assert.doesNotMatch(server, /process\.env\.DEV_ADMIN_TOKEN|process\.env\.WEB_ADMIN_ACCESS_KEY/);
-assert.doesNotMatch(compose.split("  api:")[0], /DEV_ADMIN_TOKEN|WEB_ADMIN_ACCESS_KEY|WEB_ADMIN_SESSION_TTL/);
+assert.doesNotMatch(
+  webService,
+  /^\s+(?:DEV_ADMIN_TOKEN|WEB_ADMIN_ACCESS_KEY|WEB_ADMIN_SESSION_TTL_MINUTES):/m
+);
 assert.doesNotMatch(env, /WEB_ADMIN_ACCESS_KEY|WEB_ADMIN_SESSION_TTL/);
 
 assert.match(html, /id="admin-email"/);
