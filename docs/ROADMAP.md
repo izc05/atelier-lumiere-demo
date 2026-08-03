@@ -1,6 +1,6 @@
 # Hoja de ruta de Atelier Lumière
 
-Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox y el escaparate de talleres.
+Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres y la nueva experiencia privada del cliente.
 
 ## Estado global
 
@@ -19,7 +19,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 | 8C | Pago sandbox genérico | Completado y desactivado por defecto |
 | 8D | Migraciones, copias y recuperación | Completado para instalaciones nuevas |
 | 9 | Mini PC y piloto privado | Herramientas preparadas; instalación real pendiente |
-| 10 | Experiencia pública | En desarrollo avanzado |
+| 10 | Experiencia pública y cliente | En desarrollo avanzado |
 
 ## Capacidades completadas
 
@@ -56,6 +56,10 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Pedidos, encargos personalizados, presupuestos y aprobación del cliente.
 - Conversaciones, archivos, seguimiento, logística e incidencias.
 - Acceso privado del cliente mediante enlace de un solo uso.
+- Panel con búsqueda y filtros por situación.
+- Progreso visual y próxima actuación de cada pedido.
+- Enlace al escaparate del taller desde el detalle privado.
+- Resumen preparado para imprimir o guardar como PDF desde el navegador.
 
 ### Pago sandbox
 
@@ -85,10 +89,12 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 
 ### Área del cliente
 
-- [ ] Unificar visualmente acceso, listado y detalle de pedidos.
-- [ ] Panel de estado, mensajes, archivos e incidencias más sencillo.
-- [ ] Confirmaciones y comunicaciones de compra.
-- [ ] Resumen imprimible del pedido.
+- [x] Unificar visualmente listado, detalle, conversaciones, archivos e incidencias.
+- [x] Búsqueda y filtros por pedidos en curso, con atención y finalizados.
+- [x] Panel de progreso y próxima actuación.
+- [x] Resumen imprimible del pedido.
+- [ ] Confirmaciones y comunicaciones automáticas de compra.
+- [ ] Prueba de usabilidad móvil con clientes reales.
 
 ### Experiencia pública definitiva
 
