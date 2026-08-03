@@ -1,30 +1,24 @@
-name: Validar base de datos multi-proveedor
+name: Validar PostgreSQL y aislamiento
 
 on:
   pull_request:
     paths:
-      - "source/apps/api/**"
-      - "source/packages/database/**"
-      - "source/infra/docker/Dockerfile.api"
-      - "source/infra/docker/docker-compose.yml"
-      - "source/package.json"
+      - "source/**"
       - ".github/workflows/validate-database.yml"
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
-      - "source/apps/api/**"
-      - "source/packages/database/**"
-      - "source/infra/docker/Dockerfile.api"
-      - "source/infra/docker/docker-compose.yml"
-      - "source/package.json"
+      - "source/**"
       - ".github/workflows/validate-database.yml"
 
 permissions:
   contents: read
 
 jobs:
-  tenant-isolation-and-api:
+  validate-database:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:17-alpine
@@ -36,24 +30,30 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U postgres -d atelier_test"
-          --health-interval 10s
+          --health-interval 5s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
 
     env:
       PGPASSWORD: postgres
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/atelier_test
+      NODE_ENV: test
+      ALLOW_DEV_ADMIN_AUTH: "true"
+      DEV_ADMIN_TOKEN: test-admin-token-with-at-least-thirty-two-characters
+      DEV_ADMIN_USER_ID: 00000000-0000-4000-8000-000000000001
+      DEV_ADMIN_EMAIL: admin@atelier.test
+      DEV_ADMIN_DISPLAY_NAME: Administración de prueba
+      TWO_FACTOR_ENCRYPTION_KEY_BASE64: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      TWO_FACTOR_RECOVERY_PEPPER: test-recovery-pepper-with-at-least-thirty-two-characters
+      AUTH_LOGIN_PEPPER: test-login-pepper-with-at-least-thirty-two-characters
+      APP_URL: http://localhost:3000
+      SMTP_ENABLED: "false"
+      PILOT_CHECKOUT_ENABLED: "true"
+      PILOT_SHIPPING_CENTS: "500"
 
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: source/package.json
 
       - name: Instalar cliente PostgreSQL
         run: |
@@ -84,6 +84,9 @@ jobs:
 
       - name: Verificar aprobación de presupuestos por el cliente
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/custom_quote_approval.sql
+
+      - name: Verificar documentos y consentimientos legales
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/legal_consents.sql
 
       - name: Instalar dependencias de la aplicación fuente
         working-directory: source
