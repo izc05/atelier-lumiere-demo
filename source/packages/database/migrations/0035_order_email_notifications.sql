@@ -55,20 +55,62 @@ FOR ALL
 USING (app.is_notification_service())
 WITH CHECK (app.is_notification_service());
 
-CREATE POLICY provider_orders_notification_service_select ON provider_orders
-FOR SELECT USING (app.is_notification_service());
-
-CREATE POLICY providers_notification_service_select ON providers
-FOR SELECT USING (app.is_notification_service());
-
-CREATE POLICY users_notification_service_select ON users
-FOR SELECT USING (app.is_notification_service());
-
-CREATE POLICY provider_members_notification_service_select ON provider_members
-FOR SELECT USING (app.is_notification_service());
-
-GRANT SELECT ON provider_orders, providers, users, provider_members TO atelier_app_runtime;
 GRANT SELECT, INSERT, UPDATE ON order_notifications TO atelier_app_runtime;
+
+CREATE OR REPLACE FUNCTION app.notification_delivery(target_notification_id bigint)
+RETURNS TABLE (
+  id bigint,
+  attempts integer,
+  event_type text,
+  template_key text,
+  order_id uuid,
+  order_number text,
+  provider_name text,
+  recipient_email citext,
+  recipient_name text,
+  recipient_kind text
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, public, app
+AS $$
+  SELECT
+    notification.id,
+    notification.attempts,
+    notification.event_type,
+    notification.template_key,
+    order_row.id,
+    order_row.order_number,
+    provider.display_name,
+    COALESCE(direct_recipient.email, provider_owner.email),
+    COALESCE(direct_recipient.display_name, provider_owner.display_name),
+    CASE
+      WHEN notification.recipient_user_id IS NULL THEN 'PROVIDER'
+      ELSE 'CUSTOMER'
+    END
+  FROM public.order_notifications notification
+  INNER JOIN public.provider_orders order_row ON order_row.id = notification.order_id
+  INNER JOIN public.providers provider ON provider.id = notification.provider_id
+  LEFT JOIN public.users direct_recipient ON direct_recipient.id = notification.recipient_user_id
+  LEFT JOIN LATERAL (
+    SELECT owner_user.email, owner_user.display_name
+    FROM public.provider_members membership
+    INNER JOIN public.users owner_user ON owner_user.id = membership.user_id
+    WHERE membership.provider_id = notification.provider_id
+      AND membership.role = 'PROVIDER_OWNER'
+      AND membership.status = 'ACTIVE'
+      AND owner_user.status = 'ACTIVE'
+    ORDER BY membership.created_at, membership.id
+    LIMIT 1
+  ) provider_owner ON notification.recipient_user_id IS NULL
+  WHERE notification.id = target_notification_id
+    AND notification.channel = 'EMAIL'
+    AND app.is_notification_service();
+$$;
+
+REVOKE ALL ON FUNCTION app.notification_delivery(bigint) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION app.notification_delivery(bigint) TO atelier_app_runtime;
 
 CREATE OR REPLACE FUNCTION app.enqueue_order_event_email()
 RETURNS trigger
