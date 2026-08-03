@@ -8,7 +8,7 @@
     "start": "node src/server.mjs",
     "migrate": "node src/migrate-database.mjs",
     "bootstrap:platform-owner": "node src/bootstrap-platform-owner.mjs",
-    "test:integration": "node --test tests/*.test.mjs"
+    "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs"
   },
   "dependencies": {
     "nodemailer": "9.0.3",
