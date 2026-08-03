@@ -38,6 +38,17 @@ CREATE POLICY admin_account_recovery_auth_service_all
 ON admin_account_recovery_tokens
 FOR ALL USING (app.is_auth_service()) WITH CHECK (app.is_auth_service());
 
+-- SELECT ... FOR UPDATE necesita una política UPDATE sobre cada tabla bloqueada.
+-- AUTH_SERVICE puede reservar estas filas durante la recuperación, pero WITH CHECK false
+-- impide que modifique realmente identidades o membresías administrativas.
+CREATE POLICY users_auth_service_lock
+ON users
+FOR UPDATE USING (app.is_auth_service()) WITH CHECK (false);
+
+CREATE POLICY admin_memberships_auth_service_lock
+ON admin_memberships
+FOR UPDATE USING (app.is_auth_service()) WITH CHECK (false);
+
 CREATE POLICY user_credentials_auth_service_update
 ON user_credentials
 FOR UPDATE USING (app.is_auth_service()) WITH CHECK (app.is_auth_service());
