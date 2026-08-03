@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 
 const paths = [
+  "scripts/mini-pc-init-env.sh",
   "scripts/mini-pc-preflight.sh",
   "scripts/mini-pc-deploy.sh",
   "package.json",
@@ -25,10 +26,27 @@ for (const shellScript of paths.filter((path) => path.endsWith(".sh"))) {
   );
 }
 
+const initEnv = files["scripts/mini-pc-init-env.sh"];
 const preflight = files["scripts/mini-pc-preflight.sh"];
 const deploy = files["scripts/mini-pc-deploy.sh"];
 const packageJson = files["package.json"];
 const guide = files["docs/MINI_PC_OPERATOR.md"];
+
+for (const expected of [
+  "umask 077",
+  "openssl rand -hex 32",
+  "openssl rand -base64 32",
+  "No se sobrescribirá",
+  "chmod 600",
+  "ALLOW_DEV_ADMIN_AUTH=false",
+  "DEV_ADMIN_TOKEN=",
+  "SMTP_ENABLED=false",
+  "Los secretos no se han mostrado"
+]) {
+  assert.match(initEnv, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+}
+assert.doesNotMatch(initEnv, /printf[^\n]*(?:POSTGRES_PASSWORD|AUTH_SECRET|AUTH_LOGIN_PEPPER|TWO_FACTOR_ENCRYPTION_KEY_BASE64|TWO_FACTOR_RECOVERY_PEPPER)/);
+assert.doesNotMatch(initEnv, /(?:^|\n)\s*(?:source|\.)\s+/);
 
 for (const expected of [
   "docker info",
@@ -57,6 +75,8 @@ for (const expected of [
   "verify:backup",
   "git -C",
   "merge --ff-only origin/main",
+  "La base ya contiene",
+  "Usa el modo update",
   "run --rm migrate",
   "wait_for_healthy",
   "deployments",
@@ -85,12 +105,14 @@ for (const forbidden of [
 }
 assert.doesNotMatch(deploy, /(?:POSTGRES_PASSWORD|AUTH_LOGIN_PEPPER|TWO_FACTOR_RECOVERY_PEPPER)[^\n]*printf/);
 
+assert.match(packageJson, /"init:mini-pc"/);
 assert.match(packageJson, /"preflight:mini-pc"/);
 assert.match(packageJson, /"deploy:mini-pc"/);
 
 for (const expected of [
   "Codex puede ejecutar",
   "Requiere a la persona responsable",
+  "init:mini-pc",
   "--mode install",
   "update --dry-run",
   "copia se crea **antes**",
@@ -101,4 +123,4 @@ for (const expected of [
   assert.match(guide, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 }
 
-console.log("Asistentes seguros de instalación y actualización del mini PC validados.");
+console.log("Asistentes seguros de configuración, instalación y actualización del mini PC validados.");
