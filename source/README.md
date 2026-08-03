@@ -36,6 +36,16 @@ source/
 - Aislamiento por taller mediante RLS forzada.
 - Auditoría de operaciones sensibles.
 
+### Administración
+
+- Cuentas administrativas persistentes separadas de los talleres.
+- Roles `PLATFORM_OWNER`, `PROVIDER_MANAGER` y `EDITORIAL_REVIEWER`.
+- Acceso mediante correo, contraseña y TOTP o código de recuperación.
+- Sesiones revocables guardadas en cookie `HttpOnly`.
+- BFF administrativo único: el navegador nunca recibe el token interno.
+- Creador local e interactivo de la primera cuenta `PLATFORM_OWNER`.
+- Bloqueo automático del bootstrap cuando ya existe un propietario.
+
 ### Catálogo y multimedia
 
 - Borradores, revisión, solicitud de cambios, aprobación y publicación.
@@ -118,7 +128,20 @@ Docker Compose levanta:
 - volumen persistente de base de datos;
 - volumen privado de multimedia.
 
-Las migraciones montadas en `/docker-entrypoint-initdb.d` se aplican únicamente al crear una base vacía. Antes del piloto real debe añadirse un ejecutor de migraciones versionado para bases existentes.
+Las migraciones montadas en `/docker-entrypoint-initdb.d` se aplican únicamente al crear una base vacía. Antes del piloto real sobre una base existente debe añadirse un ejecutor de migraciones versionado.
+
+### Instalación en el mini PC
+
+La guía completa está en [`docs/MINI_PC_INSTALL.md`](docs/MINI_PC_INSTALL.md). No hay que copiar archivos manualmente: el mini PC clona o actualiza el repositorio con Git y ejecuta la aplicación con Docker.
+
+En una base nueva, la primera cuenta propietaria se crea mediante:
+
+```bash
+docker compose --env-file .env -f infra/docker/docker-compose.yml \
+  exec -it api npm run bootstrap:platform-owner
+```
+
+La contraseña se introduce de forma oculta y el QR/códigos de recuperación solo se muestran durante esa ejecución interactiva.
 
 ## Pruebas
 
@@ -131,6 +154,7 @@ La batería comprueba, entre otros puntos:
 
 - contratos y permisos;
 - autenticación y doble factor;
+- bootstrap seguro del primer propietario;
 - correo y recuperación;
 - catálogo y blog;
 - archivos privados;
@@ -143,7 +167,8 @@ GitHub Actions añade pruebas reales sobre PostgreSQL aplicando todas las migrac
 
 ## Configuración pendiente de producción
 
-- Administrador real con autenticación y 2FA.
+- Recuperación específica de cuentas administrativas.
+- Permisos efectivos y mínimos por cada rol administrativo.
 - Modelo comercial, vendedor contractual, comisiones y facturación.
 - Decisión final del modelo de carrito antes de integrar pagos.
 - Pasarela de pago en sandbox y webhooks firmados.
