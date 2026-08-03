@@ -38,7 +38,7 @@ test("documentos y preferencias permanecen versionados y aislados", { skip: !con
   t.after(() => database.close());
 
   const development = createLegalService({ database, systemContext: LEGAL, environment: "development" });
-  const production = createLegalService({ database, systemContext: LEGAL, environment: "production" });
+  const productionService = createLegalService({ database, systemContext: LEGAL, environment: "production" });
   const documents = await development.listDocuments();
 
   assert.equal(documents.length, 8);
@@ -46,7 +46,7 @@ test("documentos y preferencias permanecen versionados y aislados", { skip: !con
   assert.ok(documents.every((document) => document.professionalReviewRequired));
   assert.ok(documents.every((document) => /^[a-f0-9]{64}$/.test(document.contentSha256)));
   assert.ok(documents.some((document) => document.contentMd.includes("[NIF PENDIENTE]")));
-  assert.deepEqual(await production.listDocuments(), []);
+  assert.deepEqual(await productionService.listDocuments(), []);
   assert.equal((await development.getDocument("cookies")).type, "COOKIE_POLICY");
 
   const preferenceKey = randomBytes(32).toString("base64url");
