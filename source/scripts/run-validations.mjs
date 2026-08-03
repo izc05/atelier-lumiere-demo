@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 const validations = [
   "validate-source.mjs",
   "validate-public-home.mjs",
+  "validate-public-provider-storefront.mjs",
   "validate-two-factor.mjs",
   "validate-provider-onboarding-ui.mjs",
   "validate-provider-session.mjs",
