@@ -22,7 +22,9 @@ const login = files[paths[3]];
 const test = files[paths[4]];
 const env = files[paths[5]];
 const compose = files[paths[6]];
-const webService = compose.split("\n  api:\n", 1)[0];
+const webServiceMatch = compose.match(/^  web:\n[\s\S]*?(?=^  api:\n)/m);
+assert.ok(webServiceMatch, "No se ha encontrado el bloque web de Docker Compose.");
+const webService = webServiceMatch[0];
 
 assert.match(proxy, /atelier_admin_session/);
 assert.match(proxy, /HttpOnly/);
