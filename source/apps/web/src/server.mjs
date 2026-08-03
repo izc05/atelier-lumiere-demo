@@ -6,6 +6,7 @@ import { createAdminRecoveryWebHandler } from "./admin-recovery-proxy.mjs";
 import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
 import { createLegalPrivacyWebHandler } from "./legal-privacy-proxy.mjs";
 import { createOrderLogisticsWebHandler } from "./order-logistics-proxy.mjs";
+import { createPaymentSandboxWebHandler } from "./payment-sandbox-proxy.mjs";
 import { createPilotCheckoutWebHandler } from "./pilot-checkout-proxy.mjs";
 import { createProviderBlogWebHandler } from "./provider-blog-proxy.mjs";
 import { createProviderOrdersWebHandler } from "./provider-orders-proxy.mjs";
@@ -37,7 +38,8 @@ const customerOrdersHandler = createCustomerOrdersWebHandler({ baseHandler: prov
 const requestFilesHandler = createRequestFilesWebHandler({ baseHandler: customerOrdersHandler });
 const orderLogisticsHandler = createOrderLogisticsWebHandler({ baseHandler: requestFilesHandler });
 const pilotCheckoutHandler = createPilotCheckoutWebHandler({ baseHandler: orderLogisticsHandler });
-const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: pilotCheckoutHandler });
+const paymentSandboxHandler = createPaymentSandboxWebHandler({ baseHandler: pilotCheckoutHandler });
+const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: paymentSandboxHandler });
 const publicCatalogHandler = createPublicCatalogWebHandler({ baseHandler: publicBlogHandler });
 const legalPrivacyHandler = createLegalPrivacyWebHandler({ baseHandler: publicCatalogHandler });
 const adminRecoveryHandler = createAdminRecoveryWebHandler({
