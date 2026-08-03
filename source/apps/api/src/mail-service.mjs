@@ -73,6 +73,7 @@ function disabledService() {
     sendEmailVerification: disabled,
     sendPasswordReset: disabled,
     sendTwoFactorReset: disabled,
+    sendAdminRecovery: disabled,
     sendCustomerOrderAccess: disabled,
     close() {}
   });
@@ -166,14 +167,15 @@ export function createMailService({
     displayName,
     providerName,
     token,
-    expiresAt
+    expiresAt,
+    pathname
   }) {
     const input = {
       displayName,
       providerName,
       actionUrl: actionUrl(
         baseUrl,
-        type === "PASSWORD" ? "/proveedor/recuperar-clave/" : "/proveedor/recuperar-2fa/",
+        pathname ?? (type === "PASSWORD" ? "/proveedor/recuperar-clave/" : "/proveedor/recuperar-2fa/"),
         token
       ),
       expiresAt
@@ -233,6 +235,20 @@ export function createMailService({
           providerName,
           token,
           expiresAt
+        })
+      });
+    },
+
+    async sendAdminRecovery({ to, displayName, token, expiresAt }) {
+      return send({
+        to,
+        template: recoveryTemplate({
+          type: "TWO_FACTOR",
+          displayName,
+          providerName: "Administración de Atelier Lumière",
+          token,
+          expiresAt,
+          pathname: "/admin/recuperar/"
         })
       });
     },
