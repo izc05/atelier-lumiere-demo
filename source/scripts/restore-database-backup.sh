@@ -29,6 +29,8 @@ COMPOSE=(docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}")
 
 cleanup() {
   local exit_code=$?
+  trap - EXIT INT TERM
+
   if [[ "${SWAP_COMPLETED}" != "true" && -n "${RESTORE_DATABASE}" ]]; then
     "${COMPOSE[@]}" exec -T database sh -ec '
       dropdb --if-exists --force --username="$POSTGRES_USER" "$1"
@@ -82,7 +84,7 @@ printf 'Restaurando archivo en la base aislada...\n'
 
 printf 'Validando la base restaurada...\n'
 RESTORE_CHECK="$("${COMPOSE[@]}" exec -T database sh -ec '
-  psql --username="$POSTGRES_USER" --dbname="$1" --tuples-only --no-align --command="
+  psql --username="$POSTGRES_USER" --dbname="$1" --tuples-only --no-align --set=ON_ERROR_STOP=1 --command="
     SELECT
       (to_regclass('\''public.users'\'') IS NOT NULL)::int || '\'':'\'' ||
       (to_regclass('\''public.providers'\'') IS NOT NULL)::int || '\'':'\'' ||
@@ -110,10 +112,10 @@ printf 'Intercambiando bases de datos...\n'
   psql --username="$POSTGRES_USER" --dbname=postgres --set=ON_ERROR_STOP=1 <<SQL
 SELECT pg_terminate_backend(pid)
 FROM pg_stat_activity
-WHERE datname IN ('${CURRENT_DATABASE}', '${RESTORE_DATABASE}')
+WHERE datname IN ('${current}', '${restored}')
   AND pid <> pg_backend_pid();
-ALTER DATABASE "${CURRENT_DATABASE}" RENAME TO "${ROLLBACK_DATABASE}";
-ALTER DATABASE "${RESTORE_DATABASE}" RENAME TO "${CURRENT_DATABASE}";
+ALTER DATABASE "${current}" RENAME TO "${rollback}";
+ALTER DATABASE "${restored}" RENAME TO "${current}";
 SQL
 ' sh "${CURRENT_DATABASE}" "${RESTORE_DATABASE}" "${ROLLBACK_DATABASE}"
 
