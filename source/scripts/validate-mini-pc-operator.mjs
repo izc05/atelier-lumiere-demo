@@ -49,7 +49,8 @@ assert.doesNotMatch(preflight, /(?:^|\n)\s*(?:source|\.)\s+["']?\$?\{?ENV_FILE/)
 assert.doesNotMatch(preflight, /cat\s+["']?\$?\{?ENV_FILE/);
 
 for (const expected of [
-  "install|update",
+  '"install"',
+  '"update"',
   "--dry-run",
   "mini-pc-preflight.sh",
   "backup:database",
@@ -66,8 +67,8 @@ for (const expected of [
 }
 
 const backupIndex = deploy.indexOf("run backup:database");
-const fetchIndex = deploy.indexOf('fetch --prune origin main');
 const verifyIndex = deploy.indexOf("run verify:backup");
+const fetchIndex = deploy.indexOf("fetch --prune origin main");
 assert.ok(backupIndex >= 0, "El despliegue debe crear una copia antes de actualizar.");
 assert.ok(verifyIndex > backupIndex, "La copia debe verificarse después de crearla.");
 assert.ok(fetchIndex > verifyIndex, "Git no debe actualizarse antes de verificar la copia.");
