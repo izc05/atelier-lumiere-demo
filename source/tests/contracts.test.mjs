@@ -80,13 +80,19 @@ test("la política multimedia limita imágenes y vídeo", () => {
   assert.match(result.errors[0], /8 imágenes/);
 });
 
-test("el mapa de datos incluye credenciales y exige seguridad antes del acceso", () => {
+test("el mapa de datos incluye credenciales y administración protegida", () => {
   assert.ok(CORE_TABLES.includes("audit_events"));
   assert.ok(CORE_TABLES.includes("user_credentials"));
+  assert.ok(CORE_TABLES.includes("admin_memberships"));
+  assert.ok(CORE_TABLES.includes("admin_totp_credentials"));
+  assert.ok(CORE_TABLES.includes("admin_login_challenges"));
   assert.equal(DATABASE_RULES.providerScopedTablesRequireProviderId, true);
   assert.equal(DATABASE_RULES.allMutationsCreateAuditEvent, true);
   assert.equal(DATABASE_RULES.passwordsStoredWithScrypt, true);
   assert.equal(DATABASE_RULES.providerAccessRequiresVerifiedEmailAndTwoFactor, true);
+  assert.equal(DATABASE_RULES.adminAccountsRequireMembership, true);
+  assert.equal(DATABASE_RULES.adminLoginRequiresTwoIndependentFactors, true);
+  assert.equal(DATABASE_RULES.authenticationServiceCannotAdoptProviderContext, true);
 });
 
 test("la API informa de conexión y capacidades sin exponer configuración", async () => {
