@@ -43,12 +43,12 @@ test("el checkout recalcula precios, separa talleres y es idempotente", { skip: 
          status, price_cents, currency, stock_mode, stock_quantity,
          preparation_min_days, preparation_max_days, customizable,
          personalization_notes, shipping_notes, created_by, updated_by,
-         published_at
+         approved_by, published_by, approved_at, published_at
        ) VALUES (
          $1,$2,$3,'Álbum bordado','Álbum artesanal con bordado personalizado.',
          'Pieza artesanal elaborada a mano para conservar recuerdos y celebraciones familiares durante muchos años.',
          'Papelería','PUBLISHED',3200,'EUR','FINITE',5,3,6,true,
-         'Elige el color del bordado.','Envío protegido.',$4,$4,now()
+         'Elige el color del bordado.','Envío protegido.',$4,$4,$4,$4,now(),now()
        )`,
       [productA, PROVIDER_A, `album-${suffix}`, ADMIN.userId]
     );
@@ -58,12 +58,12 @@ test("el checkout recalcula precios, separa talleres y es idempotente", { skip: 
          status, price_cents, currency, stock_mode, stock_quantity,
          preparation_min_days, preparation_max_days, customizable,
          personalization_notes, shipping_notes, created_by, updated_by,
-         published_at
+         approved_by, published_by, approved_at, published_at
        ) VALUES (
          $1,$2,$3,'Lámpara de madera','Lámpara artesanal realizada bajo pedido.',
          'Cada lámpara se corta, lija y termina a mano para crear una pieza cálida adaptada al espacio de la persona que la recibe.',
          'Decoración','PUBLISHED',5800,'EUR','MADE_TO_ORDER',null,7,12,true,
-         'Admite diseño propio.','Se enviará desmontada y protegida.',$4,$4,now()
+         'Admite diseño propio.','Se enviará desmontada y protegida.',$4,$4,$4,$4,now(),now()
        )`,
       [productB, PROVIDER_B, `lampara-${suffix}`, ADMIN.userId]
     );
