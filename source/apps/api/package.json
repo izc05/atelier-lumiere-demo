@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.mjs",
     "start": "node src/server.mjs",
+    "migrate": "node src/migrate-database.mjs",
     "bootstrap:platform-owner": "node src/bootstrap-platform-owner.mjs",
     "test:integration": "node --test tests/*.test.mjs"
   },
