@@ -25,8 +25,8 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 
 const baseWebHandler = createWebHandler({
   enableAdminUi,
-  apiAdminToken: process.env.DEV_ADMIN_TOKEN ?? DISABLED_LEGACY_ADMIN_TOKEN,
-  adminAccessKey: process.env.WEB_ADMIN_ACCESS_KEY ?? DISABLED_LEGACY_ADMIN_KEY
+  apiAdminToken: DISABLED_LEGACY_ADMIN_TOKEN,
+  adminAccessKey: DISABLED_LEGACY_ADMIN_KEY
 });
 const accountRecoveryHandler = createAccountRecoveryWebHandler({ baseHandler: baseWebHandler });
 const providerProductsHandler = createProviderProductsWebHandler({ baseHandler: accountRecoveryHandler });
