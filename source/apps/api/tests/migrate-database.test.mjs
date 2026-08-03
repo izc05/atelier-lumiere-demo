@@ -60,7 +60,7 @@ test("elimina únicamente el BEGIN y COMMIT exteriores", () => {
   );
 });
 
-test("descubre migraciones por orden, checksum y versión única", async () => {
+test("descubre migraciones por orden de nombre y calcula su checksum", async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "atelier-migrations-"));
   try {
     await writeFile(path.join(directory, "0002_second.sql"), "BEGIN;\nSELECT 2;\nCOMMIT;\n");
@@ -73,6 +73,23 @@ test("descubre migraciones por orden, checksum y versión única", async () => {
     ]);
     assert.match(migrations[0].checksum, /^[a-f0-9]{64}$/);
     assert.equal(migrations[0].sql, "SELECT 1;");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("acepta prefijos numéricos repetidos y mantiene el orden por nombre completo", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "atelier-migrations-"));
+  try {
+    await writeFile(path.join(directory, "0015_second.sql"), "BEGIN;\nSELECT 2;\nCOMMIT;\n");
+    await writeFile(path.join(directory, "0015_first.sql"), "BEGIN;\nSELECT 1;\nCOMMIT;\n");
+    const migrations = await loadMigrations(directory);
+
+    assert.deepEqual(migrations.map((item) => item.filename), [
+      "0015_first.sql",
+      "0015_second.sql"
+    ]);
+    assert.deepEqual(migrations.map((item) => item.version), ["0015", "0015"]);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
