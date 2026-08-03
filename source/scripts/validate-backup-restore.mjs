@@ -8,6 +8,7 @@ const paths = [
   "scripts/restore-database-backup.sh",
   "package.json",
   ".gitignore",
+  "infra/docker/docker-compose.yml",
   "docs/MINI_PC_INSTALL.md"
 ];
 const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [
@@ -32,6 +33,7 @@ const verify = files["scripts/verify-database-backup.sh"];
 const restore = files["scripts/restore-database-backup.sh"];
 const packageJson = files["package.json"];
 const gitignore = files[".gitignore"];
+const compose = files["infra/docker/docker-compose.yml"];
 const guide = files["docs/MINI_PC_INSTALL.md"];
 
 for (const expected of [
@@ -83,6 +85,10 @@ assert.match(packageJson, /"backup:database"/);
 assert.match(packageJson, /"verify:backup"/);
 assert.match(packageJson, /"restore:database"/);
 assert.match(gitignore, /\/backups\/\*/);
+
+assert.match(compose, /fetch\('http:\/\/127\.0\.0\.1:4000\/health'\)/);
+assert.match(compose, /process\.exit\(response\.ok \? 0 : 1\)/);
+assert.doesNotMatch(compose, /test:\s*\["CMD",\s*"wget"/);
 
 for (const expected of [
   "backup:database",
