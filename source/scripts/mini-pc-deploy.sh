@@ -119,9 +119,30 @@ STAGE="construir imágenes"
 log "Construcción de imágenes Docker"
 run "${COMPOSE[@]}" build --pull
 
+STAGE="preparar base de datos"
+log "Preparación de PostgreSQL"
+run "${COMPOSE[@]}" up -d database
+
+if [[ "${MODE}" == "install" ]]; then
+  if [[ "${DRY_RUN}" == "true" ]]; then
+    printf '  [DRY-RUN] comprobar que la base pública no contiene tablas\n'
+  else
+    EXISTING_TABLES="$("${COMPOSE[@]}" exec -T database sh -ec '
+      psql --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --tuples-only --no-align --set=ON_ERROR_STOP=1 --command="
+        SELECT count(*)
+        FROM pg_catalog.pg_tables
+        WHERE schemaname = '\''public'\'';
+      "
+    ' | tr -d '\r[:space:]')"
+    [[ "${EXISTING_TABLES}" =~ ^[0-9]+$ ]] \
+      || fail "No se pudo comprobar si la base está vacía."
+    [[ "${EXISTING_TABLES}" == "0" ]] \
+      || fail "La base ya contiene ${EXISTING_TABLES} tablas. Usa el modo update para crear una copia antes de migrar."
+  fi
+fi
+
 STAGE="migrar base de datos"
 log "Aplicación de migraciones"
-run "${COMPOSE[@]}" up -d database
 run "${COMPOSE[@]}" run --rm migrate
 
 STAGE="arrancar servicios"
@@ -159,8 +180,10 @@ wait_for_healthy api 40
 wait_for_healthy web 40
 
 if [[ "${DRY_RUN}" == "false" ]]; then
-  curl --fail --silent --show-error http://127.0.0.1:4000/health >/dev/null \
-    || fail "La API no responde correctamente en 127.0.0.1:4000."
+  API_PUBLIC_PORT="$(awk -F= '/^[[:space:]]*API_PORT[[:space:]]*=/ { gsub(/[[:space:]\r\047\"]/, "", $2); print $2; exit }' "${ENV_FILE}")"
+  API_PUBLIC_PORT="${API_PUBLIC_PORT:-4000}"
+  curl --fail --silent --show-error "http://127.0.0.1:${API_PUBLIC_PORT}/health" >/dev/null \
+    || fail "La API no responde correctamente en el puerto ${API_PUBLIC_PORT}."
 
   WEB_PORT="$(awk -F= '/^[[:space:]]*WEB_PORT[[:space:]]*=/ { gsub(/[[:space:]\r\047\"]/, "", $2); print $2; exit }' "${ENV_FILE}")"
   WEB_PORT="${WEB_PORT:-3000}"
