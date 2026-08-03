@@ -2,7 +2,7 @@
 
 Esta guía prepara una instalación nueva de Atelier Lumière mediante Docker. No se copian archivos manualmente: el mini PC descarga y actualiza el proyecto con Git.
 
-> Esta fase está pensada para una instalación nueva. Si ya existe un volumen PostgreSQL con datos reales, no debe borrarse ni recrearse; primero debe incorporarse el ejecutor de migraciones incrementales previsto en la hoja de ruta.
+> Si ya existe un volumen PostgreSQL creado con una versión anterior y contiene tablas pero no historial `schema_migrations`, el sistema se detendrá sin modificarlo. Debe hacerse una copia y utilizar el procedimiento de adopción de base existente antes de continuar.
 
 ## 1. Requisitos
 
@@ -19,15 +19,6 @@ cd /opt
 sudo git clone https://github.com/izc05/atelier-lumiere-demo.git atelier-lumiere
 sudo chown -R "$USER":"$USER" /opt/atelier-lumiere
 cd /opt/atelier-lumiere/source
-```
-
-Para actualizar una instalación ya clonada:
-
-```bash
-cd /opt/atelier-lumiere
-git switch main
-git pull --ff-only origin main
-cd source
 ```
 
 ## 3. Crear el archivo privado de configuración
@@ -56,6 +47,8 @@ ALLOW_DEV_ADMIN_AUTH=false
 ENABLE_ADMIN_UI=false
 WEB_COOKIE_SECURE=false
 PROVIDER_COOKIE_SECURE=false
+MIGRATION_STATEMENT_TIMEOUT_MS=120000
+MIGRATION_LOCK_TIMEOUT_MS=10000
 ```
 
 Mientras el acceso sea solo local por HTTP, las cookies `Secure` permanecen en `false`. Cuando se publique exclusivamente por HTTPS mediante Cloudflare Tunnel, deben cambiarse a `true`.
@@ -70,14 +63,22 @@ Desde `/opt/atelier-lumiere/source`:
 docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --build
 ```
 
-Comprobar el estado:
+El orden es automático:
+
+1. PostgreSQL queda saludable.
+2. `migrate` verifica el historial y aplica solo los SQL pendientes.
+3. La API arranca únicamente si las migraciones terminan correctamente.
+4. La web espera a que la API esté saludable.
+
+Comprobar el estado y el resultado de migraciones:
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml ps
+docker compose --env-file .env -f infra/docker/docker-compose.yml ps -a
+docker compose --env-file .env -f infra/docker/docker-compose.yml logs --tail=100 migrate
 docker compose --env-file .env -f infra/docker/docker-compose.yml logs --tail=100 api
 ```
 
-La API debe aparecer saludable y la base de datos debe estar iniciada.
+El servicio `migrate` debe aparecer como terminado con código `0`. Es normal que no permanezca en ejecución.
 
 ## 5. Crear la primera cuenta PLATFORM_OWNER
 
@@ -108,10 +109,10 @@ Editar `.env`:
 ENABLE_ADMIN_UI=true
 ```
 
-Recrear únicamente web y API:
+Recrear web y API:
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --build web api
+docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --build
 ```
 
 Acceso local inicial:
@@ -134,9 +135,7 @@ Comprobar desde el navegador:
 - Un código TOTP ya utilizado no se acepta de nuevo.
 - El cierre de sesión vuelve a la pantalla de acceso.
 
-## 8. Copias antes de cambios importantes
-
-Antes de actualizar una instalación con datos:
+## 8. Copia antes de cada actualización
 
 ```bash
 mkdir -p /opt/atelier-backups
@@ -146,11 +145,41 @@ docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T databa
   > "/opt/atelier-backups/atelier-$(date +%Y%m%d-%H%M%S).sql"
 ```
 
-La restauración y la automatización de copias se completarán en el bloque específico de operación y despliegue.
+Comprobar que el archivo no esté vacío:
+
+```bash
+ls -lh /opt/atelier-backups/
+```
+
+## 9. Actualizar el proyecto sin borrar datos
+
+```bash
+cd /opt/atelier-lumiere
+git switch main
+git pull --ff-only origin main
+cd source
+
+docker compose --env-file .env -f infra/docker/docker-compose.yml build
+
+docker compose --env-file .env -f infra/docker/docker-compose.yml run --rm migrate
+
+docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
+```
+
+El proceso `migrate`:
+
+- mantiene una tabla `schema_migrations`;
+- compara el SHA-256 de las migraciones aplicadas;
+- rechaza cualquier archivo histórico modificado o eliminado;
+- aplica solo los archivos nuevos;
+- registra la migración dentro de la misma transacción;
+- impide que dos actualizaciones se ejecuten al mismo tiempo.
+
+Nunca se debe borrar `database_data` para “arreglar” un fallo de migración. Primero se revisan los logs y la copia de seguridad.
 
 ## Qué puede hacer Codex
 
-Codex, abierto sobre el repositorio del mini PC, puede ejecutar prácticamente todos los comandos de esta guía: actualizar Git, editar `.env`, construir Docker, revisar logs y aplicar correcciones.
+Codex, abierto sobre el repositorio del mini PC, puede ejecutar prácticamente todos los comandos de esta guía: actualizar Git, crear la copia, construir Docker, ejecutar `migrate`, revisar logs y aplicar correcciones.
 
 La creación inicial del `PLATFORM_OWNER` debe hacerse contigo presente, porque necesitas:
 
