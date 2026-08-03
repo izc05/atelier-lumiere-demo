@@ -1,67 +1,122 @@
-# Lumiere
+# Atelier Lumière
 
-Marketplace curado de artesanía para bodas, comuniones y celebraciones.
+Marketplace curado de artesanía para bodas, comuniones, bautizos, aniversarios y otras celebraciones.
 
-## Estado
+## Estado actual
 
-La primera versión ejecutable ya está disponible. Incluye Inicio, Tienda con filtros, fichas de producto, carrito separado por proveedor, checkout de demostración, Blog, cuenta con historial de pedidos y encargos, solicitudes personalizadas y un panel de administración navegable. El panel permite gestionar proveedores cerrados; crear, editar y publicar artículos; controlar pedidos separados por taller y envío; y tramitar encargos personalizados desde la solicitud hasta la elaboración. Los cambios son temporales, se guardan solo en el navegador y no envían correos ni pagos reales; la conexión a PostgreSQL, autenticación y Bizum/Redsys corresponde a la siguiente fase.
+El repositorio contiene dos capas separadas:
 
-## Ejecutar en local
+1. **Demo pública protegida**, situada en la raíz y publicada mediante GitHub Pages. Conserva la referencia visual, la portada interactiva y distintos flujos demostrativos.
+2. **Aplicación real mantenible**, situada en `source/`. Incluye web, API, PostgreSQL, autenticación, almacenamiento privado, catálogo, blog, pedidos, encargos y centro legal.
 
-Requiere Node.js 24.
+Los bloques técnicos 0–7 están integrados. La aplicación real ya dispone de:
+
+- alta cerrada de proveedores mediante invitación;
+- verificación de correo, contraseña, doble factor y recuperación de cuenta;
+- aislamiento efectivo de cada taller mediante Row Level Security;
+- catálogo privado, multimedia, revisión administrativa y publicación pública;
+- blog editorial con revisión y publicación;
+- pedidos separados por taller, encargos personalizados y conversaciones privadas;
+- archivos privados, presupuestos, seguimiento e incidencias;
+- checkout piloto sin cobro real;
+- documentos legales versionados y centro de privacidad;
+- pruebas automáticas de aplicación, PostgreSQL, seguridad y regresión de la demo.
+
+## Límites actuales
+
+Atelier Lumière **todavía no está abierto a ventas reales**.
+
+Siguen pendientes:
+
+- autenticación administrativa definitiva para producción;
+- decisión jurídica y comercial sobre vendedor, comisiones, facturación y reparto de responsabilidades;
+- decisión final entre compra limitada a un taller o checkout dividido por talleres;
+- pasarela de pago en entorno de pruebas;
+- estrategia de migraciones para bases de datos ya existentes;
+- copias de seguridad y restauración verificadas;
+- configuración del mini PC, correo real, HTTPS y Cloudflare Tunnel;
+- revisión profesional de los textos legales;
+- unificación visual de la aplicación real con la demo pública.
+
+## Ejecutar la demo pública
+
+La raíz utiliza Node.js 22 o posterior únicamente para validar la exportación protegida:
 
 ```bash
 npm install
-npm run dev
+npm test
 ```
 
-Comprobaciones antes de publicar cambios:
+## Ejecutar la aplicación real
 
 ```bash
-npm run lint
-npm run typecheck
-npm run build
+cd source
+npm install
+npm test
+npm run dev:api
 ```
 
-Para generar la demostración estática publicada en GitHub Pages:
+En otra terminal:
 
 ```bash
-npm run build:pages
+cd source
+npm run dev:web
 ```
+
+- Web: `http://localhost:3000`
+- API: `http://localhost:4000`
+- Salud de la API: `http://localhost:4000/health`
+
+También puede levantarse con Docker Compose:
+
+```bash
+cd source
+cp .env.example .env
+# Sustituir todos los secretos y contraseñas ficticios.
+docker compose -f infra/docker/docker-compose.yml up --build
+```
+
+El archivo `.env` nunca debe subirse a GitHub.
 
 ## Principios del producto
 
-- Catálogo público con artículos de proveedores invitados por administración.
+- Los talleres acceden únicamente por invitación de Administración.
 - No existe registro público de proveedores.
-- Cada carrito, pedido, pago y envío pertenece a un único proveedor.
-- El cliente puede comprar varios artículos del mismo proveedor y compartir el envío.
-- Cada artículo puede incluir historia, fotografías, vídeo y solicitud de diseño personalizado.
-- La portada tendrá movimiento elegante, vídeo y efectos de desplazamiento, respetando rendimiento y accesibilidad.
-- Administrador, proveedor y cliente tienen permisos claramente separados.
+- Cada proveedor trabaja dentro de su propio espacio aislado.
+- Los artículos y las historias pasan por revisión antes de publicarse.
+- Fotografías, vídeos y archivos privados se guardan fuera de GitHub y PostgreSQL.
+- Cada pieza puede incorporar historia, fotografías, vídeo y solicitud de diseño propio.
+- La experiencia debe combinar curación editorial, confianza y personalización.
+- Los pagos no se activarán hasta cerrar el modelo jurídico, comercial y operativo.
 
-## Tecnología acordada
+## Tecnología real
 
-- TypeScript.
-- Next.js 16 y React.
-- PostgreSQL 18 y Prisma ORM.
-- Better Auth para autenticación y doble factor.
-- Tailwind CSS y Motion para el sistema visual.
-- MinIO/S3 para imágenes y vídeos.
-- FFmpeg para optimización de vídeo.
-- Bizum mediante integración segura por redirección.
-- Docker Compose en el mini PC.
-- Cloudflare Tunnel para la publicación sin abrir puertos del router.
+- Node.js 22 y módulos ECMAScript.
+- HTML, CSS y JavaScript mantenibles.
+- PostgreSQL 17 con Row Level Security forzada.
+- Driver `pg` y consultas parametrizadas.
+- Nodemailer para correo transaccional.
+- Sharp para previews WebP.
+- QRCode para configuración TOTP.
+- Almacenamiento privado en volumen local del mini PC.
+- Docker Compose para web, API, PostgreSQL y multimedia.
+- GitHub Actions para pruebas y migraciones.
+- Cloudflare Tunnel previsto para el piloto externo.
 
 ## Documentación
 
-- [Arquitectura](docs/ARQUITECTURA.md)
-- [Seguridad](docs/SEGURIDAD.md)
-- [Flujos funcionales](docs/FLUJOS.md)
-- [Decisiones](docs/DECISIONES.md)
+- [Arquitectura actual](docs/ARCHITECTURE.md)
 - [Hoja de ruta](docs/ROADMAP.md)
-- [Referencia visual](docs/design/README.md)
-- [Informe de calidad visual](design-qa.md)
+- [Aplicación fuente](source/README.md)
+- [Base legal técnica](source/legal/README.md)
 
-## Repositorio
+## Seguridad del repositorio
 
-Las claves, datos personales, copias de la base de datos y archivos reales de clientes o proveedores nunca se almacenarán en GitHub.
+Nunca deben almacenarse en GitHub:
+
+- contraseñas o claves privadas;
+- tokens y credenciales SMTP;
+- archivos `.env` reales;
+- datos personales de clientes o proveedores;
+- copias de PostgreSQL;
+- fotografías, vídeos o documentos reales de pedidos.
