@@ -53,7 +53,10 @@ BEGIN
       OR NEW.status <> 'ACTIVE'
     );
   IF NOT removes_active_owner THEN
-    RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
+    END IF;
+    RETURN NEW;
   END IF;
 
   PERFORM pg_advisory_xact_lock(hashtextextended('atelier-active-platform-owner', 0));
@@ -65,7 +68,10 @@ BEGIN
   IF active_owners <= 1 THEN
     RAISE EXCEPTION 'LAST_PLATFORM_OWNER_REQUIRED' USING ERRCODE = '23514';
   END IF;
-  RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
+  RETURN NEW;
 END;
 $$;
 
