@@ -17,10 +17,14 @@ const SLUG_BY_TYPE = Object.freeze(
 const PRIVACY_KEY_PATTERN = /^[A-Za-z0-9_-]{32,180}$/;
 
 function legalContext(context) {
-  if (!context || context.role !== "LEGAL_SERVICE" || typeof context.userId !== "string") {
+  if (
+    !context
+    || !["LEGAL_SERVICE", "ADMIN"].includes(context.role)
+    || typeof context.userId !== "string"
+  ) {
     throw new TypeError("createLegalService necesita un contexto técnico legal.");
   }
-  return { role: "LEGAL_SERVICE", userId: context.userId, providerId: null };
+  return { role: context.role, userId: context.userId, providerId: null };
 }
 
 function hashKey(value) {
