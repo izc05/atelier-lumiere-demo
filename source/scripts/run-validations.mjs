@@ -20,6 +20,7 @@ const validations = [
   "validate-provider-orders.mjs",
   "validate-provider-orders-ui.mjs",
   "validate-customer-orders.mjs",
+  "validate-order-email-notifications.mjs",
   "validate-request-files.mjs",
   "validate-request-files-ui.mjs",
   "validate-order-logistics.mjs",

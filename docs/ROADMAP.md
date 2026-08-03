@@ -1,6 +1,6 @@
 # Hoja de ruta de Atelier Lumière
 
-Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres y la nueva experiencia privada del cliente.
+Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente y la cola segura de avisos transaccionales.
 
 ## Estado global
 
@@ -20,6 +20,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 | 8D | Migraciones, copias y recuperación | Completado para instalaciones nuevas |
 | 9 | Mini PC y piloto privado | Herramientas preparadas; instalación real pendiente |
 | 10 | Experiencia pública y cliente | En desarrollo avanzado |
+| 11 | Avisos automáticos de pedido | Preparados para piloto; activación SMTP pendiente |
 
 ## Capacidades completadas
 
@@ -61,6 +62,19 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Enlace al escaparate del taller desde el detalle privado.
 - Resumen preparado para imprimir o guardar como PDF desde el navegador.
 
+### Avisos transaccionales
+
+- Confirmación de compra para cliente y taller.
+- Cambios de estado, elaboración, envío y entrega.
+- Presupuestos, mensajes privados e incidencias.
+- Cola PostgreSQL con deduplicación por evento y destinatario.
+- Procesamiento concurrente mediante `FOR UPDATE SKIP LOCKED`.
+- Reintentos exponenciales y cierre tras el máximo configurado.
+- Identificador estable del mensaje para reducir duplicados tras reinicios.
+- Correos sin conversaciones, direcciones, archivos ni datos bancarios.
+- Servicio `NOTIFICATION_SERVICE` aislado mediante una proyección de datos mínima.
+- Interruptor independiente, desactivado por defecto hasta probar el SMTP real.
+
 ### Pago sandbox
 
 - Intentos de pago separados del pedido.
@@ -93,7 +107,9 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - [x] Búsqueda y filtros por pedidos en curso, con atención y finalizados.
 - [x] Panel de progreso y próxima actuación.
 - [x] Resumen imprimible del pedido.
-- [ ] Confirmaciones y comunicaciones automáticas de compra.
+- [x] Confirmaciones y comunicaciones automáticas preparadas.
+- [ ] Configurar y verificar el SMTP real del piloto.
+- [ ] Activar los avisos y revisar entregabilidad con cuentas reales.
 - [ ] Prueba de usabilidad móvil con clientes reales.
 
 ### Experiencia pública definitiva
@@ -130,7 +146,8 @@ La decisión técnica vigente es **un taller por checkout**.
 - [ ] Clonar o actualizar `main` en `/opt/atelier-lumiere`.
 - [ ] Generar `.env`, ejecutar preflight e instalación.
 - [ ] Crear presencialmente el primer `PLATFORM_OWNER`.
-- [ ] Configurar SMTP.
+- [ ] Configurar y verificar SMTP.
+- [ ] Activar avisos automáticos después de la prueba SMTP.
 - [ ] Activar HTTPS, cookies `Secure` y Cloudflare Tunnel.
 - [ ] Asignar dominio o subdominio.
 - [ ] Programar copias diarias y retención.
@@ -144,6 +161,7 @@ La decisión técnica vigente es **un taller por checkout**.
 - [ ] Una historia de blog por taller.
 - [ ] Pedido normal y encargo personalizado completos.
 - [ ] Pago sandbox aprobado y rechazado.
+- [ ] Confirmación, cambio de estado, presupuesto e incidencia por email.
 - [ ] Cancelación, incidencia y recuperación de acceso.
 - [ ] Prueba móvil y escritorio.
 - [ ] Restauración real de una copia del mini PC.

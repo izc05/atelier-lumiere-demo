@@ -4,6 +4,7 @@ import {
   createInvitationEmail,
   createVerificationEmail
 } from "./email-templates.mjs";
+import { createOrderNotificationEmail } from "./order-notification-email-templates.mjs";
 import {
   createPasswordResetEmail,
   createTwoFactorResetEmail
@@ -62,6 +63,16 @@ function customerAccessUrl(baseUrl, token) {
   return url.toString();
 }
 
+function orderActionUrl(baseUrl, recipientKind, orderId) {
+  const id = requiredString(orderId, "orderId", 36, 36);
+  const pathname = recipientKind === "PROVIDER"
+    ? "/proveedor/pedidos/detalle/"
+    : "/mis-pedidos/detalle/";
+  const url = new URL(pathname, `${baseUrl.toString().replace(/\/$/, "")}/`);
+  url.searchParams.set("id", id);
+  return url.toString();
+}
+
 function disabledService() {
   const disabled = async () => ({ status: "DISABLED", messageId: null, accepted: [] });
   return Object.freeze({
@@ -75,6 +86,7 @@ function disabledService() {
     sendTwoFactorReset: disabled,
     sendAdminRecovery: disabled,
     sendCustomerOrderAccess: disabled,
+    sendOrderNotification: disabled,
     close() {}
   });
 }
@@ -145,18 +157,20 @@ export function createMailService({
     })
   });
 
-  async function send({ to, template }) {
+  async function send({ to, template, messageId, extraHeaders = {} }) {
     const recipient = requiredString(to, "destinatario", 3, 254).toLowerCase();
     const info = await transporter.sendMail({
       from: sender,
       to: recipient,
       ...(replyTo ? { replyTo: requiredString(replyTo, "SMTP_REPLY_TO", 3, 320) } : {}),
+      ...(messageId ? { messageId: requiredString(messageId, "messageId", 3, 500) } : {}),
       subject: template.subject,
       text: template.text,
       html: template.html,
       headers: {
         "X-Atelier-Lumiere-Transactional": "true",
-        "X-Auto-Response-Suppress": "All"
+        "X-Auto-Response-Suppress": "All",
+        ...extraHeaders
       }
     });
     return deliveryResult(info);
@@ -268,6 +282,36 @@ export function createMailService({
           expiresAt,
           orderNumbers
         })
+      });
+    },
+
+    async sendOrderNotification({
+      to,
+      recipientName,
+      recipientKind,
+      providerName,
+      orderNumber,
+      orderId,
+      eventType,
+      notificationId
+    }) {
+      const kind = recipientKind === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
+      const id = Number.parseInt(notificationId, 10);
+      if (!Number.isSafeInteger(id) || id < 1) throw new TypeError("notificationId no es válido.");
+      return send({
+        to,
+        template: createOrderNotificationEmail({
+          recipientName,
+          recipientKind: kind,
+          providerName,
+          orderNumber,
+          eventType,
+          actionUrl: orderActionUrl(baseUrl, kind, orderId)
+        }),
+        messageId: `<order-notification-${id}@atelier-lumiere.invalid>`,
+        extraHeaders: {
+          "X-Atelier-Lumiere-Notification": String(id)
+        }
       });
     },
 

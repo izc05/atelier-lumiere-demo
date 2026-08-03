@@ -12,7 +12,7 @@ $$;
 
 GRANT USAGE ON SCHEMA public, app TO atelier_rls_test;
 GRANT SELECT, INSERT, UPDATE, DELETE ON users, providers, provider_members, provider_invitations, sessions, audit_events TO atelier_rls_test;
-GRANT SELECT, INSERT, UPDATE, DELETE ON payment_attempts, payment_webhook_events TO atelier_rls_test;
+GRANT SELECT, INSERT, UPDATE, DELETE ON payment_attempts, payment_webhook_events, order_notifications TO atelier_rls_test;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO atelier_rls_test;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA app TO atelier_rls_test;
 
@@ -198,6 +198,38 @@ BEGIN
 END;
 $$;
 
+SELECT set_config('app.role', 'NOTIFICATION_SERVICE', false);
+SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000010', false);
+SELECT set_config('app.provider_id', '', false);
+
+DO $$
+DECLARE
+  visible_users integer;
+  visible_providers integer;
+  visible_members integer;
+  visible_invitations integer;
+  projected_rows integer;
+BEGIN
+  SELECT count(*) INTO visible_users FROM users;
+  IF visible_users <> 1 OR NOT EXISTS (
+    SELECT 1 FROM users
+    WHERE id = '00000000-0000-4000-8000-000000000010'
+  ) THEN
+    RAISE EXCEPTION 'El servicio de notificaciones no está aislado en su identidad técnica.';
+  END IF;
+  SELECT count(*) INTO visible_providers FROM providers;
+  SELECT count(*) INTO visible_members FROM provider_members;
+  SELECT count(*) INTO visible_invitations FROM provider_invitations;
+  IF visible_providers <> 0 OR visible_members <> 0 OR visible_invitations <> 0 THEN
+    RAISE EXCEPTION 'El servicio de notificaciones puede consultar tablas privadas directamente.';
+  END IF;
+  SELECT count(*) INTO projected_rows FROM app.notification_delivery(-1);
+  IF projected_rows <> 0 THEN
+    RAISE EXCEPTION 'La proyección de notificaciones devuelve una fila inexistente.';
+  END IF;
+END;
+$$;
+
 SELECT set_config('app.role', 'ADMIN', false);
 SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000001', false);
 
@@ -221,8 +253,8 @@ BEGIN
   IF visible_demo_users <> 3 THEN
     RAISE EXCEPTION 'Administración ve % usuarios de demostración; debería ver 3.', visible_demo_users;
   END IF;
-  IF visible_technical_users <> 3 THEN
-    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 3.', visible_technical_users;
+  IF visible_technical_users <> 4 THEN
+    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 4.', visible_technical_users;
   END IF;
 END;
 $$;
