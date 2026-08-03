@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { createAdminAccountsService } from "../src/admin-accounts-service.mjs";
 import { createDatabase } from "../src/database.mjs";
 
@@ -15,6 +15,10 @@ const MANAGER = Object.freeze({
   ...OWNER,
   adminRole: "PROVIDER_MANAGER"
 });
+
+function tokenHash() {
+  return randomBytes(32).toString("hex");
+}
 
 function setupService(calls) {
   return {
@@ -53,6 +57,7 @@ test("el propietario crea, suspende y cierra sesiones administrativas", { skip: 
           "DELETE FROM audit_events WHERE entity_id=$1 OR metadata->>'targetUserId'=$1::text",
           [userId]
         );
+        await tx.query("DELETE FROM admin_memberships WHERE user_id=$1", [userId]);
         await tx.query("DELETE FROM users WHERE id=$1", [userId]);
       });
     }
@@ -93,7 +98,7 @@ test("el propietario crea, suspende y cierra sesiones administrativas", { skip: 
       `INSERT INTO sessions
         (id,user_id,token_hash,provider_id,role,user_agent,expires_at,last_seen_at)
        VALUES($1,$2,$3,NULL,'PROVIDER_MANAGER','Prueba remota',now()+interval '8 hours',now())`,
-      [sessionId, userId, "b".repeat(64)]
+      [sessionId, userId, tokenHash()]
     );
   });
 
@@ -109,12 +114,12 @@ test("el propietario crea, suspende y cierra sesiones administrativas", { skip: 
   assert.equal((await service.sessions(OWNER, userId)).length, 0);
 
   await database.withContext(OWNER, async (tx) => {
-    for (const marker of ["c", "d"]) {
+    for (let index = 0; index < 2; index += 1) {
       await tx.query(
         `INSERT INTO sessions
           (user_id,token_hash,provider_id,role,user_agent,expires_at,last_seen_at)
          VALUES($1,$2,NULL,'PROVIDER_MANAGER','Otra sesión',now()+interval '8 hours',now())`,
-        [userId, marker.repeat(64)]
+        [userId, tokenHash()]
       );
     }
   });
@@ -125,7 +130,7 @@ test("el propietario crea, suspende y cierra sesiones administrativas", { skip: 
       `INSERT INTO sessions
         (user_id,token_hash,provider_id,role,user_agent,expires_at,last_seen_at)
        VALUES($1,$2,NULL,'PROVIDER_MANAGER','Sesión a suspender',now()+interval '8 hours',now())`,
-      [userId, "e".repeat(64)]
+      [userId, tokenHash()]
     );
   });
   const suspended = await service.updateStatus(OWNER, userId, { status: "SUSPENDED" });
