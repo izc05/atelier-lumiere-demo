@@ -12,6 +12,8 @@
     "backup:database": "bash scripts/backup-database.sh",
     "verify:backup": "bash scripts/verify-database-backup.sh",
     "restore:database": "bash scripts/restore-database-backup.sh",
+    "preflight:mini-pc": "bash scripts/mini-pc-preflight.sh",
+    "deploy:mini-pc": "bash scripts/mini-pc-deploy.sh",
     "test": "node --test tests/*.test.mjs && npm run test:web-integration && node scripts/run-validations.mjs",
     "test:web-integration": "npm --workspace @atelier-lumiere/web run test:integration",
     "test:api-integration": "npm --workspace @atelier-lumiere/api run test:integration",
