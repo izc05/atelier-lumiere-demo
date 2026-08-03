@@ -39,6 +39,9 @@ import { createMediaPreviewStorage } from "./media-preview-storage.mjs";
 import { createLocalMediaStorage } from "./media-storage-service.mjs";
 import { createOrderLogisticsApiHandler } from "./order-logistics-api.mjs";
 import { createOrderLogisticsService } from "./order-logistics-service.mjs";
+import { withSandboxPayment } from "./payment-checkout-integration.mjs";
+import { createPaymentSandboxApiHandler } from "./payment-sandbox-api.mjs";
+import { createPaymentSandboxService } from "./payment-sandbox-service.mjs";
 import { createPilotCheckoutApiHandler } from "./pilot-checkout-api.mjs";
 import { createPilotCheckoutService } from "./pilot-checkout-service.mjs";
 import { createProductMediaApiHandler } from "./product-media-api.mjs";
@@ -76,6 +79,11 @@ const authenticationSystemContext = createAuthenticationServiceContext();
 const legalSystemContext = Object.freeze({
   role: "LEGAL_SERVICE",
   userId: process.env.LEGAL_SERVICE_USER_ID ?? "00000000-0000-4000-8000-000000000007",
+  providerId: null
+});
+const paymentSystemContext = Object.freeze({
+  role: "PAYMENT_SERVICE",
+  userId: process.env.PAYMENT_SERVICE_USER_ID ?? "00000000-0000-4000-8000-000000000009",
   providerId: null
 });
 
@@ -165,7 +173,16 @@ const customRequestFilesService = database.enabled
 const orderLogisticsService = database.enabled
   ? createOrderLogisticsService({ database })
   : null;
-const pilotCheckoutService = database.enabled && developmentAdminContext && customerAuthService
+const paymentSandboxService = database.enabled
+  && environment !== "production"
+  && process.env.PAYMENT_SANDBOX_ENABLED === "true"
+  ? createPaymentSandboxService({
+      database,
+      systemContext: paymentSystemContext,
+      environment
+    })
+  : null;
+const basePilotCheckoutService = database.enabled && developmentAdminContext && customerAuthService
   ? createPilotCheckoutService({
       database,
       systemContext: developmentAdminContext,
@@ -174,6 +191,10 @@ const pilotCheckoutService = database.enabled && developmentAdminContext && cust
       environment
     })
   : null;
+const pilotCheckoutService = withSandboxPayment({
+  checkoutService: basePilotCheckoutService,
+  paymentSandboxService
+});
 const adminBlogService = database.enabled
   ? createAdminBlogService({ database, storage: mediaStorage })
   : null;
@@ -267,8 +288,12 @@ const pilotCheckoutHandler = createPilotCheckoutApiHandler({
   baseHandler: orderLogisticsHandler,
   pilotCheckoutService
 });
-const adminBlogHandler = createAdminBlogApiHandler({
+const paymentSandboxHandler = createPaymentSandboxApiHandler({
   baseHandler: pilotCheckoutHandler,
+  paymentSandboxService
+});
+const adminBlogHandler = createAdminBlogApiHandler({
+  baseHandler: paymentSandboxHandler,
   adminBlogService,
   authenticateRequest
 });
