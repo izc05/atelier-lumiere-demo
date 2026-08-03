@@ -20,10 +20,23 @@ INSERT INTO checkout_batches (
   id, customer_user_id, checkout_reference, currency,
   customer_name, contact_email, contact_phone, shipping_address,
   status, submitted_at
-) VALUES (
+) VALUES
+(
   '50000000-0000-4000-8000-000000000001',
   '00000000-0000-4000-8000-000000000003',
-  'AL-CHECKOUT-TEST-ORDER-0001',
+  'AL-CHECKOUT-TEST-ORDER-A-0001',
+  'EUR',
+  'Cliente de prueba',
+  'cliente-prueba@example.test',
+  '+34000000000',
+  '{"line1":"Calle de prueba 1","city":"Granada","postalCode":"18001","country":"ES"}'::jsonb,
+  'SUBMITTED',
+  now()
+),
+(
+  '50000000-0000-4000-8000-000000000002',
+  '00000000-0000-4000-8000-000000000003',
+  'AL-CHECKOUT-TEST-ORDER-B-0001',
   'EUR',
   'Cliente de prueba',
   'cliente-prueba@example.test',
@@ -53,7 +66,7 @@ INSERT INTO provider_orders (
 ),
 (
   '51000000-0000-4000-8000-000000000002',
-  '50000000-0000-4000-8000-000000000001',
+  '50000000-0000-4000-8000-000000000002',
   '00000000-0000-4000-8000-000000000202',
   '00000000-0000-4000-8000-000000000003',
   'AL-TEST-ORDER-B-0001',
@@ -63,6 +76,31 @@ INSERT INTO provider_orders (
   'Cliente de prueba', 'cliente-prueba@example.test', '+34000000000',
   '{"line1":"Calle de prueba 1","city":"Granada","postalCode":"18001","country":"ES"}'::jsonb
 );
+
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO provider_orders (
+      id, checkout_id, provider_id, customer_user_id, order_number,
+      status, currency, subtotal_cents, shipping_cents, total_cents,
+      customer_name, contact_email, shipping_address
+    ) VALUES (
+      '51000000-0000-4000-8000-000000000003',
+      '50000000-0000-4000-8000-000000000001',
+      '00000000-0000-4000-8000-000000000202',
+      '00000000-0000-4000-8000-000000000003',
+      'AL-TEST-INVALID-MIXED-PROVIDER',
+      'PENDING_CONFIRMATION',
+      'EUR', 1000, 0, 1000,
+      'Cliente de prueba', 'cliente-prueba@example.test',
+      '{"line1":"Calle de prueba 1","city":"Granada","postalCode":"18001","country":"ES"}'::jsonb
+    );
+    RAISE EXCEPTION 'Se ha permitido mezclar talleres dentro del mismo checkout';
+  EXCEPTION
+    WHEN check_violation THEN NULL;
+  END;
+END;
+$$;
 
 INSERT INTO order_items (
   id, order_id, provider_id, customer_user_id, item_type,
@@ -226,7 +264,10 @@ SELECT set_config('app.provider_id', '', true);
 DO $$
 BEGIN
   IF (SELECT count(*) FROM provider_orders) <> 2 THEN
-    RAISE EXCEPTION 'El cliente debe ver los dos pedidos separados por taller';
+    RAISE EXCEPTION 'El cliente debe ver dos pedidos procedentes de dos checkouts separados';
+  END IF;
+  IF (SELECT count(DISTINCT checkout_id) FROM provider_orders) <> 2 THEN
+    RAISE EXCEPTION 'Cada taller debe estar asociado a un checkout independiente';
   END IF;
 END;
 $$;

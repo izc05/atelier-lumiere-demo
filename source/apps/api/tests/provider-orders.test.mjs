@@ -44,7 +44,8 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();
   const customerId = randomUUID();
   const customerEmail = `cliente-${suffix.toLowerCase()}@example.test`;
-  const checkoutId = randomUUID();
+  const checkoutAId = randomUUID();
+  const checkoutBId = randomUUID();
   const orderAId = randomUUID();
   const orderBId = randomUUID();
   const itemAId = randomUUID();
@@ -59,22 +60,30 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
       [customerId, customerEmail]
     );
 
-    await transaction.query(
-      `INSERT INTO checkout_batches (
-         id, customer_user_id, checkout_reference, currency,
-         customer_name, contact_email, contact_phone, shipping_address,
-         status, submitted_at
-       ) VALUES ($1, $2, $3, 'EUR', $4, $5, $6, $7::jsonb, 'SUBMITTED', now())`,
-      [
-        checkoutId,
-        customerId,
-        `AL-CHECKOUT-${suffix}`,
-        "Cliente integración",
-        customerEmail,
-        "+34000000000",
-        JSON.stringify(address())
-      ]
-    );
+    const insertCheckout = `INSERT INTO checkout_batches (
+      id, customer_user_id, checkout_reference, currency,
+      customer_name, contact_email, contact_phone, shipping_address,
+      status, submitted_at
+    ) VALUES ($1, $2, $3, 'EUR', $4, $5, $6, $7::jsonb, 'SUBMITTED', now())`;
+
+    await transaction.query(insertCheckout, [
+      checkoutAId,
+      customerId,
+      `AL-CHECKOUT-A-${suffix}`,
+      "Cliente integración",
+      customerEmail,
+      "+34000000000",
+      JSON.stringify(address())
+    ]);
+    await transaction.query(insertCheckout, [
+      checkoutBId,
+      customerId,
+      `AL-CHECKOUT-B-${suffix}`,
+      "Cliente integración",
+      customerEmail,
+      "+34000000000",
+      JSON.stringify(address())
+    ]);
 
     const insertOrder = `INSERT INTO provider_orders (
       id, checkout_id, provider_id, customer_user_id, order_number,
@@ -90,7 +99,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
 
     await transaction.query(insertOrder, [
       orderAId,
-      checkoutId,
+      checkoutAId,
       PROVIDER_A,
       customerId,
       `AL-ORDER-A-${suffix}`,
@@ -107,7 +116,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
     ]);
     await transaction.query(insertOrder, [
       orderBId,
-      checkoutId,
+      checkoutBId,
       PROVIDER_B,
       customerId,
       `AL-ORDER-B-${suffix}`,
@@ -166,6 +175,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
   const listA = await service.list(PROVIDER_A_CONTEXT, { query: suffix });
   assert.equal(listA.length, 1);
   assert.equal(listA[0].id, orderAId);
+  assert.equal(listA[0].checkoutId, checkoutAId);
   assert.equal(listA[0].itemCount, 1);
   assert.equal(listA[0].openCustomRequests, 1);
   assert.equal(listA[0].customer.name, "Cliente integración");
@@ -173,6 +183,7 @@ test("cada taller gestiona únicamente sus pedidos y encargos", { skip: !connect
   const listB = await service.list(PROVIDER_B_CONTEXT, { query: suffix });
   assert.equal(listB.length, 1);
   assert.equal(listB[0].id, orderBId);
+  assert.equal(listB[0].checkoutId, checkoutBId);
 
   await assert.rejects(
     () => service.get(PROVIDER_B_CONTEXT, orderAId),
