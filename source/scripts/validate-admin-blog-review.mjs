@@ -66,7 +66,7 @@ assert.match(proxy, /\/internal\/admin\/session/);
 assert.match(proxy, /Authorization: `Bearer \$\{token\}`/);
 assert.match(proxy, /Readable\.fromWeb/);
 assert.match(proxy, /ENABLE_ADMIN_UI/);
-assert.match(webServer, /createAdminBlogWebHandler/);
+assert.match(webServer, /createAdminAuthenticationWebHandler/);
 assert.match(proxyTest, /admin-blog-proxy-token/);
 
 for (const html of [listHtml, detailHtml]) {
