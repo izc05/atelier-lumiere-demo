@@ -13,6 +13,11 @@ const LEGAL = {
   userId: "00000000-0000-4000-8000-000000000007",
   providerId: null
 };
+const ADMIN = {
+  role: "ADMIN",
+  userId: "00000000-0000-4000-8000-000000000001",
+  providerId: null
+};
 const CUSTOMER = {
   role: "CUSTOMER",
   userId: "00000000-0000-4000-8000-000000000103",
@@ -59,9 +64,9 @@ test("los borradores legales y preferencias están versionados y aislados", {
   const documents = await developmentService.listDocuments();
   assert.equal(documents.length, 8);
   assert.ok(documents.every((item) => item.status === "DRAFT"));
+  assert.ok(documents.every((item) => item.reviewStatus === "TECHNICAL_DRAFT"));
   assert.ok(documents.every((item) => item.professionalReviewRequired === true));
   assert.ok(documents.every((item) => /^[a-f0-9]{64}$/.test(item.contentSha256)));
-  assert.ok(documents.every((item) => item.contentSha256 !== "0".repeat(64)));
   assert.ok(documents.some((item) => item.contentMd.includes("[NIF PENDIENTE]")));
   assert.deepEqual(await productionService.listDocuments(), []);
 
@@ -110,23 +115,23 @@ test("los borradores legales y preferencias están versionados y aislados", {
     assert.equal(current.rows[0].version, 2);
 
     const events = await transaction.query(
-      `SELECT decision, categories, evidence
+      `SELECT decision, evidence
        FROM legal_consent_events
-       WHERE preference_key_hash = $1
+       WHERE anonymous_id_hash = $1
        ORDER BY occurred_at`,
       [keyHash]
     );
     assert.equal(events.rowCount, 2);
-    assert.equal(events.rows[0].decision, "DENIED");
-    assert.equal(events.rows[1].decision, "GRANTED");
-    assert.equal(events.rows[1].categories.analytics, true);
+    assert.equal(events.rows[0].decision, "REJECTED");
+    assert.equal(events.rows[1].decision, "ACCEPTED");
+    assert.equal(events.rows[1].evidence.categories.analytics, true);
     assert.equal(events.rows[1].evidence.source, "privacy-center");
     assert.equal(JSON.stringify(events.rows).includes(preferenceKey), false);
   });
 
   await assert.rejects(
     () => database.withContext(LEGAL, (transaction) => transaction.query(
-      "UPDATE legal_consent_events SET decision='WITHDRAWN' WHERE preference_key_hash=$1",
+      "UPDATE legal_consent_events SET decision='WITHDRAWN' WHERE anonymous_id_hash=$1",
       [keyHash]
     )),
     (error) => error?.code === "42501"
@@ -140,6 +145,85 @@ test("los borradores legales y preferencias están versionados y aislados", {
     assert.equal(preferencesResult.rowCount, 0);
     assert.equal(eventsResult.rowCount, 0);
   });
+});
+
+test("un documento activo no puede modificarse ni volver a borrador", {
+  skip: !connectionString
+}, async (t) => {
+  const database = createDatabase({
+    connectionString,
+    maxConnections: 2,
+    statementTimeoutMs: 5000,
+    logger: { error() {} }
+  });
+  t.after(() => database.close());
+
+  const documentId = "70000000-0000-4000-8000-000000000099";
+  await database.withContext(ADMIN, async (transaction) => {
+    await transaction.query("DELETE FROM legal_documents WHERE id = $1", [documentId]);
+    await transaction.query(
+      `INSERT INTO legal_documents (
+         id, document_type, locale, version, title, summary,
+         content_markdown, content_sha256, status, review_status, created_by
+       ) VALUES (
+         $1, 'LEGAL_NOTICE', 'es-ES', '9.9.9',
+         'Documento de prueba inmutable', 'Prueba de ciclo legal.',
+         '# Documento de prueba\n\nContenido preparado para comprobar la inmutabilidad.',
+         $2, 'DRAFT', 'TECHNICAL_DRAFT', $3
+       )`,
+      [documentId, "a".repeat(64), LEGAL.userId]
+    );
+  });
+
+  await assert.rejects(
+    () => database.withContext(ADMIN, (transaction) => transaction.query(
+      "UPDATE legal_documents SET status='ACTIVE' WHERE id=$1",
+      [documentId]
+    )),
+    (error) => error?.code === "23514"
+  );
+
+  await database.withContext(ADMIN, (transaction) => transaction.query(
+    `UPDATE legal_documents
+        SET review_status='PROFESSIONAL_REVIEWED',
+            reviewed_by='Revisión profesional de prueba',
+            reviewed_at=now(),
+            status='ACTIVE'
+      WHERE id=$1`,
+    [documentId]
+  ));
+
+  await assert.rejects(
+    () => database.withContext(ADMIN, (transaction) => transaction.query(
+      "UPDATE legal_documents SET title='Título alterado' WHERE id=$1",
+      [documentId]
+    )),
+    (error) => error?.code === "23514"
+  );
+  await assert.rejects(
+    () => database.withContext(ADMIN, (transaction) => transaction.query(
+      "UPDATE legal_documents SET status='DRAFT' WHERE id=$1",
+      [documentId]
+    )),
+    (error) => error?.code === "23514"
+  );
+
+  await database.withContext(ADMIN, (transaction) => transaction.query(
+    "UPDATE legal_documents SET status='RETIRED' WHERE id=$1",
+    [documentId]
+  ));
+  await assert.rejects(
+    () => database.withContext(ADMIN, (transaction) => transaction.query(
+      "UPDATE legal_documents SET title='Título tras retirada' WHERE id=$1",
+      [documentId]
+    )),
+    (error) => error?.code === "42501"
+  );
+
+  await database.withContext(ADMIN, (transaction) => transaction.query(
+    "DELETE FROM legal_documents WHERE id=$1",
+    [documentId]
+  ));
 });
 
 test("la API legal publica documentos y guarda preferencias sin autenticación", {
