@@ -121,7 +121,7 @@ printf 'Intercambiando bases de datos...\n'
   psql --username="$POSTGRES_USER" --dbname=postgres --set=ON_ERROR_STOP=1 <<SQL
 SELECT pg_terminate_backend(pid)
 FROM pg_stat_activity
-WHERE datname IN ('${current}', '${restored}')
+WHERE datname IN (\$\$${current}\$\$, \$\$${restored}\$\$)
   AND pid <> pg_backend_pid();
 ALTER DATABASE "${current}" RENAME TO "${rollback}";
 ALTER DATABASE "${restored}" RENAME TO "${current}";
