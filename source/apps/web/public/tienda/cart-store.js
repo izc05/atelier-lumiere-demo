@@ -1,5 +1,5 @@
 (() => {
-  const STORAGE_KEY = "atelier_lumiere_pilot_cart_v1";
+  const STORAGE_KEY = "atelier_lumiere_pilot_cart_v2";
   const MAX_LINES = 20;
   const MAX_QUANTITY = 10;
   const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
@@ -7,6 +7,8 @@
   function cleanLine(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     if (!UUID_PATTERN.test(value.productId ?? "")) return null;
+    const providerSlug = String(value.providerSlug ?? "").trim().slice(0, 180);
+    if (!providerSlug) return null;
     const quantity = Number(value.quantity);
     if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY) return null;
     const personalization = value.personalization && typeof value.personalization === "object" && !Array.isArray(value.personalization)
@@ -31,7 +33,7 @@
       productId: value.productId.toLowerCase(),
       productSlug: String(value.productSlug ?? "").slice(0, 180),
       productName: String(value.productName ?? "Artículo").slice(0, 180),
-      providerSlug: String(value.providerSlug ?? "").slice(0, 180),
+      providerSlug,
       providerName: String(value.providerName ?? "Taller").slice(0, 140),
       quantity,
       basePriceCents: Number.isSafeInteger(Number(value.basePriceCents)) ? Math.max(0, Number(value.basePriceCents)) : 0,
@@ -46,7 +48,9 @@
     try {
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
       if (!Array.isArray(parsed)) return [];
-      return parsed.map(cleanLine).filter(Boolean).slice(0, MAX_LINES);
+      const cleaned = parsed.map(cleanLine).filter(Boolean).slice(0, MAX_LINES);
+      const providerSlug = cleaned[0]?.providerSlug;
+      return providerSlug ? cleaned.filter((line) => line.providerSlug === providerSlug) : [];
     } catch {
       return [];
     }
@@ -56,9 +60,13 @@
     const cleaned = Array.isArray(lines)
       ? lines.map(cleanLine).filter(Boolean).slice(0, MAX_LINES)
       : [];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
-    window.dispatchEvent(new CustomEvent("atelier:cart-change", { detail: { count: count(cleaned) } }));
-    return cleaned;
+    const providerSlug = cleaned[0]?.providerSlug;
+    const singleProviderLines = providerSlug
+      ? cleaned.filter((line) => line.providerSlug === providerSlug)
+      : [];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(singleProviderLines));
+    window.dispatchEvent(new CustomEvent("atelier:cart-change", { detail: { count: count(singleProviderLines) } }));
+    return singleProviderLines;
   }
 
   function count(lines = read()) {
@@ -69,6 +77,12 @@
     const cleaned = cleanLine(line);
     if (!cleaned) throw new Error("El artículo no es válido.");
     const lines = read();
+    const currentProvider = lines[0];
+    if (currentProvider && currentProvider.providerSlug !== cleaned.providerSlug) {
+      throw new Error(
+        `Tu carrito pertenece a ${currentProvider.providerName}. Finaliza o vacía ese pedido antes de comprar a otro taller.`
+      );
+    }
     if (lines.length >= MAX_LINES) throw new Error("El carrito ya tiene veinte líneas.");
     lines.push(cleaned);
     write(lines);
