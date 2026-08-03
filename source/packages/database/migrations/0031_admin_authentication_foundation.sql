@@ -144,8 +144,8 @@ FOR SELECT USING (app.is_auth_service());
 CREATE POLICY audit_events_auth_service_insert ON audit_events
 FOR INSERT WITH CHECK (app.is_auth_service());
 
-GRANT SELECT ON admin_memberships TO atelier_app_runtime;
-GRANT SELECT, UPDATE ON admin_totp_credentials TO atelier_app_runtime;
+GRANT SELECT, INSERT, UPDATE, DELETE ON admin_memberships TO atelier_app_runtime;
+GRANT SELECT, INSERT, UPDATE, DELETE ON admin_totp_credentials TO atelier_app_runtime;
 GRANT SELECT, INSERT, UPDATE, DELETE ON admin_login_challenges TO atelier_app_runtime;
 
 COMMIT;
