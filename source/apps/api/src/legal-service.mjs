@@ -7,7 +7,7 @@ const DOCUMENT_SLUGS = Object.freeze({
   cookies: "COOKIE_POLICY",
   "condiciones-compra": "PURCHASE_TERMS",
   "envios-devoluciones": "SHIPPING_RETURNS",
-  "productos-personalizados": "PERSONALIZED_PRODUCTS",
+  "productos-personalizados": "CUSTOM_PRODUCTS",
   proveedores: "PROVIDER_AGREEMENT",
   "licencias-contenido": "CONTENT_LICENSE"
 });
@@ -39,7 +39,7 @@ function normalizeKey(value, { optional = false } = {}) {
   return value;
 }
 
-function boolean(value) {
+function enabled(value) {
   return value === true;
 }
 
@@ -48,21 +48,23 @@ function serializeDocument(row) {
     id: row.id,
     slug: SLUG_BY_TYPE[row.document_type],
     type: row.document_type,
+    locale: row.locale,
     version: row.version,
     title: row.title,
     summary: row.summary,
-    contentMd: row.content_md,
+    contentMd: row.content_markdown,
     contentSha256: row.content_sha256,
     status: row.status,
-    professionalReviewRequired: row.professional_review_required,
+    reviewStatus: row.review_status,
+    professionalReviewRequired: row.review_status !== "PROFESSIONAL_REVIEWED",
     effectiveAt: row.effective_at,
     updatedAt: row.updated_at
   };
 }
 
-function serializePreferences(row, keyExists) {
+function serializePreferences(row) {
   return {
-    keyExists,
+    keyExists: Boolean(row),
     necessary: true,
     preferences: Boolean(row?.preferences),
     analytics: Boolean(row?.analytics),
@@ -89,12 +91,13 @@ export function createLegalService({
       `SELECT *
        FROM legal_documents
        WHERE ($1::text IS NULL OR document_type = $1)
+         AND locale = 'es-ES'
          AND (
-           status = 'PUBLISHED'
+           (status = 'ACTIVE' AND effective_at <= now())
            OR ($2::boolean = false AND status = 'DRAFT')
          )
        ORDER BY document_type,
-         CASE status WHEN 'PUBLISHED' THEN 0 ELSE 1 END,
+         CASE status WHEN 'ACTIVE' THEN 0 ELSE 1 END,
          updated_at DESC`,
       [type, production]
     );
@@ -142,7 +145,7 @@ export function createLegalService({
 
     async getPreferences(rawKey) {
       const key = normalizeKey(rawKey, { optional: true });
-      if (!key) return serializePreferences(null, false);
+      if (!key) return serializePreferences(null);
       return database.withContext(context, async (transaction) => {
         const result = await transaction.query(
           `SELECT preferences, analytics, marketing, version, updated_at
@@ -150,7 +153,7 @@ export function createLegalService({
            WHERE preference_key_hash = $1`,
           [hashKey(key)]
         );
-        return serializePreferences(result.rows[0] ?? null, true);
+        return serializePreferences(result.rows[0] ?? null);
       });
     },
 
@@ -158,9 +161,9 @@ export function createLegalService({
       const key = normalizeKey(rawKey);
       const categories = {
         necessary: true,
-        preferences: boolean(input.preferences),
-        analytics: boolean(input.analytics),
-        marketing: boolean(input.marketing)
+        preferences: enabled(input.preferences),
+        analytics: enabled(input.analytics),
+        marketing: enabled(input.marketing)
       };
       return database.withContext(context, async (transaction) => {
         const document = await cookieDocument(transaction);
@@ -187,22 +190,22 @@ export function createLegalService({
         const anyOptional = categories.preferences || categories.analytics || categories.marketing;
         await transaction.query(
           `INSERT INTO legal_consent_events (
-             preference_key_hash, legal_document_id, event_type,
-             decision, categories, evidence
-           ) VALUES ($1, $2, 'COOKIE_PREFERENCES_SAVED', $3, $4::jsonb, $5::jsonb)`,
+             document_id, anonymous_id_hash, purpose,
+             decision, source, evidence
+           ) VALUES ($1, $2, 'COOKIE_PREFERENCES', $3, 'COOKIE_BANNER', $4::jsonb)`,
           [
-            keyHash,
             document.id,
-            anyOptional ? "GRANTED" : "DENIED",
-            JSON.stringify(categories),
+            keyHash,
+            anyOptional ? "ACCEPTED" : "REJECTED",
             JSON.stringify({
+              categories,
               source: "privacy-center",
               optionalServicesConfigured: false,
               documentVersion: document.version
             })
           ]
         );
-        return serializePreferences(result.rows[0], true);
+        return serializePreferences(result.rows[0]);
       });
     }
   });
