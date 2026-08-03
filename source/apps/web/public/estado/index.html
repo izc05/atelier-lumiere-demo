@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Estado técnico · Atelier Lumière</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/status.js" defer></script>
+</head>
+<body class="technical-page">
+  <main class="technical-shell">
+    <header class="technical-hero">
+      <p class="eyebrow">Entorno privado de operación</p>
+      <h1>Estado de Atelier Lumière</h1>
+      <p class="lead">Comprobación interna de servicios, accesos y módulos antes de publicar la plataforma en el mini PC.</p>
+      <div class="technical-actions">
+        <a class="button button-primary" href="/">Abrir portada</a>
+        <a class="button button-outline" href="/tienda/">Abrir tienda</a>
+        <a class="button button-outline" href="/admin/proveedores/">Administración</a>
+        <a class="button button-outline" href="/internal/api-health">Comprobar API</a>
+      </div>
+    </header>
+
+    <section class="status-card" aria-labelledby="service-title">
+      <div><p class="eyebrow">Estado técnico</p><h2 id="service-title">Servicios locales</h2></div>
+      <p id="api-status" class="status pending" role="status">Comprobando la API…</p>
+    </section>
+
+    <section class="technical-grid" aria-label="Módulos de la plataforma">
+      <article><span>01</span><h2>Plataforma</h2><p>Web, API, PostgreSQL, migraciones, copias y recuperación.</p><strong>Preparado</strong></article>
+      <article><span>02</span><h2>Operación</h2><p>Administración, talleres, catálogo, blog, pedidos y privacidad.</p><strong>Protegido</strong></article>
+      <article><span>03</span><h2>Apertura</h2><p>Pagos sandbox, textos jurídicos revisados y piloto privado.</p><strong>Pendiente</strong></article>
+    </section>
+  </main>
+</body>
+</html>
