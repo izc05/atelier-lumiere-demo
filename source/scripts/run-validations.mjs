@@ -23,7 +23,8 @@ const validations = [
   "validate-order-logistics.mjs",
   "validate-pilot-checkout.mjs",
   "validate-legal-privacy.mjs",
-  "validate-admin-auth-web.mjs"
+  "validate-admin-auth-web.mjs",
+  "validate-admin-bootstrap.mjs"
 ];
 
 for (const validation of validations) {
