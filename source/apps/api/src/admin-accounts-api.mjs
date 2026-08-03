@@ -2,7 +2,9 @@ import { ServiceError } from "./providers-service.mjs";
 
 const COLLECTION_PATH = "/api/admin/accounts";
 const STATUS_PATTERN = /^\/api\/admin\/accounts\/([0-9a-f-]{36})\/status$/i;
+const ROLE_PATTERN = /^\/api\/admin\/accounts\/([0-9a-f-]{36})\/role$/i;
 const SETUP_PATTERN = /^\/api\/admin\/accounts\/([0-9a-f-]{36})\/setup-link$/i;
+const SECURITY_RESET_PATTERN = /^\/api\/admin\/accounts\/([0-9a-f-]{36})\/security-reset$/i;
 const SESSIONS_PATTERN = /^\/api\/admin\/accounts\/([0-9a-f-]{36})\/sessions$/i;
 const SESSION_PATTERN = /^\/api\/admin\/accounts\/([0-9a-f-]{36})\/sessions\/([0-9a-f-]{36})$/i;
 const MAX_BODY_BYTES = 64 * 1024;
@@ -74,12 +76,16 @@ export function createAdminAccountsApiHandler({
   return async function adminAccountsApiHandler(request, response) {
     const url = new URL(request.url ?? "/", "http://localhost");
     const statusMatch = url.pathname.match(STATUS_PATTERN);
+    const roleMatch = url.pathname.match(ROLE_PATTERN);
     const setupMatch = url.pathname.match(SETUP_PATTERN);
+    const securityResetMatch = url.pathname.match(SECURITY_RESET_PATTERN);
     const sessionsMatch = url.pathname.match(SESSIONS_PATTERN);
     const sessionMatch = url.pathname.match(SESSION_PATTERN);
     const matches = url.pathname === COLLECTION_PATH
       || statusMatch
+      || roleMatch
       || setupMatch
+      || securityResetMatch
       || sessionsMatch
       || sessionMatch;
     if (!matches) return baseHandler(request, response);
@@ -109,8 +115,28 @@ export function createAdminAccountsApiHandler({
         );
         return;
       }
+      if (roleMatch && request.method === "PATCH") {
+        sendJson(
+          response,
+          200,
+          await adminAccountsService.updateRole(context, roleMatch[1], await readJson(request))
+        );
+        return;
+      }
       if (setupMatch && request.method === "POST") {
         sendJson(response, 200, await adminAccountsService.resendSetup(context, setupMatch[1]));
+        return;
+      }
+      if (securityResetMatch && request.method === "POST") {
+        sendJson(
+          response,
+          200,
+          await adminAccountsService.resetSecurity(
+            context,
+            securityResetMatch[1],
+            await readJson(request)
+          )
+        );
         return;
       }
       if (sessionsMatch && request.method === "GET") {

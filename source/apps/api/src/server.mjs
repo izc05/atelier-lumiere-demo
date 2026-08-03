@@ -8,6 +8,7 @@ import { createAdminAuthApiHandler } from "./admin-auth-api.mjs";
 import { createAdminAuthService } from "./admin-auth-service.mjs";
 import { createAdminRecoveryApiHandler } from "./admin-recovery-api.mjs";
 import { createAdminRecoveryService } from "./admin-recovery-service.mjs";
+import { createAdminSensitiveActionService } from "./admin-sensitive-action-service.mjs";
 import { createAdminBlogApiHandler } from "./admin-blog-api.mjs";
 import { createAdminBlogService } from "./admin-blog-service.mjs";
 import { createAdminProductsApiHandler } from "./admin-products-api.mjs";
@@ -61,6 +62,7 @@ import { createPublicBlogService } from "./public-blog-service.mjs";
 import { createPublicCatalogApiHandler } from "./public-catalog-api.mjs";
 import { createPublicCatalogService } from "./public-catalog-service.mjs";
 import { createRequestFileStorage } from "./request-file-storage.mjs";
+import { createSecuredAdminAccountsService } from "./secured-admin-accounts-service.mjs";
 import { createTwoFactorService } from "./two-factor-service.mjs";
 
 const host = process.env.API_HOST ?? "0.0.0.0";
@@ -110,8 +112,24 @@ const adminRecoveryService = database.enabled
       environment
     })
   : null;
-const adminAccountsService = database.enabled && adminRecoveryService
+const adminSensitiveActionService = database.enabled
+  ? createAdminSensitiveActionService({
+      database,
+      systemContext: authenticationSystemContext
+    })
+  : null;
+const baseAdminAccountsService = database.enabled && adminRecoveryService
   ? createAdminAccountsService({ database, adminRecoveryService })
+  : null;
+const adminAccountsService = baseAdminAccountsService
+  && adminRecoveryService
+  && adminSensitiveActionService
+  ? createSecuredAdminAccountsService({
+      baseService: baseAdminAccountsService,
+      database,
+      sensitiveActionService: adminSensitiveActionService,
+      adminRecoveryService
+    })
   : null;
 const authenticateRequest = createRequestAuthenticator({
   environment,

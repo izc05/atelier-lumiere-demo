@@ -39,6 +39,15 @@ test("el proxy de cuentas conserva la sesión en HttpOnly y filtra rutas", async
     if (target.pathname.endsWith("/status")) {
       return Response.json({ account: { status: "SUSPENDED" } });
     }
+    if (target.pathname.endsWith("/role")) {
+      return Response.json({ account: { role: "PLATFORM_OWNER" }, revokedSessions: 1 });
+    }
+    if (target.pathname.endsWith("/security-reset")) {
+      return Response.json({
+        account: { securityReady: false },
+        setup: { delivery: "manual-development" }
+      });
+    }
     if (target.pathname.endsWith("/sessions")) {
       return Response.json({ sessions: [] });
     }
@@ -74,33 +83,48 @@ test("el proxy de cuentas conserva la sesión en HttpOnly y filtra rutas", async
   assert.equal(list.status, 200);
   assert.deepEqual((await json(list)).accounts, []);
 
-  const status = await fetch(
-    `${app.baseUrl}/internal/admin/accounts/00000000-0000-4000-8000-000000000106/status`,
-    {
-      method: "PATCH",
-      headers: {
-        Cookie: COOKIE,
-        "Content-Type": "application/json",
-        "Sec-Fetch-Site": "same-origin"
-      },
-      body: JSON.stringify({ status: "SUSPENDED" })
-    }
-  );
+  const commonHeaders = {
+    Cookie: COOKIE,
+    "Content-Type": "application/json",
+    "Sec-Fetch-Site": "same-origin"
+  };
+  const accountPath = `${app.baseUrl}/internal/admin/accounts/00000000-0000-4000-8000-000000000106`;
+
+  const status = await fetch(`${accountPath}/status`, {
+    method: "PATCH",
+    headers: commonHeaders,
+    body: JSON.stringify({ status: "SUSPENDED" })
+  });
   assert.equal(status.status, 200);
 
+  const role = await fetch(`${accountPath}/role`, {
+    method: "PATCH",
+    headers: commonHeaders,
+    body: JSON.stringify({
+      role: "PLATFORM_OWNER",
+      confirmation: { password: "secreta", code: "123456" }
+    })
+  });
+  assert.equal(role.status, 200);
+  assert.equal((await json(role)).account.role, "PLATFORM_OWNER");
+
+  const reset = await fetch(`${accountPath}/security-reset`, {
+    method: "POST",
+    headers: commonHeaders,
+    body: JSON.stringify({ confirmation: { password: "secreta", code: "654321" } })
+  });
+  assert.equal(reset.status, 200);
+  assert.equal((await json(reset)).account.securityReady, false);
+
   const beforeCrossSite = upstream.length;
-  const blocked = await fetch(
-    `${app.baseUrl}/internal/admin/accounts/00000000-0000-4000-8000-000000000106/status`,
-    {
-      method: "PATCH",
-      headers: {
-        Cookie: COOKIE,
-        "Content-Type": "application/json",
-        "Sec-Fetch-Site": "cross-site"
-      },
-      body: JSON.stringify({ status: "ACTIVE" })
-    }
-  );
+  const blocked = await fetch(`${accountPath}/security-reset`, {
+    method: "POST",
+    headers: {
+      ...commonHeaders,
+      "Sec-Fetch-Site": "cross-site"
+    },
+    body: JSON.stringify({ confirmation: { password: "secreta", code: "111111" } })
+  });
   assert.equal(blocked.status, 403);
   assert.equal(upstream.length, beforeCrossSite);
   assert.equal(JSON.stringify(upstream).includes("DEV_ADMIN_TOKEN"), false);
