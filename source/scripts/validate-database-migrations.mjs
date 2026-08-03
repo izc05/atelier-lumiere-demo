@@ -41,10 +41,12 @@ for (const expected of [
 ]) {
   assert.match(runner, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 }
+assert.doesNotMatch(runner, /DUPLICATE_MIGRATION_VERSION/);
 assert.doesNotMatch(runner, /console\.(?:log|info)[^\n]*(?:DATABASE_URL|connectionString)/);
 
 for (const expected of [
   "aplica solo las pendientes",
+  "acepta prefijos numéricos repetidos",
   "bloquea una migración aplicada cuyo contenido cambió",
   "rechaza una base antigua con tablas pero sin historial",
   "libera el bloqueo incluso cuando falla una migración"
@@ -77,7 +79,8 @@ assert.doesNotMatch(activeComposeLines, /docker-entrypoint-initdb\.d/);
 for (const expected of [
   "SHA-256",
   "misma transacción",
-  "UNTRACKED_EXISTING_SCHEMA"
+  "UNTRACKED_EXISTING_SCHEMA",
+  "orden de nombre"
 ]) {
   assert.match(databaseReadme, new RegExp(expected));
 }
@@ -92,15 +95,14 @@ for (const expected of [
 const migrationDirectory = new URL("../packages/database/migrations/", import.meta.url);
 const migrationNames = (await readdir(migrationDirectory))
   .filter((filename) => filename.endsWith(".sql"))
-  .sort((left, right) => left.localeCompare(right, "en"));
+  .sort();
 assert.ok(migrationNames.length >= 31, "Deben conservarse todas las migraciones existentes.");
 
-const versions = new Set();
+const filenames = new Set();
 for (const filename of migrationNames) {
   assert.match(filename, /^(\d{4})_[a-z0-9_]+\.sql$/);
-  const version = filename.slice(0, 4);
-  assert.equal(versions.has(version), false, `Versión repetida: ${version}`);
-  versions.add(version);
+  assert.equal(filenames.has(filename), false, `Nombre repetido: ${filename}`);
+  filenames.add(filename);
 
   const sql = (await readFile(new URL(filename, migrationDirectory), "utf8"))
     .replace(/^\uFEFF/, "")
