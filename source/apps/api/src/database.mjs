@@ -6,7 +6,8 @@ const VALID_ROLES = new Set([
   "PROVIDER_OWNER",
   "PROVIDER_MEMBER",
   "CUSTOMER",
-  "CATALOG_READER"
+  "CATALOG_READER",
+  "LEGAL_SERVICE"
 ]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -31,6 +32,9 @@ function normalizeContext(context) {
   }
   if (context.role === "CATALOG_READER" && providerId) {
     throw new TypeError("El lector del catálogo no puede adoptar el contexto de un proveedor.");
+  }
+  if (context.role === "LEGAL_SERVICE" && providerId) {
+    throw new TypeError("El servicio legal no puede adoptar el contexto de un proveedor.");
   }
 
   return Object.freeze({

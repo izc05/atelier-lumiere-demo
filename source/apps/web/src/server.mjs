@@ -4,6 +4,7 @@ import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
 import { createAdminBlogWebHandler } from "./admin-blog-proxy.mjs";
 import { createAdminProductsWebHandler } from "./admin-products-proxy.mjs";
 import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
+import { createLegalPrivacyWebHandler } from "./legal-privacy-proxy.mjs";
 import { createOrderLogisticsWebHandler } from "./order-logistics-proxy.mjs";
 import { createPilotCheckoutWebHandler } from "./pilot-checkout-proxy.mjs";
 import { createProviderBlogWebHandler } from "./provider-blog-proxy.mjs";
@@ -32,7 +33,8 @@ const pilotCheckoutHandler = createPilotCheckoutWebHandler({ baseHandler: orderL
 const adminBlogHandler = createAdminBlogWebHandler({ baseHandler: pilotCheckoutHandler });
 const adminProductsHandler = createAdminProductsWebHandler({ baseHandler: adminBlogHandler });
 const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: adminProductsHandler });
-const server = createServer(createPublicCatalogWebHandler({ baseHandler: publicBlogHandler }));
+const publicCatalogHandler = createPublicCatalogWebHandler({ baseHandler: publicBlogHandler });
+const server = createServer(createLegalPrivacyWebHandler({ baseHandler: publicCatalogHandler }));
 
 server.listen(port, host, () => {
   console.log(`Atelier Lumière web fuente disponible en http://${host}:${port}`);
