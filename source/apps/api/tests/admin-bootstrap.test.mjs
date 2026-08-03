@@ -105,7 +105,7 @@ test("un código incorrecto no inicia ninguna transacción", async () => {
   });
 
   await assert.rejects(
-    service.activate(prepared, "000000"),
+    service.activate(prepared, "abcdef"),
     (error) => error.code === "INVALID_TOTP_CODE"
   );
   assert.equal(database.calls.length, 0);
