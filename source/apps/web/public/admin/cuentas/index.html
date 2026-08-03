@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Cuentas administrativas · Atelier Lumière</title>
+  <link rel="stylesheet" href="/admin/proveedores/admin.css">
+  <link rel="stylesheet" href="/admin/cuentas/accounts.css">
+  <script src="/admin/cuentas/accounts.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <main class="page-shell">
+    <section class="admin-layout">
+      <header class="topbar">
+        <a class="brand compact" href="/">
+          <span class="brand-mark">AL</span>
+          <span><strong>Atelier Lumière</strong><small>Administración privada</small></span>
+        </a>
+        <div class="topbar-actions">
+          <span id="admin-account" class="environment-badge">Comprobando sesión…</span>
+          <a class="button secondary" href="/admin/proveedores/">Proveedores</a>
+          <a class="button secondary" href="/admin/articulos/">Artículos</a>
+          <a class="button secondary" href="/admin/publicaciones/">Blog</a>
+          <button id="refresh-button" class="icon-button" type="button">Actualizar</button>
+          <button id="logout-button" class="text-button" type="button">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="page-heading accounts-heading">
+        <div>
+          <p class="eyebrow">Control de acceso</p>
+          <h1>Cuentas administrativas</h1>
+          <p>Crea accesos personales, revisa su doble factor y cierra sesiones desde un único panel.</p>
+        </div>
+        <button id="open-create-button" class="button primary" type="button">Añadir administrador</button>
+      </section>
+
+      <section id="forbidden-panel" class="notice-panel" hidden>
+        <p class="eyebrow">Acceso restringido</p>
+        <h2>Solo para propietarios de plataforma</h2>
+        <p>Tu cuenta puede utilizar sus módulos asignados, pero no administrar otras identidades.</p>
+        <a class="button secondary" href="/admin/proveedores/">Volver al panel</a>
+      </section>
+
+      <div id="accounts-content">
+        <section class="metrics" aria-label="Resumen de cuentas administrativas">
+          <article><span>Total</span><strong id="metric-total">—</strong><small>Cuentas registradas</small></article>
+          <article><span>Activas</span><strong id="metric-active">—</strong><small>Con acceso permitido</small></article>
+          <article><span>Pendientes</span><strong id="metric-pending">—</strong><small>Sin completar seguridad</small></article>
+          <article><span>Sesiones</span><strong id="metric-sessions">—</strong><small>Sesiones abiertas</small></article>
+        </section>
+
+        <section class="accounts-toolbar">
+          <div>
+            <p class="eyebrow">Identidades personales</p>
+            <h2>Equipo administrativo</h2>
+          </div>
+          <label class="search-field"><span class="sr-only">Buscar cuenta</span><input id="account-search" type="search" placeholder="Buscar nombre, correo o rol"></label>
+        </section>
+
+        <p id="global-message" class="global-message" role="status" aria-live="polite"></p>
+        <section id="accounts-list" class="accounts-list" aria-live="polite">
+          <div class="loading-card">Cargando cuentas…</div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="create-dialog" class="dialog-card account-dialog">
+    <form method="dialog" class="dialog-close-row"><button class="icon-button" value="close" aria-label="Cerrar">Cerrar</button></form>
+    <p class="eyebrow">Nueva identidad</p>
+    <h2>Añadir administrador</h2>
+    <p>La persona recibirá un enlace de un solo uso para crear su contraseña, registrar el autenticador y guardar diez códigos de recuperación.</p>
+    <form id="account-form" class="stack-form" novalidate>
+      <label>Nombre completo<input name="displayName" maxlength="120" required autocomplete="name"></label>
+      <label>Correo administrativo<input name="email" type="email" maxlength="254" required autocomplete="email"></label>
+      <label>Rol<select name="role" required>
+        <option value="PROVIDER_MANAGER">Gestión de proveedores</option>
+        <option value="EDITORIAL_REVIEWER">Revisión editorial</option>
+        <option value="PLATFORM_OWNER">Propietario de plataforma</option>
+      </select></label>
+      <div class="role-help">
+        <p><strong>Proveedores:</strong> altas, invitaciones y estados de talleres.</p>
+        <p><strong>Editorial:</strong> revisión y publicación de artículos y blog.</p>
+        <p><strong>Propietario:</strong> acceso total, incluidas las cuentas administrativas.</p>
+      </div>
+      <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+      <button class="button primary full" type="submit">Crear cuenta y acceso</button>
+    </form>
+  </dialog>
+
+  <dialog id="setup-dialog" class="dialog-card account-dialog">
+    <form method="dialog" class="dialog-close-row"><button class="icon-button" value="close" aria-label="Cerrar">Cerrar</button></form>
+    <p class="eyebrow">Acceso preparado</p>
+    <h2 id="setup-title">Enlace de activación</h2>
+    <p id="setup-description">El correo transaccional se ha procesado.</p>
+    <label id="setup-link-field" hidden>Enlace provisional<span class="copy-field"><input id="setup-link" readonly><button id="copy-setup-link" class="button secondary" type="button">Copiar</button></span></label>
+    <p class="warning-note">En producción el enlace nunca se devuelve al navegador. Solo se entrega mediante el SMTP configurado.</p>
+  </dialog>
+
+  <dialog id="sessions-dialog" class="dialog-card sessions-dialog">
+    <form method="dialog" class="dialog-close-row"><button class="icon-button" value="close" aria-label="Cerrar">Cerrar</button></form>
+    <p class="eyebrow">Accesos abiertos</p>
+    <h2 id="sessions-title">Sesiones de la cuenta</h2>
+    <p id="sessions-message" class="form-message" role="status" aria-live="polite"></p>
+    <div id="sessions-list" class="sessions-list"></div>
+    <button id="revoke-all-button" class="button danger full" type="button">Cerrar todas las sesiones</button>
+  </dialog>
+</body>
+</html>
