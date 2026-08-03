@@ -38,6 +38,12 @@ export const COMMERCE_TABLES = Object.freeze([
   "custom_commissions"
 ]);
 
+export const LEGAL_TABLES = Object.freeze([
+  "legal_documents",
+  "privacy_preference_records",
+  "legal_consent_events"
+]);
+
 export const DATABASE_RULES = Object.freeze({
   providerScopedTablesRequireProviderId: true,
   allMutationsCreateAuditEvent: true,
@@ -63,5 +69,12 @@ export const DATABASE_RULES = Object.freeze({
   productMediaReadsRequireProviderSession: true,
   productImagesGenerateMetadataStrippedWebpPreviews: true,
   productMediaAllowsAtMostEightImagesAndOneVideo: true,
-  publishedProductsRequireAdministrativeApproval: true
+  publishedProductsRequireAdministrativeApproval: true,
+  legalDocumentsAreVersionedAndHashed: true,
+  publishedLegalDocumentsAreImmutable: true,
+  legalDraftsAreHiddenInProduction: true,
+  privacyKeysAreStoredOnlyAsHashes: true,
+  consentEventsAreAppendOnly: true,
+  optionalPrivacyCategoriesDefaultToDisabled: true,
+  legalServiceHasDedicatedDatabaseRole: true
 });
