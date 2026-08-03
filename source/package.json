@@ -1,12 +1,13 @@
 {
   "name": "@atelier-lumiere/source",
-  "version": "0.25.0",
+  "version": "0.26.0",
   "private": true,
   "type": "module",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev:web": "npm --workspace @atelier-lumiere/web run dev",
     "dev:api": "npm --workspace @atelier-lumiere/api run dev",
+    "bootstrap:platform-owner": "npm --workspace @atelier-lumiere/api run bootstrap:platform-owner",
     "test": "node --test tests/*.test.mjs && npm run test:web-integration && node scripts/run-validations.mjs",
     "test:web-integration": "npm --workspace @atelier-lumiere/web run test:integration",
     "test:api-integration": "npm --workspace @atelier-lumiere/api run test:integration",
