@@ -21,7 +21,7 @@ function address() {
   };
 }
 
-test("el checkout recalcula precios, separa talleres y es idempotente", { skip: !connectionString }, async (t) => {
+test("el checkout recalcula precios, mantiene un solo taller y es idempotente", { skip: !connectionString }, async (t) => {
   const database = createDatabase({
     connectionString,
     maxConnections: 5,
@@ -102,31 +102,49 @@ test("el checkout recalcula precios, separa talleres y es idempotente", { skip: 
     logger: { error() {} }
   });
 
+  const customer = {
+    name: "Cliente del piloto",
+    email: customerEmail,
+    phone: "+34 600 123 123",
+    shippingAddress: address()
+  };
+
+  await assert.rejects(
+    () => service.submit({
+      idempotencyKey: randomUUID(),
+      customer,
+      customerNote: "Intento de mezclar talleres.",
+      items: [
+        {
+          productId: productA,
+          quantity: 1,
+          personalization: { [optionA]: "Burdeos" }
+        },
+        {
+          productId: productB,
+          quantity: 1,
+          personalization: {}
+        }
+      ]
+    }),
+    (error) => error?.code === "23514"
+      && error?.constraint === "provider_orders_single_provider_checkout"
+  );
+
   const idempotencyKey = randomUUID();
   const payload = {
     idempotencyKey,
-    customer: {
-      name: "Cliente del piloto",
-      email: customerEmail,
-      phone: "+34 600 123 123",
-      shippingAddress: address()
-    },
+    customer,
     customerNote: "Entregar preferentemente por la tarde.",
     items: [
       {
         productId: productA,
         quantity: 2,
         priceCents: 1,
-        personalization: { [optionA]: "Burdeos" }
-      },
-      {
-        productId: productB,
-        quantity: 1,
-        priceCents: 1,
-        personalization: {},
+        personalization: { [optionA]: "Burdeos" },
         customRequest: {
           title: "Diseño con iniciales",
-          brief: "Quiero una versión con dos iniciales recortadas y un acabado natural claro.",
+          brief: "Quiero una versión con dos iniciales bordadas y un acabado natural claro.",
           desiredDate: "2026-12-20"
         }
       }
@@ -137,25 +155,23 @@ test("el checkout recalcula precios, separa talleres y es idempotente", { skip: 
   assert.equal(first.status, "SUBMITTED");
   assert.equal(first.paymentCollected, false);
   assert.equal(first.reused, false);
-  assert.equal(first.orders.length, 2);
+  assert.equal(first.orders.length, 1);
   assert.equal(Object.hasOwn(first.access, "accessToken"), false);
   assert.match(first.access.manualAccessUrl, /^http:\/\/localhost:3000\/pedido\/acceso\/#token=/);
   assert.equal(deliveries.length, 1);
   assert.equal(deliveries[0].to, customerEmail);
   assert.match(deliveries[0].token, /^[A-Za-z0-9_-]{32,180}$/);
 
-  const orderA = first.orders.find((order) => order.provider.id === PROVIDER_A);
-  const orderB = first.orders.find((order) => order.provider.id === PROVIDER_B);
+  const orderA = first.orders[0];
+  assert.equal(orderA.provider.id, PROVIDER_A);
   assert.equal(orderA.subtotalCents, (3200 + 250) * 2);
   assert.equal(orderA.shippingCents, 500);
   assert.equal(orderA.totalCents, 7400);
-  assert.equal(orderB.subtotalCents, 5800);
-  assert.equal(orderB.totalCents, 6300);
 
   const repeated = await service.submit(payload);
   assert.equal(repeated.reused, true);
   assert.equal(repeated.checkoutId, first.checkoutId);
-  assert.equal(repeated.orders.length, 2);
+  assert.equal(repeated.orders.length, 1);
   assert.equal(deliveries.length, 2);
 
   await assert.rejects(
@@ -180,19 +196,21 @@ test("el checkout recalcula precios, separa talleres y es idempotente", { skip: 
       "SELECT provider_id, subtotal_cents, shipping_cents, total_cents FROM provider_orders WHERE checkout_id=$1 ORDER BY provider_id",
       [first.checkoutId]
     );
-    assert.equal(orders.rowCount, 2);
+    assert.equal(orders.rowCount, 1);
+    assert.equal(orders.rows[0].provider_id, PROVIDER_A);
     const items = await tx.query(
-      "SELECT product_id, unit_price_cents, quantity, personalization FROM order_items WHERE order_id = ANY($1::uuid[]) ORDER BY product_id",
-      [first.orders.map((order) => order.id)]
+      "SELECT product_id, unit_price_cents, quantity, personalization FROM order_items WHERE order_id=$1",
+      [orderA.id]
     );
-    assert.equal(items.rowCount, 2);
-    assert.equal(items.rows.find((row) => row.product_id === productA).unit_price_cents, 3450);
-    assert.equal(items.rows.find((row) => row.product_id === productB).unit_price_cents, 5800);
+    assert.equal(items.rowCount, 1);
+    assert.equal(items.rows[0].product_id, productA);
+    assert.equal(items.rows[0].unit_price_cents, 3450);
+    assert.equal(items.rows[0].quantity, 2);
     const stock = await tx.query("SELECT stock_quantity FROM products WHERE id=$1", [productA]);
     assert.equal(stock.rows[0].stock_quantity, 3);
     const requests = await tx.query(
       "SELECT title, status FROM custom_requests WHERE order_id=$1",
-      [orderB.id]
+      [orderA.id]
     );
     assert.equal(requests.rowCount, 1);
     assert.equal(requests.rows[0].status, "OPEN");
@@ -208,5 +226,13 @@ test("el checkout recalcula precios, separa talleres y es idempotente", { skip: 
     );
     assert.equal(access.rows[0].token_hash.length, 64);
     assert.notEqual(access.rows[0].token_hash, deliveries.at(-1).token);
+
+    const mixedOrders = await tx.query(
+      `SELECT count(*)::int AS count
+       FROM provider_orders
+       WHERE contact_email=$1 AND checkout_id<>$2`,
+      [customerEmail, first.checkoutId]
+    );
+    assert.equal(mixedOrders.rows[0].count, 0);
   });
 });
