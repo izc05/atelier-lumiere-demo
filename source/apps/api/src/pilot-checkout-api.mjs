@@ -2,6 +2,7 @@ import { ServiceError } from "./providers-service.mjs";
 
 const PATH = "/api/pilot-checkout/submit";
 const MAX_BODY_BYTES = 256 * 1024;
+const SINGLE_PROVIDER_CONSTRAINT = "provider_orders_single_provider_checkout";
 
 function sendJson(response, statusCode, payload, extraHeaders = {}) {
   response.writeHead(statusCode, {
@@ -41,12 +42,23 @@ async function readJson(request) {
   }
 }
 
+function singleProviderViolation(error) {
+  return error?.code === "23514" && error?.constraint === SINGLE_PROVIDER_CONSTRAINT;
+}
+
 function handleError(response, error, logger) {
   if (error instanceof ServiceError) {
     sendJson(response, error.statusCode, {
       error: error.code,
       message: error.message,
       ...(error.details === undefined ? {} : { details: error.details })
+    });
+    return;
+  }
+  if (singleProviderViolation(error)) {
+    sendJson(response, 409, {
+      error: "CHECKOUT_PROVIDER_MISMATCH",
+      message: "Cada compra debe contener artículos de un único taller. Finaliza este pedido antes de comprar a otro proveedor."
     });
     return;
   }
