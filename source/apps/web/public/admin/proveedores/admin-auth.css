@@ -1,0 +1,49 @@
+.login-card .stack-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.login-card code,
+.login-points code {
+  padding: 0.12rem 0.32rem;
+  border-radius: 0.35rem;
+  color: var(--burgundy);
+  background: rgba(90, 15, 31, 0.07);
+  font-size: 0.88em;
+}
+
+#factor-step .muted {
+  margin: 12px 0 22px;
+  line-height: 1.6;
+}
+
+#back-to-password {
+  margin-top: 2px;
+}
+
+#admin-factor-code {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#admin-factor-code[inputmode="numeric"] {
+  font-variant-numeric: tabular-nums;
+}
+
+#admin-account {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+@media (max-width: 900px) {
+  #admin-account {
+    width: 100%;
+    max-width: none;
+    order: -1;
+  }
+}
