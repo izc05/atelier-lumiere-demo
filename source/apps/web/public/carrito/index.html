@@ -35,7 +35,7 @@
       </div>
       <aside class="hero-note">
         <strong>Sin cobro real</strong>
-        <p>Este checkout piloto registra el pedido y reserva el stock, pero todavía no procesa tarjetas ni transferencias.</p>
+        <p>El checkout registra el pedido y reserva el stock. Cuando el sandbox esté activo, podrás simular un pago aprobado o rechazado sin introducir datos bancarios.</p>
       </aside>
     </section>
 
@@ -91,8 +91,9 @@
           <h2>Pedido registrado</h2>
           <p id="success-message"></p>
           <div id="order-results" class="order-result-list"></div>
-          <a id="manual-access-link" class="button primary" href="/pedido/acceso/" hidden>Abrir mi pedido</a>
-          <a class="button secondary" href="/tienda/">Volver a la tienda</a>
+          <a id="sandbox-payment-link" class="button primary" href="/pago/sandbox/" hidden>Probar pago sandbox</a>
+          <a id="manual-access-link" class="button secondary" href="/pedido/acceso/" hidden>Abrir mi pedido</a>
+          <a class="button ghost" href="/tienda/">Volver a la tienda</a>
         </section>
       </aside>
     </section>
