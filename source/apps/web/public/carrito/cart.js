@@ -68,7 +68,7 @@
     const header = element("header");
     header.append(
       element("h2", "", providerName),
-      element("small", "", `${lines.length} ${lines.length === 1 ? "línea" : "líneas"} · pedido independiente`)
+      element("small", "", `${lines.length} ${lines.length === 1 ? "línea" : "líneas"} · pedido único`)
     );
     group.append(header, ...lines.map(lineNode));
     return group;
@@ -79,11 +79,10 @@
       (sum, line) => sum + cart.estimatedUnitPrice(line) * line.quantity,
       0
     );
-    const providers = new Set(lines.map((line) => line.providerSlug)).size;
     byId("checkout-summary").replaceChildren(
+      summaryRow("Taller", lines[0]?.providerName ?? "Taller artesanal"),
       summaryRow("Artículos estimados", money(estimated, lines[0]?.currency ?? "EUR")),
-      summaryRow("Pedidos por taller", String(providers)),
-      summaryRow("Envío", "Se recalcula en el servidor")
+      summaryRow("Envío compartido", "Se recalcula para este taller")
     );
   }
 
@@ -99,13 +98,7 @@
     byId("empty-cart").hidden = lines.length !== 0;
     byId("cart-content").hidden = lines.length === 0;
     if (!lines.length) return;
-    const groups = new Map();
-    for (const line of lines) {
-      const list = groups.get(line.providerName) ?? [];
-      list.push(line);
-      groups.set(line.providerName, list);
-    }
-    byId("cart-groups").replaceChildren(...[...groups].map(([name, groupLines]) => groupNode(name, groupLines)));
+    byId("cart-groups").replaceChildren(groupNode(lines[0].providerName, lines));
     renderSummary(lines);
   }
 
@@ -118,7 +111,7 @@
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
-      const error = new Error(body.message || "No se pudieron registrar los pedidos.");
+      const error = new Error(body.message || "No se pudo registrar el pedido.");
       error.code = body.error;
       error.details = body.details;
       throw error;
@@ -158,7 +151,7 @@
     byId("checkout-success").hidden = false;
     byId("success-message").textContent = result.access.delivery === "SENT"
       ? "Te hemos enviado el acceso privado por correo."
-      : "Los pedidos están guardados. En el piloto local puedes abrir el acceso manual de abajo.";
+      : "El pedido está guardado. En el piloto local puedes abrir el acceso manual de abajo.";
     byId("order-results").replaceChildren(...result.orders.map((order) => {
       const row = element("article", "order-result");
       row.append(
@@ -187,13 +180,15 @@
       return;
     }
     button.disabled = true;
-    button.textContent = "Registrando pedidos…";
+    button.textContent = "Registrando pedido…";
     setMessage(resultNode, "");
     try {
       const result = await submitCheckout(checkoutPayload(lines));
       showSuccess(result);
     } catch (error) {
-      const type = error.code?.includes("STOCK") || error.code?.includes("IDEMPOTENCY")
+      const type = error.code?.includes("STOCK")
+        || error.code?.includes("IDEMPOTENCY")
+        || error.code === "CHECKOUT_PROVIDER_MISMATCH"
         ? "warning"
         : "error";
       setMessage(resultNode, error.message, type);
@@ -202,7 +197,7 @@
       }
     } finally {
       button.disabled = false;
-      button.textContent = "Registrar pedidos sin pagar";
+      button.textContent = "Registrar pedido sin pagar";
     }
   });
 
