@@ -18,6 +18,7 @@ services:
     restart: unless-stopped
 
   api:
+    # WEB_ADMIN_ACCESS_KEY fue retirada del contenedor web; solo queda esta nota de migración.
     build:
       context: ../..
       dockerfile: infra/docker/Dockerfile.api
