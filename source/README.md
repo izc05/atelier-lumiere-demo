@@ -17,7 +17,7 @@ source/
 ├── infra/
 │   └── docker/    # Web, API, migraciones, PostgreSQL y volúmenes persistentes
 ├── legal/         # Alcance y límites de los borradores legales
-├── scripts/       # Validaciones estáticas y de seguridad
+├── scripts/       # Validaciones, operación y seguridad
 ├── tests/         # Contratos de dominio
 └── .env.example
 ```
@@ -46,7 +46,7 @@ source/
 - Creador local e interactivo de la primera cuenta `PLATFORM_OWNER`.
 - Bloqueo automático del bootstrap cuando ya existe un propietario.
 
-### Base de datos y actualizaciones
+### Base de datos y operación
 
 - Migraciones SQL ordenadas y versionadas.
 - Historial persistente en `schema_migrations`.
@@ -56,6 +56,10 @@ source/
 - Registro de la migración dentro de la misma transacción que sus cambios.
 - La API no arranca hasta que el servicio `migrate` termina correctamente.
 - Una base antigua sin historial se bloquea y nunca se adopta por suposición.
+- Copias privadas comprimidas con SHA-256 y metadatos.
+- Verificación mediante restauración completa en una base temporal.
+- Restauración real mediante intercambio y conservación de rollback.
+- Asistente del mini PC para generar configuración, comprobar, instalar y actualizar.
 
 ### Catálogo y multimedia
 
@@ -121,37 +125,40 @@ npm run dev:web
 - Salud: `http://localhost:4000/health`
 - Metadatos técnicos: `http://localhost:4000/api/meta`
 
-## Ejecutar con Docker
+## Ejecutar con Docker en el mini PC
+
+No hay que copiar archivos manualmente. El servidor clona o actualiza el repositorio mediante Git.
+
+Guías:
+
+- [`docs/MINI_PC_INSTALL.md`](docs/MINI_PC_INSTALL.md): instalación, migraciones, copias y restauración.
+- [`docs/MINI_PC_OPERATOR.md`](docs/MINI_PC_OPERATOR.md): comandos seguros para Codex y operación cotidiana.
+
+### Instalación resumida
 
 ```bash
-cd source
-cp .env.example .env
-# Cambiar todas las contraseñas, claves y secretos.
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --build
+cd /opt/atelier-lumiere/source
+npm run init:mini-pc -- --app-url http://IP_DEL_MINI_PC:3000
+npm run preflight:mini-pc -- --mode install
+npm run deploy:mini-pc -- install
 ```
 
-Docker Compose levanta, en este orden:
-
-- PostgreSQL 17 con volumen persistente;
-- servicio `migrate` de una sola ejecución;
-- API expuesta solo en `127.0.0.1`;
-- web en el puerto configurado;
-- volumen privado de multimedia.
-
-`migrate` aplica solo los SQL pendientes y termina con código `0`. La API depende de ese resultado y no arranca cuando una migración falla.
-
-### Instalación en el mini PC
-
-La guía completa está en [`docs/MINI_PC_INSTALL.md`](docs/MINI_PC_INSTALL.md). No hay que copiar archivos manualmente: el mini PC clona o actualiza el repositorio con Git y ejecuta la aplicación con Docker.
-
-En una base nueva, la primera cuenta propietaria se crea mediante:
+Después, con la persona responsable presente:
 
 ```bash
 docker compose --env-file .env -f infra/docker/docker-compose.yml \
   exec -it api npm run bootstrap:platform-owner
 ```
 
-La contraseña se introduce de forma oculta y el QR/códigos de recuperación solo se muestran durante esa ejecución interactiva.
+### Actualización resumida
+
+```bash
+cd /opt/atelier-lumiere/source
+npm run preflight:mini-pc -- --mode update
+npm run deploy:mini-pc -- update
+```
+
+El modo `update` crea y restaura temporalmente una copia antes de descargar código nuevo. No borra volúmenes ni restaura automáticamente la base activa.
 
 ## Pruebas
 
@@ -167,6 +174,8 @@ La batería comprueba, entre otros puntos:
 - bootstrap seguro del primer propietario;
 - descubrimiento, checksum, orden y bloqueo de migraciones;
 - rechazo de una base antigua sin historial;
+- copia, restauración temporal, intercambio y rollback;
+- generación privada de `.env`, preflight y despliegue simulado;
 - correo y recuperación;
 - catálogo y blog;
 - archivos privados;
@@ -175,7 +184,7 @@ La batería comprueba, entre otros puntos:
 - ausencia de secretos en el navegador;
 - estructura compatible con la CSP.
 
-GitHub Actions añade pruebas reales sobre PostgreSQL aplicando todas las migraciones y verificando el aislamiento entre talleres.
+GitHub Actions añade pruebas reales sobre PostgreSQL y Docker, incluido un ciclo completo de copia, modificación, restauración y arranque saludable.
 
 ## Configuración pendiente de producción
 
@@ -185,7 +194,7 @@ GitHub Actions añade pruebas reales sobre PostgreSQL aplicando todas las migrac
 - Modelo comercial, vendedor contractual, comisiones y facturación.
 - Decisión final del modelo de carrito antes de integrar pagos.
 - Pasarela de pago en sandbox y webhooks firmados.
-- Copias automáticas y prueba de restauración.
+- Programación automática y copia externa de backups.
 - SMTP real.
 - HTTPS, cookies `Secure` y Cloudflare Tunnel.
 - Revisión jurídica profesional.
@@ -197,7 +206,8 @@ GitHub Actions añade pruebas reales sobre PostgreSQL aplicando todas las migrac
 - Administración controla altas, revisiones y publicaciones.
 - El navegador nunca recibe tokens internos de API.
 - Los datos personales no se guardan en `localStorage`.
-- Las imágenes, vídeos y documentos reales no se almacenan en GitHub.
+- Las imágenes, vídeos, documentos y copias reales no se almacenan en GitHub.
 - Las migraciones aplicadas nunca se editan; los cambios se añaden en un archivo nuevo.
+- Un despliegue no borra volúmenes ni restaura automáticamente la base activa.
 - Toda funcionalidad nueva debe incluir pruebas antes de fusionarse.
 - La demo pública no será sustituida hasta que la aplicación real iguale su calidad visual y supere el piloto.

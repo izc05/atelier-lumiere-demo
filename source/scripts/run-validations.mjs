@@ -26,7 +26,8 @@ const validations = [
   "validate-admin-auth-web.mjs",
   "validate-admin-bootstrap.mjs",
   "validate-database-migrations.mjs",
-  "validate-backup-restore.mjs"
+  "validate-backup-restore.mjs",
+  "validate-mini-pc-operator.mjs"
 ];
 
 for (const validation of validations) {

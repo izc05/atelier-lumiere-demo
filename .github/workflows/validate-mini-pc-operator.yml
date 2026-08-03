@@ -1,0 +1,69 @@
+name: Validar asistente del mini PC
+
+on:
+  pull_request:
+    paths:
+      - "source/**"
+      - ".github/workflows/validate-mini-pc-operator.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "source/**"
+      - ".github/workflows/validate-mini-pc-operator.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-mini-pc-operator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Generar configuración privada de prueba
+        working-directory: source
+        run: |
+          bash scripts/mini-pc-init-env.sh --app-url http://localhost:3000
+          test "$(stat -c '%a' .env)" = "600"
+          grep -q '^NODE_ENV=production$' .env
+          grep -q '^ALLOW_DEV_ADMIN_AUTH=false$' .env
+          grep -q '^WEB_COOKIE_SECURE=false$' .env
+          ! grep -Eq '(GENERAR_|CAMBIAR_|atelier_dev_change_me)' .env
+
+      - name: Impedir sobrescribir la configuración
+        working-directory: source
+        run: |
+          if bash scripts/mini-pc-init-env.sh --app-url http://localhost:3000; then
+            echo "El generador sobrescribió un .env existente." >&2
+            exit 1
+          fi
+
+      - name: Ejecutar preflight sin modificar servicios
+        working-directory: source
+        run: |
+          bash scripts/mini-pc-preflight.sh --mode check
+          test -z "$(docker compose --env-file .env -f infra/docker/docker-compose.yml ps -q)"
+
+      - name: Comprobar que permisos inseguros bloquean el preflight
+        working-directory: source
+        run: |
+          chmod 644 .env
+          if bash scripts/mini-pc-preflight.sh --mode check; then
+            echo "El preflight aceptó un .env legible por otros usuarios." >&2
+            exit 1
+          fi
+          chmod 600 .env
+
+      - name: Simular instalación y actualización
+        working-directory: source
+        run: |
+          bash scripts/mini-pc-deploy.sh install --dry-run
+          bash scripts/mini-pc-deploy.sh update --dry-run
+          test -z "$(docker compose --env-file .env -f infra/docker/docker-compose.yml ps -q)"
+
+      - name: Verificar que la simulación no cambió el repositorio
+        run: test -z "$(git status --porcelain --untracked-files=normal)"
