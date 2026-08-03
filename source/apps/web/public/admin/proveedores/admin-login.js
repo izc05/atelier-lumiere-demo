@@ -106,7 +106,26 @@ function errorText(payload, fallback) {
   return payload?.message || fallback;
 }
 
+function ensureAccountsLink(role) {
+  const actions = document.querySelector(".topbar-actions");
+  if (!actions) return;
+  let link = document.querySelector("#admin-accounts-link");
+  if (role !== "PLATFORM_OWNER") {
+    link?.remove();
+    return;
+  }
+  if (link) return;
+  link = document.createElement("a");
+  link.id = "admin-accounts-link";
+  link.className = "button secondary";
+  link.href = "/admin/cuentas/";
+  link.textContent = "Cuentas";
+  const refreshButton = document.querySelector("#refresh-button");
+  actions.insertBefore(link, refreshButton || null);
+}
+
 function applyRoleInterface(role) {
+  ensureAccountsLink(role);
   const productLink = document.querySelector('a[href="/admin/articulos/"]');
   const blogLink = document.querySelector('a[href="/admin/publicaciones/"]');
   if (role === "PROVIDER_MANAGER") {
