@@ -9,7 +9,8 @@ const VALID_ROLES = new Set([
   "CATALOG_READER",
   "LEGAL_SERVICE",
   "AUTH_SERVICE",
-  "PAYMENT_SERVICE"
+  "PAYMENT_SERVICE",
+  "NOTIFICATION_SERVICE"
 ]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -43,6 +44,9 @@ function normalizeContext(context) {
   }
   if (context.role === "PAYMENT_SERVICE" && providerId) {
     throw new TypeError("El servicio de pagos no puede adoptar el contexto de un proveedor.");
+  }
+  if (context.role === "NOTIFICATION_SERVICE" && providerId) {
+    throw new TypeError("El servicio de notificaciones no puede adoptar el contexto de un proveedor.");
   }
 
   return Object.freeze({
