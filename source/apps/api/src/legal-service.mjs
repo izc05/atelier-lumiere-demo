@@ -16,11 +16,11 @@ const SLUG_BY_TYPE = Object.freeze(
 );
 const PRIVACY_KEY_PATTERN = /^[A-Za-z0-9_-]{32,180}$/;
 
-function adminContext(context) {
-  if (!context || context.role !== "ADMIN" || typeof context.userId !== "string") {
-    throw new TypeError("createLegalService necesita un contexto administrativo interno.");
+function legalContext(context) {
+  if (!context || context.role !== "LEGAL_SERVICE" || typeof context.userId !== "string") {
+    throw new TypeError("createLegalService necesita un contexto técnico legal.");
   }
-  return { role: "ADMIN", userId: context.userId, providerId: null };
+  return { role: "LEGAL_SERVICE", userId: context.userId, providerId: null };
 }
 
 function hashKey(value) {
@@ -77,7 +77,7 @@ export function createLegalService({
   if (!database || typeof database.withContext !== "function") {
     throw new TypeError("createLegalService necesita una base de datos.");
   }
-  const context = adminContext(systemContext);
+  const context = legalContext(systemContext);
   const production = environment === "production";
 
   async function selectedDocuments(transaction, type = null) {
