@@ -30,8 +30,11 @@ function normalizeContext(context) {
   if (context.role.startsWith("PROVIDER_") && !providerId) {
     throw new TypeError("Los roles de proveedor necesitan providerId.");
   }
-  if (["CATALOG_READER", "LEGAL_SERVICE"].includes(context.role) && providerId) {
-    throw new TypeError("Los servicios públicos no pueden adoptar el contexto de un proveedor.");
+  if (context.role === "CATALOG_READER" && providerId) {
+    throw new TypeError("El lector del catálogo no puede adoptar el contexto de un proveedor.");
+  }
+  if (context.role === "LEGAL_SERVICE" && providerId) {
+    throw new TypeError("El servicio legal no puede adoptar el contexto de un proveedor.");
   }
 
   return Object.freeze({
