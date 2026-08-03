@@ -32,7 +32,7 @@ const LOGIN_PEPPER = "admin-recovery-login-pepper-with-more-than-32-characters";
 const RECOVERY_PEPPER = "admin-recovery-code-pepper-with-more-than-32-characters";
 const ENCRYPTION_KEY = Buffer.from("0123456789abcdef0123456789abcdef", "utf8");
 const ENCRYPTION_KEY_BASE64 = ENCRYPTION_KEY.toString("base64");
-const FIXED_TIME = new Date("2026-08-03T13:00:00.000Z");
+const FIXED_TIME = new Date(Date.now() + 24 * 60 * 60 * 1000);
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 function decodeBase32(value) {
