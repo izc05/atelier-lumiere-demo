@@ -1,0 +1,27 @@
+name: Exportar fuente temporal de la PR del bloque 18
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  export-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar rama
+        uses: actions/checkout@v4
+
+      - name: Empaquetar fuente sin metadatos Git
+        run: tar --exclude=.git --exclude='*.env' -czf block-18-source.tar.gz .
+
+      - name: Publicar artefacto temporal
+        uses: actions/upload-artifact@v4
+        with:
+          name: block-18-source-pr
+          path: block-18-source.tar.gz
+          retention-days: 1
+          if-no-files-found: error
