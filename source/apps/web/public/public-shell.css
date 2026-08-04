@@ -58,6 +58,19 @@ body.public-menu-open {
   overflow: hidden;
 }
 
+.js[data-motion="full"] [data-public-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 620ms cubic-bezier(.2, .65, .25, 1),
+    transform 620ms cubic-bezier(.2, .65, .25, 1);
+}
+
+.js[data-motion="full"] [data-public-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
 @media (max-width: 760px) {
   .js .public-menu-toggle {
     position: relative;
@@ -152,6 +165,11 @@ body.public-menu-open {
 
   .skip-link {
     transition: none;
+  }
+
+  [data-public-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 
