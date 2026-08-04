@@ -17,21 +17,22 @@ function money(cents, currency = "EUR") {
   }).format(cents / 100);
 }
 
-function mediaPath(path) {
-  return typeof path === "string" ? path.replace(/^\/api\//, "/internal/") : null;
-}
-
 function productCard(product) {
   const article = node("article", "product-card");
   const visual = node("div", "product-visual");
-  const imagePath = mediaPath(product.cover?.path);
 
-  if (imagePath) {
+  if (product.cover?.path) {
     const image = document.createElement("img");
-    image.src = imagePath;
-    image.alt = product.cover?.altText || product.name || "Pieza artesanal";
-    image.loading = "lazy";
-    image.decoding = "async";
+    window.AtelierImages.configure(image, {
+      path: product.cover.path,
+      alt: product.cover.altText || product.name || "Pieza artesanal",
+      width: product.cover.width,
+      height: product.cover.height,
+      sizes: "(max-width: 760px) calc(100vw - 48px), (max-width: 1100px) 50vw, 360px",
+      loading: "lazy",
+      priority: "low",
+      defaultWidth: 640
+    });
     visual.append(image);
   }
 
