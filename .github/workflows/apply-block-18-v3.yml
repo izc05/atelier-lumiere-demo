@@ -1,0 +1,83 @@
+name: Aplicar bloque 18 validado v3
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-block-18-v3-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  apply-final-tree:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar rama
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Verificar fragmentos
+        run: |
+          echo "84b5c424a18e0fcf903aa60e7ced680e4bcd406abf24c76be068f99630164e81  .github/block18-v3-00-0" | sha256sum --check --strict
+          echo "052bea0f4ef905d441a0401816b8b3d88fb4c50beab2e22e6f19f266d9ad60fb  .github/block18-v3-00-1" | sha256sum --check --strict
+          echo "ed64dd9a6f0a1fd102f7183a33322148101c1204db0eca3aa65519f303b054b3  .github/block18-v3-00-2" | sha256sum --check --strict
+          echo "5eff614f14c24433eae8948149a8d29a6738a7896447963ab245d148af7b46be  .github/block18-v3-00-3" | sha256sum --check --strict
+          echo "e234e20eadcafd8e43e58ec2171bbca187a6e93fbabdb15fe14aea06a3bd8290  .github/block18-v2-part-01" | sha256sum --check --strict
+          echo "ce82727cfacc63befdcbfaab49175c7c54e214a24e180206bf4b24825e756f87  .github/block18-v2-part-02" | sha256sum --check --strict
+          echo "e95488d3ae3773f4fea070e31b6a7bc6de13965970797107073e7355f2a4e9f9  .github/block18-v2-part-03" | sha256sum --check --strict
+          echo "ba3859e9ae02a135224ad920df5ee8554e87835b1268738755e863c0a57c8556  .github/block18-v2-part-04" | sha256sum --check --strict
+
+      - name: Reconstruir y aplicar parche
+        run: |
+          cat \
+            .github/block18-v3-00-0 \
+            .github/block18-v3-00-1 \
+            .github/block18-v3-00-2 \
+            .github/block18-v3-00-3 \
+            .github/block18-v2-part-01 \
+            .github/block18-v2-part-02 \
+            .github/block18-v2-part-03 \
+            .github/block18-v2-part-04 \
+            | base64 --decode | xz --decompress > /tmp/block18-final-v2.patch
+          echo "785d7f7af434328a14245d618c79182c2cdf724fc217db9d434239f6f7317c3f  /tmp/block18-final-v2.patch" | sha256sum --check --strict
+          git apply --check /tmp/block18-final-v2.patch
+          git apply --index /tmp/block18-final-v2.patch
+
+      - name: Retirar herramientas temporales
+        run: |
+          git rm --ignore-unmatch \
+            .github/block18-final.patch.gz.b64 \
+            .github/block18-patch-part-00 \
+            .github/block18-patch-part-01 \
+            .github/block18-patch-part-02 \
+            .github/block18-patch-part-03 \
+            .github/block18-patch-part-04 \
+            .github/block18-v2-part-00 \
+            .github/block18-v2-part-01 \
+            .github/block18-v2-part-02 \
+            .github/block18-v2-part-03 \
+            .github/block18-v2-part-04 \
+            .github/block18-v3-00-0 \
+            .github/block18-v3-00-1 \
+            .github/block18-v3-00-2 \
+            .github/block18-v3-00-3 \
+            .github/workflows/apply-block-18-final.yml \
+            .github/workflows/apply-block-18-v2.yml \
+            .github/workflows/apply-block-18-v3.yml \
+            .github/workflows/export-block-18-source.yml \
+            .github/workflows/export-block-18-pr-source.yml \
+            .github/workflows/export-block-18-pr-source-v2.yml
+
+      - name: Publicar árbol definitivo
+        run: |
+          git config user.name "atelier-lumiere-automation"
+          git config user.email "199996336+izc05@users.noreply.github.com"
+          git commit -m "Preparar operación segura del piloto"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
