@@ -1,0 +1,67 @@
+name: Aplicar corrección temporal del reloj de invitaciones
+
+on:
+  push:
+    branches:
+      - block-18-pilot-operations
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar rama
+        uses: actions/checkout@v4
+        with:
+          ref: block-18-pilot-operations
+
+      - name: Sincronizar fechas de emisión y caducidad
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("source/apps/api/src/providers-service.mjs")
+          text = path.read_text()
+          old = '''  const rawToken = randomBytes(32).toString("base64url");
+            const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+            const expiresAt = new Date(now().getTime() + invitationTtlHours * 60 * 60 * 1000);
+
+            const result = await transaction.query(
+              `INSERT INTO provider_invitations
+                (provider_id, email, role, token_hash, expires_at, invited_by)
+               VALUES ($1, $2, $3, $4, $5, $6)
+               RETURNING id, provider_id, email, role, status, expires_at, created_at`,
+              [providerId, emailAddress, role, tokenHash, expiresAt, invitedBy]
+            );
+          '''
+          new = '''  const rawToken = randomBytes(32).toString("base64url");
+            const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+            const issuedAt = new Date(now());
+            if (Number.isNaN(issuedAt.getTime())) {
+              throw new TypeError("El reloj de invitaciones debe devolver una fecha válida.");
+            }
+            const expiresAt = new Date(issuedAt.getTime() + invitationTtlHours * 60 * 60 * 1000);
+
+            const result = await transaction.query(
+              `INSERT INTO provider_invitations
+                (provider_id, email, role, token_hash, expires_at, invited_by, created_at, updated_at)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+               RETURNING id, provider_id, email, role, status, expires_at, created_at`,
+              [providerId, emailAddress, role, tokenHash, expiresAt, invitedBy, issuedAt]
+            );
+          '''
+          if old not in text:
+              raise SystemExit("No se encontró el bloque exacto que debía corregirse.")
+          path.write_text(text.replace(old, new, 1))
+          PY
+          node --check source/apps/api/src/providers-service.mjs
+
+      - name: Confirmar cambio en la rama
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add source/apps/api/src/providers-service.mjs
+          git commit -m "fix: sincronizar reloj de invitaciones"
+          git push origin HEAD:block-18-pilot-operations
