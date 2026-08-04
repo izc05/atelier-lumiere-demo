@@ -24,9 +24,9 @@ for service in database api web; do
   case "${state}" in healthy|running) ok "${service}: ${state}" ;; *) error "${service}: ${state:-desconocido}" ;; esac
 done
 
-WEB_PORT="$(awk -F= '/^[[:space:]]*WEB_PORT[[:space:]]*=/{gsub(/[[:space:]\r\047\"]/ ,"",$2);print $2;exit}' "${ENV_FILE}")"
+WEB_PORT="$(grep -m1 -E '^[[:space:]]*WEB_PORT[[:space:]]*=' "${ENV_FILE}" | cut -d= -f2- | tr -d '[:space:]' | tr -d "'\"")"
 WEB_PORT="${WEB_PORT:-3000}"
-API_PORT="$(awk -F= '/^[[:space:]]*API_PORT[[:space:]]*=/{gsub(/[[:space:]\r\047\"]/ ,"",$2);print $2;exit}' "${ENV_FILE}")"
+API_PORT="$(grep -m1 -E '^[[:space:]]*API_PORT[[:space:]]*=' "${ENV_FILE}" | cut -d= -f2- | tr -d '[:space:]' | tr -d "'\"")"
 API_PORT="${API_PORT:-4000}"
 curl --fail --silent --max-time 10 "http://127.0.0.1:${WEB_PORT}/" >/dev/null \
   && ok "web responde en loopback" || error "web no responde en loopback"
