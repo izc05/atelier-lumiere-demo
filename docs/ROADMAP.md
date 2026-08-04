@@ -1,6 +1,6 @@
 # Hoja de ruta de Atelier Lumière
 
-Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente, los avisos transaccionales, la gestión operativa de administradores y la confirmación reforzada de acciones críticas.
+Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente, los avisos transaccionales, la gestión operativa de administradores, la confirmación reforzada de acciones críticas y la navegación pública accesible.
 
 ## Estado global
 
@@ -19,7 +19,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 | 8C | Pago sandbox genérico | Completado y desactivado por defecto |
 | 8D | Migraciones, copias y recuperación | Completado para instalaciones nuevas |
 | 9 | Mini PC y piloto privado | Herramientas preparadas; instalación real pendiente |
-| 10 | Experiencia pública y cliente | En desarrollo avanzado |
+| 10 | Experiencia pública y cliente | Navegación y accesibilidad base completadas; rendimiento y SEO pendientes |
 | 11 | Avisos automáticos de pedido | Preparados para piloto; activación SMTP pendiente |
 
 ## Capacidades completadas
@@ -101,6 +101,13 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Escaparate público de cada taller y búsqueda dentro de su colección.
 - Enlaces desde las piezas hacia su artesano.
 - Estados de carga, vacío y error sin exponer datos privados.
+- Navegación móvil común en inicio, tienda, artículo, taller, carrito, blog e historia.
+- Menú progresivo con cierre mediante Escape, control de foco y fondo inerte.
+- Enlace de salto al contenido y foco visible en controles interactivos.
+- Marcado automático de la sección actual con `aria-current`.
+- Movimiento de entrada progresivo desactivado cuando se solicita reducir animaciones.
+- Compatibilidad de contraste forzado y objetivos táctiles mínimos de 44 píxeles.
+- Validador estático permanente para navegación, teclado y preferencias de movimiento.
 
 ## Trabajo pendiente en el repositorio
 
@@ -128,9 +135,9 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - [x] Portada premium en la aplicación real.
 - [x] Cabecera, tienda, ficha, carrito y blog responsive.
 - [x] Ficha pública de taller.
-- [ ] Efectos de desplazamiento y movimiento con reducción accesible.
-- [ ] Navegación móvil común para todas las páginas.
-- [ ] Accesibilidad y navegación completa por teclado.
+- [x] Efectos de desplazamiento y movimiento con reducción accesible.
+- [x] Navegación móvil común para todas las páginas principales.
+- [x] Accesibilidad y navegación completa por teclado en la cabecera pública.
 - [ ] Optimización final de imágenes y rendimiento.
 - [ ] Metadatos sociales, sitemap y SEO al finalizar el piloto privado.
 - [ ] Páginas 404/500 definitivas.

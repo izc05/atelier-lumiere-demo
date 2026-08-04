@@ -80,39 +80,6 @@ async function loadFeaturedProducts() {
   }
 }
 
-function setupMenu() {
-  const button = byId("menu-toggle");
-  const menu = byId("mobile-nav");
-  if (!button || !menu) return;
-
-  function close() {
-    button.setAttribute("aria-expanded", "false");
-    button.textContent = "Menú";
-    menu.hidden = true;
-    document.body.classList.remove("menu-open");
-  }
-
-  button.addEventListener("click", () => {
-    const open = button.getAttribute("aria-expanded") === "true";
-    if (open) {
-      close();
-      return;
-    }
-    button.setAttribute("aria-expanded", "true");
-    button.textContent = "Cerrar";
-    menu.hidden = false;
-    document.body.classList.add("menu-open");
-  });
-
-  menu.addEventListener("click", (event) => {
-    if (event.target.closest("a")) close();
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") close();
-  });
-}
-
 function setupCartCount() {
   const count = byId("cart-count");
   if (count && window.AtelierCart?.wireCount) {
@@ -120,6 +87,5 @@ function setupCartCount() {
   }
 }
 
-setupMenu();
 setupCartCount();
 void loadFeaturedProducts();

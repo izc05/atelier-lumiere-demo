@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,80 +9,88 @@
   <title>Artículo · Atelier Lumière</title>
   <link rel="stylesheet" href="/tienda/store.css">
   <link rel="stylesheet" href="/tienda/cart.css">
+  <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
+  <script defer src="/public-shell.js"></script>
   <script defer src="/tienda/product.js"></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
+  <div class="shell">
+    <header class="topbar" data-public-header>
       <a class="brand" href="/">
         <span class="brand-mark" aria-hidden="true">AL</span>
         <span><strong>Atelier Lumière</strong><small>Ficha de la pieza</small></span>
       </a>
-      <nav class="nav" aria-label="Navegación de la tienda">
+      <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-public-menu-toggle>Menú</button>
+      <nav class="nav public-navigation" id="public-navigation" aria-label="Navegación principal" data-public-navigation>
         <a class="button ghost" href="/">Inicio</a>
-        <a class="button ghost" href="/tienda/">Volver a la tienda</a>
+        <a class="button ghost" href="/tienda/">Tienda</a>
+        <a class="button ghost" href="/blog/">Historias</a>
+        <a class="button ghost" href="/legal/">Legal</a>
         <a class="button secondary cart-link" href="/carrito/">Carrito <span id="cart-count" class="cart-count">0</span></a>
       </nav>
     </header>
 
-    <section id="loading-view" class="loading"><p>Abriendo la pieza publicada…</p></section>
-    <section id="error-view" class="error" hidden><div><h2>No se pudo abrir la pieza</h2><p id="error-message"></p><a class="button primary" href="/tienda/">Volver a la tienda</a></div></section>
+    <main id="main-content" tabindex="-1">
+      <section id="loading-view" class="loading" role="status"><p>Abriendo la pieza publicada…</p></section>
+      <section id="error-view" class="error" hidden><div><h2>No se pudo abrir la pieza</h2><p id="error-message"></p><a class="button primary" href="/tienda/">Volver a la tienda</a></div></section>
 
-    <section id="product-view" hidden>
-      <section class="product-hero">
-        <div id="hero-media" class="hero-media"></div>
-        <div class="product-copy">
-          <p id="product-provider" class="eyebrow"></p>
-          <h1 id="product-name"></h1>
-          <p id="product-short" class="lead"></p>
-          <strong id="product-price" class="product-price"></strong>
-          <div id="product-facts" class="chips"></div>
-          <div id="product-events" class="chips"></div>
+      <section id="product-view" hidden>
+        <section class="product-hero">
+          <div id="hero-media" class="hero-media"></div>
+          <div class="product-copy">
+            <p id="product-provider" class="eyebrow"></p>
+            <h1 id="product-name"></h1>
+            <p id="product-short" class="lead"></p>
+            <strong id="product-price" class="product-price"></strong>
+            <div id="product-facts" class="chips"></div>
+            <div id="product-events" class="chips"></div>
 
-          <form id="purchase-form" class="purchase-box">
-            <div>
-              <h2>Preparar esta pieza</h2>
-              <p class="lead">Selecciona cantidad y personalizaciones. El precio definitivo se recalcula en el servidor.</p>
-            </div>
-            <div id="purchase-options" class="option-grid"></div>
-            <div class="quantity-row">
-              <label class="field">Cantidad
-                <input id="purchase-quantity" type="number" inputmode="numeric" min="1" max="10" value="1" required>
-              </label>
-              <div id="custom-request-container" class="custom-request-box" hidden>
-                <label class="custom-request-toggle"><input id="custom-request-toggle" type="checkbox"> Solicitar un diseño propio</label>
-                <div id="custom-request-fields" hidden>
-                  <label class="field">Título del encargo
-                    <input id="custom-request-title" maxlength="180" placeholder="Ejemplo: versión con nombre y fecha">
-                  </label>
-                  <label class="field">Qué necesitas
-                    <textarea id="custom-request-brief" minlength="20" maxlength="12000" placeholder="Describe medidas, colores, texto, acabado y cualquier referencia"></textarea>
-                  </label>
-                  <label class="field">Fecha deseada
-                    <input id="custom-request-date" type="date">
-                  </label>
+            <form id="purchase-form" class="purchase-box">
+              <div>
+                <h2>Preparar esta pieza</h2>
+                <p class="lead">Selecciona cantidad y personalizaciones. El precio definitivo se recalcula en el servidor.</p>
+              </div>
+              <div id="purchase-options" class="option-grid"></div>
+              <div class="quantity-row">
+                <label class="field">Cantidad
+                  <input id="purchase-quantity" type="number" inputmode="numeric" min="1" max="10" value="1" required>
+                </label>
+                <div id="custom-request-container" class="custom-request-box" hidden>
+                  <label class="custom-request-toggle"><input id="custom-request-toggle" type="checkbox"> Solicitar un diseño propio</label>
+                  <div id="custom-request-fields" hidden>
+                    <label class="field">Título del encargo
+                      <input id="custom-request-title" maxlength="180" placeholder="Ejemplo: versión con nombre y fecha">
+                    </label>
+                    <label class="field">Qué necesitas
+                      <textarea id="custom-request-brief" minlength="20" maxlength="12000" placeholder="Describe medidas, colores, texto, acabado y cualquier referencia"></textarea>
+                    </label>
+                    <label class="field">Fecha deseada
+                      <input id="custom-request-date" type="date">
+                    </label>
+                  </div>
                 </div>
               </div>
-            </div>
-            <button id="add-cart-button" class="button primary" type="submit">Añadir al carrito</button>
-            <p id="purchase-result" class="message" role="status" aria-live="polite"></p>
-            <p class="pilot-warning">Checkout piloto sin cobro real. El carrito puede reunir varias piezas de este mismo taller.</p>
-          </form>
-        </div>
-      </section>
+              <button id="add-cart-button" class="button primary" type="submit">Añadir al carrito</button>
+              <p id="purchase-result" class="message" role="status" aria-live="polite"></p>
+              <p class="pilot-warning">Checkout piloto sin cobro real. El carrito puede reunir varias piezas de este mismo taller.</p>
+            </form>
+          </div>
+        </section>
 
-      <section class="content-grid">
-        <article class="story-card"><p class="eyebrow">La pieza</p><h2>Historia y proceso</h2><p id="product-story" class="story"></p></article>
-        <aside class="info-stack">
-          <article class="info-card"><h2>Preparación y disponibilidad</h2><div id="availability-data" class="key-values"></div></article>
-          <article class="info-card"><h2>Personalización</h2><p id="personalization-notes"></p><div id="personalization-options" class="option-list"></div></article>
-          <article class="info-card"><h2>Envío</h2><p id="shipping-notes"></p></article>
-        </aside>
-      </section>
+        <section class="content-grid">
+          <article class="story-card"><p class="eyebrow">La pieza</p><h2>Historia y proceso</h2><p id="product-story" class="story"></p></article>
+          <aside class="info-stack">
+            <article class="info-card"><h2>Preparación y disponibilidad</h2><div id="availability-data" class="key-values"></div></article>
+            <article class="info-card"><h2>Personalización</h2><p id="personalization-notes"></p><div id="personalization-options" class="option-list"></div></article>
+            <article class="info-card"><h2>Envío</h2><p id="shipping-notes"></p></article>
+          </aside>
+        </section>
 
-      <section class="gallery-section"><p class="eyebrow">Galería publicada</p><h2>Detalles de la pieza</h2><div id="media-gallery" class="media-gallery"></div></section>
-    </section>
-  </main>
+        <section class="gallery-section"><p class="eyebrow">Galería publicada</p><h2>Detalles de la pieza</h2><div id="media-gallery" class="media-gallery"></div></section>
+      </section>
+    </main>
+  </div>
 </body>
 </html>

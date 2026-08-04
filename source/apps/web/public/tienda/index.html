@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,18 +9,23 @@
   <title>Tienda · Atelier Lumière</title>
   <link rel="stylesheet" href="/tienda/store.css">
   <link rel="stylesheet" href="/tienda/cart.css">
+  <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
+  <script defer src="/public-shell.js"></script>
   <script defer src="/tienda/store.js"></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
+  <div class="shell">
+    <header class="topbar" data-public-header>
       <a class="brand" href="/">
         <span class="brand-mark" aria-hidden="true">AL</span>
         <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
       </a>
-      <nav class="nav" aria-label="Navegación principal">
+      <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-public-menu-toggle>Menú</button>
+      <nav class="nav public-navigation" id="public-navigation" aria-label="Navegación principal" data-public-navigation>
         <a class="button ghost" href="/">Inicio</a>
+        <a class="button ghost" href="/tienda/">Tienda</a>
         <a class="button ghost" href="/blog/">Historias</a>
         <a class="button ghost" href="/legal/">Legal</a>
         <a class="button ghost cart-link" href="/carrito/">Carrito <span id="cart-count" class="cart-count">0</span></a>
@@ -28,38 +33,40 @@
       </nav>
     </header>
 
-    <section class="hero">
-      <div>
-        <p class="eyebrow">Piezas con historia</p>
-        <h1>La tienda de los talleres invitados.</h1>
-        <p class="lead">Descubre artículos artesanales revisados por Atelier Lumière. Solo mostramos talleres activos y piezas aprobadas y publicadas.</p>
-      </div>
-      <aside class="hero-note">
-        <strong>Catálogo editorial</strong>
-        <p>Cada pieza pasa por un flujo de borrador, revisión, aprobación y publicación antes de aparecer aquí.</p>
-      </aside>
-    </section>
+    <main id="main-content" tabindex="-1">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Piezas con historia</p>
+          <h1>La tienda de los talleres invitados.</h1>
+          <p class="lead">Descubre artículos artesanales revisados por Atelier Lumière. Solo mostramos talleres activos y piezas aprobadas y publicadas.</p>
+        </div>
+        <aside class="hero-note">
+          <strong>Catálogo editorial</strong>
+          <p>Cada pieza pasa por un flujo de borrador, revisión, aprobación y publicación antes de aparecer aquí.</p>
+        </aside>
+      </section>
 
-    <section class="toolbar" aria-label="Filtros del catálogo">
-      <input id="search-input" type="search" autocomplete="off" placeholder="Buscar pieza, categoría o taller">
-      <select id="category-filter"><option value="">Todas las categorías</option></select>
-      <select id="event-filter">
-        <option value="">Todas las ocasiones</option>
-        <option value="boda">Boda</option>
-        <option value="aniversario">Aniversario</option>
-        <option value="cumpleanos">Cumpleaños</option>
-        <option value="bautizo">Bautizo</option>
-        <option value="comunion">Comunión</option>
-        <option value="nacimiento">Nacimiento</option>
-        <option value="navidad">Navidad</option>
-        <option value="agradecimiento">Agradecimiento</option>
-      </select>
-    </section>
+      <section class="toolbar" aria-label="Filtros del catálogo">
+        <input id="search-input" type="search" autocomplete="off" placeholder="Buscar pieza, categoría o taller" aria-label="Buscar pieza, categoría o taller">
+        <select id="category-filter" aria-label="Filtrar por categoría"><option value="">Todas las categorías</option></select>
+        <select id="event-filter" aria-label="Filtrar por ocasión">
+          <option value="">Todas las ocasiones</option>
+          <option value="boda">Boda</option>
+          <option value="aniversario">Aniversario</option>
+          <option value="cumpleanos">Cumpleaños</option>
+          <option value="bautizo">Bautizo</option>
+          <option value="comunion">Comunión</option>
+          <option value="nacimiento">Nacimiento</option>
+          <option value="navidad">Navidad</option>
+          <option value="agradecimiento">Agradecimiento</option>
+        </select>
+      </section>
 
-    <section id="loading-view" class="loading"><p>Preparando las piezas publicadas…</p></section>
-    <section id="empty-view" class="empty" hidden><div><h2>El catálogo todavía está vacío</h2><p>Los artículos aparecerán aquí cuando sean aprobados y publicados.</p></div></section>
-    <section id="error-view" class="error" hidden><div><h2>No se pudo abrir la tienda</h2><p id="error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div></section>
-    <section id="products-view" class="products" aria-live="polite" hidden></section>
-  </main>
+      <section id="loading-view" class="loading" role="status"><p>Preparando las piezas publicadas…</p></section>
+      <section id="empty-view" class="empty" hidden><div><h2>El catálogo todavía está vacío</h2><p>Los artículos aparecerán aquí cuando sean aprobados y publicados.</p></div></section>
+      <section id="error-view" class="error" hidden><div><h2>No se pudo abrir la tienda</h2><p id="error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div></section>
+      <section id="products-view" class="products" aria-live="polite" hidden></section>
+    </main>
+  </div>
 </body>
 </html>

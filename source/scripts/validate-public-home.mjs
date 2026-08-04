@@ -8,7 +8,9 @@ const paths = [
   "apps/web/public/estado/index.html",
   "apps/web/public/tienda/index.html",
   "apps/web/public/tienda/articulo/index.html",
-  "apps/web/public/carrito/index.html"
+  "apps/web/public/carrito/index.html",
+  "apps/web/public/public-shell.css",
+  "apps/web/public/public-shell.js"
 ];
 
 const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [
@@ -23,6 +25,8 @@ const technical = files[paths[3]];
 const store = files[paths[4]];
 const product = files[paths[5]];
 const cart = files[paths[6]];
+const publicShellCss = files[paths[7]];
+const publicShellScript = files[paths[8]];
 
 for (const html of [home, technical, store, product, cart]) {
   assert.match(html, /noindex,nofollow/);
@@ -33,24 +37,29 @@ for (const html of [home, technical, store, product, cart]) {
 assert.match(home, /Artesanía para celebrar/);
 assert.match(home, /Cada pieza guarda un instante/);
 assert.match(home, /id="featured-products"/);
-assert.match(home, /id="mobile-nav"/);
+assert.match(home, /data-public-navigation/);
+assert.match(home, /data-public-menu-toggle/);
 assert.match(home, /id="cart-count"/);
 assert.match(home, /\/tienda\/cart-store\.js/);
+assert.match(home, /\/public-shell\.js/);
 assert.match(home, /\/home\.js/);
 assert.match(home, /checkout piloto no realiza cobros reales/i);
 assert.doesNotMatch(home, /Entorno privado de desarrollo|Inicio técnico/);
+assert.doesNotMatch(home, /id="mobile-nav"|id="menu-toggle"/);
 
 assert.match(script, /\/internal\/catalog\/products/);
 assert.match(script, /window\.AtelierCart\?\.wireCount/);
 assert.match(script, /replaceChildren/);
-assert.match(script, /event\.key === "Escape"/);
 assert.doesNotMatch(script, /innerHTML|localStorage|sessionStorage|Authorization|Bearer/);
 
 assert.match(css, /prefers-reduced-motion/);
 assert.match(css, /@media \(max-width: 780px\)/);
-assert.match(css, /\.mobile-nav/);
 assert.match(css, /\.featured-grid/);
 assert.match(css, /:focus-visible/);
+assert.match(publicShellCss, /\.public-menu-toggle/);
+assert.match(publicShellCss, /prefers-reduced-motion/);
+assert.match(publicShellScript, /event\.key === "Escape"/);
+assert.match(publicShellScript, /aria-expanded/);
 
 assert.match(technical, /Estado de Atelier Lumière/);
 assert.match(technical, /id="api-status"/);
