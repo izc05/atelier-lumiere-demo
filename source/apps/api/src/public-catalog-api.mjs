@@ -4,6 +4,7 @@ import { ServiceError } from "./providers-service.mjs";
 const COLLECTION_PATH = "/api/catalog/products";
 const DETAIL_PATTERN = /^\/api\/catalog\/products\/([a-z0-9-]+)\/([a-z0-9-]+)$/i;
 const MEDIA_PATTERN = /^\/api\/catalog\/products\/([0-9a-f-]{36})\/media\/([0-9a-f-]{36})\/(preview|content)$/i;
+const PREVIEW_WIDTHS = new Set([320, 640, 960]);
 
 function sendJson(response, statusCode, body, cacheControl = "public, max-age=60") {
   response.writeHead(statusCode, {
@@ -44,6 +45,20 @@ function contentDisposition(filename) {
     .replace(/[^A-Za-z0-9._ -]/g, "_")
     .slice(0, 120) || "archivo";
   return `inline; filename="${fallback.replaceAll('"', "_")}"; filename*=UTF-8''${encoded}`;
+}
+
+function previewWidth(value) {
+  if (value === null || value === "") return null;
+  const width = Number(value);
+  if (!Number.isInteger(width) || !PREVIEW_WIDTHS.has(width)) {
+    throw new ServiceError(
+      "MEDIA_PREVIEW_WIDTH_INVALID",
+      "La anchura de imagen solicitada no es válida.",
+      422,
+      { allowedWidths: [...PREVIEW_WIDTHS] }
+    );
+  }
+  return width;
 }
 
 export function createPublicCatalogApiHandler({
@@ -91,11 +106,15 @@ export function createPublicCatalogApiHandler({
       }
 
       if (mediaMatch) {
+        const width = mediaMatch[3] === "preview"
+          ? previewWidth(url.searchParams.get("width"))
+          : null;
         const opened = await publicCatalogService.openMedia(
           mediaMatch[1],
           mediaMatch[2],
           mediaMatch[3],
-          request.headers.range
+          request.headers.range,
+          width
         );
         const length = opened.end - opened.start + 1;
         const headers = {
@@ -103,7 +122,7 @@ export function createPublicCatalogApiHandler({
           "Content-Length": String(length),
           "Content-Disposition": contentDisposition(opened.filename),
           "Accept-Ranges": "bytes",
-          "Cache-Control": "public, max-age=300",
+          "Cache-Control": "public, max-age=31536000, immutable",
           "X-Content-Type-Options": "nosniff",
           "Cross-Origin-Resource-Policy": "same-origin",
           "Content-Security-Policy": "default-src 'none'; sandbox"
