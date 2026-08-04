@@ -50,8 +50,6 @@ CREATE POLICY onboarding_continuations_auth_service_all ON onboarding_continuati
 FOR ALL USING (app.is_auth_service()) WITH CHECK (app.is_auth_service());
 CREATE POLICY user_totp_credentials_auth_service_all ON user_totp_credentials
 FOR ALL USING (app.is_auth_service()) WITH CHECK (app.is_auth_service());
-CREATE POLICY login_throttles_auth_service_all ON login_throttles
-FOR ALL USING (app.is_auth_service()) WITH CHECK (app.is_auth_service());
 CREATE POLICY provider_login_challenges_auth_service_all ON provider_login_challenges
 FOR ALL USING (app.is_auth_service()) WITH CHECK (app.is_auth_service());
 CREATE POLICY account_recovery_tokens_auth_service_all ON account_recovery_tokens
