@@ -16,7 +16,7 @@ function money(cents, currency = "EUR") {
 }
 
 function mediaUrl(path) {
-  return path.replace(/^\/api\/catalog/, "/internal/catalog");
+  return window.AtelierImages.mediaUrl(path);
 }
 
 function safeMessage(node, text, type = "") {
@@ -88,12 +88,16 @@ function mediaNode(item) {
   }
   const card = element("article", "media-card");
   const image = document.createElement("img");
-  image.src = mediaUrl(item.path);
-  image.alt = item.altText || "Detalle de la pieza artesanal";
-  image.loading = "lazy";
-  image.decoding = "async";
-  if (item.width) image.width = item.width;
-  if (item.height) image.height = item.height;
+  window.AtelierImages.configure(image, {
+    path: item.path,
+    alt: item.altText || "Detalle de la pieza artesanal",
+    width: item.width,
+    height: item.height,
+    sizes: "(max-width: 760px) calc(100vw - 36px), (max-width: 1100px) 50vw, 560px",
+    loading: "lazy",
+    priority: "low",
+    defaultWidth: 640
+  });
   card.append(image, element("footer", "", item.altText || "Detalle artesanal"));
   return card;
 }
@@ -127,9 +131,16 @@ function renderProduct() {
   const hero = byId("hero-media");
   if (images[0]) {
     const image = document.createElement("img");
-    image.src = mediaUrl(images[0].path);
-    image.alt = images[0].altText || product.name;
-    image.decoding = "async";
+    window.AtelierImages.configure(image, {
+      path: images[0].path,
+      alt: images[0].altText || product.name,
+      width: images[0].width,
+      height: images[0].height,
+      sizes: "(max-width: 980px) calc(100vw - 28px), 56vw",
+      loading: "eager",
+      priority: "high",
+      defaultWidth: 960
+    });
     hero.replaceChildren(image);
   } else {
     hero.replaceChildren(element("span", "hero-placeholder", "Pieza artesanal"));
@@ -146,7 +157,7 @@ function keyValue(label, value) {
 }
 
 async function requestJson(path) {
-  const response = await fetch(path, { headers: { Accept: "application/json" }, cache: "no-store" });
+  const response = await fetch(path, { headers: { Accept: "application/json" } });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     const error = new Error(payload.message || "No se pudo abrir la pieza.");

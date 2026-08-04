@@ -4,6 +4,7 @@ root.classList.add("js");
 
 const MOBILE_QUERY = "(max-width: 760px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+const PUBLIC_IMAGE_WIDTHS = Object.freeze([320, 640, 960]);
 const REVEAL_SELECTOR = [
   ".hero-section",
   ".manifesto-section",
@@ -29,6 +30,59 @@ function normalizedPath(value) {
   const path = String(value || "/").replace(/\/+$/g, "");
   return path || "/";
 }
+
+function internalMediaPath(path) {
+  if (typeof path !== "string" || !path.startsWith("/api/")) return null;
+  return path.replace(/^\/api\//, "/internal/");
+}
+
+function imageVariantUrl(path, width = null) {
+  const internalPath = internalMediaPath(path);
+  if (!internalPath) return null;
+  if (width === null) return internalPath;
+  const url = new URL(internalPath, window.location.origin);
+  url.searchParams.set("width", String(width));
+  return `${url.pathname}${url.search}`;
+}
+
+function configurePublicImage(image, {
+  path,
+  alt = "",
+  width = null,
+  height = null,
+  sizes = "100vw",
+  loading = "lazy",
+  priority = "auto",
+  defaultWidth = 640
+} = {}) {
+  if (!(image instanceof HTMLImageElement)) {
+    throw new TypeError("La imagen pública no es válida.");
+  }
+  const source = imageVariantUrl(path, defaultWidth);
+  if (!source) return false;
+
+  image.src = source;
+  image.srcset = PUBLIC_IMAGE_WIDTHS
+    .map((candidate) => `${imageVariantUrl(path, candidate)} ${candidate}w`)
+    .join(", ");
+  image.sizes = sizes;
+  image.alt = String(alt || "");
+  image.loading = loading === "eager" ? "eager" : "lazy";
+  image.decoding = "async";
+  image.classList.add("responsive-image");
+
+  if (Number.isInteger(width) && width > 0) image.width = width;
+  if (Number.isInteger(height) && height > 0) image.height = height;
+  if (["high", "low"].includes(priority)) image.setAttribute("fetchpriority", priority);
+  return true;
+}
+
+window.AtelierImages = Object.freeze({
+  widths: PUBLIC_IMAGE_WIDTHS,
+  mediaUrl: internalMediaPath,
+  variantUrl: imageVariantUrl,
+  configure: configurePublicImage
+});
 
 function markCurrentPage(navigation) {
   const current = normalizedPath(window.location.pathname);

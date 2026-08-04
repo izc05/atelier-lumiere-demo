@@ -1,6 +1,6 @@
 # Hoja de ruta de Atelier Lumière
 
-Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente, los avisos transaccionales, la gestión operativa de administradores, la confirmación reforzada de acciones críticas y la navegación pública accesible.
+Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente, los avisos transaccionales, la gestión operativa de administradores, la confirmación reforzada de acciones críticas, la navegación pública accesible y las imágenes públicas adaptativas.
 
 ## Estado global
 
@@ -19,7 +19,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 | 8C | Pago sandbox genérico | Completado y desactivado por defecto |
 | 8D | Migraciones, copias y recuperación | Completado para instalaciones nuevas |
 | 9 | Mini PC y piloto privado | Herramientas preparadas; instalación real pendiente |
-| 10 | Experiencia pública y cliente | Navegación y accesibilidad base completadas; rendimiento y SEO pendientes |
+| 10 | Experiencia pública y cliente | Navegación, accesibilidad e imágenes adaptativas completadas; SEO y medición real pendientes |
 | 11 | Avisos automáticos de pedido | Preparados para piloto; activación SMTP pendiente |
 
 ## Capacidades completadas
@@ -107,7 +107,14 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Marcado automático de la sección actual con `aria-current`.
 - Movimiento de entrada progresivo desactivado cuando se solicita reducir animaciones.
 - Compatibilidad de contraste forzado y objetivos táctiles mínimos de 44 píxeles.
-- Validador estático permanente para navegación, teclado y preferencias de movimiento.
+- Previews WebP generadas en 320, 640 y 960 píxeles al subir cada fotografía.
+- Selección automática mediante `srcset` y `sizes` en portada, tienda, taller, producto y blog.
+- Dimensiones intrínsecas para reducir movimientos durante la carga.
+- Prioridad alta limitada a la imagen principal de producto o historia.
+- Carga diferida y prioridad baja para tarjetas, galerías y piezas relacionadas.
+- Caché inmutable de un año para multimedia identificada mediante UUID.
+- Compatibilidad con previews antiguas cuando una variante todavía no existe.
+- Validadores y pruebas automáticas para navegación, teclado, movimiento y rendimiento de imágenes.
 
 ## Trabajo pendiente en el repositorio
 
@@ -138,7 +145,8 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - [x] Efectos de desplazamiento y movimiento con reducción accesible.
 - [x] Navegación móvil común para todas las páginas principales.
 - [x] Accesibilidad y navegación completa por teclado en la cabecera pública.
-- [ ] Optimización final de imágenes y rendimiento.
+- [x] Optimización de imágenes públicas, tamaños adaptativos y caché multimedia.
+- [ ] Medición final de Core Web Vitals con contenido y dispositivos reales.
 - [ ] Metadatos sociales, sitemap y SEO al finalizar el piloto privado.
 - [ ] Páginas 404/500 definitivas.
 - [ ] Pruebas con usuarios reales.
@@ -182,6 +190,7 @@ La decisión técnica vigente es **un taller por checkout**.
 - [ ] Confirmación, cambio de estado, presupuesto e incidencia por email.
 - [ ] Cancelación, incidencia y recuperación de acceso.
 - [ ] Prueba móvil y escritorio.
+- [ ] Medición de Core Web Vitals con fotografías reales.
 - [ ] Restauración real de una copia del mini PC.
 
 ## Condiciones para abrir ventas reales

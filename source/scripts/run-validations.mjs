@@ -4,6 +4,7 @@ const validations = [
   "validate-source.mjs",
   "validate-public-home.mjs",
   "validate-public-accessibility.mjs",
+  "validate-public-performance.mjs",
   "validate-two-factor.mjs",
   "validate-provider-onboarding-ui.mjs",
   "validate-provider-session.mjs",
