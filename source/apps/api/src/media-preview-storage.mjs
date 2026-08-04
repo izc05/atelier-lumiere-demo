@@ -46,6 +46,16 @@ function normalizedWidths(values) {
   return Object.freeze(widths);
 }
 
+function openRequest(rangeHeader, requestedWidth) {
+  if (rangeHeader && typeof rangeHeader === "object" && !Array.isArray(rangeHeader)) {
+    return {
+      rangeHeader: rangeHeader.range,
+      requestedWidth: rangeHeader.width ?? requestedWidth
+    };
+  }
+  return { rangeHeader, requestedWidth };
+}
+
 async function createPreview({ originalPath, outputPath, width, height, quality }) {
   const temporaryPath = `${outputPath}.${randomUUID()}.tmp`;
   try {
@@ -195,19 +205,24 @@ export function createMediaPreviewStorage({
     },
 
     async openPreview(previewStorageKey, rangeHeader, requestedWidth = null) {
-      if (requestedWidth === null || requestedWidth === undefined || requestedWidth === "") {
-        return baseStorage.openRead(previewStorageKey, rangeHeader);
+      const request = openRequest(rangeHeader, requestedWidth);
+      if (
+        request.requestedWidth === null
+        || request.requestedWidth === undefined
+        || request.requestedWidth === ""
+      ) {
+        return baseStorage.openRead(previewStorageKey, request.rangeHeader);
       }
-      const width = Number(requestedWidth);
+      const width = Number(request.requestedWidth);
       if (!widths.includes(width)) {
         throw previewError("MEDIA_PREVIEW_WIDTH_INVALID", "La anchura de imagen solicitada no es válida.", 422);
       }
       const variantStorageKey = variantKeyForPreview(previewStorageKey, width);
       try {
-        return await baseStorage.openRead(variantStorageKey, rangeHeader);
+        return await baseStorage.openRead(variantStorageKey, request.rangeHeader);
       } catch (error) {
         if (error?.code !== "MEDIA_FILE_NOT_FOUND") throw error;
-        return baseStorage.openRead(previewStorageKey, rangeHeader);
+        return baseStorage.openRead(previewStorageKey, request.rangeHeader);
       }
     }
   });
