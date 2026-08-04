@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,94 +9,101 @@
   <title>Carrito · Atelier Lumière</title>
   <link rel="stylesheet" href="/tienda/store.css">
   <link rel="stylesheet" href="/tienda/cart.css">
+  <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
+  <script defer src="/public-shell.js"></script>
   <script defer src="/carrito/cart.js"></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
+  <div class="shell">
+    <header class="topbar" data-public-header>
       <a class="brand" href="/">
         <span class="brand-mark" aria-hidden="true">AL</span>
         <span><strong>Atelier Lumière</strong><small>Carrito piloto</small></span>
       </a>
-      <nav class="nav" aria-label="Navegación del carrito">
+      <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-public-menu-toggle>Menú</button>
+      <nav class="nav public-navigation" id="public-navigation" aria-label="Navegación principal" data-public-navigation>
         <a class="button ghost" href="/">Inicio</a>
-        <a class="button ghost" href="/tienda/">Seguir comprando</a>
+        <a class="button ghost" href="/tienda/">Tienda</a>
+        <a class="button ghost" href="/blog/">Historias</a>
         <a class="button ghost" href="/legal/">Legal</a>
-        <span class="button secondary cart-link">Carrito <span id="cart-count" class="cart-count">0</span></span>
+        <a class="button secondary cart-link" href="/carrito/">Carrito <span id="cart-count" class="cart-count">0</span></a>
       </nav>
     </header>
 
-    <section class="hero">
-      <div>
-        <p class="eyebrow">Compra directa a un taller</p>
-        <h1>Un pedido, un proveedor y un único envío.</h1>
-        <p class="lead">Puedes combinar varias piezas del mismo taller y compartir sus gastos de envío. Para comprar a otro proveedor, primero debes finalizar o vaciar este pedido.</p>
-      </div>
-      <aside class="hero-note">
-        <strong>Sin cobro real</strong>
-        <p>El checkout registra el pedido y reserva el stock. Cuando el sandbox esté activo, podrás simular un pago aprobado o rechazado sin introducir datos bancarios.</p>
-      </aside>
-    </section>
+    <main id="main-content" tabindex="-1">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Compra directa a un taller</p>
+          <h1>Un pedido, un proveedor y un único envío.</h1>
+          <p class="lead">Puedes combinar varias piezas del mismo taller y compartir sus gastos de envío. Para comprar a otro proveedor, primero debes finalizar o vaciar este pedido.</p>
+        </div>
+        <aside class="hero-note">
+          <strong>Sin cobro real</strong>
+          <p>El checkout registra el pedido y reserva el stock. Cuando el sandbox esté activo, podrás simular un pago aprobado o rechazado sin introducir datos bancarios.</p>
+        </aside>
+      </section>
 
-    <section id="empty-cart" class="empty-cart" hidden>
-      <div><h2>Tu carrito está vacío</h2><p>Explora la tienda y añade una pieza artesanal.</p><a class="button primary" href="/tienda/">Abrir la tienda</a></div>
-    </section>
+      <section id="empty-cart" class="empty-cart" hidden>
+        <div><h2>Tu carrito está vacío</h2><p>Explora la tienda y añade una pieza artesanal.</p><a class="button primary" href="/tienda/">Abrir la tienda</a></div>
+      </section>
 
-    <section id="cart-content" class="cart-layout" hidden>
-      <div id="cart-groups" class="cart-groups"></div>
-      <aside class="checkout-panel">
-        <div><p class="eyebrow">Datos de entrega</p><h2>Confirmar el pedido piloto</h2></div>
-        <form id="checkout-form" class="checkout-form">
-          <label class="field">Nombre completo
-            <input id="customer-name" autocomplete="name" minlength="2" maxlength="120" required>
-          </label>
-          <label class="field">Correo
-            <input id="customer-email" type="email" autocomplete="email" maxlength="254" required>
-          </label>
-          <label class="field">Teléfono
-            <input id="customer-phone" type="tel" autocomplete="tel" minlength="6" maxlength="40">
-          </label>
-          <div class="address-grid">
-            <label class="field wide">Dirección
-              <input id="address-line1" autocomplete="address-line1" minlength="3" maxlength="180" required>
+      <section id="cart-content" class="cart-layout" hidden>
+        <div id="cart-groups" class="cart-groups"></div>
+        <aside class="checkout-panel">
+          <div><p class="eyebrow">Datos de entrega</p><h2>Confirmar el pedido piloto</h2></div>
+          <form id="checkout-form" class="checkout-form">
+            <label class="field">Nombre completo
+              <input id="customer-name" autocomplete="name" minlength="2" maxlength="120" required>
             </label>
-            <label class="field wide">Información adicional
-              <input id="address-line2" autocomplete="address-line2" maxlength="180">
+            <label class="field">Correo
+              <input id="customer-email" type="email" autocomplete="email" maxlength="254" required>
             </label>
-            <label class="field">Código postal
-              <input id="address-postal" autocomplete="postal-code" minlength="3" maxlength="20" required>
+            <label class="field">Teléfono
+              <input id="customer-phone" type="tel" autocomplete="tel" minlength="6" maxlength="40">
             </label>
-            <label class="field">Localidad
-              <input id="address-city" autocomplete="address-level2" minlength="2" maxlength="120" required>
+            <div class="address-grid">
+              <label class="field wide">Dirección
+                <input id="address-line1" autocomplete="address-line1" minlength="3" maxlength="180" required>
+              </label>
+              <label class="field wide">Información adicional
+                <input id="address-line2" autocomplete="address-line2" maxlength="180">
+              </label>
+              <label class="field">Código postal
+                <input id="address-postal" autocomplete="postal-code" minlength="3" maxlength="20" required>
+              </label>
+              <label class="field">Localidad
+                <input id="address-city" autocomplete="address-level2" minlength="2" maxlength="120" required>
+              </label>
+              <label class="field">Provincia
+                <input id="address-province" autocomplete="address-level1" maxlength="120">
+              </label>
+              <label class="field">País
+                <select id="address-country" autocomplete="country" required><option value="ES">España</option></select>
+              </label>
+            </div>
+            <label class="field">Nota para el taller
+              <textarea id="customer-note" maxlength="4000" placeholder="Indicaciones generales de entrega o preparación"></textarea>
             </label>
-            <label class="field">Provincia
-              <input id="address-province" autocomplete="address-level1" maxlength="120">
-            </label>
-            <label class="field">País
-              <select id="address-country" autocomplete="country" required><option value="ES">España</option></select>
-            </label>
-          </div>
-          <label class="field">Nota para el taller
-            <textarea id="customer-note" maxlength="4000" placeholder="Indicaciones generales de entrega o preparación"></textarea>
-          </label>
-          <label class="field" hidden>Web<input id="website-field" tabindex="-1" autocomplete="off"></label>
-          <div id="checkout-summary" class="checkout-summary"></div>
-          <p class="pilot-warning">No introduzcas datos bancarios. Se enviará por correo un enlace privado de un solo uso para consultar el pedido.</p>
-          <p class="pilot-warning">Los textos legales siguen en borrador técnico. Revisa <a href="/legal/privacidad/">privacidad</a>, <a href="/legal/condiciones-compra/">condiciones de compra</a>, <a href="/legal/envios-devoluciones/">envíos y devoluciones</a> y <a href="/legal/productos-personalizados/">productos personalizados</a>.</p>
-          <button id="checkout-button" class="button primary" type="submit">Registrar pedido sin pagar</button>
-          <p id="checkout-result" class="message" role="status" aria-live="polite"></p>
-        </form>
-        <section id="checkout-success" class="checkout-success" hidden>
-          <h2>Pedido registrado</h2>
-          <p id="success-message"></p>
-          <div id="order-results" class="order-result-list"></div>
-          <a id="sandbox-payment-link" class="button primary" href="/pago/sandbox/" hidden>Probar pago sandbox</a>
-          <a id="manual-access-link" class="button secondary" href="/pedido/acceso/" hidden>Abrir mi pedido</a>
-          <a class="button ghost" href="/tienda/">Volver a la tienda</a>
-        </section>
-      </aside>
-    </section>
-  </main>
+            <label class="field" hidden>Web<input id="website-field" tabindex="-1" autocomplete="off"></label>
+            <div id="checkout-summary" class="checkout-summary"></div>
+            <p class="pilot-warning">No introduzcas datos bancarios. Se enviará por correo un enlace privado de un solo uso para consultar el pedido.</p>
+            <p class="pilot-warning">Los textos legales siguen en borrador técnico. Revisa <a href="/legal/privacidad/">privacidad</a>, <a href="/legal/condiciones-compra/">condiciones de compra</a>, <a href="/legal/envios-devoluciones/">envíos y devoluciones</a> y <a href="/legal/productos-personalizados/">productos personalizados</a>.</p>
+            <button id="checkout-button" class="button primary" type="submit">Registrar pedido sin pagar</button>
+            <p id="checkout-result" class="message" role="status" aria-live="polite"></p>
+          </form>
+          <section id="checkout-success" class="checkout-success" hidden>
+            <h2>Pedido registrado</h2>
+            <p id="success-message"></p>
+            <div id="order-results" class="order-result-list"></div>
+            <a id="sandbox-payment-link" class="button primary" href="/pago/sandbox/" hidden>Probar pago sandbox</a>
+            <a id="manual-access-link" class="button secondary" href="/pedido/acceso/" hidden>Abrir mi pedido</a>
+            <a class="button ghost" href="/tienda/">Volver a la tienda</a>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
