@@ -1,6 +1,6 @@
 # Hoja de ruta de Atelier Lumière
 
-Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente, los avisos transaccionales, la gestión operativa de administradores, la confirmación reforzada de acciones críticas, la navegación pública accesible y las imágenes públicas adaptativas.
+Actualizada después de integrar la portada pública real, la recuperación administrativa, los permisos efectivos, el pago sandbox, el escaparate de talleres, la experiencia privada del cliente, los avisos transaccionales, la gestión operativa de administradores, la confirmación reforzada de acciones críticas, la navegación pública accesible, las imágenes públicas adaptativas y las páginas de error definitivas.
 
 ## Estado global
 
@@ -19,7 +19,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 | 8C | Pago sandbox genérico | Completado y desactivado por defecto |
 | 8D | Migraciones, copias y recuperación | Completado para instalaciones nuevas |
 | 9 | Mini PC y piloto privado | Herramientas preparadas; instalación real pendiente |
-| 10 | Experiencia pública y cliente | Navegación, accesibilidad e imágenes adaptativas completadas; SEO y medición real pendientes |
+| 10 | Experiencia pública y cliente | Navegación, accesibilidad, imágenes y errores públicos completados; SEO y medición real pendientes |
 | 11 | Avisos automáticos de pedido | Preparados para piloto; activación SMTP pendiente |
 
 ## Capacidades completadas
@@ -114,7 +114,10 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Carga diferida y prioridad baja para tarjetas, galerías y piezas relacionadas.
 - Caché inmutable de un año para multimedia identificada mediante UUID.
 - Compatibilidad con previews antiguas cuando una variante todavía no existe.
-- Validadores y pruebas automáticas para navegación, teclado, movimiento y rendimiento de imágenes.
+- Páginas 404 y 500 con diseño Atelier Lumière, navegación accesible y códigos HTTP correctos.
+- Sustitución segura de errores de navegación sin mostrar mensajes internos, rutas, credenciales ni respuestas técnicas.
+- Respuestas JSON internas y errores de archivos estáticos conservados sin transformación HTML.
+- Validadores y pruebas automáticas para navegación, teclado, movimiento, rendimiento de imágenes y páginas de error.
 
 ## Trabajo pendiente en el repositorio
 
@@ -148,7 +151,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - [x] Optimización de imágenes públicas, tamaños adaptativos y caché multimedia.
 - [ ] Medición final de Core Web Vitals con contenido y dispositivos reales.
 - [ ] Metadatos sociales, sitemap y SEO al finalizar el piloto privado.
-- [ ] Páginas 404/500 definitivas.
+- [x] Páginas 404/500 definitivas.
 - [ ] Pruebas con usuarios reales.
 
 ### Modelo comercial y contractual

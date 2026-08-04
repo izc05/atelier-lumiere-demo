@@ -14,6 +14,7 @@ import { createProviderOrdersWebHandler } from "./provider-orders-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
 import { createPublicBlogWebHandler } from "./public-blog-proxy.mjs";
 import { createPublicCatalogWebHandler } from "./public-catalog-proxy.mjs";
+import { createPublicErrorPagesWebHandler } from "./public-error-pages-handler.mjs";
 import { createRequestFilesWebHandler } from "./request-files-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
@@ -51,10 +52,14 @@ const adminAccountsHandler = createAdminAccountsWebHandler({
   baseHandler: adminRecoveryHandler,
   enableAdminUi
 });
-const server = createServer(createAdminAuthenticationWebHandler({
+const adminAuthenticationHandler = createAdminAuthenticationWebHandler({
   baseHandler: adminAccountsHandler,
   enableAdminUi
-}));
+});
+const publicErrorPagesHandler = createPublicErrorPagesWebHandler({
+  baseHandler: adminAuthenticationHandler
+});
+const server = createServer(publicErrorPagesHandler);
 
 server.listen(port, host, () => {
   console.log(`Atelier Lumière web fuente disponible en http://${host}:${port}`);
