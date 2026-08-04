@@ -109,12 +109,14 @@ export function createPublicCatalogApiHandler({
         const width = mediaMatch[3] === "preview"
           ? previewWidth(url.searchParams.get("width"))
           : null;
+        const rangeRequest = width === null
+          ? request.headers.range
+          : { range: request.headers.range, width };
         const opened = await publicCatalogService.openMedia(
           mediaMatch[1],
           mediaMatch[2],
           mediaMatch[3],
-          request.headers.range,
-          width
+          rangeRequest
         );
         const length = opened.end - opened.start + 1;
         const headers = {
