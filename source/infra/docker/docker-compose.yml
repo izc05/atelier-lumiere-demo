@@ -1,3 +1,9 @@
+x-default-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "${DOCKER_LOG_MAX_SIZE:-10m}"
+    max-file: "${DOCKER_LOG_MAX_FILES:-5}"
+
 services:
   web:
     build:
@@ -11,12 +17,27 @@ services:
       ENABLE_ADMIN_UI: ${ENABLE_ADMIN_UI:-false}
       WEB_COOKIE_SECURE: ${WEB_COOKIE_SECURE:-false}
       PROVIDER_COOKIE_SECURE: ${PROVIDER_COOKIE_SECURE:-false}
+      PILOT_MODE_ENABLED: ${PILOT_MODE_ENABLED:-false}
       PAYMENT_SANDBOX_ENABLED: ${PAYMENT_SANDBOX_ENABLED:-false}
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      - "${WEB_BIND_ADDRESS:-0.0.0.0}:${WEB_PORT:-3000}:3000"
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:3000/')
+          .then((response) => process.exit(response.ok ? 0 : 1))
+          .catch(() => process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    logging: *default-logging
     restart: unless-stopped
 
   migrate:
@@ -32,6 +53,7 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    logging: *default-logging
     restart: "no"
 
   api:
@@ -58,7 +80,9 @@ services:
       DEV_ADMIN_USER_ID: ${DEV_ADMIN_USER_ID:-00000000-0000-4000-8000-000000000001}
       DEV_ADMIN_EMAIL: ${DEV_ADMIN_EMAIL:-admin@atelier.localhost}
       DEV_ADMIN_DISPLAY_NAME: ${DEV_ADMIN_DISPLAY_NAME:-Administración Atelier Lumière}
+      PILOT_MODE_ENABLED: ${PILOT_MODE_ENABLED:-false}
       PILOT_CHECKOUT_ENABLED: ${PILOT_CHECKOUT_ENABLED:-false}
+      PILOT_CHECKOUT_SERVICE_USER_ID: ${PILOT_CHECKOUT_SERVICE_USER_ID:-00000000-0000-4000-8000-000000000011}
       PILOT_SHIPPING_CENTS: ${PILOT_SHIPPING_CENTS:-0}
       PAYMENT_SANDBOX_ENABLED: ${PAYMENT_SANDBOX_ENABLED:-false}
       PAYMENT_SERVICE_USER_ID: ${PAYMENT_SERVICE_USER_ID:-00000000-0000-4000-8000-000000000009}
@@ -116,6 +140,7 @@ services:
       timeout: 5s
       retries: 6
       start_period: 10s
+    logging: *default-logging
     restart: unless-stopped
 
   database:
@@ -133,6 +158,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging: *default-logging
     restart: unless-stopped
 
 volumes:

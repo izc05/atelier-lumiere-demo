@@ -318,7 +318,7 @@ export function createAccountRecoveryService({
   if (!database || typeof database.withContext !== "function") {
     throw new TypeError("La recuperación necesita una base de datos.");
   }
-  if (!systemContext || systemContext.role !== "ADMIN") {
+  if (!systemContext || !["ADMIN", "AUTH_SERVICE"].includes(systemContext.role) || systemContext.providerId) {
     throw new TypeError("La recuperación necesita un contexto interno de administración.");
   }
   if (typeof loginPepper !== "string" || loginPepper.length < 32) {

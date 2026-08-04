@@ -26,6 +26,7 @@ import { createDatabase } from "./database.mjs";
 import {
   createAuthenticationServiceContext,
   createDevelopmentAdminContext,
+  createPilotCheckoutServiceContext,
   createRequestAuthenticator,
   ensureDevelopmentAdmin
 } from "./auth-context.mjs";
@@ -81,6 +82,7 @@ const requestFileStorage = createRequestFileStorage();
 const baseProvidersService = database.enabled ? createProvidersService({ database }) : null;
 const developmentAdminContext = createDevelopmentAdminContext({ environment });
 const authenticationSystemContext = createAuthenticationServiceContext();
+const pilotCheckoutSystemContext = createPilotCheckoutServiceContext();
 const legalSystemContext = Object.freeze({
   role: "LEGAL_SERVICE",
   userId: process.env.LEGAL_SERVICE_USER_ID ?? "00000000-0000-4000-8000-000000000007",
@@ -135,11 +137,11 @@ const authenticateRequest = createRequestAuthenticator({
   environment,
   adminAuthService
 });
-const baseOnboardingService = database.enabled && developmentAdminContext
-  ? createProviderOnboardingService({ database, systemContext: developmentAdminContext })
+const baseOnboardingService = database.enabled
+  ? createProviderOnboardingService({ database, systemContext: authenticationSystemContext })
   : null;
-const baseEmailVerificationService = database.enabled && developmentAdminContext
-  ? createEmailVerificationService({ database, systemContext: developmentAdminContext })
+const baseEmailVerificationService = database.enabled
+  ? createEmailVerificationService({ database, systemContext: authenticationSystemContext })
   : null;
 const providersService = withProviderInvitationDelivery({
   providersService: baseProvidersService,
@@ -150,27 +152,27 @@ const onboardingService = withOnboardingEmailDelivery({
   onboardingService: baseOnboardingService,
   mailService
 });
-const emailVerificationService = baseEmailVerificationService && developmentAdminContext
+const emailVerificationService = baseEmailVerificationService
   ? withVerificationEmailDelivery({
       emailVerificationService: baseEmailVerificationService,
       mailService,
       database,
-      systemContext: developmentAdminContext
+      systemContext: authenticationSystemContext
     })
   : null;
-const twoFactorService = database.enabled && developmentAdminContext
-  ? createTwoFactorService({ database, systemContext: developmentAdminContext })
+const twoFactorService = database.enabled
+  ? createTwoFactorService({ database, systemContext: authenticationSystemContext })
   : null;
-const providerAuthService = database.enabled && developmentAdminContext
-  ? createProviderAuthService({ database, systemContext: developmentAdminContext })
+const providerAuthService = database.enabled
+  ? createProviderAuthService({ database, systemContext: authenticationSystemContext })
   : null;
-const customerAuthService = database.enabled && developmentAdminContext
-  ? createCustomerAuthService({ database, systemContext: developmentAdminContext })
+const customerAuthService = database.enabled
+  ? createCustomerAuthService({ database, systemContext: authenticationSystemContext })
   : null;
-const accountRecoveryService = database.enabled && developmentAdminContext
+const accountRecoveryService = database.enabled
   ? createAccountRecoveryService({
       database,
-      systemContext: developmentAdminContext,
+      systemContext: authenticationSystemContext,
       mailService,
       environment
     })
@@ -201,14 +203,13 @@ const orderNotificationWorker = database.enabled
     })
   : null;
 const paymentSandboxService = database.enabled
-  && environment !== "production"
   && process.env.PAYMENT_SANDBOX_ENABLED === "true"
   ? createPaymentSandboxService({ database, systemContext: paymentSystemContext, environment })
   : null;
-const basePilotCheckoutService = database.enabled && developmentAdminContext && customerAuthService
+const basePilotCheckoutService = database.enabled && customerAuthService
   ? createPilotCheckoutService({
       database,
-      systemContext: developmentAdminContext,
+      systemContext: pilotCheckoutSystemContext,
       customerAuthService,
       mailService,
       environment

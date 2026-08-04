@@ -85,9 +85,9 @@ for (const expected of [
   assert.match(databaseReadme, new RegExp(expected));
 }
 for (const expected of [
-  "logs --tail=100 migrate",
-  "run --rm migrate",
-  "Nunca se debe borrar `database_data`"
+  "logs --tail=200 migrate",
+  "deploy:mini-pc -- update",
+  "borrar `database_data`"
 ]) {
   assert.match(installGuide, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 }

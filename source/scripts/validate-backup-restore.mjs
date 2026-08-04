@@ -91,8 +91,8 @@ assert.match(compose, /process\.exit\(response\.ok \? 0 : 1\)/);
 assert.doesNotMatch(compose, /test:\s*\["CMD",\s*"wget"/);
 
 for (const expected of [
-  "backup:database",
-  "verify:backup",
+  "backup:pilot",
+  "conjunto verificado",
   "RESTORE_ACTIVE_DATABASE",
   "base anterior",
   "prueba de restauración"

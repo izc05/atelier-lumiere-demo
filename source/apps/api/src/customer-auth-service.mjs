@@ -24,7 +24,7 @@ function userAgentHash(value) {
   return sha256(value.trim().slice(0, 500));
 }
 function requireSystemContext(context) {
-  if (!context || context.role !== "ADMIN" || !UUID_PATTERN.test(context.userId ?? "")) {
+  if (!context || !["ADMIN", "AUTH_SERVICE"].includes(context.role) || context.providerId || !UUID_PATTERN.test(context.userId ?? "")) {
     throw new TypeError("El acceso de clientes necesita un contexto interno de Administración.");
   }
   return context;

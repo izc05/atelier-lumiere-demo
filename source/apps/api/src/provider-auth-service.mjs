@@ -285,7 +285,7 @@ export function createProviderAuthService({
   if (!database || typeof database.withContext !== "function") {
     throw new TypeError("createProviderAuthService necesita una base de datos.");
   }
-  if (!systemContext || systemContext.role !== "ADMIN") {
+  if (!systemContext || !["ADMIN", "AUTH_SERVICE"].includes(systemContext.role) || systemContext.providerId) {
     throw new TypeError("La autenticación necesita un contexto interno de administración.");
   }
   if (typeof loginPepper !== "string" || loginPepper.length < 32) {

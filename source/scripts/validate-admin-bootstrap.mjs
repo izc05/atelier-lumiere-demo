@@ -56,8 +56,9 @@ for (const expected of [
   assert.match(test, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 }
 
-assert.match(guide, /git pull --ff-only origin main/);
+assert.match(guide, /deploy:mini-pc -- update/);
 assert.match(guide, /ENABLE_ADMIN_UI=true/);
-assert.match(guide, /No debes compartir/);
+assert.match(guide, /Nunca ejecutar/);
+assert.match(guide, /contraseñas, TOTP o códigos de recuperación/);
 
 console.log("Bootstrap administrativo y guía del mini PC validados.");

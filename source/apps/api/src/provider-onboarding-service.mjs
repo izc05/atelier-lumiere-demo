@@ -134,7 +134,7 @@ export function createProviderOnboardingService({
   if (!database || typeof database.withContext !== "function") {
     throw new TypeError("createProviderOnboardingService necesita una base de datos.");
   }
-  if (!systemContext || systemContext.role !== "ADMIN") {
+  if (!systemContext || !["ADMIN", "AUTH_SERVICE"].includes(systemContext.role) || systemContext.providerId) {
     throw new TypeError("La incorporación necesita un contexto interno de administración.");
   }
   if (

@@ -204,6 +204,48 @@ if [[ -f "${ENV_FILE}" ]]; then
     ok "No se detectan marcadores de ejemplo en .env."
   fi
 
+  PILOT_MODE_VALUE="$(env_value PILOT_MODE_ENABLED)"
+  CHECKOUT_VALUE="$(env_value PILOT_CHECKOUT_ENABLED)"
+  SMTP_VALUE="$(env_value SMTP_ENABLED)"
+  PAYMENT_VALUE="$(env_value PAYMENT_SANDBOX_ENABLED)"
+  if [[ "${PILOT_MODE_VALUE}" == "true" ]]; then
+    ok "Modo piloto endurecido activado."
+    if [[ "${CHECKOUT_VALUE}" == "true" ]]; then
+      [[ "${SMTP_VALUE}" == "true" ]] \
+        && ok "SMTP activo para entregar el acceso privado de clientes." \
+        || error "El checkout piloto en producción necesita SMTP_ENABLED=true."
+    else
+      warn "Modo piloto activo pero el checkout permanece desactivado."
+    fi
+    if [[ "${PAYMENT_VALUE}" == "true" ]]; then
+      check_secret PAYMENT_SANDBOX_SESSION_SECRET 32
+      check_secret PAYMENT_SANDBOX_WEBHOOK_SECRET 32
+    fi
+  elif [[ "${CHECKOUT_VALUE}" == "true" || "${PAYMENT_VALUE}" == "true" ]]; then
+    error "Checkout o pago sandbox activos sin PILOT_MODE_ENABLED=true."
+  else
+    ok "Funciones de pedido del piloto apagadas por defecto."
+  fi
+
+  APP_URL_VALUE="$(env_value APP_URL)"
+  if [[ "${APP_URL_VALUE}" == https://* ]]; then
+    [[ "$(env_value WEB_COOKIE_SECURE)" == "true" && "$(env_value PROVIDER_COOKIE_SECURE)" == "true" ]] \
+      && ok "Cookies Secure activadas para HTTPS." \
+      || error "HTTPS requiere WEB_COOKIE_SECURE=true y PROVIDER_COOKIE_SECURE=true."
+    [[ "$(env_value WEB_BIND_ADDRESS)" == "127.0.0.1" ]] \
+      && ok "La web solo escucha en loopback detrás del túnel." \
+      || warn "Con Cloudflare Tunnel se recomienda WEB_BIND_ADDRESS=127.0.0.1."
+  fi
+
+  MIRROR_VALUE="$(env_value PILOT_BACKUP_MIRROR_DIR)"
+  if [[ -n "${MIRROR_VALUE}" ]]; then
+    [[ -d "${MIRROR_VALUE}" && -w "${MIRROR_VALUE}" ]] \
+      && ok "Destino externo de copias disponible: ${MIRROR_VALUE}." \
+      || error "PILOT_BACKUP_MIRROR_DIR no está montado o no permite escritura."
+  else
+    warn "No se ha configurado todavía una copia externa del mini PC."
+  fi
+
   if docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" config --quiet >/dev/null 2>&1; then
     ok "Docker Compose acepta la configuración."
   else

@@ -46,7 +46,10 @@ export function createPaymentSandboxWebHandler({
   baseHandler,
   apiInternalUrl = process.env.API_INTERNAL_URL ?? "http://localhost:4000",
   enabled = process.env.PAYMENT_SANDBOX_ENABLED === "true"
-    && (process.env.NODE_ENV ?? "development") !== "production",
+    && (
+      (process.env.NODE_ENV ?? "development") !== "production"
+      || process.env.PILOT_MODE_ENABLED === "true"
+    ),
   fetchImpl = fetch,
   logger = console
 } = {}) {
