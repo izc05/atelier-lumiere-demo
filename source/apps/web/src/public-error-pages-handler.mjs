@@ -1,12 +1,8 @@
 import { readFile } from "node:fs/promises";
-import { extname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { extname, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const DEFAULT_PUBLIC_DIRECTORY = fileURLToPath(new URL("../public/", import.meta.url));
-const ERROR_PAGE_PATHS = Object.freeze({
-  404: new URL("../public/404/index.html", import.meta.url),
-  500: new URL("../public/500/index.html", import.meta.url)
-});
 
 function errorHeaders() {
   return {
@@ -84,7 +80,8 @@ function createBufferedResponse() {
     },
     write(chunk, encoding) {
       if (chunk !== undefined && chunk !== null) {
-        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk), encoding));
+        const selectedEncoding = typeof encoding === "string" ? encoding : undefined;
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk), selectedEncoding));
       }
       return true;
     },
@@ -126,16 +123,16 @@ export function createPublicErrorPagesWebHandler({
     throw new TypeError("La carpeta pública no es válida.");
   }
 
+  const root = resolve(publicDirectory);
   const pageUrls = {
-    404: new URL("404/index.html", `file://${publicDirectory.replace(/\/$/, "")}/`),
-    500: new URL("500/index.html", `file://${publicDirectory.replace(/\/$/, "")}/`)
+    404: pathToFileURL(resolve(root, "404/index.html")),
+    500: pathToFileURL(resolve(root, "500/index.html"))
   };
   const pageCache = new Map();
 
   async function loadErrorPage(statusCode) {
     if (!pageCache.has(statusCode)) {
-      const source = pageUrls[statusCode] ?? ERROR_PAGE_PATHS[statusCode];
-      pageCache.set(statusCode, readFile(source).catch(() => fallbackPage(statusCode)));
+      pageCache.set(statusCode, readFile(pageUrls[statusCode]).catch(() => fallbackPage(statusCode)));
     }
     return pageCache.get(statusCode);
   }
