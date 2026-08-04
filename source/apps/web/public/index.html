@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,39 +10,35 @@
   <title>Atelier Lumière · Artesanía para celebrar</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/tienda/cart.css">
+  <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
+  <script defer src="/public-shell.js"></script>
   <script defer src="/home.js"></script>
 </head>
 <body>
-  <header class="site-header" id="site-header">
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
+  <header class="site-header" id="site-header" data-public-header>
     <a class="wordmark" href="/" aria-label="Atelier Lumière, inicio">
       <span>Atelier</span>
       <strong>Lumière</strong>
     </a>
-    <nav class="main-nav" aria-label="Navegación principal">
+    <nav class="main-nav public-navigation" id="public-navigation" aria-label="Navegación principal" data-public-navigation>
       <a href="#talleres">Talleres</a>
       <a href="/tienda/">Tienda</a>
       <a href="/blog/">Historias</a>
       <a href="/legal/">Legal</a>
+      <a href="/proveedor/acceso/">Acceso talleres</a>
     </nav>
     <div class="header-actions">
-      <a class="header-link" href="/proveedor/acceso/">Acceso talleres</a>
       <a class="bag-link" href="/carrito/" aria-label="Abrir carrito">
         <span>Carrito</span>
         <strong id="cart-count">0</strong>
       </a>
-      <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav">Menú</button>
+      <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-public-menu-toggle>Menú</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" aria-label="Navegación móvil" hidden>
-      <a href="#talleres">Talleres</a>
-      <a href="/tienda/">Tienda</a>
-      <a href="/blog/">Historias</a>
-      <a href="/carrito/">Carrito</a>
-      <a href="/proveedor/acceso/">Acceso talleres</a>
-    </nav>
   </header>
 
-  <main>
+  <main id="main-content" tabindex="-1">
     <section class="hero-section" aria-labelledby="hero-title">
       <div class="hero-thread" aria-hidden="true"></div>
       <div class="hero-copy">
