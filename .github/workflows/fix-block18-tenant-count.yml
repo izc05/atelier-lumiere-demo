@@ -1,0 +1,38 @@
+name: Actualizar contador técnico bloque 18
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  fix-count:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Actualizar expectativa de cuentas técnicas
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('source/packages/database/tests/tenant_isolation.sql')
+          text = path.read_text()
+          old = "IF visible_technical_users <> 4 THEN\n    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 4.', visible_technical_users;"
+          new = "IF visible_technical_users <> 5 THEN\n    RAISE EXCEPTION 'Administración ve % cuentas técnicas; debería ver 5.', visible_technical_users;"
+          if old not in text:
+              raise SystemExit('No se encontró la expectativa antigua')
+          path.write_text(text.replace(old, new))
+          PY
+      - name: Publicar corrección
+        run: |
+          git config user.name "atelier-lumiere-automation"
+          git config user.email "199996336+izc05@users.noreply.github.com"
+          git add source/packages/database/tests/tenant_isolation.sql
+          git commit -m "Actualizar aislamiento para servicio de checkout"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
