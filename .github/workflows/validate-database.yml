@@ -96,6 +96,9 @@ jobs:
       - name: Verificar autenticación administrativa
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/admin_authentication.sql
 
+      - name: Verificar servicios internos de producción
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/production_internal_services.sql
+
       - name: Verificar catálogo, medios y revisión editorial
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/catalog_isolation.sql
 
