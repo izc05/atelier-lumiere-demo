@@ -17,10 +17,6 @@ function money(cents, currency = "EUR") {
   return new Intl.NumberFormat("es-ES", { style: "currency", currency }).format(cents / 100);
 }
 
-function mediaPath(path) {
-  return typeof path === "string" ? path.replace(/^\/api\//, "/internal/") : null;
-}
-
 async function requestJson(path) {
   const response = await fetch(path, { headers: { Accept: "application/json" } });
   const payload = await response.json().catch(() => ({}));
@@ -37,9 +33,16 @@ function card(product) {
   const visual = element("div", "product-image", "Pieza artesanal");
   if (product.cover?.path) {
     const image = document.createElement("img");
-    image.src = mediaPath(product.cover.path);
-    image.alt = product.cover.altText || product.name;
-    image.loading = "lazy";
+    window.AtelierImages.configure(image, {
+      path: product.cover.path,
+      alt: product.cover.altText || product.name,
+      width: product.cover.width,
+      height: product.cover.height,
+      sizes: "(max-width: 700px) calc(100vw - 44px), (max-width: 980px) 50vw, 390px",
+      loading: "lazy",
+      priority: "low",
+      defaultWidth: 640
+    });
     visual.replaceChildren(image);
   }
 
