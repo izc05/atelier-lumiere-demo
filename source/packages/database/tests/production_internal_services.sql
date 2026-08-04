@@ -6,12 +6,13 @@ SELECT set_config('app.role', 'ADMIN', false);
 SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000008', false);
 SELECT set_config('app.provider_id', '', false);
 
-INSERT INTO providers (id, slug, display_name, contact_name, specialty, status)
+INSERT INTO providers (id, slug, display_name, contact_name, contact_email, specialty, status)
 VALUES (
   '10000000-0000-4000-8000-000000000037',
   'servicios-produccion-test',
   'Servicios Producción Test',
   'Responsable de prueba',
+  'responsable-servicios@atelier.test',
   'Cerámica',
   'ACTIVE'
 );
