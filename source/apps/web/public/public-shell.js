@@ -4,6 +4,26 @@ root.classList.add("js");
 
 const MOBILE_QUERY = "(max-width: 760px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+const REVEAL_SELECTOR = [
+  ".hero-section",
+  ".manifesto-section",
+  ".featured-section",
+  ".process-section",
+  ".story-section",
+  ".closing-section",
+  ".hero",
+  ".toolbar",
+  ".provider-hero",
+  "#collection",
+  ".product-hero",
+  ".content-grid",
+  ".gallery-section",
+  ".cart-layout",
+  ".empty-cart",
+  ".article-head",
+  ".article-layout",
+  "#grid"
+].join(",");
 
 function normalizedPath(value) {
   const path = String(value || "/").replace(/\/+$/g, "");
@@ -38,6 +58,38 @@ function initializeMotionPreference() {
   };
   apply();
   preference.addEventListener?.("change", apply);
+}
+
+function initializeReveals() {
+  const elements = [...new Set(document.querySelectorAll(REVEAL_SELECTOR))];
+  if (elements.length === 0) return;
+  for (const element of elements) element.setAttribute("data-public-reveal", "");
+
+  const showAll = () => {
+    for (const element of elements) element.classList.add("is-visible");
+  };
+  if (root.dataset.motion === "reduced" || !("IntersectionObserver" in window)) {
+    showAll();
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.classList.add("is-visible");
+      observer.unobserve(entry.target);
+    }
+  }, {
+    rootMargin: "0px 0px -8%",
+    threshold: .08
+  });
+  for (const element of elements) observer.observe(element);
+
+  window.addEventListener("atelier:motion-preference", (event) => {
+    if (!event.detail?.reduced) return;
+    observer.disconnect();
+    showAll();
+  }, { once: true });
 }
 
 function initializeNavigation(header) {
@@ -133,6 +185,7 @@ function initializeNavigation(header) {
 }
 
 initializeMotionPreference();
+initializeReveals();
 for (const header of document.querySelectorAll("[data-public-header]")) {
   initializeNavigation(header);
 }
