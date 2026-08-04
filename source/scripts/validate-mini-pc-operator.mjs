@@ -71,8 +71,7 @@ for (const expected of [
   '"update"',
   "--dry-run",
   "mini-pc-preflight.sh",
-  "backup:database",
-  "verify:backup",
+  "backup:pilot",
   "git -C",
   "merge --ff-only origin/main",
   "La base ya contiene",
@@ -86,12 +85,10 @@ for (const expected of [
   assert.match(deploy, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 }
 
-const backupIndex = deploy.indexOf("run backup:database");
-const verifyIndex = deploy.indexOf("run verify:backup");
+const backupIndex = deploy.indexOf("run backup:pilot");
 const fetchIndex = deploy.indexOf("fetch --prune origin main");
-assert.ok(backupIndex >= 0, "El despliegue debe crear una copia antes de actualizar.");
-assert.ok(verifyIndex > backupIndex, "La copia debe verificarse después de crearla.");
-assert.ok(fetchIndex > verifyIndex, "Git no debe actualizarse antes de verificar la copia.");
+assert.ok(backupIndex >= 0, "El despliegue debe crear una copia completa antes de actualizar.");
+assert.ok(fetchIndex > backupIndex, "Git no debe actualizarse antes de verificar la copia completa.");
 
 for (const forbidden of [
   "git reset --hard",

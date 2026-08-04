@@ -249,7 +249,7 @@ export function createTwoFactorService({
   if (!database || typeof database.withContext !== "function") {
     throw new TypeError("createTwoFactorService necesita una base de datos.");
   }
-  if (!systemContext || systemContext.role !== "ADMIN") {
+  if (!systemContext || !["ADMIN", "AUTH_SERVICE"].includes(systemContext.role) || systemContext.providerId) {
     throw new TypeError("2FA necesita un contexto interno de administración.");
   }
   const key = parseEncryptionKey(encryptionKey);

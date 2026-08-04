@@ -116,7 +116,7 @@ for (const expected of [
   "recipient_kind",
   "directPrivateRows"
 ]) assert.match(tests, new RegExp(expected));
-assert.match(files[paths[1]], /visible_technical_users <> 4/);
+assert.match(files[paths[1]], /visible_technical_users <> 5/);
 assert.match(files[paths[1]], /El servicio de notificaciones no está aislado/);
 
 console.log("Cola, plantillas, reintentos y aislamiento de avisos de pedido validados.");

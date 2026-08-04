@@ -152,7 +152,7 @@ export function createEmailVerificationService({
   if (!database || typeof database.withContext !== "function") {
     throw new TypeError("createEmailVerificationService necesita una base de datos.");
   }
-  if (!systemContext || systemContext.role !== "ADMIN") {
+  if (!systemContext || !["ADMIN", "AUTH_SERVICE"].includes(systemContext.role) || systemContext.providerId) {
     throw new TypeError("La verificación necesita un contexto interno de administración.");
   }
   if (!Number.isInteger(tokenTtlHours) || tokenTtlHours < 1 || tokenTtlHours > 72) {

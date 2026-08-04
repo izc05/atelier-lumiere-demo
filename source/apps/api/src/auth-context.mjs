@@ -34,6 +34,25 @@ export function createAuthenticationServiceContext({
   });
 }
 
+
+export function createPilotCheckoutServiceContext({
+  pilotCheckoutServiceUserId = process.env.PILOT_CHECKOUT_SERVICE_USER_ID
+    ?? "00000000-0000-4000-8000-000000000011"
+} = {}) {
+  if (
+    typeof pilotCheckoutServiceUserId !== "string"
+    || !UUID_PATTERN.test(pilotCheckoutServiceUserId)
+  ) {
+    throw new Error("PILOT_CHECKOUT_SERVICE_USER_ID debe ser un UUID válido.");
+  }
+  return Object.freeze({
+    role: "PILOT_CHECKOUT_SERVICE",
+    userId: pilotCheckoutServiceUserId.toLowerCase(),
+    providerId: null,
+    authenticationMode: "internal-pilot-checkout-service"
+  });
+}
+
 export function createDevelopmentAdminContext({
   environment = process.env.NODE_ENV ?? "development",
   allowDevelopmentAdminAuth = process.env.ALLOW_DEV_ADMIN_AUTH === "true",

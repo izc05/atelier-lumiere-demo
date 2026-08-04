@@ -91,16 +91,13 @@ if [[ "${MODE}" == "update" ]]; then
   BEFORE_SHA="$(git -C "${REPO_DIR}" rev-parse HEAD)"
 
   if [[ "${DRY_RUN}" == "false" ]]; then
-    run "${COMPOSE[@]}" up -d database
-    run npm --prefix "${ROOT_DIR}" run backup:database -- "${BACKUP_DIR}"
-    BACKUP_ARCHIVE="$(find "${BACKUP_DIR}" -maxdepth 1 -type f -name 'atelier-*.dump' -printf '%T@ %p\n' \
+    run npm --prefix "${ROOT_DIR}" run backup:pilot -- "${BACKUP_DIR}"
+    BACKUP_ARCHIVE="$(find "${BACKUP_DIR}" -maxdepth 1 -type f -name 'atelier-pilot-*.manifest' -printf '%T@ %p\n' \
       | sort -nr | awk 'NR==1 { sub(/^[^ ]+ /, ""); print; exit }')"
     [[ -n "${BACKUP_ARCHIVE}" && -s "${BACKUP_ARCHIVE}" ]] \
-      || fail "No se localizó la copia recién creada."
-    run npm --prefix "${ROOT_DIR}" run verify:backup -- "${BACKUP_ARCHIVE}"
+      || fail "No se localizó el manifiesto de la copia completa recién creada."
   else
-    run npm --prefix "${ROOT_DIR}" run backup:database -- "${BACKUP_DIR}"
-    run npm --prefix "${ROOT_DIR}" run verify:backup -- "${BACKUP_DIR}/atelier-FECHA.dump"
+    run npm --prefix "${ROOT_DIR}" run backup:pilot -- "${BACKUP_DIR}"
   fi
 
   STAGE="actualizar repositorio"

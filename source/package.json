@@ -3,23 +3,36 @@
   "version": "0.25.0",
   "private": true,
   "type": "module",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev:web": "npm --workspace @atelier-lumiere/web run dev",
     "dev:api": "npm --workspace @atelier-lumiere/api run dev",
     "migrate": "npm --workspace @atelier-lumiere/api run migrate",
     "bootstrap:platform-owner": "npm --workspace @atelier-lumiere/api run bootstrap:platform-owner",
     "backup:database": "bash scripts/backup-database.sh",
+    "backup:media": "bash scripts/backup-media.sh",
+    "verify:media": "bash scripts/verify-media-backup.sh",
+    "backup:pilot": "bash scripts/backup-pilot.sh",
+    "prune:pilot-backups": "bash scripts/prune-pilot-backups.sh",
     "verify:backup": "bash scripts/verify-database-backup.sh",
     "restore:database": "bash scripts/restore-database-backup.sh",
     "init:mini-pc": "bash scripts/mini-pc-init-env.sh",
+    "configure:smtp": "bash scripts/configure-smtp.sh",
+    "health:mini-pc": "bash scripts/mini-pc-health.sh",
+    "install:pilot-operations": "bash scripts/install-pilot-operations.sh",
     "preflight:mini-pc": "bash scripts/mini-pc-preflight.sh",
     "deploy:mini-pc": "bash scripts/mini-pc-deploy.sh",
     "test": "node --test tests/*.test.mjs && npm run test:web-integration && node scripts/run-validations.mjs",
     "test:web-integration": "npm --workspace @atelier-lumiere/web run test:integration",
     "test:api-integration": "npm --workspace @atelier-lumiere/api run test:integration",
     "validate": "node scripts/run-validations.mjs",
-    "validate:source": "node scripts/validate-source.mjs"
+    "validate:source": "node scripts/validate-source.mjs",
+    "restore:media": "bash scripts/restore-media-backup.sh"
   },
-  "engines": {"node": ">=22"}
+  "engines": {
+    "node": ">=22"
+  }
 }

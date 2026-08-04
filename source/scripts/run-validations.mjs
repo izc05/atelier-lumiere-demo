@@ -36,7 +36,8 @@ const validations = [
   "validate-admin-bootstrap.mjs",
   "validate-database-migrations.mjs",
   "validate-backup-restore.mjs",
-  "validate-mini-pc-operator.mjs"
+  "validate-mini-pc-operator.mjs",
+  "validate-production-pilot-operations.mjs"
 ];
 
 for (const validation of validations) {

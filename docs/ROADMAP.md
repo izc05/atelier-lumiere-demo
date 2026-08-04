@@ -21,6 +21,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 | 9 | Mini PC y piloto privado | Herramientas preparadas; instalación real pendiente |
 | 10 | Experiencia pública y cliente | Navegación, accesibilidad, imágenes y errores públicos completados; SEO y medición real pendientes |
 | 11 | Avisos automáticos de pedido | Preparados para piloto; activación SMTP pendiente |
+| 12 | Operación segura del piloto | Servicios internos, copia completa, SMTP guiado, logs y supervisión completados en repositorio |
 
 ## Capacidades completadas
 
@@ -30,8 +31,10 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Node.js, PostgreSQL 17, Docker Compose y migraciones incrementales.
 - RLS forzada y pruebas con talleres independientes.
 - Auditoría, sesiones revocables y servicios técnicos con permisos mínimos.
-- Copias verificadas, restauración aislada, intercambio seguro de bases y rollback.
-- Generador privado de `.env`, preflight, instalación y actualización del mini PC.
+- Copias verificadas de PostgreSQL y multimedia, manifiesto conjunto, destino externo opcional y retención.
+- Restauración aislada de PostgreSQL, intercambio seguro de bases y rollback.
+- Generador privado de `.env`, preflight, instalación, actualización, SMTP guiado y supervisión del mini PC.
+- Servicios técnicos de producción separados para identidad, checkout, pagos, legal y notificaciones.
 
 ### Proveedores
 
@@ -91,7 +94,7 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Simulación de aprobación y rechazo sin datos bancarios.
 - Registro de cronología y auditoría sin guardar el cuerpo del webhook.
 - Servicio `PAYMENT_SERVICE` aislado.
-- Desactivado por defecto e inutilizable en producción.
+- Desactivado por defecto; solo funciona en producción cuando `PILOT_MODE_ENABLED=true` y se activa expresamente.
 - No mueve dinero y `paymentCollected` permanece en `false`.
 
 ### Experiencia pública
@@ -118,6 +121,10 @@ Actualizada después de integrar la portada pública real, la recuperación admi
 - Sustitución segura de errores de navegación sin mostrar mensajes internos, rutas, credenciales ni respuestas técnicas.
 - Respuestas JSON internas y errores de archivos estáticos conservados sin transformación HTML.
 - Validadores y pruebas automáticas para navegación, teclado, movimiento, rendimiento de imágenes y páginas de error.
+
+## Estado del repositorio después del Bloque 18
+
+La base técnica del piloto está completada. Permanecen como trabajo real la instalación, las credenciales, el dominio, el SMTP, el destino externo de copias y las pruebas con personas.
 
 ## Trabajo pendiente en el repositorio
 
@@ -179,9 +186,9 @@ La decisión técnica vigente es **un taller por checkout**.
 - [ ] Activar avisos automáticos después de la prueba SMTP.
 - [ ] Activar HTTPS, cookies `Secure` y Cloudflare Tunnel.
 - [ ] Asignar dominio o subdominio.
-- [ ] Programar copias diarias y retención.
-- [ ] Copiar base y multimedia fuera del mini PC.
-- [ ] Añadir rotación de logs y monitorización de espacio y servicios.
+- [ ] Instalar en el mini PC los temporizadores de copia diaria y salud ya preparados.
+- [ ] Montar y configurar el destino externo para duplicar base y multimedia.
+- [ ] Verificar en el equipo real la rotación de logs, espacio y antigüedad de copias.
 
 ### Prueba piloto
 
@@ -194,7 +201,7 @@ La decisión técnica vigente es **un taller por checkout**.
 - [ ] Cancelación, incidencia y recuperación de acceso.
 - [ ] Prueba móvil y escritorio.
 - [ ] Medición de Core Web Vitals con fotografías reales.
-- [ ] Restauración real de una copia del mini PC.
+- [ ] Restauración real de un conjunto emparejado de base y multimedia del mini PC.
 
 ## Condiciones para abrir ventas reales
 

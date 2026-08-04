@@ -6,48 +6,42 @@ Marketplace curado de artesanía para bodas, comuniones, bautizos, aniversarios 
 
 El repositorio contiene dos capas separadas:
 
-1. **Demo pública protegida**, situada en la raíz y publicada mediante GitHub Pages. Conserva la referencia visual, la portada interactiva y distintos flujos demostrativos.
-2. **Aplicación real mantenible**, situada en `source/`. Incluye web, API, PostgreSQL, autenticación, almacenamiento privado, catálogo, blog, pedidos, encargos y centro legal.
+1. **Demo pública protegida**, publicada mediante GitHub Pages como referencia visual.
+2. **Aplicación real**, situada en `source/`, con web, API, PostgreSQL, autenticación, almacenamiento privado y operación del mini PC.
 
-Los bloques técnicos 0–7 están integrados. La aplicación real ya dispone de:
+La aplicación real ya incluye:
 
-- alta cerrada de proveedores mediante invitación;
-- verificación de correo, contraseña, doble factor y recuperación de cuenta;
-- aislamiento efectivo de cada taller mediante Row Level Security;
-- catálogo privado, multimedia, revisión administrativa y publicación pública;
-- blog editorial con revisión y publicación;
-- pedidos separados por taller, encargos personalizados y conversaciones privadas;
-- archivos privados, presupuestos, seguimiento e incidencias;
-- checkout piloto sin cobro real;
+- alta cerrada de talleres por invitación;
+- cuentas administrativas reales con roles, contraseña, TOTP, recuperación y sesiones revocables;
+- aislamiento entre talleres mediante Row Level Security forzada;
+- catálogo, fotografías adaptativas, vídeo, revisión y publicación;
+- blog editorial y escaparate público por taller;
+- un único taller por checkout y envío compartido dentro del mismo taller;
+- pedidos, encargos, presupuestos, conversaciones, archivos, logística e incidencias;
+- área privada del cliente y resumen imprimible;
+- avisos de pedido en cola, apagados hasta verificar SMTP;
+- pago sandbox sin dinero real, disponible únicamente en modo piloto explícito;
 - documentos legales versionados y centro de privacidad;
-- pruebas automáticas de aplicación, PostgreSQL, seguridad y regresión de la demo.
+- migraciones verificadas, copias PostgreSQL y multimedia, recuperación y rollback;
+- instalación, preflight, actualizaciones, supervisión y copias programadas para mini PC;
+- navegación accesible, imágenes WebP adaptativas y páginas 404/500 definitivas.
 
-## Límites actuales
+## Situación de lanzamiento
 
-Atelier Lumière **todavía no está abierto a ventas reales**.
+Atelier Lumière **no está abierto a ventas reales**.
 
-Siguen pendientes:
+El repositorio está preparado para instalar un piloto privado. En el equipo real siguen pendientes:
 
-- autenticación administrativa definitiva para producción;
-- decisión jurídica y comercial sobre vendedor, comisiones, facturación y reparto de responsabilidades;
-- decisión final entre compra limitada a un taller o checkout dividido por talleres;
-- pasarela de pago en entorno de pruebas;
-- estrategia de migraciones para bases de datos ya existentes;
-- copias de seguridad y restauración verificadas;
-- configuración del mini PC, correo real, HTTPS y Cloudflare Tunnel;
-- revisión profesional de los textos legales;
-- unificación visual de la aplicación real con la demo pública.
+- instalación en `/opt/atelier-lumiere`;
+- creación presencial del primer `PLATFORM_OWNER`;
+- dominio, HTTPS y Cloudflare Tunnel;
+- configuración y comprobación del SMTP;
+- disco o destino externo para duplicar copias;
+- pruebas con dos talleres y datos autorizados.
 
-## Ejecutar la demo pública
+Antes de cobrar dinero también deben definirse vendedor contractual, comisión, liquidaciones, facturación, fiscalidad, devoluciones y textos legales revisados profesionalmente.
 
-La raíz utiliza Node.js 22 o posterior únicamente para validar la exportación protegida:
-
-```bash
-npm install
-npm test
-```
-
-## Ejecutar la aplicación real
+## Desarrollo local
 
 ```bash
 cd source
@@ -65,58 +59,47 @@ npm run dev:web
 
 - Web: `http://localhost:3000`
 - API: `http://localhost:4000`
-- Salud de la API: `http://localhost:4000/health`
+- Salud: `http://localhost:4000/health`
 
-También puede levantarse con Docker Compose:
+## Instalación en mini PC
+
+No se debe copiar `.env.example` manualmente para una instalación real. Utilizar los asistentes:
 
 ```bash
-cd source
-cp .env.example .env
-# Sustituir todos los secretos y contraseñas ficticios.
-docker compose -f infra/docker/docker-compose.yml up --build
+cd /opt/atelier-lumiere/source
+npm run init:mini-pc -- --app-url http://IP_DEL_MINI_PC:3000
+npm run preflight:mini-pc -- --mode install
+npm run deploy:mini-pc -- install
 ```
 
-El archivo `.env` nunca debe subirse a GitHub.
+La creación del primer propietario requiere introducir personalmente la contraseña, escanear el QR y guardar los códigos de recuperación.
 
-## Principios del producto
+## Principios permanentes
 
-- Los talleres acceden únicamente por invitación de Administración.
-- No existe registro público de proveedores.
-- Cada proveedor trabaja dentro de su propio espacio aislado.
-- Los artículos y las historias pasan por revisión antes de publicarse.
-- Fotografías, vídeos y archivos privados se guardan fuera de GitHub y PostgreSQL.
-- Cada pieza puede incorporar historia, fotografías, vídeo y solicitud de diseño propio.
-- La experiencia debe combinar curación editorial, confianza y personalización.
-- Los pagos no se activarán hasta cerrar el modelo jurídico, comercial y operativo.
+- Los talleres solo acceden por invitación.
+- El navegador nunca recibe credenciales internas de API.
+- Un proveedor nunca consulta ni modifica otro taller.
+- Un carrito contiene artículos de un único taller.
+- Los importes se recalculan en el servidor.
+- Fotografías, documentos, bases y secretos reales nunca se guardan en GitHub.
+- Los pagos reales no se activan antes de cerrar el modelo jurídico y operativo.
 
-## Tecnología real
+## Tecnología
 
-- Node.js 22 y módulos ECMAScript.
-- HTML, CSS y JavaScript mantenibles.
-- PostgreSQL 17 con Row Level Security forzada.
-- Driver `pg` y consultas parametrizadas.
-- Nodemailer para correo transaccional.
-- Sharp para previews WebP.
-- QRCode para configuración TOTP.
-- Almacenamiento privado en volumen local del mini PC.
-- Docker Compose para web, API, PostgreSQL y multimedia.
-- GitHub Actions para pruebas y migraciones.
-- Cloudflare Tunnel previsto para el piloto externo.
+- Node.js 22, HTML, CSS y JavaScript.
+- PostgreSQL 17 con RLS forzada.
+- Docker Compose.
+- Nodemailer, Sharp y QRCode.
+- Almacenamiento privado en volumen persistente.
+- GitHub Actions para aplicación, PostgreSQL, restauración y despliegue.
+- Cloudflare Tunnel previsto para acceso externo.
 
 ## Documentación
 
-- [Arquitectura actual](docs/ARCHITECTURE.md)
+- [Arquitectura](docs/ARCHITECTURE.md)
 - [Hoja de ruta](docs/ROADMAP.md)
-- [Aplicación fuente](source/README.md)
+- [Aplicación real](source/README.md)
+- [Instalación del mini PC](source/docs/MINI_PC_INSTALL.md)
+- [Operación del mini PC](source/docs/MINI_PC_OPERATOR.md)
+- [Manual del piloto](source/docs/PILOT_RUNBOOK.md)
 - [Base legal técnica](source/legal/README.md)
-
-## Seguridad del repositorio
-
-Nunca deben almacenarse en GitHub:
-
-- contraseñas o claves privadas;
-- tokens y credenciales SMTP;
-- archivos `.env` reales;
-- datos personales de clientes o proveedores;
-- copias de PostgreSQL;
-- fotografías, vídeos o documentos reales de pedidos.

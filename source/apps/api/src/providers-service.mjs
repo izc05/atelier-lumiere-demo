@@ -127,14 +127,18 @@ async function issueInvitation(transaction, {
 }) {
   const rawToken = randomBytes(32).toString("base64url");
   const tokenHash = createHash("sha256").update(rawToken).digest("hex");
-  const expiresAt = new Date(now().getTime() + invitationTtlHours * 60 * 60 * 1000);
+  const issuedAt = new Date(now());
+  if (Number.isNaN(issuedAt.getTime())) {
+    throw new TypeError("El reloj de invitaciones debe devolver una fecha válida.");
+  }
+  const expiresAt = new Date(issuedAt.getTime() + invitationTtlHours * 60 * 60 * 1000);
 
   const result = await transaction.query(
     `INSERT INTO provider_invitations
-      (provider_id, email, role, token_hash, expires_at, invited_by)
-     VALUES ($1, $2, $3, $4, $5, $6)
+      (provider_id, email, role, token_hash, expires_at, invited_by, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
      RETURNING id, provider_id, email, role, status, expires_at, created_at`,
-    [providerId, emailAddress, role, tokenHash, expiresAt, invitedBy]
+    [providerId, emailAddress, role, tokenHash, expiresAt, invitedBy, issuedAt]
   );
 
   const row = result.rows[0];

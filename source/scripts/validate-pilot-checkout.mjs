@@ -95,7 +95,8 @@ assert.match(api, /provider_orders_single_provider_checkout/);
 assert.match(api, /CHECKOUT_PROVIDER_MISMATCH/);
 assert.match(apiServer, /createPilotCheckoutApiHandler/);
 assert.match(apiServer, /createPilotCheckoutService/);
-assert.match(apiServer, /developmentAdminContext && customerAuthService/);
+assert.match(apiServer, /database.enabled && customerAuthService/);
+assert.match(apiServer, /systemContext: pilotCheckoutSystemContext/);
 
 assert.match(proxy, /\/internal\/checkout\/submit/);
 assert.match(proxy, /MAX_ATTEMPTS = 10/);

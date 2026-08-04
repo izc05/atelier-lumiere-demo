@@ -157,7 +157,12 @@ function sha256(value) {
 }
 
 function internalContext(context) {
-  if (!context || context.role !== "ADMIN" || !UUID_PATTERN.test(context.userId ?? "")) {
+  if (
+    !context
+    || !["ADMIN", "PILOT_CHECKOUT_SERVICE"].includes(context.role)
+    || context.providerId
+    || !UUID_PATTERN.test(context.userId ?? "")
+  ) {
     throw new TypeError("El checkout piloto necesita un contexto interno de Administración.");
   }
   return context;

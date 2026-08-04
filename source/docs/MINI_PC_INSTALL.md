@@ -1,18 +1,15 @@
-# Instalación piloto en mini PC
+# Instalación segura en el mini PC
 
-Esta guía prepara una instalación nueva de Atelier Lumière mediante Docker. No se copian archivos manualmente: el mini PC descarga y actualiza el proyecto con Git.
+La instalación oficial se realiza mediante los asistentes del repositorio. No se copia `.env.example` manualmente ni se arranca Docker antes del preflight.
 
-> Si ya existe un volumen PostgreSQL creado con una versión anterior y contiene tablas pero no historial `schema_migrations`, el sistema se detendrá sin modificarlo. Debe hacerse una copia y utilizar el procedimiento de adopción de base existente antes de continuar.
-
-## 1. Requisitos
+## Requisitos
 
 - Ubuntu o Debian actualizado.
-- Git.
-- Docker Engine y el complemento `docker compose`.
-- Acceso al repositorio.
-- Un móvil con aplicación TOTP: Google Authenticator, Microsoft Authenticator, 2FAS o equivalente.
+- Git, Docker Engine, `docker compose`, OpenSSL y curl.
+- Usuario con permiso para Docker.
+- Móvil con aplicación TOTP.
 
-## 2. Descargar el proyecto
+## Descargar
 
 ```bash
 cd /opt
@@ -21,248 +18,102 @@ sudo chown -R "$USER":"$USER" /opt/atelier-lumiere
 cd /opt/atelier-lumiere/source
 ```
 
-## 3. Crear el archivo privado de configuración
+## Crear configuración privada
+
+Para acceso local inicial:
 
 ```bash
-cp .env.example .env
-chmod 600 .env
+npm run init:mini-pc -- --app-url http://IP_DEL_MINI_PC:3000
 ```
 
-Editar `.env` y sustituir todos los valores `GENERAR_...`. Estos comandos generan los secretos principales:
+El comando crea `.env` con permisos `600`, secretos aleatorios, producción activada y todas las funciones de pedido, correo y sandbox apagadas.
+
+## Comprobar e instalar
 
 ```bash
-openssl rand -hex 32
-openssl rand -base64 32
+npm run preflight:mini-pc -- --mode install
+npm run deploy:mini-pc -- install
 ```
 
-Configuración mínima recomendada para el piloto:
+No continuar si el preflight muestra errores. El despliegue aplica migraciones, arranca PostgreSQL, API y web y verifica su salud.
 
-```dotenv
-NODE_ENV=production
-POSTGRES_PASSWORD=CAMBIAR_POR_UNA_CLAVE_LARGA
-AUTH_LOGIN_PEPPER=SECRETO_ALEATORIO_DE_64_CARACTERES
-TWO_FACTOR_ENCRYPTION_KEY_BASE64=RESULTADO_DE_OPENSSL_RAND_BASE64_32
-TWO_FACTOR_RECOVERY_PEPPER=OTRO_SECRETO_ALEATORIO_DE_64_CARACTERES
-ALLOW_DEV_ADMIN_AUTH=false
-ENABLE_ADMIN_UI=false
-WEB_COOKIE_SECURE=false
-PROVIDER_COOKIE_SECURE=false
-MIGRATION_STATEMENT_TIMEOUT_MS=120000
-MIGRATION_LOCK_TIMEOUT_MS=10000
-```
+## Primer propietario
 
-Mientras el acceso sea solo local por HTTP, las cookies `Secure` permanecen en `false`. Cuando se publique exclusivamente por HTTPS mediante Cloudflare Tunnel, deben cambiarse a `true`.
-
-No se debe enviar el archivo `.env` por correo, WhatsApp ni subirlo a GitHub.
-
-## 4. Construir y arrancar los servicios
-
-Desde `/opt/atelier-lumiere/source`:
-
-```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --build
-```
-
-El orden es automático:
-
-1. PostgreSQL queda saludable.
-2. `migrate` verifica el historial y aplica solo los SQL pendientes.
-3. La API arranca únicamente si las migraciones terminan correctamente.
-4. La web espera a que la API esté saludable.
-
-Comprobar el estado y el resultado de migraciones:
-
-```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml ps -a
-docker compose --env-file .env -f infra/docker/docker-compose.yml logs --tail=100 migrate
-docker compose --env-file .env -f infra/docker/docker-compose.yml logs --tail=100 api
-```
-
-El servicio `migrate` debe aparecer como terminado con código `0`. Es normal que no permanezca en ejecución.
-
-## 5. Crear la primera cuenta PLATFORM_OWNER
-
-Este paso requiere estar delante del terminal y tener el móvil preparado. La contraseña no se muestra ni se pasa como argumento.
+Con la persona responsable presente:
 
 ```bash
 docker compose --env-file .env -f infra/docker/docker-compose.yml \
   exec -it api npm run bootstrap:platform-owner
 ```
 
-El asistente solicita:
+Guardar los diez códigos de recuperación fuera del mini PC. Después activar `ENABLE_ADMIN_UI=true` y recrear API y web.
 
-1. Correo administrativo.
-2. Nombre visible.
-3. Contraseña y confirmación.
-4. Escaneo del QR TOTP.
-5. Código de seis cifras.
-
-Solo después de validar el código se crea la cuenta. Al terminar se muestran diez códigos de recuperación una sola vez. Deben guardarse fuera del mini PC, preferiblemente impresos o dentro de un gestor de contraseñas.
-
-El comando queda bloqueado automáticamente cuando ya existe cualquier cuenta `PLATFORM_OWNER`.
-
-## 6. Activar la interfaz administrativa
-
-Editar `.env`:
-
-```dotenv
-ENABLE_ADMIN_UI=true
-```
-
-Recrear web y API:
+## SMTP
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --build
+npm run configure:smtp
 ```
 
-Acceso local inicial:
+El asistente prueba conexión y entrega, no muestra la contraseña y conserva una copia del `.env` anterior. Los avisos de pedido permanecen apagados hasta confirmar el mensaje recibido.
 
-```text
-http://IP_DEL_MINI_PC:3000/admin/proveedores/
-```
-
-## 7. Comprobación básica
+## Copia completa
 
 ```bash
-curl -I http://127.0.0.1:3000/
-curl http://127.0.0.1:4000/health
+npm run backup:pilot -- /opt/atelier-backups
 ```
 
-Comprobar desde el navegador:
+La copia detiene brevemente las escrituras y genera un conjunto verificado. La copia PostgreSQL incluye una **prueba de restauración** completa en una base temporal antes de considerarse válida, con:
 
-- La portada abre.
-- `/admin/proveedores/` solicita correo, contraseña y segundo factor.
-- Un código TOTP ya utilizado no se acepta de nuevo.
-- El cierre de sesión vuelve a la pantalla de acceso.
+- PostgreSQL comprimido, SHA-256 y metadatos;
+- fotografías, vídeos y documentos privados, SHA-256 y metadatos;
+- manifiesto que empareja ambos archivos con el commit desplegado.
 
-## 8. Crear una copia privada y verificable
+Configurar `PILOT_BACKUP_MIRROR_DIR` para duplicar cada conjunto fuera del disco principal.
 
-Preparar una carpeta fuera del repositorio:
+## Operación automática
 
 ```bash
-sudo mkdir -p /opt/atelier-backups
-sudo chown "$USER":"$USER" /opt/atelier-backups
-chmod 700 /opt/atelier-backups
+sudo npm run install:pilot-operations
 ```
 
-Crear la copia:
+Instala una copia diaria a las 03:30 y una comprobación de salud cada quince minutos. La retención predeterminada es de 14 días.
+
+## Actualización
 
 ```bash
-cd /opt/atelier-lumiere/source
-npm run backup:database -- /opt/atelier-backups
+npm run preflight:mini-pc -- --mode update
+npm run deploy:mini-pc -- update
 ```
 
-El comando:
+La actualización crea y verifica primero la copia completa, y solo después descarga `origin/main`, construye y migra. Nunca borra volúmenes ni restaura automáticamente.
 
-- utiliza el formato comprimido personalizado de PostgreSQL;
-- no incluye propietarios ni privilegios del servidor;
-- escribe primero un archivo temporal `.part`;
-- comprueba que `pg_restore` puede leer su catálogo;
-- genera un SHA-256;
-- guarda metadatos con fecha, tamaño, versión PostgreSQL y commit de Git;
-- aplica permisos `600`;
-- impide dos copias simultáneas.
+## Restauración PostgreSQL
 
-Cada copia genera tres archivos:
-
-```text
-atelier-AAAAmmddTHHMMSSZ.dump
-atelier-AAAAmmddTHHMMSSZ.dump.sha256
-atelier-AAAAmmddTHHMMSSZ.dump.meta
-```
-
-## 9. Hacer una prueba de restauración sin tocar la base activa
-
-No basta con comprobar que el archivo existe. Debe restaurarse periódicamente en una base temporal:
+La restauración de la base activa exige autorización literal:
 
 ```bash
-npm run verify:backup -- /opt/atelier-backups/atelier-AAAAmmddTHHMMSSZ.dump
-```
-
-La prueba de restauración:
-
-1. comprueba el SHA-256;
-2. comprueba el catálogo del archivo;
-3. crea una base PostgreSQL temporal;
-4. restaura el archivo completo;
-5. comprueba `users`, `providers` y `schema_migrations`;
-6. elimina la base temporal;
-7. confirma que la base activa no fue modificada.
-
-Una copia no debe considerarse válida hasta superar esta prueba.
-
-## 10. Actualizar el proyecto sin borrar datos
-
-Primero crear y verificar una copia. Después:
-
-```bash
-cd /opt/atelier-lumiere
-git switch main
-git pull --ff-only origin main
-cd source
-
-docker compose --env-file .env -f infra/docker/docker-compose.yml build
-
-docker compose --env-file .env -f infra/docker/docker-compose.yml run --rm migrate
-
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
-```
-
-El proceso `migrate`:
-
-- mantiene una tabla `schema_migrations`;
-- compara el SHA-256 de las migraciones aplicadas;
-- rechaza cualquier archivo histórico modificado o eliminado;
-- aplica solo los archivos nuevos;
-- registra la migración dentro de la misma transacción;
-- impide que dos actualizaciones se ejecuten al mismo tiempo.
-
-Nunca se debe borrar `database_data` para “arreglar” un fallo de migración. Primero se revisan los logs y la copia de seguridad.
-
-## 11. Restaurar la base activa
-
-Esta operación es destructiva y exige la confirmación literal `RESTORE_ACTIVE_DATABASE`:
-
-```bash
-cd /opt/atelier-lumiere/source
 npm run restore:database -- \
-  /opt/atelier-backups/atelier-AAAAmmddTHHMMSSZ.dump \
+  /opt/atelier-backups/atelier-FECHA.dump \
   RESTORE_ACTIVE_DATABASE
 ```
 
-El procedimiento no sobrescribe directamente la base activa:
+La base anterior se conserva como rollback. Para recuperar los archivos privados del mismo conjunto, usar el archivo multimedia indicado por el manifiesto:
 
-1. vuelve a verificar completamente la copia;
-2. restaura en una base aislada;
-3. valida estructura e historial;
-4. detiene web y API;
-5. renombra la base activa como `atelier_before_...`;
-6. renombra la base restaurada con el nombre activo;
-7. ejecuta `migrate` para confirmar checksums y pendientes;
-8. vuelve a arrancar web y API.
+```bash
+npm run restore:media -- \
+  /opt/atelier-backups/atelier-media-FECHA.tar.gz \
+  RESTORE_MEDIA_VOLUME
+```
 
-La base anterior se conserva y **no se elimina automáticamente**. Debe mantenerse hasta revisar la aplicación, entrar en Administración y comprobar los datos. Si algo falla antes del intercambio, la aplicación vuelve a arrancar con la base original.
+El comando verifica SHA-256 y rutas, detiene las escrituras, crea una copia de rollback del volumen actual y la conserva. La recuperación completa de un incidente debe usar siempre la base y la multimedia del mismo manifiesto.
 
-No debe ejecutarse esta restauración por intuición. Codex puede lanzar el comando, pero la persona responsable debe comprobar previamente el archivo, la fecha y la copia que se quiere recuperar.
+## Diagnóstico
 
-## 12. Qué puede hacer Codex
+```bash
+npm run health:mini-pc
+docker compose --env-file .env -f infra/docker/docker-compose.yml ps -a
+docker compose --env-file .env -f infra/docker/docker-compose.yml \
+  logs --tail=200 migrate api web database
+```
 
-Codex, abierto sobre el repositorio del mini PC, puede ejecutar prácticamente todos los comandos de esta guía:
-
-- actualizar Git;
-- crear y verificar la copia;
-- construir Docker;
-- ejecutar `migrate`;
-- revisar logs;
-- realizar una prueba de restauración;
-- preparar una restauración real con la confirmación indicada.
-
-La creación inicial del `PLATFORM_OWNER` debe hacerse contigo presente, porque necesitas:
-
-- escribir la contraseña privada;
-- escanear el QR con el móvil;
-- guardar los códigos de recuperación.
-
-También debes estar presente para autorizar una restauración de la base activa.
-
-No debes compartir con Codex, GitHub ni el chat la contraseña, el secreto TOTP, los códigos de recuperación o el contenido completo de `.env`.
+Nunca ejecutar `docker compose down -v`, borrar `database_data` o compartir `.env`, contraseñas, TOTP o códigos de recuperación.

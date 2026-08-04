@@ -188,6 +188,7 @@ export function createPaymentSandboxService({
   systemContext,
   enabled = process.env.PAYMENT_SANDBOX_ENABLED === "true",
   environment = process.env.NODE_ENV ?? "development",
+  pilotModeEnabled = process.env.PILOT_MODE_ENABLED === "true",
   sessionSecret = process.env.PAYMENT_SANDBOX_SESSION_SECRET,
   ttlMinutes = Number.parseInt(process.env.PAYMENT_SANDBOX_TTL_MINUTES ?? "30", 10),
   now = () => new Date()
@@ -202,7 +203,8 @@ export function createPaymentSandboxService({
   if (!Number.isInteger(ttlMinutes) || ttlMinutes < 5 || ttlMinutes > 120) {
     throw new TypeError("PAYMENT_SANDBOX_TTL_MINUTES debe estar entre 5 y 120.");
   }
-  const active = Boolean(enabled) && environment !== "production";
+  const active = Boolean(enabled)
+    && (environment !== "production" || Boolean(pilotModeEnabled));
 
   async function processWebhook(rawInput = {}) {
     if (!active) {

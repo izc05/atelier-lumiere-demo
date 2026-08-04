@@ -66,7 +66,8 @@ assert.match(database, /context\.role === "PAYMENT_SERVICE" && providerId/);
 assert.match(database, /El servicio de pagos no puede adoptar el contexto de un proveedor/);
 
 assert.match(service, /createPaymentSandboxService/);
-assert.match(service, /environment !== "production"/);
+assert.match(service, /pilotModeEnabled/);
+assert.match(service, /environment !== "production" \|\| Boolean\(pilotModeEnabled\)/);
 assert.match(service, /createHmac\("sha256", secret\)/);
 assert.match(service, /ON CONFLICT \(payment_provider, event_id\) DO NOTHING/);
 assert.match(service, /PAYMENT_WEBHOOK_IDEMPOTENCY_CONFLICT/);
@@ -87,7 +88,8 @@ assert.match(integration, /status: "UNAVAILABLE"/);
 assert.match(apiServer, /createPaymentSandboxService/);
 assert.match(apiServer, /createPaymentSandboxApiHandler/);
 assert.match(apiServer, /withSandboxPayment/);
-assert.match(apiServer, /environment !== "production"/);
+assert.match(apiServer, /PAYMENT_SANDBOX_ENABLED === "true"/);
+assert.doesNotMatch(apiServer, /environment !== "production"\s*&&\s*process\.env\.PAYMENT_SANDBOX_ENABLED/);
 
 assert.match(serviceTest, /webhooks idempotentes/);
 assert.match(serviceTest, /duplicate\.reused, true/);
@@ -134,6 +136,7 @@ assert.match(compose, /PAYMENT_SANDBOX_ENABLED/);
 assert.match(compose, /PAYMENT_SANDBOX_SESSION_SECRET/);
 assert.match(compose, /PAYMENT_SANDBOX_WEBHOOK_SECRET/);
 assert.match(env, /PAYMENT_SANDBOX_ENABLED=false/);
+assert.match(env, /PILOT_MODE_ENABLED=false/);
 assert.match(env, /PAYMENT_SERVICE_USER_ID=00000000-0000-4000-8000-000000000009/);
 
 console.log("Pago sandbox y webhooks idempotentes validados.");

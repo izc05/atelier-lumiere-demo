@@ -238,3 +238,20 @@ Cuando el repositorio ya esté clonado en el mini PC, la instrucción segura par
 ```text
 Abre /opt/atelier-lumiere, revisa source/docs/MINI_PC_OPERATOR.md, ejecuta primero el preflight correspondiente y no continúes si aparece un error. No muestres ni modifiques secretos sin mi autorización. No borres volúmenes ni restaures la base activa.
 ```
+
+## 10. Preparar el piloto privado
+
+Después de instalar, crear el propietario y activar HTTPS:
+
+```bash
+npm run configure:smtp
+npm run backup:pilot -- /opt/atelier-backups
+npm run health:mini-pc
+sudo npm run install:pilot-operations
+```
+
+El checkout y el pago sandbox solo pueden activarse conjuntamente con `PILOT_MODE_ENABLED=true`. El preflight bloquea el checkout en producción cuando SMTP no está disponible, porque el cliente necesita recibir su acceso privado.
+
+Las actualizaciones usan una copia completa de PostgreSQL y multimedia. Si se configura `PILOT_BACKUP_MIRROR_DIR`, el destino externo debe estar montado y permitir escritura; de lo contrario la copia falla de forma visible.
+
+El guion y las condiciones de parada están en [`PILOT_RUNBOOK.md`](PILOT_RUNBOOK.md).
