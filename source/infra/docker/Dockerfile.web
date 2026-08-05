@@ -5,7 +5,14 @@ ENV NODE_ENV=production
 ENV WEB_HOST=0.0.0.0
 ENV WEB_PORT=3000
 
-COPY apps/web ./apps/web
+COPY source/apps/web ./apps/web
+COPY index.html /demo/index.html
+COPY _next /demo/_next
+COPY images /demo/images
+COPY assets /demo/assets
+
+RUN node apps/web/scripts/prepare-original-home.mjs /demo /app/apps/web/public \
+  && rm -rf /demo
 
 EXPOSE 3000
 
