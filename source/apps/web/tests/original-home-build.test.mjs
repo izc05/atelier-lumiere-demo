@@ -41,6 +41,8 @@ test("prepara la portada original sin sustituir las rutas reales", async () => {
     assert.match(html, /href="\/tienda\/"/);
     assert.match(html, /src="\/images\/hero-hilo-celebracion\.webp"/);
     assert.match(html, /href="\/original-home-overrides\.css"/);
+    assert.match(html, /href="\/premium-ui\.css"/);
+    assert.match(html, /src="\/premium-ui\.js"/);
     assert.match(html, /src="\/original-home\.js"/);
     assert.match(html, /<a class="button button-outline" href="\/tienda\/">/);
     assert.doesNotMatch(html, /atelier-lumiere-demo/);

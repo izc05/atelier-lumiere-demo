@@ -12,6 +12,7 @@ COPY images /demo/images
 COPY assets /demo/assets
 
 RUN node apps/web/scripts/prepare-original-home.mjs /demo /app/apps/web/public \
+  && node apps/web/scripts/prepare-premium-ui.mjs /app/apps/web/public \
   && rm -rf /demo
 
 EXPOSE 3000

@@ -74,6 +74,30 @@ trap on_exit EXIT INT TERM
 
 COMPOSE=(docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}")
 
+wait_for_healthy() {
+  local service="$1"
+  local attempts="${2:-30}"
+  local container status
+
+  if [[ "${DRY_RUN}" == "true" ]]; then
+    printf '  [DRY-RUN] comprobar salud de %s\n' "${service}"
+    return 0
+  fi
+
+  container="$("${COMPOSE[@]}" ps -q "${service}")"
+  [[ -n "${container}" ]] || fail "No existe el contenedor ${service}."
+
+  for _ in $(seq 1 "${attempts}"); do
+    status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "${container}" 2>/dev/null || true)"
+    case "${status}" in
+      healthy|running) printf '  [OK] %s: %s\n' "${service}" "${status}"; return 0 ;;
+      unhealthy|exited|dead) fail "${service} terminó con estado ${status}." ;;
+    esac
+    sleep 2
+  done
+  fail "${service} no alcanzó estado saludable."
+}
+
 STAGE="preflight"
 log "Comprobación previa"
 run bash "${ROOT_DIR}/scripts/mini-pc-preflight.sh" --mode "${MODE}"
@@ -119,6 +143,7 @@ run "${COMPOSE[@]}" build --pull
 STAGE="preparar base de datos"
 log "Preparación de PostgreSQL"
 run "${COMPOSE[@]}" up -d database
+wait_for_healthy database 60
 
 if [[ "${MODE}" == "install" ]]; then
   if [[ "${DRY_RUN}" == "true" ]]; then
@@ -145,30 +170,6 @@ run "${COMPOSE[@]}" run --rm migrate
 STAGE="arrancar servicios"
 log "Arranque de API y web"
 run "${COMPOSE[@]}" up -d api web
-
-wait_for_healthy() {
-  local service="$1"
-  local attempts="${2:-30}"
-  local container status
-
-  if [[ "${DRY_RUN}" == "true" ]]; then
-    printf '  [DRY-RUN] comprobar salud de %s\n' "${service}"
-    return 0
-  fi
-
-  container="$("${COMPOSE[@]}" ps -q "${service}")"
-  [[ -n "${container}" ]] || fail "No existe el contenedor ${service}."
-
-  for _ in $(seq 1 "${attempts}"); do
-    status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "${container}" 2>/dev/null || true)"
-    case "${status}" in
-      healthy|running) printf '  [OK] %s: %s\n' "${service}" "${status}"; return 0 ;;
-      unhealthy|exited|dead) fail "${service} terminó con estado ${status}." ;;
-    esac
-    sleep 2
-  done
-  fail "${service} no alcanzó estado saludable."
-}
 
 STAGE="verificar servicios"
 log "Verificación final"

@@ -1,8 +1,10 @@
 (() => {
-  const premiumStyles = document.createElement("link");
-  premiumStyles.rel = "stylesheet";
-  premiumStyles.href = "/mis-pedidos/customer-area-premium.css";
-  document.head.append(premiumStyles);
+  if (!document.querySelector('link[href="/mis-pedidos/customer-area-premium.css"]')) {
+    const premiumStyles = document.createElement("link");
+    premiumStyles.rel = "stylesheet";
+    premiumStyles.href = "/mis-pedidos/customer-area-premium.css";
+    document.head.append(premiumStyles);
+  }
 
   const ORDER_LABELS = Object.freeze({PENDING_CONFIRMATION:"Pendiente de confirmar",ACCEPTED:"Aceptado",IN_PRODUCTION:"En elaboración",READY_TO_SHIP:"Listo para enviar",SHIPPED:"Enviado",DELIVERED:"Entregado",INCIDENT:"Con incidencia",CANCELLED:"Cancelado"});
   const ORDER_CLASSES = Object.freeze({PENDING_CONFIRMATION:"pending",ACCEPTED:"accepted",IN_PRODUCTION:"production",READY_TO_SHIP:"ready",SHIPPED:"shipped",DELIVERED:"delivered",INCIDENT:"incident",CANCELLED:"cancelled"});
