@@ -1,0 +1,56 @@
+name: Aplicar sistema visual premium del bloque 19
+
+on:
+  push:
+    branches:
+      - block-19-premium-visual-system
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-block-19
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar la rama
+        uses: actions/checkout@v4
+        with:
+          ref: block-19-premium-visual-system
+          fetch-depth: 0
+
+      - name: Reconstruir y verificar el parche
+        run: |
+          cat .github/block19-patch-01.txt \
+              .github/block19-patch-02.txt \
+              .github/block19-patch-03.txt \
+              .github/block19-patch-04.txt \
+            | tr -d '\n' | base64 --decode > /tmp/block19.patch.gz
+          echo 'dabd8ce7f5c3a2d150028631bec7dcdaa1d2ce6bd4f95b1ca0e7ddc069ff051e  /tmp/block19.patch.gz' | sha256sum --check
+          gzip --decompress --stdout /tmp/block19.patch.gz > /tmp/block19.patch
+          echo 'e7db51a69895cff52fe0bb27493041356c5cb9c3b1f34df0e674b9a4bf5001bc  /tmp/block19.patch' | sha256sum --check
+          git apply --check /tmp/block19.patch
+
+      - name: Aplicar la versión validada
+        run: |
+          git apply /tmp/block19.patch
+          rm -f \
+            .github/block19-patch-01.txt \
+            .github/block19-patch-02.txt \
+            .github/block19-patch-03.txt \
+            .github/block19-patch-04.txt \
+            .github/workflows/apply-block-19.yml \
+            .github/workflows/export-block-19-source.yml
+          git diff --check
+
+      - name: Publicar el bloque 19
+        run: |
+          git config user.name 'IsiVoltPro Mantenimiento'
+          git config user.email 'isiciozafracantos@gmail.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Bloque 19: unificar la experiencia visual premium'
+          git push origin HEAD:block-19-premium-visual-system
