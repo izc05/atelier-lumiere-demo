@@ -7,8 +7,8 @@ x-default-logging: &default-logging
 services:
   web:
     build:
-      context: ../..
-      dockerfile: infra/docker/Dockerfile.web
+      context: ../../..
+      dockerfile: source/infra/docker/Dockerfile.web
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       WEB_HOST: 0.0.0.0
