@@ -5,6 +5,7 @@ import { createAdminAccountsWebHandler } from "./admin-accounts-proxy.mjs";
 import { createAdminAuthenticationWebHandler } from "./admin-auth-proxy.mjs";
 import { createAdminRecoveryWebHandler } from "./admin-recovery-proxy.mjs";
 import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
+import { createLegacyRouteRedirectWebHandler } from "./legacy-route-redirects.mjs";
 import { createLegalPrivacyWebHandler } from "./legal-privacy-proxy.mjs";
 import { createOrderLogisticsWebHandler } from "./order-logistics-proxy.mjs";
 import { createPaymentSandboxWebHandler } from "./payment-sandbox-proxy.mjs";
@@ -59,7 +60,10 @@ const adminAuthenticationHandler = createAdminAuthenticationWebHandler({
 const publicErrorPagesHandler = createPublicErrorPagesWebHandler({
   baseHandler: adminAuthenticationHandler
 });
-const server = createServer(publicErrorPagesHandler);
+const legacyRouteRedirectHandler = createLegacyRouteRedirectWebHandler({
+  baseHandler: publicErrorPagesHandler
+});
+const server = createServer(legacyRouteRedirectHandler);
 
 server.listen(port, host, () => {
   console.log(`Atelier Lumière web fuente disponible en http://${host}:${port}`);
