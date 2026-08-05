@@ -78,6 +78,7 @@ for (const expected of [
   "Usa el modo update",
   "run --rm migrate",
   "wait_for_healthy",
+  "wait_for_healthy database 60",
   "deployments",
   "bootstrap:platform-owner",
   "DESPLIEGUE COMPLETADO CORRECTAMENTE"
@@ -89,6 +90,13 @@ const backupIndex = deploy.indexOf("run backup:pilot");
 const fetchIndex = deploy.indexOf("fetch --prune origin main");
 assert.ok(backupIndex >= 0, "El despliegue debe crear una copia completa antes de actualizar.");
 assert.ok(fetchIndex > backupIndex, "Git no debe actualizarse antes de verificar la copia completa.");
+
+const databaseStartIndex = deploy.indexOf('up -d database');
+const databaseWaitIndex = deploy.indexOf('wait_for_healthy database 60');
+const databaseInspectionIndex = deploy.indexOf('EXISTING_TABLES=');
+assert.ok(databaseStartIndex >= 0, "El despliegue debe arrancar PostgreSQL.");
+assert.ok(databaseWaitIndex > databaseStartIndex, "El despliegue debe esperar a PostgreSQL después de arrancarlo.");
+assert.ok(databaseInspectionIndex > databaseWaitIndex, "No se debe consultar PostgreSQL antes de que esté saludable.");
 
 for (const forbidden of [
   "git reset --hard",

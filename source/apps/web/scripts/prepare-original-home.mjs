@@ -36,6 +36,8 @@ export function transformOriginalHomeHtml(source) {
     "</head>",
     '<meta name="robots" content="noindex,nofollow,noarchive">'
       + '<link rel="stylesheet" href="/original-home-overrides.css">'
+      + '<link rel="stylesheet" href="/premium-ui.css">'
+      + '<script src="/premium-ui.js" defer></script>'
       + "</head>"
   );
   html = html.replace(

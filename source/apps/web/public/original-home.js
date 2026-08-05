@@ -36,7 +36,7 @@ function updateHeroParallax() {
   animationFrame = null;
   if (!heroVisual || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const offset = Math.min(window.scrollY * 0.08, 34);
-  heroVisual.style.transform = `translate3d(0, ${offset}px, 0) scale(1.025)`;
+  heroVisual.style.setProperty("--original-home-scroll-y", `${offset}px`);
 }
 
 if (heroVisual) {
