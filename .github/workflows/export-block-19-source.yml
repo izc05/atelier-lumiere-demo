@@ -1,0 +1,27 @@
+name: Exportar fuente temporal del bloque 19
+
+on:
+  push:
+    branches:
+      - block-19-premium-visual-system
+
+permissions:
+  contents: read
+
+jobs:
+  export-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar rama
+        uses: actions/checkout@v4
+
+      - name: Empaquetar fuente sin metadatos ni secretos
+        run: tar --exclude=.git --exclude='*.env' -czf /tmp/block-19-source.tar.gz .
+
+      - name: Publicar artefacto temporal
+        uses: actions/upload-artifact@v4
+        with:
+          name: block-19-source
+          path: /tmp/block-19-source.tar.gz
+          retention-days: 1
+          if-no-files-found: error
