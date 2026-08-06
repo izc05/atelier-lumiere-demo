@@ -15,7 +15,9 @@ RUN npm install --omit=dev --ignore-scripts \
 COPY apps/api/src ./src
 COPY packages/database/migrations ./migrations
 
-RUN mkdir -p /data/media/.tmp \
+RUN find /app/src /app/migrations -type d -exec chmod 755 {} + \
+  && find /app/src /app/migrations -type f -exec chmod 644 {} + \
+  && mkdir -p /data/media/.tmp \
   && chown -R node:node /data/media
 
 EXPOSE 4000
