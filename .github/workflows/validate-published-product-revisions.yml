@@ -1,0 +1,95 @@
+name: Validar revisiones publicadas
+
+on:
+  push:
+    branches:
+      - feat/published-product-revisions-v2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-source-and-database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: atelier_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d atelier_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGPASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/atelier_test
+      NODE_ENV: test
+      ALLOW_DEV_ADMIN_AUTH: "true"
+      DEV_ADMIN_TOKEN: test-admin-token-with-at-least-thirty-two-characters
+      DEV_ADMIN_USER_ID: 00000000-0000-4000-8000-000000000001
+      DEV_ADMIN_EMAIL: admin@atelier.test
+      DEV_ADMIN_DISPLAY_NAME: Administración de prueba
+      TWO_FACTOR_ENCRYPTION_KEY_BASE64: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      TWO_FACTOR_RECOVERY_PEPPER: test-recovery-pepper-with-at-least-thirty-two-characters
+      AUTH_LOGIN_PEPPER: test-login-pepper-with-at-least-thirty-two-characters
+      APP_URL: http://localhost:3000
+      SMTP_ENABLED: "false"
+      PILOT_CHECKOUT_ENABLED: "true"
+      PILOT_SHIPPING_CENTS: "500"
+      MIGRATION_STATEMENT_TIMEOUT_MS: "120000"
+      MIGRATION_LOCK_TIMEOUT_MS: "10000"
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar cliente PostgreSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Instalar dependencias
+        working-directory: source
+        run: npm install --ignore-scripts
+
+      - name: Validar aplicación fuente
+        working-directory: source
+        run: npm test
+
+      - name: Aplicar migraciones
+        working-directory: source
+        run: npm run migrate
+
+      - name: Comprobar idempotencia
+        working-directory: source
+        run: npm run migrate
+
+      - name: Cargar talleres de prueba
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/seeds/0001_two_providers.sql
+
+      - name: Verificar catálogo existente
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/catalog_isolation.sql
+
+      - name: Verificar edición de artículos publicados
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/published_product_revisions.sql
+
+      - name: Probar API
+        working-directory: source
+        run: npm run test:api-integration
+
+      - name: Validar Docker Compose
+        working-directory: source
+        run: docker compose -f infra/docker/docker-compose.yml config
