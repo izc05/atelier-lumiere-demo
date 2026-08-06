@@ -4,6 +4,7 @@ import { pipeline } from "node:stream/promises";
 const PROVIDER_SESSION_COOKIE = "atelier_provider_session";
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,180}$/;
 const FOCAL_PATTERN = /^\/internal\/provider\/products\/([0-9a-f-]{36})\/media-focal(?:\/([0-9a-f-]{36}))?$/i;
+const PUBLICATION_PATTERN = /^\/internal\/provider\/products\/([0-9a-f-]{36})\/publication\/(edit|pause|resume)$/i;
 
 function parseCookies(header) {
   const cookies = new Map();
@@ -58,7 +59,8 @@ function sendJson(response, statusCode, payload, extraHeaders = {}) {
 }
 
 function crossSiteMutation(request) {
-  if ((request.method ?? "GET") !== "PATCH") return false;
+  const method = request.method ?? "GET";
+  if (!["PATCH", "POST"].includes(method)) return false;
   return String(request.headers["sec-fetch-site"] ?? "same-origin").toLowerCase() === "cross-site";
 }
 
@@ -76,17 +78,26 @@ export function createProviderMediaFocalWebHandler({
 
   return async function providerMediaFocalWebHandler(request, response) {
     const url = new URL(request.url ?? "/", "http://localhost");
-    const match = url.pathname.match(FOCAL_PATTERN);
-    if (!match) return baseHandler(request, response);
+    const focalMatch = url.pathname.match(FOCAL_PATTERN);
+    const publicationMatch = url.pathname.match(PUBLICATION_PATTERN);
+    if (!focalMatch && !publicationMatch) return baseHandler(request, response);
 
-    const [, , mediaId] = match;
     const method = request.method ?? "GET";
-    const allowed = (!mediaId && method === "GET") || (mediaId && method === "PATCH");
+    let allowed = false;
+    let allowHeader = "GET";
+    if (focalMatch) {
+      const mediaId = focalMatch[2];
+      allowed = (!mediaId && method === "GET") || (Boolean(mediaId) && method === "PATCH");
+      allowHeader = mediaId ? "PATCH" : "GET";
+    } else {
+      allowed = method === "POST";
+      allowHeader = "POST";
+    }
     if (!allowed) {
       sendJson(response, 405, {
         error: "METHOD_NOT_ALLOWED",
         message: "Método no permitido."
-      }, { Allow: mediaId ? "PATCH" : "GET" });
+      }, { Allow: allowHeader });
       return;
     }
     if (crossSiteMutation(request)) {
@@ -130,13 +141,13 @@ export function createProviderMediaFocalWebHandler({
       if (!upstream.body) response.end();
       else await pipeline(Readable.fromWeb(upstream.body), response);
     } catch (error) {
-      logger.error("No se pudo completar el proxy de encuadre focal.", {
-        code: typeof error?.code === "string" ? error.code : "FOCAL_PROXY_FAILED"
+      logger.error("No se pudo completar el proxy de publicación y encuadre.", {
+        code: typeof error?.code === "string" ? error.code : "PRODUCT_PUBLICATION_PROXY_FAILED"
       });
       if (!response.headersSent) {
         sendJson(response, 502, {
           error: "API_UNAVAILABLE",
-          message: "El ajuste de encuadre no responde."
+          message: "La gestión del artículo no responde."
         });
       } else {
         response.destroy(error instanceof Error ? error : undefined);
