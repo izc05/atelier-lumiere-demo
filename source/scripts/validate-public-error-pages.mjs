@@ -60,7 +60,9 @@ assert.doesNotMatch(handler, /error\.message|error\.stack/);
 
 assert.match(server, /createPublicErrorPagesWebHandler/);
 assert.match(server, /baseHandler: adminAuthenticationHandler/);
-assert.match(server, /createServer\(publicErrorPagesHandler\)/);
+assert.match(server, /createLegacyRouteRedirectWebHandler/);
+assert.match(server, /baseHandler: publicErrorPagesHandler/);
+assert.match(server, /createServer\(legacyRouteRedirectHandler\)/);
 
 assert.match(tests, /postgres:\/\/usuario:secreto/);
 assert.match(tests, /\/internal\/desconocido/);
