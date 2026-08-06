@@ -13,8 +13,8 @@ COPY assets /demo/assets
 
 RUN node apps/web/scripts/prepare-original-home.mjs /demo /app/apps/web/public \
   && node apps/web/scripts/prepare-premium-ui.mjs /app/apps/web/public \
-  && find /app/apps/web/public -type d -exec chmod 755 {} + \
-  && find /app/apps/web/public -type f -exec chmod 644 {} + \
+  && find /app/apps/web -type d -exec chmod 755 {} + \
+  && find /app/apps/web -type f -exec chmod 644 {} + \
   && rm -rf /demo
 
 EXPOSE 3000
