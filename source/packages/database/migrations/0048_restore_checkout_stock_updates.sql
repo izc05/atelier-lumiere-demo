@@ -10,15 +10,19 @@ DECLARE
 BEGIN
   IF app.is_pilot_checkout_service() THEN
     IF TG_OP <> 'UPDATE'
-       OR OLD.status <> 'PUBLISHED'
-       OR NEW.status <> 'PUBLISHED'
        OR (to_jsonb(NEW) - ARRAY['stock_quantity','updated_at','updated_by','version'])
           IS DISTINCT FROM
           (to_jsonb(OLD) - ARRAY['stock_quantity','updated_at','updated_by','version'])
        OR OLD.stock_mode <> 'FINITE'
        OR NEW.stock_quantity IS NULL
        OR NEW.stock_quantity < 0
-       OR NEW.stock_quantity >= OLD.stock_quantity THEN
+       OR NEW.stock_quantity >= OLD.stock_quantity
+       OR NOT EXISTS (
+         SELECT 1
+         FROM product_publications publication
+         WHERE publication.product_id = OLD.id
+           AND publication.visible = true
+       ) THEN
       RAISE EXCEPTION 'PILOT_CHECKOUT_STOCK_UPDATE_NOT_ALLOWED' USING ERRCODE = '42501';
     END IF;
 
@@ -129,7 +133,8 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 BEGIN
-  IF NEW.stock_quantity IS NOT DISTINCT FROM OLD.stock_quantity THEN
+  IF NEW.stock_mode IS NOT DISTINCT FROM OLD.stock_mode
+     AND NEW.stock_quantity IS NOT DISTINCT FROM OLD.stock_quantity THEN
     RETURN NEW;
   END IF;
 
@@ -137,9 +142,14 @@ BEGIN
 
   UPDATE product_publications publication
   SET snapshot = jsonb_set(
-        publication.snapshot,
+        jsonb_set(
+          publication.snapshot,
+          '{product,stockMode}',
+          to_jsonb(NEW.stock_mode::text),
+          true
+        ),
         '{product,stockQuantity}',
-        to_jsonb(NEW.stock_quantity),
+        COALESCE(to_jsonb(NEW.stock_quantity), 'null'::jsonb),
         true
       ),
       updated_at = now()
@@ -153,7 +163,7 @@ $$;
 REVOKE ALL ON FUNCTION app.sync_published_stock_quantity() FROM PUBLIC;
 
 CREATE TRIGGER products_95_sync_publication_stock
-AFTER UPDATE OF stock_quantity ON products
+AFTER UPDATE OF stock_mode, stock_quantity ON products
 FOR EACH ROW EXECUTE FUNCTION app.sync_published_stock_quantity();
 
 COMMIT;
