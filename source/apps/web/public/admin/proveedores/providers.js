@@ -210,8 +210,13 @@ function renderProviderCard(provider) {
   main.append(content);
 
   const actions = createElement("div", "provider-actions");
-  const nextStatus = provider.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED";
-  const statusLabel = nextStatus === "ACTIVE" ? "Reactivar" : "Pausar";
+  const pendingApproval = provider.status === "INVITED";
+  const nextStatus = provider.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+  const statusLabel = pendingApproval
+    ? "Aprobar taller"
+    : nextStatus === "ACTIVE"
+      ? "Reactivar"
+      : "Pausar";
   actions.append(
     actionButton(statusLabel, nextStatus === "ACTIVE" ? "secondary" : "danger", (button) => changeStatus(provider, nextStatus, button)),
     actionButton("Nueva invitación", "secondary", (button) => renewInvitation(provider, button)),
@@ -265,7 +270,8 @@ async function loadProviders({ quiet = false } = {}) {
 }
 
 async function changeStatus(provider, status, button) {
-  const action = status === "ACTIVE" ? "reactivar" : "pausar";
+  const approving = provider.status === "INVITED" && status === "ACTIVE";
+  const action = approving ? "aprobar" : status === "ACTIVE" ? "reactivar" : "pausar";
   if (!window.confirm(`¿Confirmas que deseas ${action} “${provider.displayName}”?`)) return;
 
   setBusy(button, true);
@@ -275,7 +281,13 @@ async function changeStatus(provider, status, button) {
       method: "PATCH",
       body: JSON.stringify({ status })
     });
-    setMessage(elements.globalMessage, `El taller “${provider.displayName}” se ha actualizado.`, "success");
+    setMessage(
+      elements.globalMessage,
+      approving
+        ? `El taller “${provider.displayName}” ha sido aprobado y activado.`
+        : `El taller “${provider.displayName}” se ha actualizado.`,
+      "success"
+    );
     await loadProviders({ quiet: true });
   } catch (error) {
     if (error.status === 401) return showLogin("La sesión ha caducado.");
