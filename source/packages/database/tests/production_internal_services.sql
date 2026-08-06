@@ -46,6 +46,20 @@ INSERT INTO products (
   now(), now(), now()
 );
 
+INSERT INTO product_publications (
+  product_id, provider_id, revision, snapshot, visible,
+  published_by, published_at
+)
+SELECT product.id,
+       product.provider_id,
+       1,
+       app.build_product_publication_snapshot(product.id),
+       true,
+       product.published_by,
+       product.published_at
+FROM products product
+WHERE product.id='20000000-0000-4000-8000-000000000037';
+
 SET LOCAL ROLE atelier_app_runtime;
 
 SELECT set_config('app.role', 'AUTH_SERVICE', true);
