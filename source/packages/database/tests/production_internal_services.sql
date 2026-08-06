@@ -107,4 +107,20 @@ BEGIN
 END;
 $$;
 
+SELECT set_config('app.role', 'CATALOG_READER', true);
+SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000002', true);
+
+DO $$
+DECLARE public_stock integer;
+BEGIN
+  SELECT stock_quantity INTO public_stock
+  FROM catalog.products
+  WHERE id='20000000-0000-4000-8000-000000000037';
+
+  IF public_stock <> 4 THEN
+    RAISE EXCEPTION 'PUBLIC_CATALOG_STOCK_NOT_SYNCHRONIZED';
+  END IF;
+END;
+$$;
+
 ROLLBACK;
