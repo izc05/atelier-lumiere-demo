@@ -19,6 +19,10 @@ function mediaUrl(path) {
   return window.AtelierImages.mediaUrl(path);
 }
 
+function applyFocal(image, item) {
+  image.style.objectPosition = `${item?.focalX ?? 50}% ${item?.focalY ?? 50}%`;
+}
+
 function safeMessage(node, text, type = "") {
   node.textContent = text;
   node.className = `message${type ? ` ${type}` : ""}`;
@@ -98,6 +102,7 @@ function mediaNode(item) {
     priority: "low",
     defaultWidth: 640
   });
+  applyFocal(image, item);
   card.append(image, element("footer", "", item.altText || "Detalle artesanal"));
   return card;
 }
@@ -141,6 +146,7 @@ function renderProduct() {
       priority: "high",
       defaultWidth: 960
     });
+    applyFocal(image, images[0]);
     hero.replaceChildren(image);
   } else {
     hero.replaceChildren(element("span", "hero-placeholder", "Pieza artesanal"));
