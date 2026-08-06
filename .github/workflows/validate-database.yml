@@ -102,6 +102,12 @@ jobs:
       - name: Verificar catálogo, medios y revisión editorial
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/catalog_isolation.sql
 
+      - name: Verificar revisiones de artículos publicados
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/published_product_revisions.sql
+
+      - name: Verificar compra durante una revisión publicada
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/checkout_published_revision.sql
+
       - name: Verificar blog editorial multi-proveedor
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/blog_editorial.sql
 

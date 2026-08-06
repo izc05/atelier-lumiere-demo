@@ -6,6 +6,7 @@ const focalState = {
   productId: null,
   productStatus: null,
   editable: false,
+  publication: null,
   media: new Map()
 };
 
@@ -35,7 +36,7 @@ async function focalRequest(path, options = {}) {
     window.location.replace("/proveedor/acceso/");
     throw new Error("La sesión ha caducado.");
   }
-  if (!response.ok) throw new Error(payload.message || "No se pudo guardar el encuadre.");
+  if (!response.ok) throw new Error(payload.message || "No se pudo completar la operación.");
   return payload;
 }
 
@@ -67,6 +68,137 @@ function focalControl(labelText, value, axis) {
   input.dataset.axis = axis;
   label.append(heading, input);
   return { label, input, output };
+}
+
+function publicationDescription(status, publication) {
+  if (!publication?.exists) {
+    return status === "PUBLISHED"
+      ? "La versión pública necesita actualizarse antes de preparar una revisión."
+      : "";
+  }
+  if (!publication.visible) {
+    return "La versión pública está pausada y no aparece en la tienda. Puedes seguir preparando cambios con normalidad.";
+  }
+  switch (status) {
+    case "PUBLISHED":
+      return "La pieza está visible en la tienda. Al empezar una edición, esta versión seguirá publicada hasta que Administración apruebe y publique la nueva.";
+    case "DRAFT":
+      return "Estás preparando una nueva versión. La versión anterior continúa visible en la tienda mientras guardas el borrador.";
+    case "CHANGES_REQUESTED":
+      return "Corrige la nueva versión con tranquilidad: la versión anterior continúa visible en la tienda.";
+    case "IN_REVIEW":
+      return "Los cambios están en revisión. La tienda mantiene la última versión publicada hasta que se aprueben.";
+    case "APPROVED":
+      return "La nueva versión está aprobada. La tienda mantendrá la anterior hasta que Administración pulse Publicar.";
+    default:
+      return "Existe una versión pública independiente de los cambios que estás preparando.";
+  }
+}
+
+function renderPublicationControls() {
+  const content = document.getElementById("editor-content");
+  const lockedBanner = document.getElementById("locked-banner");
+  if (!content || !lockedBanner) return;
+
+  let panel = document.getElementById("publication-revision-panel");
+  if (!panel) {
+    panel = focalNode("section", "publication-revision-panel");
+    panel.id = "publication-revision-panel";
+    lockedBanner.insertAdjacentElement("afterend", panel);
+  }
+
+  const publication = focalState.publication;
+  if (!publication?.exists && focalState.productStatus !== "PUBLISHED") {
+    panel.hidden = true;
+    panel.replaceChildren();
+    return;
+  }
+  panel.hidden = false;
+
+  const copy = focalNode("div", "publication-revision-copy");
+  copy.append(
+    focalNode("p", "eyebrow", publication?.visible === false ? "Publicación pausada" : "Versión pública protegida"),
+    focalNode(
+      "h2",
+      "publication-revision-title",
+      focalState.productStatus === "PUBLISHED" ? "Editar sin retirar la pieza" : "La tienda conserva la versión anterior"
+    ),
+    focalNode("p", "publication-revision-help", publicationDescription(focalState.productStatus, publication))
+  );
+
+  if (publication?.exists) {
+    const metadata = focalNode("p", "publication-revision-meta");
+    metadata.textContent = `Versión pública ${publication.revision}${publication.visible ? " · Visible" : " · Pausada"}`;
+    copy.append(metadata);
+  }
+
+  const actions = focalNode("div", "publication-revision-actions");
+  const status = focalNode("p", "message publication-revision-message");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+
+  if (focalState.productStatus === "PUBLISHED" && publication?.exists) {
+    const edit = focalNode("button", "button primary", "Editar artículo publicado");
+    edit.type = "button";
+    edit.addEventListener("click", async () => {
+      if (!window.confirm(
+        "Se abrirá una nueva versión editable. La versión actual seguirá visible hasta que los cambios se aprueben y publiquen."
+      )) return;
+      edit.disabled = true;
+      status.textContent = "Preparando una copia editable…";
+      status.className = "message publication-revision-message";
+      try {
+        await focalRequest(
+          `/internal/provider/products/${focalState.productId}/publication/edit`,
+          { method: "POST" }
+        );
+        status.textContent = "Versión editable preparada. Recargando la ficha…";
+        status.className = "message publication-revision-message success";
+        window.location.reload();
+      } catch (error) {
+        status.textContent = error.message;
+        status.className = "message publication-revision-message error";
+        edit.disabled = false;
+      }
+    });
+    actions.append(edit);
+  }
+
+  if (publication?.exists) {
+    const visibility = focalNode(
+      "button",
+      "button secondary",
+      publication.visible ? "Pausar publicación" : "Reactivar publicación"
+    );
+    visibility.type = "button";
+    visibility.addEventListener("click", async () => {
+      const nextVisible = !publication.visible;
+      const confirmation = nextVisible
+        ? "¿Volver a mostrar esta pieza en la tienda?"
+        : "¿Ocultar temporalmente esta pieza de la tienda? No se borrará ningún dato.";
+      if (!window.confirm(confirmation)) return;
+      visibility.disabled = true;
+      status.textContent = nextVisible ? "Reactivando publicación…" : "Pausando publicación…";
+      status.className = "message publication-revision-message";
+      try {
+        const payload = await focalRequest(
+          `/internal/provider/products/${focalState.productId}/publication/${nextVisible ? "resume" : "pause"}`,
+          { method: "POST" }
+        );
+        focalState.publication = payload.publication;
+        renderPublicationControls();
+      } catch (error) {
+        status.textContent = error.message;
+        status.className = "message publication-revision-message error";
+        visibility.disabled = false;
+      }
+    });
+    actions.append(visibility);
+  }
+
+  const controls = focalNode("div", "publication-revision-controls");
+  controls.append(actions, status);
+  panel.replaceChildren(copy, controls);
 }
 
 function enhanceFocalCard(card) {
@@ -192,7 +324,9 @@ async function startFocalEditor() {
     );
     focalState.productStatus = payload.productStatus;
     focalState.editable = Boolean(payload.editable);
+    focalState.publication = payload.publication ?? null;
     for (const item of payload.media ?? []) focalState.media.set(item.id.toLowerCase(), item);
+    renderPublicationControls();
   } catch (error) {
     const message = document.getElementById("media-message");
     if (message) {

@@ -46,6 +46,20 @@ INSERT INTO products (
   now(), now(), now()
 );
 
+INSERT INTO product_publications (
+  product_id, provider_id, revision, snapshot, visible,
+  published_by, published_at
+)
+SELECT product.id,
+       product.provider_id,
+       1,
+       app.build_product_publication_snapshot(product.id),
+       true,
+       product.published_by,
+       product.published_at
+FROM products product
+WHERE product.id='20000000-0000-4000-8000-000000000037';
+
 SET LOCAL ROLE atelier_app_runtime;
 
 SELECT set_config('app.role', 'AUTH_SERVICE', true);
@@ -104,6 +118,22 @@ BEGIN
   EXCEPTION WHEN insufficient_privilege THEN
     NULL;
   END;
+END;
+$$;
+
+SELECT set_config('app.role', 'CATALOG_READER', true);
+SELECT set_config('app.user_id', '00000000-0000-4000-8000-000000000002', true);
+
+DO $$
+DECLARE public_stock integer;
+BEGIN
+  SELECT stock_quantity INTO public_stock
+  FROM catalog.products
+  WHERE id='20000000-0000-4000-8000-000000000037';
+
+  IF public_stock <> 4 THEN
+    RAISE EXCEPTION 'PUBLIC_CATALOG_STOCK_NOT_SYNCHRONIZED';
+  END IF;
 END;
 $$;
 

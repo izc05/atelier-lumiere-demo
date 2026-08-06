@@ -1,6 +1,7 @@
 import { ServiceError } from "./providers-service.mjs";
 
 const FOCAL_PATH = /^\/api\/provider\/products\/([0-9a-f-]{36})\/media-focal(?:\/([0-9a-f-]{36}))?$/i;
+const PUBLICATION_PATH = /^\/api\/provider\/products\/([0-9a-f-]{36})\/publication\/(edit|pause|resume)$/i;
 const MAX_BODY_BYTES = 16 * 1024;
 
 function sendJson(response, statusCode, body, extraHeaders = {}) {
@@ -45,12 +46,12 @@ function apiError(response, error, logger) {
     });
     return;
   }
-  logger.error("Error no controlado en el encuadre focal.", {
-    code: typeof error?.code === "string" ? error.code : "PRODUCT_MEDIA_FOCAL_API_FAILED"
+  logger.error("Error no controlado en publicación o encuadre focal.", {
+    code: typeof error?.code === "string" ? error.code : "PRODUCT_PUBLICATION_API_FAILED"
   });
   sendJson(response, 500, {
     error: "INTERNAL_ERROR",
-    message: "No se ha podido guardar el encuadre de la fotografía."
+    message: "No se ha podido completar la operación del artículo."
   });
 }
 
@@ -66,12 +67,13 @@ export function createProductMediaFocalApiHandler({
 
   return async function productMediaFocalApiHandler(request, response) {
     const url = new URL(request.url ?? "/", "http://localhost");
-    const match = url.pathname.match(FOCAL_PATH);
-    if (!match) return baseHandler(request, response);
+    const focalMatch = url.pathname.match(FOCAL_PATH);
+    const publicationMatch = url.pathname.match(PUBLICATION_PATH);
+    if (!focalMatch && !publicationMatch) return baseHandler(request, response);
 
     try {
       if (!focalService || !providerAuthService) {
-        throw new ServiceError("SERVICE_UNAVAILABLE", "El ajuste de encuadre no está disponible.", 503);
+        throw new ServiceError("SERVICE_UNAVAILABLE", "La gestión del artículo no está disponible.", 503);
       }
       const token = bearerToken(request);
       const session = token ? await providerAuthService.authenticate(token) : null;
@@ -79,26 +81,48 @@ export function createProductMediaFocalApiHandler({
         throw new ServiceError("UNAUTHORIZED", "Necesitas iniciar sesión como proveedor.", 401);
       }
 
-      const [, productId, mediaId] = match;
-      if (!mediaId && request.method === "GET") {
-        sendJson(response, 200, await focalService.list(session.context, productId));
-        return;
-      }
-      if (mediaId && request.method === "PATCH") {
-        const focal = await focalService.update(
-          session.context,
-          productId,
-          mediaId,
-          await readJson(request)
-        );
-        sendJson(response, 200, { focal });
+      if (focalMatch) {
+        const [, productId, mediaId] = focalMatch;
+        if (!mediaId && request.method === "GET") {
+          sendJson(response, 200, await focalService.list(session.context, productId));
+          return;
+        }
+        if (mediaId && request.method === "PATCH") {
+          const focal = await focalService.update(
+            session.context,
+            productId,
+            mediaId,
+            await readJson(request)
+          );
+          sendJson(response, 200, { focal });
+          return;
+        }
+        sendJson(response, 405, {
+          error: "METHOD_NOT_ALLOWED",
+          message: "Método no permitido."
+        }, { Allow: mediaId ? "PATCH" : "GET" });
         return;
       }
 
-      sendJson(response, 405, {
-        error: "METHOD_NOT_ALLOWED",
-        message: "Método no permitido."
-      }, { Allow: mediaId ? "PATCH" : "GET" });
+      const [, productId, action] = publicationMatch;
+      if (request.method !== "POST") {
+        sendJson(response, 405, {
+          error: "METHOD_NOT_ALLOWED",
+          message: "Método no permitido."
+        }, { Allow: "POST" });
+        return;
+      }
+      if (action === "edit") {
+        const result = await focalService.startPublishedEdit(session.context, productId);
+        sendJson(response, 200, result);
+        return;
+      }
+      const result = await focalService.setPublicationVisibility(
+        session.context,
+        productId,
+        action === "resume"
+      );
+      sendJson(response, 200, result);
     } catch (error) {
       apiError(response, error, logger);
     }

@@ -138,6 +138,11 @@ export function createDatabase({
           "SELECT set_config('app.role', $1, true), set_config('app.user_id', $2, true), set_config('app.provider_id', $3, true)",
           [context.role, context.userId, context.providerId ?? ""]
         );
+        if (context.role === "CATALOG_READER") {
+          await client.query("SET LOCAL search_path = catalog, public");
+        } else {
+          await client.query("SET LOCAL search_path = public");
+        }
 
         const transaction = Object.freeze({
           context,
