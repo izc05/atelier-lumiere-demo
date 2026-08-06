@@ -52,6 +52,8 @@ function publicSummary(row) {
       altText: row.cover_alt_text,
       width: row.cover_width,
       height: row.cover_height,
+      focalX: Number(row.cover_focal_x ?? 50),
+      focalY: Number(row.cover_focal_y ?? 50),
       path: `/api/catalog/products/${row.id}/media/${row.cover_media_id}/preview`
     } : null,
     events: Array.isArray(row.events) ? row.events : []
@@ -105,12 +107,17 @@ export function createPublicCatalogService({ database, storage } = {}) {
              cover.alt_text AS cover_alt_text,
              cover.preview_width AS cover_width,
              cover.preview_height AS cover_height,
+             cover.focal_x AS cover_focal_x,
+             cover.focal_y AS cover_focal_y,
              COALESCE(events.values, ARRAY[]::text[]) AS events
            FROM products product
            INNER JOIN providers provider ON provider.id = product.provider_id
            LEFT JOIN LATERAL (
-             SELECT media.id, media.alt_text, media.preview_width, media.preview_height
+             SELECT media.id, media.alt_text, media.preview_width, media.preview_height,
+                    COALESCE(focal.focal_x, 50) AS focal_x,
+                    COALESCE(focal.focal_y, 50) AS focal_y
              FROM product_media media
+             LEFT JOIN product_media_focal_points focal ON focal.media_id = media.id
              WHERE media.product_id = product.id
                AND media.kind = 'IMAGE'
                AND media.status = 'READY'
@@ -163,12 +170,17 @@ export function createPublicCatalogService({ database, storage } = {}) {
              cover.alt_text AS cover_alt_text,
              cover.preview_width AS cover_width,
              cover.preview_height AS cover_height,
+             cover.focal_x AS cover_focal_x,
+             cover.focal_y AS cover_focal_y,
              COALESCE(events.values, ARRAY[]::text[]) AS events
            FROM products product
            INNER JOIN providers provider ON provider.id = product.provider_id
            LEFT JOIN LATERAL (
-             SELECT media.id, media.alt_text, media.preview_width, media.preview_height
+             SELECT media.id, media.alt_text, media.preview_width, media.preview_height,
+                    COALESCE(focal.focal_x, 50) AS focal_x,
+                    COALESCE(focal.focal_y, 50) AS focal_y
              FROM product_media media
+             LEFT JOIN product_media_focal_points focal ON focal.media_id = media.id
              WHERE media.product_id = product.id
                AND media.kind = 'IMAGE'
                AND media.status = 'READY'
@@ -200,12 +212,15 @@ export function createPublicCatalogService({ database, storage } = {}) {
             [row.id]
           ),
           transaction.query(
-            `SELECT id, kind, mime_type, original_filename, alt_text,
-                    width, height, duration_seconds, sort_order,
-                    preview_storage_key
-             FROM product_media
-             WHERE product_id = $1 AND status = 'READY'
-             ORDER BY kind, sort_order, created_at`,
+            `SELECT media.id, media.kind, media.mime_type, media.original_filename, media.alt_text,
+                    media.width, media.height, media.duration_seconds, media.sort_order,
+                    media.preview_storage_key,
+                    COALESCE(focal.focal_x, 50) AS focal_x,
+                    COALESCE(focal.focal_y, 50) AS focal_y
+             FROM product_media media
+             LEFT JOIN product_media_focal_points focal ON focal.media_id = media.id
+             WHERE media.product_id = $1 AND media.status = 'READY'
+             ORDER BY media.kind, media.sort_order, media.created_at`,
             [row.id]
           )
         ]);
@@ -229,6 +244,8 @@ export function createPublicCatalogService({ database, storage } = {}) {
             height: item.height,
             durationSeconds: item.duration_seconds === null ? null : Number(item.duration_seconds),
             sortOrder: item.sort_order,
+            focalX: Number(item.focal_x ?? 50),
+            focalY: Number(item.focal_y ?? 50),
             path: item.kind === "IMAGE" && item.preview_storage_key
               ? `/api/catalog/products/${row.id}/media/${item.id}/preview`
               : item.kind === "VIDEO"
