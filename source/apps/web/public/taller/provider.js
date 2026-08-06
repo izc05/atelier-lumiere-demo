@@ -37,6 +37,7 @@ function productCard(product) {
       priority: "low",
       defaultWidth: 640
     });
+    image.style.objectPosition = `${product.cover.focalX ?? 50}% ${product.cover.focalY ?? 50}%`;
     visual.replaceChildren(image);
   }
   const body = node("div", "product-body");

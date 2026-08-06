@@ -1,0 +1,127 @@
+.focal-preview {
+  position: relative;
+  cursor: crosshair;
+}
+
+.focal-preview img {
+  transition: object-position 160ms ease;
+}
+
+.focal-marker {
+  position: absolute;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: rgba(89, 16, 31, .88);
+  box-shadow: 0 0 0 3px rgba(89, 16, 31, .24), 0 4px 14px rgba(52, 7, 16, .28);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.focal-marker::before,
+.focal-marker::after {
+  position: absolute;
+  content: "";
+  background: #fff;
+}
+
+.focal-marker::before {
+  top: 50%;
+  left: 4px;
+  width: 12px;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.focal-marker::after {
+  top: 4px;
+  left: 50%;
+  width: 2px;
+  height: 12px;
+  transform: translateX(-50%);
+}
+
+.focal-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(89, 16, 31, .12);
+}
+
+.focal-title {
+  color: var(--wine, #59101f);
+  font-size: .82rem;
+}
+
+.focal-help {
+  margin: 0;
+  color: var(--muted, #76686b);
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+.focal-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.focal-field {
+  display: grid;
+  gap: 5px;
+}
+
+.focal-field-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted, #76686b);
+  font-size: .68rem;
+  font-weight: 750;
+}
+
+.focal-output {
+  color: var(--wine, #59101f);
+  font-variant-numeric: tabular-nums;
+}
+
+.focal-field input[type="range"] {
+  width: 100%;
+  min-height: 28px;
+  padding: 0;
+  accent-color: var(--wine, #59101f);
+}
+
+.focal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.focal-actions .button {
+  min-height: 38px;
+  padding: 8px 13px;
+  font-size: .7rem;
+}
+
+.focal-message {
+  min-height: 1.25em;
+  margin: 0;
+  font-size: .69rem;
+}
+
+@media (max-width: 620px) {
+  .focal-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focal-preview img {
+    transition: none;
+  }
+}

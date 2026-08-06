@@ -11,6 +11,7 @@ import { createOrderLogisticsWebHandler } from "./order-logistics-proxy.mjs";
 import { createPaymentSandboxWebHandler } from "./payment-sandbox-proxy.mjs";
 import { createPilotCheckoutWebHandler } from "./pilot-checkout-proxy.mjs";
 import { createProviderBlogWebHandler } from "./provider-blog-proxy.mjs";
+import { createProviderMediaFocalWebHandler } from "./provider-media-focal-proxy.mjs";
 import { createProviderOrdersWebHandler } from "./provider-orders-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
 import { createPublicBlogWebHandler } from "./public-blog-proxy.mjs";
@@ -35,7 +36,10 @@ const baseWebHandler = createWebHandler({
 });
 const accountRecoveryHandler = createAccountRecoveryWebHandler({ baseHandler: baseWebHandler });
 const providerProductsHandler = createProviderProductsWebHandler({ baseHandler: accountRecoveryHandler });
-const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: providerProductsHandler });
+const providerMediaFocalHandler = createProviderMediaFocalWebHandler({
+  baseHandler: providerProductsHandler
+});
+const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: providerMediaFocalHandler });
 const providerOrdersHandler = createProviderOrdersWebHandler({ baseHandler: providerBlogHandler });
 const customerOrdersHandler = createCustomerOrdersWebHandler({ baseHandler: providerOrdersHandler });
 const requestFilesHandler = createRequestFilesWebHandler({ baseHandler: customerOrdersHandler });
