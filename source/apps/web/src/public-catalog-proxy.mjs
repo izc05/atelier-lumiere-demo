@@ -63,7 +63,9 @@ export function createPublicCatalogWebHandler({
         },
         signal: AbortSignal.timeout(isMedia ? 60_000 : 10_000)
       });
-      response.writeHead(upstream.status, copiedHeaders(upstream));
+      const headers = copiedHeaders(upstream);
+      if (!isMedia) headers["Cache-Control"] = "no-store";
+      response.writeHead(upstream.status, headers);
       if (!upstream.body) response.end();
       else await pipeline(Readable.fromWeb(upstream.body), response);
     } catch (error) {
