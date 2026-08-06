@@ -50,6 +50,8 @@ import { createPaymentSandboxService } from "./payment-sandbox-service.mjs";
 import { createPilotCheckoutApiHandler } from "./pilot-checkout-api.mjs";
 import { createPilotCheckoutService } from "./pilot-checkout-service.mjs";
 import { createProductMediaApiHandler } from "./product-media-api.mjs";
+import { createProductMediaFocalApiHandler } from "./product-media-focal-api.mjs";
+import { createProductMediaFocalService } from "./product-media-focal-service.mjs";
 import { createProductMediaService } from "./product-media-service.mjs";
 import { createProductsApiHandler } from "./products-api.mjs";
 import { createProductsService } from "./products-service.mjs";
@@ -188,6 +190,9 @@ const productsService = database.enabled ? createProductsService({ database }) :
 const productMediaService = database.enabled
   ? createProductMediaService({ database, storage: mediaStorage })
   : null;
+const productMediaFocalService = database.enabled
+  ? createProductMediaFocalService({ database })
+  : null;
 const providerOrdersService = database.enabled ? createProviderOrdersService({ database }) : null;
 const customerOrdersService = database.enabled ? createCustomerOrdersService({ database }) : null;
 const customRequestFilesService = database.enabled
@@ -295,8 +300,13 @@ const productMediaHandler = createProductMediaApiHandler({
   productMediaService,
   providerAuthService
 });
-const providerOrdersHandler = createProviderOrdersApiHandler({
+const productMediaFocalHandler = createProductMediaFocalApiHandler({
   baseHandler: productMediaHandler,
+  focalService: productMediaFocalService,
+  providerAuthService
+});
+const providerOrdersHandler = createProviderOrdersApiHandler({
+  baseHandler: productMediaFocalHandler,
   providerOrdersService,
   providerAuthService
 });
