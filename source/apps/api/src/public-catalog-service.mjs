@@ -27,10 +27,32 @@ function uuid(value, field) {
   return value.toLowerCase();
 }
 
+function profileMedia(profile, providerSlug) {
+  const raw = Array.isArray(profile.media) ? profile.media : [];
+  const media = raw
+    .filter((item) => item && typeof item === "object" && UUID_PATTERN.test(String(item.id || "")))
+    .map((item) => ({
+      id: String(item.id).toLowerCase(),
+      kind: ["LOGO", "COVER", "GALLERY"].includes(item.kind) ? item.kind : "GALLERY",
+      altText: typeof item.altText === "string" ? item.altText : "",
+      width: Number.isInteger(item.previewWidth) ? item.previewWidth : null,
+      height: Number.isInteger(item.previewHeight) ? item.previewHeight : null,
+      sortOrder: Number.isInteger(item.sortOrder) ? item.sortOrder : 0,
+      path: `/api/catalog/providers/${providerSlug}/media/${String(item.id).toLowerCase()}/preview`
+    }));
+  return {
+    logo: media.find((item) => item.kind === "LOGO") ?? null,
+    cover: media.find((item) => item.kind === "COVER") ?? null,
+    gallery: media.filter((item) => item.kind === "GALLERY").slice(0, 6),
+    media
+  };
+}
+
 function providerSummary(row) {
   const profile = row.provider_profile_snapshot && typeof row.provider_profile_snapshot === "object"
     ? row.provider_profile_snapshot
     : {};
+  const media = profileMedia(profile, row.provider_slug);
   return {
     slug: row.provider_slug,
     displayName: profile.displayName || row.provider_display_name,
@@ -44,7 +66,10 @@ function providerSummary(row) {
     preparationNote: profile.preparationNote || null,
     shippingNote: profile.shippingNote || null,
     acceptsCustomRequests: Boolean(profile.acceptsCustomRequests),
-    profileRevision: row.provider_profile_revision ? Number(row.provider_profile_revision) : null
+    profileRevision: row.provider_profile_revision ? Number(row.provider_profile_revision) : null,
+    logo: media.logo,
+    cover: media.cover,
+    gallery: media.gallery
   };
 }
 
@@ -304,9 +329,7 @@ export function createPublicCatalogService({ database, storage } = {}) {
         );
         return result.rows[0] ?? null;
       });
-      if (!row) {
-        throw new ServiceError("MEDIA_NOT_FOUND", "El archivo publicado no está disponible.", 404);
-      }
+      if (!row) throw new ServiceError("MEDIA_NOT_FOUND", "El archivo publicado no está disponible.", 404);
       if (variant === "preview") {
         if (row.kind !== "IMAGE" || !row.preview_storage_key) {
           throw new ServiceError("MEDIA_NOT_FOUND", "La previsualización no está disponible.", 404);
@@ -324,6 +347,34 @@ export function createPublicCatalogService({ database, storage } = {}) {
         ...(await storage.openRead(row.storage_key, rangeHeader)),
         mimeType: row.mime_type,
         filename: row.original_filename
+      };
+    },
+
+    async openProviderMedia(rawProviderSlug, rawMediaId, rangeHeader) {
+      const providerSlug = slug(rawProviderSlug, "providerSlug");
+      const mediaId = uuid(rawMediaId, "mediaId");
+      const row = await database.withContext(PUBLIC_CONTEXT, async (transaction) => {
+        const result = await transaction.query(
+          `SELECT item.value ->> 'previewStorageKey' AS preview_storage_key,
+                  item.value ->> 'previewMimeType' AS preview_mime_type,
+                  item.value ->> 'originalFilename' AS original_filename
+           FROM provider_profile_publications publication
+           INNER JOIN providers provider ON provider.id = publication.provider_id
+           CROSS JOIN LATERAL jsonb_array_elements(COALESCE(publication.snapshot -> 'media', '[]'::jsonb)) item(value)
+           WHERE provider.slug = $1
+             AND provider.status = 'ACTIVE'
+             AND item.value ->> 'id' = $2`,
+          [providerSlug, mediaId]
+        );
+        return result.rows[0] ?? null;
+      });
+      if (!row?.preview_storage_key) {
+        throw new ServiceError("MEDIA_NOT_FOUND", "La imagen publicada del taller no está disponible.", 404);
+      }
+      return {
+        ...(await storage.openPreview(row.preview_storage_key, rangeHeader)),
+        mimeType: row.preview_mime_type || "image/webp",
+        filename: `${String(row.original_filename || "taller").replace(/\.[^.]+$/, "")}-preview.webp`
       };
     }
   });
