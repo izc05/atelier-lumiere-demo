@@ -28,6 +28,16 @@ function formatDate(value) {
 function internalPath(path) {
   return typeof path === "string" && path.startsWith("/api/") ? path.replace(/^\/api\//, "/internal/") : null;
 }
+function featuredIds(profile) {
+  return Array.isArray(profile.featuredProductIds) ? profile.featuredProductIds.slice(0, 4) : [];
+}
+function featuredChoiceMap(profile) {
+  return new Map((Array.isArray(profile.featuredProductChoices) ? profile.featuredProductChoices : []).map((item) => [item.id, item]));
+}
+function hasUnavailableFeatured(profile) {
+  const choices = featuredChoiceMap(profile);
+  return featuredIds(profile).some((productId) => !choices.has(productId));
+}
 
 async function requestJson(path, options = {}) {
   const response = await fetch(path, {
@@ -139,6 +149,28 @@ function contentBlock(profile) {
   return content;
 }
 
+function featuredBlock(profile) {
+  const section = element("section", "profile-featured-review");
+  const ids = featuredIds(profile);
+  const choices = featuredChoiceMap(profile);
+  section.append(element("h3", "", "Piezas destacadas"));
+  if (!ids.length) {
+    section.append(element("p", "", "Sin selección destacada. El escaparate conservará el orden habitual del catálogo."));
+    return section;
+  }
+
+  const list = element("ol", "profile-featured-list");
+  ids.forEach((productId, index) => {
+    const product = choices.get(productId);
+    const item = element("li", product ? "" : "unavailable");
+    item.append(element("strong", "", `${index + 1}. ${product?.name || "Pieza ya no disponible"}`));
+    item.append(element("small", "", product ? "Publicación visible" : "Debe sustituirse o retirarse antes de aprobar/publicar"));
+    list.append(item);
+  });
+  section.append(list);
+  return section;
+}
+
 function mediaFigure(item, label) {
   const figure = element("figure", `review-media review-media-${String(item.kind || "gallery").toLowerCase()}`);
   const image = document.createElement("img");
@@ -192,8 +224,10 @@ function reviewPanel(profile) {
   panel.append(element("small", "", publicInfo));
 
   const hasCover = Array.isArray(profile.media) && profile.media.some((item) => item.kind === "COVER" && item.status === "READY");
+  const invalidFeatured = hasUnavailableFeatured(profile);
   if (profile.status === "IN_REVIEW") {
     if (!hasCover) panel.append(element("p", "media-review-error", "Esta revisión no tiene la portada obligatoria y no debería aprobarse."));
+    if (invalidFeatured) panel.append(element("p", "media-review-error", "Una pieza destacada ya no tiene una publicación visible. Solicita al taller que actualice la selección."));
     const textarea = document.createElement("textarea");
     textarea.maxLength = 1200;
     textarea.placeholder = "Nota para el taller. Es obligatoria si solicitas cambios.";
@@ -201,7 +235,7 @@ function reviewPanel(profile) {
     const actions = element("div", "review-actions");
     const approve = element("button", "button primary", "Aprobar perfil");
     approve.type = "button";
-    approve.disabled = !hasCover || Boolean(profile.mediaError);
+    approve.disabled = !hasCover || Boolean(profile.mediaError) || invalidFeatured;
     approve.addEventListener("click", () => void review(profile, panel, "APPROVE"));
     const changes = element("button", "button danger", "Solicitar cambios");
     changes.type = "button";
@@ -209,10 +243,11 @@ function reviewPanel(profile) {
     actions.append(approve, changes);
     panel.append(actions);
   } else if (profile.status === "APPROVED") {
-    panel.append(element("small", "", "La versión está aprobada. Publicarla sustituirá texto e imágenes del snapshot público de forma atómica."));
+    panel.append(element("small", "", "La versión está aprobada. Publicarla sustituirá texto, imágenes y destacados del snapshot público de forma atómica."));
+    if (invalidFeatured) panel.append(element("p", "media-review-error", "Una pieza destacada dejó de estar publicada después de la aprobación. No se puede publicar esta revisión."));
     const publishButton = element("button", "button primary", "Publicar versión");
     publishButton.type = "button";
-    publishButton.disabled = !hasCover || Boolean(profile.mediaError);
+    publishButton.disabled = !hasCover || Boolean(profile.mediaError) || invalidFeatured;
     publishButton.addEventListener("click", () => void publish(profile, panel));
     panel.append(publishButton);
   } else if (profile.status === "PUBLISHED") {
@@ -230,7 +265,7 @@ function reviewPanel(profile) {
 function profileCard(profile) {
   const card = element("article", "profile-card");
   const center = element("div", "profile-center");
-  center.append(contentBlock(profile), mediaBlock(profile));
+  center.append(contentBlock(profile), mediaBlock(profile), featuredBlock(profile));
   card.append(identityBlock(profile), center, reviewPanel(profile));
   return card;
 }

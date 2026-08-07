@@ -7,6 +7,7 @@ const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 let currentProfile = null;
 let currentMedia = [];
+let selectedFeaturedIds = [];
 let mediaBusy = false;
 
 function byId(id) { return document.getElementById(id); }
@@ -37,6 +38,12 @@ function defaultAlt(kind) {
   if (kind === "COVER") return `Portada del taller ${name}`;
   return `Detalle del taller ${name}`;
 }
+function featuredChoices() {
+  return Array.isArray(currentProfile?.featuredProductChoices) ? currentProfile.featuredProductChoices : [];
+}
+function featuredChoice(productId) {
+  return featuredChoices().find((item) => item.id === productId) ?? null;
+}
 
 async function request(path, { method = "GET", body } = {}) {
   const response = await fetch(path, {
@@ -59,10 +66,10 @@ async function request(path, { method = "GET", body } = {}) {
 function statusCopy(profile) {
   const values = {
     DRAFT: ["Borrador", "Perfil en preparación", "Puedes editarlo y guardarlo tantas veces como necesites antes de enviarlo a Atelier Lumière."],
-    IN_REVIEW: ["En revisión", "Atelier Lumière lo está revisando", "El contenido y las imágenes quedan bloqueados hasta que termine la revisión editorial."],
+    IN_REVIEW: ["En revisión", "Atelier Lumière lo está revisando", "El contenido, las imágenes y la selección destacada quedan bloqueados hasta que termine la revisión editorial."],
     CHANGES_REQUESTED: ["Cambios solicitados", "Hay ajustes pendientes", "Revisa la indicación editorial, guarda la nueva versión y vuelve a enviarla."],
     APPROVED: ["Aprobado", "Preparado para publicación", "Atelier Lumière ha aprobado esta versión. El perfil permanece bloqueado hasta su publicación."],
-    PUBLISHED: ["Publicado", "Esta versión está publicada", "La página pública usa esta versión. Al cambiar texto o imágenes se abrirá automáticamente una nueva revisión."]
+    PUBLISHED: ["Publicado", "Esta versión está publicada", "La página pública usa esta versión. Al cambiar texto, imágenes o piezas destacadas se abrirá automáticamente una nueva revisión."]
   };
   return values[profile.status] ?? [profile.status, "Estado del perfil", ""];
 }
@@ -79,8 +86,10 @@ function setLocked(locked) {
   document.body.classList.toggle("profile-locked", locked);
 }
 
-function populate(profile) {
+function populate(profile, { preserveFeatured = false } = {}) {
+  const localFeatured = preserveFeatured ? [...selectedFeaturedIds] : null;
   currentProfile = profile;
+  selectedFeaturedIds = localFeatured ?? (Array.isArray(profile.featuredProductIds) ? profile.featuredProductIds.slice(0, 4) : []);
   byId("public-name").value = profile.publicName ?? "";
   byId("specialty-label").value = profile.specialtyLabel ?? "";
   byId("tagline").value = profile.tagline ?? "";
@@ -106,6 +115,7 @@ function populate(profile) {
   byId("save-button").textContent = profile.status === "PUBLISHED" ? "Crear revisión y guardar" : "Guardar borrador";
   byId("submit-button").textContent = profile.status === "CHANGES_REQUESTED" ? "Volver a enviar" : "Enviar a revisión";
   renderMedia();
+  renderFeatured();
   updatePreview();
 }
 
@@ -121,7 +131,8 @@ function formData() {
     techniques: listValue(byId("techniques").value),
     preparationNote: byId("preparation-note").value.trim(),
     shippingNote: byId("shipping-note").value.trim(),
-    acceptsCustomRequests: byId("accepts-custom-requests").checked
+    acceptsCustomRequests: byId("accepts-custom-requests").checked,
+    featuredProductIds: [...selectedFeaturedIds]
   };
 }
 
@@ -183,6 +194,93 @@ function mediaMessage(value, type = "") {
   const element = byId("media-message");
   element.textContent = value;
   element.className = `form-message${type ? ` ${type}` : ""}`;
+}
+function featuredMessage(value, type = "") {
+  const element = byId("featured-message");
+  element.textContent = value;
+  element.className = `form-message${type ? ` ${type}` : ""}`;
+}
+
+function selectedFeaturedCard(productId, index) {
+  const product = featuredChoice(productId);
+  const card = node("article", `featured-selected-card${product ? "" : " unavailable"}`);
+  const position = node("span", "featured-position", String(index + 1).padStart(2, "0"));
+  const copy = node("div", "featured-copy");
+  copy.append(
+    node("strong", "", product?.name || "Pieza ya no disponible"),
+    node("small", "", product ? "Publicación visible" : "Retírala antes de enviar esta revisión")
+  );
+  const actions = node("div", "featured-actions");
+  const up = node("button", "mini-button", "Subir");
+  up.type = "button";
+  up.disabled = isLocked() || index === 0;
+  up.addEventListener("click", () => moveFeatured(index, -1));
+  const down = node("button", "mini-button", "Bajar");
+  down.type = "button";
+  down.disabled = isLocked() || index === selectedFeaturedIds.length - 1;
+  down.addEventListener("click", () => moveFeatured(index, 1));
+  const remove = node("button", "mini-button danger", "Quitar");
+  remove.type = "button";
+  remove.disabled = isLocked();
+  remove.addEventListener("click", () => removeFeatured(productId));
+  actions.append(up, down, remove);
+  card.append(position, copy, actions);
+  return card;
+}
+
+function availableFeaturedCard(product) {
+  const card = node("article", "featured-choice-card");
+  const copy = node("div", "featured-copy");
+  copy.append(node("strong", "", product.name || "Pieza publicada"), node("small", "", "Disponible para destacar"));
+  const add = node("button", "mini-button", "Añadir");
+  add.type = "button";
+  const full = selectedFeaturedIds.length >= 4;
+  add.disabled = isLocked() || full;
+  add.addEventListener("click", () => addFeatured(product.id));
+  card.append(copy, add);
+  return card;
+}
+
+function renderFeatured() {
+  const selected = byId("featured-selection");
+  selected.replaceChildren(...selectedFeaturedIds.map(selectedFeaturedCard));
+  if (!selectedFeaturedIds.length) {
+    selected.append(node("p", "featured-empty", "No has elegido piezas destacadas. El catálogo mantendrá su orden habitual."));
+  }
+  text("featured-count", `${selectedFeaturedIds.length}/4`);
+
+  const selectedSet = new Set(selectedFeaturedIds);
+  const available = featuredChoices().filter((product) => !selectedSet.has(product.id));
+  const choices = byId("featured-choices");
+  choices.replaceChildren(...available.map(availableFeaturedCard));
+  if (!available.length) {
+    choices.append(node("p", "featured-empty", featuredChoices().length
+      ? "Todas las publicaciones disponibles ya están en tu selección."
+      : "Todavía no tienes piezas publicadas y visibles para destacar."));
+  }
+}
+
+function addFeatured(productId) {
+  if (isLocked() || selectedFeaturedIds.length >= 4 || selectedFeaturedIds.includes(productId) || !featuredChoice(productId)) return;
+  selectedFeaturedIds.push(productId);
+  featuredMessage("Orden actualizado en esta vista. Pulsa Guardar borrador para conservarlo.");
+  renderFeatured();
+}
+
+function removeFeatured(productId) {
+  if (isLocked()) return;
+  selectedFeaturedIds = selectedFeaturedIds.filter((id) => id !== productId);
+  featuredMessage("Pieza retirada de la selección. Pulsa Guardar borrador para conservar el cambio.");
+  renderFeatured();
+}
+
+function moveFeatured(index, direction) {
+  if (isLocked()) return;
+  const target = index + direction;
+  if (target < 0 || target >= selectedFeaturedIds.length) return;
+  [selectedFeaturedIds[index], selectedFeaturedIds[target]] = [selectedFeaturedIds[target], selectedFeaturedIds[index]];
+  featuredMessage("Orden actualizado. Pulsa Guardar borrador para conservarlo.");
+  renderFeatured();
 }
 
 function mediaCard(item) {
@@ -284,7 +382,7 @@ async function uploadFiles(kind, files) {
   mediaMessage(`Subiendo ${selected.length === 1 ? "imagen" : `${selected.length} imágenes`}…`);
   try {
     for (const file of selected) await uploadOne(kind, file);
-    await reloadProfileAndMedia();
+    await reloadProfileAndMedia({ preserveFeatured: true });
     mediaMessage("Imágenes guardadas en el borrador privado.", "success");
   } catch (error) {
     mediaMessage(error.message, "error");
@@ -293,6 +391,7 @@ async function uploadFiles(kind, files) {
     for (const id of mediaInputs) byId(id).value = "";
     setLocked(isLocked());
     renderMedia();
+    renderFeatured();
   }
 }
 
@@ -302,7 +401,7 @@ async function updateMediaMetadata(mediaId, data) {
   mediaMessage("Guardando descripción…");
   try {
     await request(`/internal/provider/profile/media/${encodeURIComponent(mediaId)}`, { method: "PATCH", body: data });
-    await reloadProfileAndMedia();
+    await reloadProfileAndMedia({ preserveFeatured: true });
     mediaMessage("Descripción de imagen guardada.", "success");
   } catch (error) {
     mediaMessage(error.message, "error");
@@ -310,6 +409,7 @@ async function updateMediaMetadata(mediaId, data) {
     mediaBusy = false;
     setLocked(isLocked());
     renderMedia();
+    renderFeatured();
   }
 }
 
@@ -319,7 +419,7 @@ async function removeMedia(mediaId) {
   mediaMessage("Retirando imagen del borrador…");
   try {
     await request(`/internal/provider/profile/media/${encodeURIComponent(mediaId)}`, { method: "DELETE" });
-    await reloadProfileAndMedia();
+    await reloadProfileAndMedia({ preserveFeatured: true });
     mediaMessage("Imagen retirada. La versión pública anterior permanece intacta.", "success");
   } catch (error) {
     mediaMessage(error.message, "error");
@@ -327,16 +427,17 @@ async function removeMedia(mediaId) {
     mediaBusy = false;
     setLocked(isLocked());
     renderMedia();
+    renderFeatured();
   }
 }
 
-async function reloadProfileAndMedia() {
+async function reloadProfileAndMedia({ preserveFeatured = false } = {}) {
   const [profilePayload, mediaPayload] = await Promise.all([
     request("/internal/provider/profile"),
     request("/internal/provider/profile/media")
   ]);
   currentMedia = Array.isArray(mediaPayload.media) ? mediaPayload.media : [];
-  populate(profilePayload.profile);
+  populate(profilePayload.profile, { preserveFeatured });
 }
 
 async function save() {
@@ -346,6 +447,7 @@ async function save() {
   try {
     const payload = await request("/internal/provider/profile", { method: "PATCH", body: formData() });
     populate(payload.profile);
+    featuredMessage("Selección destacada guardada en el borrador privado.", "success");
     message("Borrador guardado correctamente.", "success");
   } catch (error) {
     message(error.message, "error");
@@ -368,7 +470,7 @@ async function submit() {
     message("Enviando a revisión…");
     const payload = await request("/internal/provider/profile/submit", { method: "POST" });
     populate(payload.profile);
-    message("Perfil e imágenes enviados a Atelier Lumière para revisión.", "success");
+    message("Perfil, imágenes y selección destacada enviados a Atelier Lumière para revisión.", "success");
   } catch (error) {
     message(error.message, "error");
     updatePreview();
