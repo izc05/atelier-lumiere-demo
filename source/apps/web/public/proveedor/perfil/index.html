@@ -119,19 +119,56 @@
             <span><strong>Acepto encargos personalizados</strong><small>La página del taller podrá destacar que estás disponible para propuestas especiales.</small></span>
           </label>
         </section>
+
+        <section class="form-section media-section">
+          <div class="section-heading">
+            <span>05</span>
+            <div><p class="eyebrow">Imagen del taller</p><h2>Logo, portada y galería</h2></div>
+          </div>
+          <p class="media-intro">Las imágenes se guardan en tu borrador privado. La portada es obligatoria para enviar una nueva revisión; el logo es opcional y puedes añadir hasta seis fotografías de galería.</p>
+
+          <div class="media-upload-grid">
+            <article class="media-uploader">
+              <div><strong>Logo</strong><small>1 imagen · opcional · JPEG, PNG o WebP · máximo 12 MB</small></div>
+              <input id="logo-file" class="media-file" type="file" accept="image/jpeg,image/png,image/webp">
+              <label class="button secondary" for="logo-file">Elegir logo</label>
+              <div id="logo-media" class="media-slot"></div>
+            </article>
+
+            <article class="media-uploader media-uploader-cover">
+              <div><strong>Portada</strong><small>1 imagen · obligatoria · mejor horizontal · máximo 12 MB</small></div>
+              <input id="cover-file" class="media-file" type="file" accept="image/jpeg,image/png,image/webp">
+              <label class="button secondary" for="cover-file">Elegir portada</label>
+              <div id="cover-media" class="media-slot"></div>
+            </article>
+          </div>
+
+          <article class="media-uploader gallery-uploader">
+            <div><strong>Galería del taller</strong><small>Hasta 6 fotografías del proceso, espacio de trabajo, materiales o detalles.</small></div>
+            <input id="gallery-file" class="media-file" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+            <label class="button secondary" for="gallery-file">Añadir fotografías</label>
+            <div id="gallery-media" class="gallery-media" aria-live="polite"></div>
+          </article>
+          <p id="media-message" class="form-message" role="status" aria-live="polite"></p>
+        </section>
       </form>
 
       <aside class="editor-side">
         <section class="preview-card" aria-labelledby="preview-title">
           <p class="eyebrow">Vista previa privada</p>
-          <div class="preview-hero">
-            <div>
+          <div id="preview-hero" class="preview-hero">
+            <img id="preview-cover" class="preview-cover" alt="" hidden>
+            <div class="preview-overlay" aria-hidden="true"></div>
+            <div class="preview-copy">
               <span id="preview-kicker">Taller invitado</span>
               <h2 id="preview-title">Tu taller</h2>
               <p id="preview-specialty">Especialidad</p>
               <p id="preview-tagline">Tu frase de presentación aparecerá aquí.</p>
             </div>
-            <div id="preview-monogram" class="preview-monogram" aria-hidden="true">AL</div>
+            <div class="preview-identity">
+              <img id="preview-logo" class="preview-logo" alt="" hidden>
+              <div id="preview-monogram" class="preview-monogram" aria-hidden="true">AL</div>
+            </div>
           </div>
           <div class="preview-details">
             <span id="preview-location">Ubicación por completar</span>
@@ -148,6 +185,7 @@
             <span id="ready-tagline">○ Presentación</span>
             <span id="ready-story">○ Historia</span>
             <span id="ready-craft">○ Oficio</span>
+            <span id="ready-cover">○ Portada del taller</span>
           </div>
           <button id="save-button" class="button secondary wide" type="button">Guardar borrador</button>
           <button id="submit-button" class="button primary wide" type="button">Enviar a revisión</button>
