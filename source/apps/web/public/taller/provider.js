@@ -22,6 +22,73 @@ async function requestCatalog() {
   if (!response.ok) throw new Error(payload.message || "No se pudo abrir el catálogo.");
   return Array.isArray(payload.products) ? payload.products : [];
 }
+function initials(value) {
+  const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "AL";
+  if (parts.length === 1) return parts[0].slice(0, 2).toLocaleUpperCase("es");
+  return `${parts[0][0]}${parts.at(-1)[0]}`.toLocaleUpperCase("es");
+}
+function framingPercent(value, fallback = 50) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(100, Math.max(0, parsed));
+}
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+function coverGeometry(containerWidth, containerHeight, sourceWidth, sourceHeight, focalX, focalY) {
+  if (![containerWidth, containerHeight, sourceWidth, sourceHeight].every((value) => Number.isFinite(value) && value > 0)) {
+    return null;
+  }
+  const scale = Math.max(containerWidth / sourceWidth, containerHeight / sourceHeight);
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+  const desiredLeft = (containerWidth / 2) - (width * focalX / 100);
+  const desiredTop = (containerHeight / 2) - (height * focalY / 100);
+  return {
+    width,
+    height,
+    left: clamp(desiredLeft, containerWidth - width, 0),
+    top: clamp(desiredTop, containerHeight - height, 0)
+  };
+}
+function applyCoverFraming(image, visual, cover) {
+  const focalX = framingPercent(cover?.focalX);
+  const focalY = framingPercent(cover?.focalY);
+  visual.style.setProperty("position", "relative", "important");
+  visual.style.setProperty("overflow", "hidden", "important");
+  image.style.setProperty("display", "block", "important");
+  image.style.setProperty("max-width", "none", "important");
+  image.style.setProperty("max-height", "none", "important");
+
+  const render = () => {
+    if (!visual.isConnected) return;
+    const sourceWidth = image.naturalWidth || Number(cover?.width);
+    const sourceHeight = image.naturalHeight || Number(cover?.height);
+    const geometry = coverGeometry(visual.clientWidth, visual.clientHeight, sourceWidth, sourceHeight, focalX, focalY);
+    if (!geometry) return;
+    image.style.setProperty("position", "absolute", "important");
+    image.style.setProperty("width", `${geometry.width}px`, "important");
+    image.style.setProperty("height", `${geometry.height}px`, "important");
+    image.style.setProperty("left", `${geometry.left}px`, "important");
+    image.style.setProperty("top", `${geometry.top}px`, "important");
+    image.style.setProperty("object-fit", "fill", "important");
+    image.style.setProperty("object-position", "50% 50%", "important");
+  };
+
+  image.addEventListener("load", render, { once: true });
+  if (image.complete && image.naturalWidth > 0) queueMicrotask(render);
+  if (typeof ResizeObserver === "function") {
+    const observer = new ResizeObserver(() => {
+      if (!visual.isConnected) {
+        observer.disconnect();
+        return;
+      }
+      render();
+    });
+    observer.observe(visual);
+  }
+}
 function productCard(product) {
   const article = node("article", "product-card");
   const visual = node("div", "product-image", "Pieza artesanal");
@@ -37,8 +104,8 @@ function productCard(product) {
       priority: "low",
       defaultWidth: 640
     });
-    image.style.objectPosition = `${product.cover.focalX ?? 50}% ${product.cover.focalY ?? 50}%`;
     visual.replaceChildren(image);
+    applyCoverFraming(image, visual, product.cover);
   }
   const body = node("div", "product-body");
   body.append(node("span", "provider", product.category || "Pieza artesanal"));
@@ -48,6 +115,7 @@ function productCard(product) {
   for (const event of (product.events ?? []).slice(0, 3)) {
     tags.append(node("span", "tag", event.replaceAll("-", " ")));
   }
+  if (product.customizable) tags.append(node("span", "tag", "personalizable"));
   body.append(tags);
   const foot = node("div", "card-foot");
   foot.append(node("strong", "price", money(product.priceCents, product.currency)));
@@ -70,6 +138,27 @@ function renderProducts() {
   view.replaceChildren(...visible.map(productCard));
   if (visible.length === 0) view.append(node("p", "provider-empty", "No hay piezas que coincidan con esta búsqueda."));
 }
+function revealProviderSections() {
+  for (const id of ["provider-hero", "provider-editorial", "collection", "provider-bespoke", "provider-footer-note"]) {
+    byId(id).hidden = false;
+  }
+}
+function hydrateProvider(provider) {
+  const displayName = provider.displayName || "Taller invitado";
+  const specialty = provider.specialty || "Piezas artesanales seleccionadas por Atelier Lumière.";
+  const categories = new Set(providerProducts.map((product) => product.category).filter(Boolean));
+  const customizable = providerProducts.filter((product) => product.customizable).length;
+
+  document.title = `${displayName} · Atelier Lumière`;
+  byId("provider-name").textContent = displayName;
+  byId("provider-specialty").textContent = specialty;
+  byId("provider-identity-name").textContent = displayName;
+  byId("provider-monogram").textContent = initials(displayName);
+  byId("provider-piece-count").textContent = String(providerProducts.length);
+  byId("provider-category-count").textContent = String(categories.size || 1);
+  byId("customizable-count").textContent = String(customizable);
+  byId("collection-note").textContent = `${providerProducts.length} ${providerProducts.length === 1 ? "pieza publicada" : "piezas publicadas"} en esta edición del taller.`;
+}
 async function load() {
   const slug = providerSlug();
   if (!slug) {
@@ -85,12 +174,8 @@ async function load() {
       byId("empty-view").hidden = false;
       return;
     }
-    const provider = providerProducts[0].provider;
-    document.title = `${provider.displayName} · Atelier Lumière`;
-    byId("provider-name").textContent = provider.displayName;
-    byId("provider-specialty").textContent = provider.specialty || "Piezas artesanales seleccionadas por Atelier Lumière.";
-    byId("provider-hero").hidden = false;
-    byId("collection").hidden = false;
+    hydrateProvider(providerProducts[0].provider);
+    revealProviderSections();
     renderProducts();
   } catch (error) {
     byId("error-message").textContent = error.message;

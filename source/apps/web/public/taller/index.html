@@ -19,7 +19,7 @@
 </head>
 <body>
   <a class="skip-link" href="#main-content">Saltar al contenido</a>
-  <div class="shell">
+  <div class="shell provider-shell">
     <header class="topbar" data-public-header>
       <a class="brand" href="/">
         <span class="brand-mark" aria-hidden="true">AL</span>
@@ -36,34 +36,85 @@
     </header>
 
     <main id="main-content" tabindex="-1">
-      <section id="provider-hero" class="provider-hero" hidden>
-        <div>
-          <p class="eyebrow">Taller invitado</p>
+      <section id="provider-hero" class="provider-hero" hidden aria-labelledby="provider-name">
+        <div class="provider-hero-copy">
+          <p class="eyebrow provider-kicker">Taller invitado · Selección Atelier Lumière</p>
           <h1 id="provider-name"></h1>
-          <p id="provider-specialty" class="lead"></p>
+          <p id="provider-specialty" class="provider-lead"></p>
+          <div class="provider-actions">
+            <a class="button primary provider-primary-action" href="#collection">Descubrir la colección</a>
+            <a class="provider-text-link" href="/tienda/">Volver a todos los talleres</a>
+          </div>
           <div class="provider-signals" aria-label="Información del taller">
-            <span>Selección revisada</span>
+            <span><strong id="provider-piece-count">0</strong> piezas publicadas</span>
+            <span><strong id="provider-category-count">0</strong> categorías</span>
             <span>Compra directa por taller</span>
             <span>Envío compartido</span>
+            <span>Selección revisada por Atelier Lumière</span>
           </div>
         </div>
-        <aside class="provider-note">
-          <strong>Una compra, un taller</strong>
-          <p>Puedes combinar varias piezas de este artesano en el mismo carrito y compartir el envío.</p>
+
+        <aside class="provider-identity" aria-label="Identidad del taller">
+          <div class="provider-monogram-wrap" aria-hidden="true">
+            <span id="provider-monogram" class="provider-monogram">AL</span>
+            <span class="provider-orbit provider-orbit-one"></span>
+            <span class="provider-orbit provider-orbit-two"></span>
+          </div>
+          <p class="provider-identity-label">Edición de taller</p>
+          <strong id="provider-identity-name"></strong>
+          <span class="provider-edition-mark">ATELIER · COLLECTION</span>
         </aside>
       </section>
 
-      <section id="loading-view" class="loading" role="status"><p>Preparando el escaparate del taller…</p></section>
+      <section id="loading-view" class="loading provider-loading" role="status"><p>Preparando el escaparate del taller…</p></section>
       <section id="error-view" class="error" hidden><div><h2>No se pudo abrir este taller</h2><p id="error-message"></p><a class="button primary" href="/tienda/">Volver a la tienda</a></div></section>
       <section id="empty-view" class="empty" hidden><div><h2>Este taller todavía no tiene piezas publicadas</h2><p>Vuelve pronto o descubre otros artesanos invitados.</p><a class="button primary" href="/tienda/">Explorar la tienda</a></div></section>
 
-      <section id="collection" hidden>
-        <div class="collection-heading">
-          <div><p class="eyebrow">Colección disponible</p><h2>Piezas publicadas</h2></div>
-          <label class="provider-search">Buscar en este taller<input id="search-input" type="search" autocomplete="off" placeholder="Nombre o categoría"></label>
+      <section id="provider-editorial" class="provider-editorial" hidden aria-label="Sobre esta selección">
+        <div class="provider-editorial-intro">
+          <p class="eyebrow">Una colección con oficio</p>
+          <h2>Piezas escogidas para contar una historia propia.</h2>
         </div>
-        <div id="products-view" class="products" aria-live="polite"></div>
+        <div class="provider-editorial-copy">
+          <p>Este escaparate reúne únicamente las piezas publicadas del taller dentro de Atelier Lumière. Cada ficha pasa por un flujo editorial antes de formar parte de la colección.</p>
+          <p>Compra varias piezas del mismo artesano en un único pedido y comparte el envío siempre que sea posible.</p>
+        </div>
+        <div class="provider-trust-grid" aria-label="Compromisos de Atelier Lumière">
+          <article><span>01</span><strong>Selección editorial</strong><p>La presentación de cada pieza se revisa antes de su publicación.</p></article>
+          <article><span>02</span><strong>Compra por taller</strong><p>Un carrito agrupado por artesano para simplificar preparación y envío.</p></article>
+          <article><span>03</span><strong>Piezas con identidad</strong><p>El protagonismo sigue siendo del taller, su oficio y su colección.</p></article>
+        </div>
       </section>
+
+      <section id="collection" class="provider-collection" hidden>
+        <div class="collection-heading">
+          <div>
+            <p class="eyebrow">Colección disponible</p>
+            <h2>Piezas del taller</h2>
+            <p id="collection-note" class="collection-note"></p>
+          </div>
+          <label class="provider-search">Buscar en este taller<input id="search-input" type="search" autocomplete="off" placeholder="Nombre, categoría u ocasión"></label>
+        </div>
+        <div id="products-view" class="products provider-products" aria-live="polite"></div>
+      </section>
+
+      <section id="provider-bespoke" class="provider-bespoke" hidden aria-labelledby="provider-bespoke-title">
+        <div>
+          <p class="eyebrow">Encargos especiales</p>
+          <h2 id="provider-bespoke-title">Una pieza puede empezar con una idea.</h2>
+          <p>Algunas creaciones de la colección admiten personalización. Entra en la pieza que te interese para consultar opciones, tiempos y detalles con el taller.</p>
+        </div>
+        <div class="provider-bespoke-card">
+          <span class="provider-bespoke-mark" aria-hidden="true">AL</span>
+          <p><strong id="customizable-count">0</strong> piezas de esta colección permiten personalización actualmente.</p>
+          <a class="button ghost" href="#collection">Ver la colección</a>
+        </div>
+      </section>
+
+      <footer id="provider-footer-note" class="provider-footer-note" hidden>
+        <p>Atelier Lumière · Taller invitado</p>
+        <span>Artesanía para celebrar, elegir y conservar.</span>
+      </footer>
     </main>
   </div>
 </body>
