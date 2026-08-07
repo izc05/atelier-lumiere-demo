@@ -339,13 +339,22 @@ export function createProviderProfileMediaService({
         return await database.withContext(context, async (transaction) => {
           await makeProfileEditable(transaction, context);
           const current = await transaction.query(
-            `SELECT id
+            `SELECT id, status
              FROM provider_profile_media
-             WHERE provider_id = $1 AND kind = 'GALLERY' AND status = 'READY'
+             WHERE provider_id = $1
+               AND kind = 'GALLERY'
+               AND status NOT IN ('DELETED','REJECTED')
              ORDER BY sort_order, created_at
              FOR UPDATE`,
             [context.providerId]
           );
+          if (current.rows.some((row) => row.status !== "READY")) {
+            throw new ServiceError(
+              "GALLERY_ORDER_BUSY",
+              "Espera a que terminen las cargas de la galería antes de cambiar su orden.",
+              409
+            );
+          }
           const currentIds = current.rows.map((row) => row.id);
           const currentSet = new Set(currentIds);
           if (currentIds.length !== mediaIds.length || mediaIds.some((mediaId) => !currentSet.has(mediaId))) {
@@ -359,7 +368,7 @@ export function createProviderProfileMediaService({
           if (mediaIds.length) {
             await transaction.query(
               `UPDATE provider_profile_media media
-               SET sort_order = ordered.position - 1
+               SET sort_order = (ordered.position - 1)::smallint
                FROM unnest($2::uuid[]) WITH ORDINALITY AS ordered(id, position)
                WHERE media.provider_id = $1
                  AND media.id = ordered.id
