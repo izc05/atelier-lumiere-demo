@@ -74,6 +74,22 @@ test("el checkout recalcula precios, mantiene un solo taller y es idempotente", 
        ) VALUES ($1,$2,$3,'Color del bordado','COLOR',true,$4::jsonb,250,1,true)`,
       [optionA, PROVIDER_A, productA, JSON.stringify(["Burdeos", "Dorado"])]
     );
+    await tx.query(
+      `INSERT INTO product_publications (
+         product_id, provider_id, revision, snapshot, visible,
+         published_by, published_at
+       )
+       SELECT product.id,
+              product.provider_id,
+              1,
+              app.build_product_publication_snapshot(product.id),
+              true,
+              product.published_by,
+              product.published_at
+       FROM products product
+       WHERE product.id = ANY($1::uuid[])`,
+      [[productA, productB]]
+    );
   });
 
   const customerAuthService = createCustomerAuthService({
