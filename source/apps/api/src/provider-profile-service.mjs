@@ -48,6 +48,14 @@ function featuredProductIds(value) {
   return normalized;
 }
 
+function featuredUnavailableError(message) {
+  return new ServiceError("FEATURED_PRODUCT_NOT_AVAILABLE", message, 422, { field: "featuredProductIds" });
+}
+
+function isFeaturedUnavailableDatabaseError(error) {
+  return error?.code === "23514" && String(error.message).includes("PROVIDER_PROFILE_FEATURED_PRODUCT_NOT_VISIBLE");
+}
+
 function serialize(row) {
   if (!row) return null;
   return {
@@ -170,12 +178,7 @@ export function createProviderProfileService({ database } = {}) {
           );
           const unavailable = values.featuredProductIds.filter((productId) => !availableIds.has(productId));
           if (unavailable.length) {
-            throw new ServiceError(
-              "FEATURED_PRODUCT_NOT_AVAILABLE",
-              "Solo puedes destacar piezas de tu taller que tengan una publicación visible.",
-              422,
-              { field: "featuredProductIds" }
-            );
+            throw featuredUnavailableError("Solo puedes destacar piezas de tu taller que tengan una publicación visible.");
           }
 
           await transaction.query(
@@ -244,13 +247,8 @@ export function createProviderProfileService({ database } = {}) {
             [context.providerId]
           );
         } catch (error) {
-          if (error?.code === "23514" && String(error.message).includes("PROVIDER_PROFILE_FEATURED_PRODUCT_NOT_VISIBLE")) {
-            throw new ServiceError(
-              "FEATURED_PRODUCT_NOT_AVAILABLE",
-              "Una de las piezas destacadas ya no está publicada. Retírala o elige otra antes de enviar el perfil.",
-              422,
-              { field: "featuredProductIds" }
-            );
+          if (isFeaturedUnavailableDatabaseError(error)) {
+            throw featuredUnavailableError("Una de las piezas destacadas ya no está publicada. Retírala o elige otra antes de enviar el perfil.");
           }
           if (error?.code === "23514") {
             throw new ServiceError(
@@ -317,10 +315,17 @@ export function createProviderProfileService({ database } = {}) {
           throw new ServiceError("PROFILE_NOT_IN_REVIEW", "El perfil no está pendiente de revisión.", 409);
         }
         const nextStatus = decision === "APPROVE" ? "APPROVED" : "CHANGES_REQUESTED";
-        await transaction.query(
-          `UPDATE provider_profiles SET status = $2, editorial_note = $3 WHERE provider_id = $1`,
-          [providerId, nextStatus, note]
-        );
+        try {
+          await transaction.query(
+            `UPDATE provider_profiles SET status = $2, editorial_note = $3 WHERE provider_id = $1`,
+            [providerId, nextStatus, note]
+          );
+        } catch (error) {
+          if (isFeaturedUnavailableDatabaseError(error)) {
+            throw featuredUnavailableError("Una pieza destacada dejó de estar publicada durante la revisión. Solicita al taller que actualice su selección.");
+          }
+          throw error;
+        }
         await writeAudit(transaction, context, providerId,
           decision === "APPROVE" ? "PROVIDER_PROFILE_APPROVED" : "PROVIDER_PROFILE_CHANGES_REQUESTED",
           { note }
@@ -339,7 +344,14 @@ export function createProviderProfileService({ database } = {}) {
         if (current.status !== "APPROVED") {
           throw new ServiceError("PROFILE_NOT_APPROVED", "El perfil debe estar aprobado antes de publicarlo.", 409);
         }
-        await transaction.query(`UPDATE provider_profiles SET status = 'PUBLISHED' WHERE provider_id = $1`, [providerId]);
+        try {
+          await transaction.query(`UPDATE provider_profiles SET status = 'PUBLISHED' WHERE provider_id = $1`, [providerId]);
+        } catch (error) {
+          if (isFeaturedUnavailableDatabaseError(error)) {
+            throw featuredUnavailableError("Una pieza destacada dejó de estar publicada después de la aprobación. La revisión debe actualizarse antes de publicar.");
+          }
+          throw error;
+        }
         await writeAudit(transaction, context, providerId, "PROVIDER_PROFILE_PUBLISHED");
         return serialize(await readForProvider(transaction, providerId));
       });
