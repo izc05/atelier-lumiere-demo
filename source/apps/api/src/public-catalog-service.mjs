@@ -127,10 +127,11 @@ export function createPublicCatalogService({ database, storage } = {}) {
   }
 
   return Object.freeze({
-    async list({ query, category, event, limit = 60 } = {}) {
+    async list({ query, category, event, provider, limit = 60 } = {}) {
       const search = cleanQuery(query, 160);
       const selectedCategory = cleanQuery(category, 80);
       const selectedEvent = event ? slug(event, "event") : "";
+      const selectedProvider = provider ? slug(provider, "provider") : "";
       const selectedLimit = Number.isInteger(limit) ? Math.min(Math.max(limit, 1), 100) : 60;
 
       return database.withContext(PUBLIC_CONTEXT, async (transaction) => {
@@ -201,9 +202,10 @@ export function createPublicCatalogService({ database, storage } = {}) {
                    AND event_filter.event_slug = $3
                )
              )
+             AND ($4::text = '' OR provider.slug = $4)
            ORDER BY product.published_at DESC, product.name
-           LIMIT $4`,
-          [search, selectedCategory, selectedEvent, selectedLimit]
+           LIMIT $5`,
+          [search, selectedCategory, selectedEvent, selectedProvider, selectedLimit]
         );
         return result.rows.map(publicSummary);
       });
