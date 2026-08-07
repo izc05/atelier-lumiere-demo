@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#59101f">
+  <title>Perfil del taller · Atelier Lumière</title>
+  <link rel="stylesheet" href="/proveedor/perfil/profile.css">
+  <script defer src="/proveedor/perfil/profile.js"></script>
+  <link rel="stylesheet" href="/premium-ui.css">
+  <script defer src="/premium-ui.js"></script>
+</head>
+<body>
+  <main class="profile-shell">
+    <header class="profile-topbar">
+      <a class="brand" href="/proveedor/panel/">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Editor del taller</small></span>
+      </a>
+      <div class="topbar-actions">
+        <a id="public-profile-link" class="button ghost" href="/tienda/">Vista pública actual</a>
+        <a class="button ghost" href="/proveedor/panel/">Volver al panel</a>
+      </div>
+    </header>
+
+    <section class="profile-intro">
+      <div>
+        <p class="eyebrow">Identidad editorial</p>
+        <h1>Tu taller,<br>con voz propia.</h1>
+        <p>Prepara la presentación que acompañará a tus piezas. Los cambios no sustituyen la versión pública hasta que Atelier Lumière los revise y publique.</p>
+      </div>
+      <aside class="workflow-card">
+        <span id="status-badge" class="status-badge">Cargando…</span>
+        <strong id="status-title">Preparando el perfil</strong>
+        <p id="status-copy">Estamos recuperando la versión privada de tu taller.</p>
+        <p id="editorial-note" class="editorial-note" hidden></p>
+      </aside>
+    </section>
+
+    <section id="loading-view" class="loading-card" role="status">Cargando perfil del taller…</section>
+    <section id="error-view" class="error-card" hidden>
+      <h2>No se pudo abrir el perfil</h2>
+      <p id="error-message"></p>
+      <a class="button primary" href="/proveedor/panel/">Volver al panel</a>
+    </section>
+
+    <section id="editor-view" class="editor-layout" hidden>
+      <form id="profile-form" class="editor-form">
+        <section class="form-section">
+          <div class="section-heading">
+            <span>01</span>
+            <div><p class="eyebrow">Identidad</p><h2>Cómo se presenta tu taller</h2></div>
+          </div>
+          <div class="field-grid two-columns">
+            <label>Nombre público del taller
+              <input id="public-name" name="publicName" type="text" minlength="2" maxlength="140" required>
+            </label>
+            <label>Especialidad
+              <input id="specialty-label" name="specialtyLabel" type="text" minlength="2" maxlength="160" required placeholder="Ej. Cerámica contemporánea">
+            </label>
+          </div>
+          <label>Frase de presentación
+            <input id="tagline" name="tagline" type="text" maxlength="180" placeholder="Una frase que resuma qué hace especial a tu taller">
+            <small><span id="tagline-count">0</span>/180 · mínimo 10 caracteres para revisión</small>
+          </label>
+          <label>Localidad o zona
+            <input id="location-label" name="locationLabel" type="text" maxlength="120" placeholder="Ej. Granada · Andalucía">
+            <small>No publiques una dirección privada. Basta con localidad, provincia o zona.</small>
+          </label>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span>02</span>
+            <div><p class="eyebrow">Historia</p><h2>Qué hay detrás del taller</h2></div>
+          </div>
+          <label>Historia del taller
+            <textarea id="story" name="story" rows="8" maxlength="4000" placeholder="Cuenta cómo nació el taller, qué te inspira y qué quieres transmitir con tus piezas."></textarea>
+            <small><span id="story-count">0</span>/4000 · mínimo 40 caracteres para revisión</small>
+          </label>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span>03</span>
+            <div><p class="eyebrow">Oficio</p><h2>Cómo haces lo que haces</h2></div>
+          </div>
+          <label>Proceso, oficio y forma de trabajar
+            <textarea id="craft-description" name="craftDescription" rows="7" maxlength="2500" placeholder="Explica el proceso, el cuidado de los acabados o aquello que diferencia tu forma de trabajar."></textarea>
+            <small><span id="craft-count">0</span>/2500 · mínimo 20 caracteres para revisión</small>
+          </label>
+          <div class="field-grid two-columns">
+            <label>Materiales
+              <input id="materials" type="text" placeholder="Arcilla, madera, lino…">
+              <small>Sepáralos con comas · máximo 12.</small>
+            </label>
+            <label>Técnicas
+              <input id="techniques" type="text" placeholder="Torno, bordado, grabado…">
+              <small>Sepáralas con comas · máximo 12.</small>
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span>04</span>
+            <div><p class="eyebrow">Operativa</p><h2>Preparación, envío y encargos</h2></div>
+          </div>
+          <label>Información habitual de preparación
+            <textarea id="preparation-note" name="preparationNote" rows="4" maxlength="1200" placeholder="Ej. Cada pieza se termina bajo pedido y suele necesitar entre 3 y 5 días laborables."></textarea>
+          </label>
+          <label>Información general de envío
+            <textarea id="shipping-note" name="shippingNote" rows="4" maxlength="1200" placeholder="Ej. Protegemos cada pieza individualmente y agrupamos el envío cuando el pedido incluye varias creaciones."></textarea>
+          </label>
+          <label class="toggle-field">
+            <input id="accepts-custom-requests" name="acceptsCustomRequests" type="checkbox">
+            <span><strong>Acepto encargos personalizados</strong><small>La página del taller podrá destacar que estás disponible para propuestas especiales.</small></span>
+          </label>
+        </section>
+      </form>
+
+      <aside class="editor-side">
+        <section class="preview-card" aria-labelledby="preview-title">
+          <p class="eyebrow">Vista previa privada</p>
+          <div class="preview-hero">
+            <div>
+              <span id="preview-kicker">Taller invitado</span>
+              <h2 id="preview-title">Tu taller</h2>
+              <p id="preview-specialty">Especialidad</p>
+              <p id="preview-tagline">Tu frase de presentación aparecerá aquí.</p>
+            </div>
+            <div id="preview-monogram" class="preview-monogram" aria-hidden="true">AL</div>
+          </div>
+          <div class="preview-details">
+            <span id="preview-location">Ubicación por completar</span>
+            <span id="preview-custom">Encargos según disponibilidad</span>
+          </div>
+          <p class="preview-note">Esta vista usa tu borrador. La página pública seguirá mostrando la última versión publicada hasta que termine la revisión.</p>
+        </section>
+
+        <section class="actions-card">
+          <p class="eyebrow">Publicación</p>
+          <h2>Prepara tu siguiente versión</h2>
+          <div class="readiness" aria-label="Requisitos para revisión">
+            <span id="ready-name">○ Nombre y especialidad</span>
+            <span id="ready-tagline">○ Presentación</span>
+            <span id="ready-story">○ Historia</span>
+            <span id="ready-craft">○ Oficio</span>
+          </div>
+          <button id="save-button" class="button secondary wide" type="button">Guardar borrador</button>
+          <button id="submit-button" class="button primary wide" type="button">Enviar a revisión</button>
+          <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+        </section>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>
