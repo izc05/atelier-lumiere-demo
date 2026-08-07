@@ -3,6 +3,7 @@ import { createWebHandler } from "./app.mjs";
 import { createAccountRecoveryWebHandler } from "./account-recovery-proxy.mjs";
 import { createAdminAccountsWebHandler } from "./admin-accounts-proxy.mjs";
 import { createAdminAuthenticationWebHandler } from "./admin-auth-proxy.mjs";
+import { createAdminProviderProfilesWebHandler } from "./admin-provider-profiles-proxy.mjs";
 import { createAdminRecoveryWebHandler } from "./admin-recovery-proxy.mjs";
 import { createCustomerOrdersWebHandler } from "./customer-orders-proxy.mjs";
 import { createLegacyRouteRedirectWebHandler } from "./legacy-route-redirects.mjs";
@@ -14,6 +15,7 @@ import { createProviderBlogWebHandler } from "./provider-blog-proxy.mjs";
 import { createProviderMediaFocalWebHandler } from "./provider-media-focal-proxy.mjs";
 import { createProviderOrdersWebHandler } from "./provider-orders-proxy.mjs";
 import { createProviderProductsWebHandler } from "./provider-products-proxy.mjs";
+import { createProviderProfileWebHandler } from "./provider-profile-proxy.mjs";
 import { createPublicBlogWebHandler } from "./public-blog-proxy.mjs";
 import { createPublicCatalogWebHandler } from "./public-catalog-proxy.mjs";
 import { createPublicErrorPagesWebHandler } from "./public-error-pages-handler.mjs";
@@ -36,10 +38,9 @@ const baseWebHandler = createWebHandler({
 });
 const accountRecoveryHandler = createAccountRecoveryWebHandler({ baseHandler: baseWebHandler });
 const providerProductsHandler = createProviderProductsWebHandler({ baseHandler: accountRecoveryHandler });
-const providerMediaFocalHandler = createProviderMediaFocalWebHandler({
-  baseHandler: providerProductsHandler
-});
-const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: providerMediaFocalHandler });
+const providerMediaFocalHandler = createProviderMediaFocalWebHandler({ baseHandler: providerProductsHandler });
+const providerProfileHandler = createProviderProfileWebHandler({ baseHandler: providerMediaFocalHandler });
+const providerBlogHandler = createProviderBlogWebHandler({ baseHandler: providerProfileHandler });
 const providerOrdersHandler = createProviderOrdersWebHandler({ baseHandler: providerBlogHandler });
 const customerOrdersHandler = createCustomerOrdersWebHandler({ baseHandler: providerOrdersHandler });
 const requestFilesHandler = createRequestFilesWebHandler({ baseHandler: customerOrdersHandler });
@@ -49,24 +50,15 @@ const paymentSandboxHandler = createPaymentSandboxWebHandler({ baseHandler: pilo
 const publicBlogHandler = createPublicBlogWebHandler({ baseHandler: paymentSandboxHandler });
 const publicCatalogHandler = createPublicCatalogWebHandler({ baseHandler: publicBlogHandler });
 const legalPrivacyHandler = createLegalPrivacyWebHandler({ baseHandler: publicCatalogHandler });
-const adminRecoveryHandler = createAdminRecoveryWebHandler({
-  baseHandler: legalPrivacyHandler,
+const adminRecoveryHandler = createAdminRecoveryWebHandler({ baseHandler: legalPrivacyHandler, enableAdminUi });
+const adminAccountsHandler = createAdminAccountsWebHandler({ baseHandler: adminRecoveryHandler, enableAdminUi });
+const adminAuthenticationHandler = createAdminAuthenticationWebHandler({ baseHandler: adminAccountsHandler, enableAdminUi });
+const adminProviderProfilesHandler = createAdminProviderProfilesWebHandler({
+  baseHandler: adminAuthenticationHandler,
   enableAdminUi
 });
-const adminAccountsHandler = createAdminAccountsWebHandler({
-  baseHandler: adminRecoveryHandler,
-  enableAdminUi
-});
-const adminAuthenticationHandler = createAdminAuthenticationWebHandler({
-  baseHandler: adminAccountsHandler,
-  enableAdminUi
-});
-const publicErrorPagesHandler = createPublicErrorPagesWebHandler({
-  baseHandler: adminAuthenticationHandler
-});
-const legacyRouteRedirectHandler = createLegacyRouteRedirectWebHandler({
-  baseHandler: publicErrorPagesHandler
-});
+const publicErrorPagesHandler = createPublicErrorPagesWebHandler({ baseHandler: adminProviderProfilesHandler });
+const legacyRouteRedirectHandler = createLegacyRouteRedirectWebHandler({ baseHandler: publicErrorPagesHandler });
 const server = createServer(legacyRouteRedirectHandler);
 
 server.listen(port, host, () => {
