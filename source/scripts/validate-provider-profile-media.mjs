@@ -101,7 +101,8 @@ assert.match(providerProxy, /x-media-kind/);
 assert.match(providerProxy, /atelier_provider_session/);
 assert.match(providerProxy, /Authorization: `Bearer \$\{token\}`/);
 assert.match(providerProxy, /pipeline\(Readable\.fromWeb/);
-assert.match(adminProxy, /\/media/);
+assert.match(adminProxy, /action === "media"/);
+assert.match(adminProxy, /preview === "preview"/);
 assert.match(adminProxy, /DEV_ADMIN_TOKEN/);
 assert.match(adminProxy, /pipeline\(Readable\.fromWeb/);
 
