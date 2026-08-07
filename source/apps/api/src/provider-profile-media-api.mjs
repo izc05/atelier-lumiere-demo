@@ -2,6 +2,7 @@ import { pipeline } from "node:stream/promises";
 import { ServiceError } from "./providers-service.mjs";
 
 const PROVIDER_MEDIA = /^\/api\/provider\/profile\/media(?:\/([0-9a-f-]{36})(?:\/(preview))?)?$/i;
+const PROVIDER_GALLERY_ORDER = /^\/api\/provider\/profile\/media\/reorder$/i;
 const ADMIN_MEDIA = /^\/api\/admin\/provider-profiles\/([0-9a-f-]{36})\/media(?:\/([0-9a-f-]{36})\/(preview))?$/i;
 const MAX_JSON_BYTES = 64 * 1024;
 
@@ -95,20 +96,31 @@ export function createProviderProfileMediaApiHandler({
 
   return async function providerProfileMediaApiHandler(request, response) {
     const url = new URL(request.url ?? "/", "http://localhost");
-    const providerMatch = url.pathname.match(PROVIDER_MEDIA);
+    const galleryOrderMatch = PROVIDER_GALLERY_ORDER.test(url.pathname);
+    const providerMatch = galleryOrderMatch ? null : url.pathname.match(PROVIDER_MEDIA);
     const adminMatch = url.pathname.match(ADMIN_MEDIA);
-    if (!providerMatch && !adminMatch) return baseHandler(request, response);
+    if (!galleryOrderMatch && !providerMatch && !adminMatch) return baseHandler(request, response);
 
     try {
       if (!profileMediaService) throw new ServiceError("SERVICE_UNAVAILABLE", "Las imágenes del taller no están disponibles.", 503);
 
-      if (providerMatch) {
+      if (galleryOrderMatch || providerMatch) {
         if (!providerAuthService) throw new ServiceError("SERVICE_UNAVAILABLE", "El acceso del taller no está disponible.", 503);
         const token = bearerToken(request);
         const session = token ? await providerAuthService.authenticate(token) : null;
         if (!session) throw new ServiceError("UNAUTHORIZED", "Necesitas iniciar sesión como proveedor.", 401);
-        const [, mediaId, variant] = providerMatch;
 
+        if (galleryOrderMatch) {
+          if (request.method !== "POST") {
+            sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." });
+            return;
+          }
+          const media = await profileMediaService.reorderGallery(session.context, await readJson(request));
+          sendJson(response, 200, { media });
+          return;
+        }
+
+        const [, mediaId, variant] = providerMatch;
         if (!mediaId && request.method === "GET") {
           sendJson(response, 200, { media: await profileMediaService.list(session.context) });
           return;
