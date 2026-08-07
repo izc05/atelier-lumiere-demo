@@ -98,7 +98,8 @@ export function createPublicCatalogApiHandler({
         const products = await publicCatalogService.list({
           query: url.searchParams.get("q") ?? "",
           category: url.searchParams.get("category") ?? "",
-          event: url.searchParams.get("event") ?? ""
+          event: url.searchParams.get("event") ?? "",
+          provider: url.searchParams.get("provider") ?? ""
         });
         sendJson(response, 200, { products }, "public, max-age=60, stale-while-revalidate=300");
         return;
