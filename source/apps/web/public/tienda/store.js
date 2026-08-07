@@ -102,8 +102,7 @@ function updateCategories(items) {
   const options = categories.map((value) => {
     const option = element("option", "", value);
     option.value = value;
-    item.textContent = value;
-    return item;
+    return option;
   });
   select.replaceChildren(defaultOption, ...options);
   if (categories.includes(current)) select.value = current;
