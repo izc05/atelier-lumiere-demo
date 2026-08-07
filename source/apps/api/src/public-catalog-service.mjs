@@ -27,6 +27,27 @@ function uuid(value, field) {
   return value.toLowerCase();
 }
 
+function providerSummary(row) {
+  const profile = row.provider_profile_snapshot && typeof row.provider_profile_snapshot === "object"
+    ? row.provider_profile_snapshot
+    : {};
+  return {
+    slug: row.provider_slug,
+    displayName: profile.displayName || row.provider_display_name,
+    specialty: profile.specialty || row.provider_specialty,
+    tagline: profile.tagline || null,
+    locationLabel: profile.locationLabel || null,
+    story: profile.story || null,
+    craftDescription: profile.craftDescription || null,
+    materials: Array.isArray(profile.materials) ? profile.materials : [],
+    techniques: Array.isArray(profile.techniques) ? profile.techniques : [],
+    preparationNote: profile.preparationNote || null,
+    shippingNote: profile.shippingNote || null,
+    acceptsCustomRequests: Boolean(profile.acceptsCustomRequests),
+    profileRevision: row.provider_profile_revision ? Number(row.provider_profile_revision) : null
+  };
+}
+
 function publicSummary(row) {
   return {
     id: row.id,
@@ -42,11 +63,7 @@ function publicSummary(row) {
     preparationMaxDays: row.preparation_max_days,
     customizable: row.customizable,
     publishedAt: row.published_at,
-    provider: {
-      slug: row.provider_slug,
-      displayName: row.provider_display_name,
-      specialty: row.provider_specialty
-    },
+    provider: providerSummary(row),
     cover: row.cover_media_id ? {
       mediaId: row.cover_media_id,
       altText: row.cover_alt_text,
@@ -103,6 +120,8 @@ export function createPublicCatalogService({ database, storage } = {}) {
              provider.slug AS provider_slug,
              provider.display_name AS provider_display_name,
              provider.specialty AS provider_specialty,
+             profile_publication.revision AS provider_profile_revision,
+             profile_publication.snapshot AS provider_profile_snapshot,
              cover.id AS cover_media_id,
              cover.alt_text AS cover_alt_text,
              cover.preview_width AS cover_width,
@@ -112,6 +131,8 @@ export function createPublicCatalogService({ database, storage } = {}) {
              COALESCE(events.values, ARRAY[]::text[]) AS events
            FROM products product
            INNER JOIN providers provider ON provider.id = product.provider_id
+           LEFT JOIN provider_profile_publications profile_publication
+             ON profile_publication.provider_id = provider.id
            LEFT JOIN LATERAL (
              SELECT media.id, media.alt_text, media.preview_width, media.preview_height,
                     COALESCE(focal.focal_x, 50) AS focal_x,
@@ -166,6 +187,8 @@ export function createPublicCatalogService({ database, storage } = {}) {
              provider.slug AS provider_slug,
              provider.display_name AS provider_display_name,
              provider.specialty AS provider_specialty,
+             profile_publication.revision AS provider_profile_revision,
+             profile_publication.snapshot AS provider_profile_snapshot,
              cover.id AS cover_media_id,
              cover.alt_text AS cover_alt_text,
              cover.preview_width AS cover_width,
@@ -175,6 +198,8 @@ export function createPublicCatalogService({ database, storage } = {}) {
              COALESCE(events.values, ARRAY[]::text[]) AS events
            FROM products product
            INNER JOIN providers provider ON provider.id = product.provider_id
+           LEFT JOIN provider_profile_publications profile_publication
+             ON profile_publication.provider_id = provider.id
            LEFT JOIN LATERAL (
              SELECT media.id, media.alt_text, media.preview_width, media.preview_height,
                     COALESCE(focal.focal_x, 50) AS focal_x,
