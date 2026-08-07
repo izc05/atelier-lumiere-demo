@@ -166,7 +166,7 @@ async function audit(transaction, context, providerId, action, mediaId, metadata
 
 async function makeProfileEditable(transaction, context) {
   const result = await transaction.query(
-    "SELECT status FROM provider_profiles WHERE provider_id = $1",
+    "SELECT status FROM provider_profiles WHERE provider_id = $1 FOR UPDATE",
     [context.providerId]
   );
   if (result.rowCount !== 1) {
@@ -280,8 +280,18 @@ export function createProviderProfileMediaService({
           await transaction.query(
             `INSERT INTO provider_profile_media (
                id, provider_id, kind, mime_type, original_filename, storage_key,
-               size_bytes, checksum_sha256, status, alt_text, uploaded_by, upload_expires_at
-             ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'PENDING_UPLOAD',$9,$10,$11)`,
+               size_bytes, checksum_sha256, status, sort_order, alt_text, uploaded_by, upload_expires_at
+             ) VALUES (
+               $1,$2,$3,$4,$5,$6,$7,$8,'PENDING_UPLOAD',
+               CASE WHEN $3 = 'GALLERY' THEN COALESCE((
+                 SELECT MAX(existing.sort_order) + 1
+                 FROM provider_profile_media existing
+                 WHERE existing.provider_id = $2
+                   AND existing.kind = 'GALLERY'
+                   AND existing.status NOT IN ('DELETED','REJECTED')
+               ), 0) ELSE 0 END,
+               $9,$10,$11
+             )`,
             [mediaId, context.providerId, kind, selectedMimeType, filename, key,
              expectedBytes, ZERO_CHECKSUM, selectedAltText, context.userId, expiresAt]
           );
