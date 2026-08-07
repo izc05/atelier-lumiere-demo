@@ -13,6 +13,7 @@ const validations = [
   "validate-smtp-email.mjs",
   "validate-account-recovery.mjs",
   "validate-provider-profile-editorial.mjs",
+  "validate-provider-profile-media.mjs",
   "validate-provider-products-ui.mjs",
   "validate-admin-products-review.mjs",
   "validate-public-catalog.mjs",
