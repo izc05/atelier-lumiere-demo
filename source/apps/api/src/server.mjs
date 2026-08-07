@@ -60,6 +60,8 @@ import { createProviderOnboardingService } from "./provider-onboarding-service.m
 import { createProviderOrdersApiHandler } from "./provider-orders-api.mjs";
 import { createProviderOrdersService } from "./provider-orders-service.mjs";
 import { createProviderProfileApiHandler } from "./provider-profile-api.mjs";
+import { createProviderProfileMediaApiHandler } from "./provider-profile-media-api.mjs";
+import { createProviderProfileMediaService } from "./provider-profile-media-service.mjs";
 import { createProviderProfileService } from "./provider-profile-service.mjs";
 import { createProvidersService } from "./providers-service.mjs";
 import { createPublicBlogApiHandler } from "./public-blog-api.mjs";
@@ -119,17 +121,12 @@ const adminRecoveryService = database.enabled
     })
   : null;
 const adminSensitiveActionService = database.enabled
-  ? createAdminSensitiveActionService({
-      database,
-      systemContext: authenticationSystemContext
-    })
+  ? createAdminSensitiveActionService({ database, systemContext: authenticationSystemContext })
   : null;
 const baseAdminAccountsService = database.enabled && adminRecoveryService
   ? createAdminAccountsService({ database, adminRecoveryService })
   : null;
-const adminAccountsService = baseAdminAccountsService
-  && adminRecoveryService
-  && adminSensitiveActionService
+const adminAccountsService = baseAdminAccountsService && adminRecoveryService && adminSensitiveActionService
   ? createSecuredAdminAccountsService({
       baseService: baseAdminAccountsService,
       database,
@@ -137,25 +134,15 @@ const adminAccountsService = baseAdminAccountsService
       adminRecoveryService
     })
   : null;
-const authenticateRequest = createRequestAuthenticator({
-  environment,
-  adminAuthService
-});
+const authenticateRequest = createRequestAuthenticator({ environment, adminAuthService });
 const baseOnboardingService = database.enabled
   ? createProviderOnboardingService({ database, systemContext: authenticationSystemContext })
   : null;
 const baseEmailVerificationService = database.enabled
   ? createEmailVerificationService({ database, systemContext: authenticationSystemContext })
   : null;
-const providersService = withProviderInvitationDelivery({
-  providersService: baseProvidersService,
-  mailService,
-  database
-});
-const onboardingService = withOnboardingEmailDelivery({
-  onboardingService: baseOnboardingService,
-  mailService
-});
+const providersService = withProviderInvitationDelivery({ providersService: baseProvidersService, mailService, database });
+const onboardingService = withOnboardingEmailDelivery({ onboardingService: baseOnboardingService, mailService });
 const emailVerificationService = baseEmailVerificationService
   ? withVerificationEmailDelivery({
       emailVerificationService: baseEmailVerificationService,
@@ -173,31 +160,23 @@ const providerAuthService = database.enabled
 const providerProfileService = database.enabled
   ? createProviderProfileService({ database })
   : null;
+const providerProfileMediaService = database.enabled
+  ? createProviderProfileMediaService({ database, storage: mediaStorage })
+  : null;
 const customerAuthService = database.enabled
   ? createCustomerAuthService({ database, systemContext: authenticationSystemContext })
   : null;
 const accountRecoveryService = database.enabled
-  ? createAccountRecoveryService({
-      database,
-      systemContext: authenticationSystemContext,
-      mailService,
-      environment
-    })
+  ? createAccountRecoveryService({ database, systemContext: authenticationSystemContext, mailService, environment })
   : null;
 const legalService = database.enabled
   ? createLegalService({ database, systemContext: legalSystemContext, environment })
   : null;
 const blogPostsService = database.enabled ? createBlogPostsService({ database }) : null;
-const blogMediaService = database.enabled
-  ? createBlogMediaService({ database, storage: mediaStorage })
-  : null;
+const blogMediaService = database.enabled ? createBlogMediaService({ database, storage: mediaStorage }) : null;
 const productsService = database.enabled ? createProductsService({ database }) : null;
-const productMediaService = database.enabled
-  ? createProductMediaService({ database, storage: mediaStorage })
-  : null;
-const productMediaFocalService = database.enabled
-  ? createProductMediaFocalService({ database })
-  : null;
+const productMediaService = database.enabled ? createProductMediaService({ database, storage: mediaStorage }) : null;
+const productMediaFocalService = database.enabled ? createProductMediaFocalService({ database }) : null;
 const providerOrdersService = database.enabled ? createProviderOrdersService({ database }) : null;
 const customerOrdersService = database.enabled ? createCustomerOrdersService({ database }) : null;
 const customRequestFilesService = database.enabled
@@ -212,8 +191,7 @@ const orderNotificationWorker = database.enabled
       enabled: process.env.ORDER_EMAIL_NOTIFICATIONS_ENABLED === "true"
     })
   : null;
-const paymentSandboxService = database.enabled
-  && process.env.PAYMENT_SANDBOX_ENABLED === "true"
+const paymentSandboxService = database.enabled && process.env.PAYMENT_SANDBOX_ENABLED === "true"
   ? createPaymentSandboxService({ database, systemContext: paymentSystemContext, environment })
   : null;
 const basePilotCheckoutService = database.enabled && customerAuthService
@@ -225,22 +203,11 @@ const basePilotCheckoutService = database.enabled && customerAuthService
       environment
     })
   : null;
-const pilotCheckoutService = withSandboxPayment({
-  checkoutService: basePilotCheckoutService,
-  paymentSandboxService
-});
-const adminBlogService = database.enabled
-  ? createAdminBlogService({ database, storage: mediaStorage })
-  : null;
-const adminProductsService = database.enabled
-  ? createAdminProductsService({ database, storage: mediaStorage })
-  : null;
-const publicBlogService = database.enabled
-  ? createPublicBlogService({ database, storage: mediaStorage })
-  : null;
-const publicCatalogService = database.enabled
-  ? createPublicCatalogService({ database, storage: mediaStorage })
-  : null;
+const pilotCheckoutService = withSandboxPayment({ checkoutService: basePilotCheckoutService, paymentSandboxService });
+const adminBlogService = database.enabled ? createAdminBlogService({ database, storage: mediaStorage }) : null;
+const adminProductsService = database.enabled ? createAdminProductsService({ database, storage: mediaStorage }) : null;
+const publicBlogService = database.enabled ? createPublicBlogService({ database, storage: mediaStorage }) : null;
+const publicCatalogService = database.enabled ? createPublicCatalogService({ database, storage: mediaStorage }) : null;
 
 if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
   try {
@@ -253,9 +220,7 @@ if (mailService.enabled && process.env.SMTP_VERIFY_ON_START === "true") {
   }
 }
 
-if (orderNotificationWorker?.start()) {
-  console.log("Avisos automáticos de pedidos activados.");
-}
+if (orderNotificationWorker?.start()) console.log("Avisos automáticos de pedidos activados.");
 
 const baseApiHandler = createApiHandler({
   environment,
@@ -268,43 +233,18 @@ const baseApiHandler = createApiHandler({
   mailService,
   authenticateRequest
 });
-const adminAuthHandler = createAdminAuthApiHandler({
-  baseHandler: baseApiHandler,
-  adminAuthService
-});
-const adminRecoveryHandler = createAdminRecoveryApiHandler({
-  baseHandler: adminAuthHandler,
-  adminRecoveryService
-});
+const adminAuthHandler = createAdminAuthApiHandler({ baseHandler: baseApiHandler, adminAuthService });
+const adminRecoveryHandler = createAdminRecoveryApiHandler({ baseHandler: adminAuthHandler, adminRecoveryService });
 const adminAccountsHandler = createAdminAccountsApiHandler({
   baseHandler: adminRecoveryHandler,
   adminAccountsService,
   authenticateRequest
 });
-const accountRecoveryHandler = createAccountRecoveryApiHandler({
-  baseHandler: adminAccountsHandler,
-  accountRecoveryService
-});
-const blogPostsHandler = createBlogPostsApiHandler({
-  baseHandler: accountRecoveryHandler,
-  blogPostsService,
-  providerAuthService
-});
-const blogMediaHandler = createBlogMediaApiHandler({
-  baseHandler: blogPostsHandler,
-  blogMediaService,
-  providerAuthService
-});
-const productsHandler = createProductsApiHandler({
-  baseHandler: blogMediaHandler,
-  productsService,
-  providerAuthService
-});
-const productMediaHandler = createProductMediaApiHandler({
-  baseHandler: productsHandler,
-  productMediaService,
-  providerAuthService
-});
+const accountRecoveryHandler = createAccountRecoveryApiHandler({ baseHandler: adminAccountsHandler, accountRecoveryService });
+const blogPostsHandler = createBlogPostsApiHandler({ baseHandler: accountRecoveryHandler, blogPostsService, providerAuthService });
+const blogMediaHandler = createBlogMediaApiHandler({ baseHandler: blogPostsHandler, blogMediaService, providerAuthService });
+const productsHandler = createProductsApiHandler({ baseHandler: blogMediaHandler, productsService, providerAuthService });
+const productMediaHandler = createProductMediaApiHandler({ baseHandler: productsHandler, productMediaService, providerAuthService });
 const productMediaFocalHandler = createProductMediaFocalApiHandler({
   baseHandler: productMediaHandler,
   focalService: productMediaFocalService,
@@ -316,8 +256,14 @@ const providerProfileHandler = createProviderProfileApiHandler({
   providerAuthService,
   authenticateRequest
 });
-const providerOrdersHandler = createProviderOrdersApiHandler({
+const providerProfileMediaHandler = createProviderProfileMediaApiHandler({
   baseHandler: providerProfileHandler,
+  profileMediaService: providerProfileMediaService,
+  providerAuthService,
+  authenticateRequest
+});
+const providerOrdersHandler = createProviderOrdersApiHandler({
+  baseHandler: providerProfileMediaHandler,
   providerOrdersService,
   providerAuthService
 });
@@ -338,36 +284,13 @@ const orderLogisticsHandler = createOrderLogisticsApiHandler({
   providerAuthService,
   customerAuthService
 });
-const pilotCheckoutHandler = createPilotCheckoutApiHandler({
-  baseHandler: orderLogisticsHandler,
-  pilotCheckoutService
-});
-const paymentSandboxHandler = createPaymentSandboxApiHandler({
-  baseHandler: pilotCheckoutHandler,
-  paymentSandboxService
-});
-const adminBlogHandler = createAdminBlogApiHandler({
-  baseHandler: paymentSandboxHandler,
-  adminBlogService,
-  authenticateRequest
-});
-const adminProductsHandler = createAdminProductsApiHandler({
-  baseHandler: adminBlogHandler,
-  adminProductsService,
-  authenticateRequest
-});
-const publicBlogHandler = createPublicBlogApiHandler({
-  baseHandler: adminProductsHandler,
-  publicBlogService
-});
-const publicCatalogHandler = createPublicCatalogApiHandler({
-  baseHandler: publicBlogHandler,
-  publicCatalogService
-});
-const server = createServer(createLegalApiHandler({
-  baseHandler: publicCatalogHandler,
-  legalService
-}));
+const pilotCheckoutHandler = createPilotCheckoutApiHandler({ baseHandler: orderLogisticsHandler, pilotCheckoutService });
+const paymentSandboxHandler = createPaymentSandboxApiHandler({ baseHandler: pilotCheckoutHandler, paymentSandboxService });
+const adminBlogHandler = createAdminBlogApiHandler({ baseHandler: paymentSandboxHandler, adminBlogService, authenticateRequest });
+const adminProductsHandler = createAdminProductsApiHandler({ baseHandler: adminBlogHandler, adminProductsService, authenticateRequest });
+const publicBlogHandler = createPublicBlogApiHandler({ baseHandler: adminProductsHandler, publicBlogService });
+const publicCatalogHandler = createPublicCatalogApiHandler({ baseHandler: publicBlogHandler, publicCatalogService });
+const server = createServer(createLegalApiHandler({ baseHandler: publicCatalogHandler, legalService }));
 
 server.listen(port, host, () => {
   console.log(`Atelier Lumière API disponible en http://${host}:${port}`);

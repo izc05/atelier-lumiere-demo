@@ -1,7 +1,7 @@
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-const CATALOG_PATTERN = /^\/internal\/catalog\/products(?:\/([a-z0-9-]+)\/([a-z0-9-]+)|\/([0-9a-f-]{36})\/media\/([0-9a-f-]{36})\/(preview|content))?$/i;
+const CATALOG_PATTERN = /^\/internal\/catalog\/(?:products(?:\/([a-z0-9-]+)\/([a-z0-9-]+)|\/([0-9a-f-]{36})\/media\/([0-9a-f-]{36})\/(preview|content))?|providers\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})\/preview)$/i;
 const SAFE_RESPONSE_HEADERS = new Set([
   "content-type", "content-length", "content-disposition",
   "accept-ranges", "content-range", "cache-control",
@@ -43,16 +43,13 @@ export function createPublicCatalogWebHandler({
     if (!match) return baseHandler(request, response);
 
     if (request.method !== "GET") {
-      sendJson(response, 405, {
-        error: "METHOD_NOT_ALLOWED",
-        message: "Método no permitido."
-      });
+      sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." });
       return;
     }
 
     const targetPath = url.pathname.replace(/^\/internal/, "/api");
     const target = new URL(`${targetPath}${url.search}`, apiBase);
-    const isMedia = Boolean(match[3]);
+    const isMedia = Boolean(match[3] || match[7]);
     try {
       const upstream = await fetchImpl(target, {
         method: "GET",
@@ -73,10 +70,7 @@ export function createPublicCatalogWebHandler({
         code: typeof error?.code === "string" ? error.code : "PUBLIC_CATALOG_PROXY_FAILED"
       });
       if (!response.headersSent) {
-        sendJson(response, 502, {
-          error: "CATALOG_UNAVAILABLE",
-          message: "La tienda no responde en este momento."
-        });
+        sendJson(response, 502, { error: "CATALOG_UNAVAILABLE", message: "La tienda no responde en este momento." });
       } else response.destroy(error instanceof Error ? error : undefined);
     }
   };

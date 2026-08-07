@@ -1,4 +1,11 @@
-const PROFILE_PATTERN = /^\/internal\/admin\/provider-profiles(?:\/([0-9a-f-]{36})(?:\/(review|publish))?)?$/i;
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+
+const PROFILE_PATTERN = /^\/internal\/admin\/provider-profiles(?:\/([0-9a-f-]{36})(?:\/(review|publish|media)(?:\/([0-9a-f-]{36})\/(preview))?)?)?$/i;
+const SAFE_RESPONSE_HEADERS = new Set([
+  "content-type", "content-length", "content-disposition", "accept-ranges", "content-range",
+  "cache-control", "x-content-type-options", "content-security-policy", "cross-origin-resource-policy"
+]);
 
 function securityHeaders(extra = {}) {
   return {
@@ -22,6 +29,14 @@ function sendNotFound(response) {
   response.end("No encontrado");
 }
 
+function copiedHeaders(upstream) {
+  const headers = securityHeaders();
+  for (const [name, value] of upstream.headers) {
+    if (SAFE_RESPONSE_HEADERS.has(name.toLowerCase())) headers[name] = value;
+  }
+  return headers;
+}
+
 async function adminSessionIsActive(baseHandler, request) {
   return new Promise((resolve) => {
     let settled = false;
@@ -40,6 +55,15 @@ async function adminSessionIsActive(baseHandler, request) {
     Promise.resolve(baseHandler({ method: "GET", url: "/internal/admin/session", headers: request.headers }, probeResponse))
       .catch(() => finish(false));
   });
+}
+
+function routeAllows(method, match) {
+  const [, providerId, action, mediaId, preview] = match;
+  if (!providerId) return method === "GET";
+  if (!action) return method === "GET";
+  if (action === "review" || action === "publish") return !mediaId && method === "POST";
+  if (action === "media" && !mediaId) return method === "GET";
+  return action === "media" && Boolean(mediaId) && preview === "preview" && method === "GET";
 }
 
 export function createAdminProviderProfilesWebHandler({
@@ -62,35 +86,38 @@ export function createAdminProviderProfilesWebHandler({
     if (match) {
       if (!enableAdminUi) return sendNotFound(response);
       const method = request.method ?? "GET";
-      const [, providerId, action] = match;
-      const allowed = !providerId ? method === "GET"
-        : action ? method === "POST" : method === "GET";
-      if (!allowed) return sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." });
+      if (!routeAllows(method, match)) return sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." });
       if (!(await adminSessionIsActive(baseHandler, request))) {
         return sendJson(response, 401, { error: "UNAUTHORIZED", message: "La sesión administrativa ha caducado." });
       }
 
+      const [, , action, mediaId, preview] = match;
       const target = new URL(`${url.pathname.replace(/^\/internal/, "/api")}${url.search}`, apiBase);
+      const hasBody = !["GET", "HEAD"].includes(method);
+      const isPreview = action === "media" && Boolean(mediaId) && preview === "preview";
       try {
         const upstream = await fetchImpl(target, {
           method,
           headers: {
-            Accept: "application/json",
+            Accept: request.headers.accept ?? (isPreview ? "*/*" : "application/json"),
             Authorization: `Bearer ${apiAdminToken}`,
-            ...(!["GET", "HEAD"].includes(method) ? { "Content-Type": "application/json" } : {}),
+            ...(hasBody ? { "Content-Type": "application/json" } : {}),
+            ...(request.headers.range ? { Range: request.headers.range } : {}),
             "User-Agent": String(request.headers["user-agent"] ?? "").slice(0, 500)
           },
-          ...(!["GET", "HEAD"].includes(method) ? { body: request, duplex: "half" } : {}),
-          signal: AbortSignal.timeout(12_000)
+          ...(hasBody ? { body: request, duplex: "half" } : {}),
+          signal: AbortSignal.timeout(isPreview ? 60_000 : 12_000)
         });
-        const text = await upstream.text();
-        response.writeHead(upstream.status, securityHeaders({ "Content-Type": "application/json; charset=utf-8" }));
-        response.end(text);
+        response.writeHead(upstream.status, copiedHeaders(upstream));
+        if (!upstream.body) response.end();
+        else await pipeline(Readable.fromWeb(upstream.body), response);
       } catch (error) {
         logger.error("No se pudo completar la revisión de perfiles.", {
           code: typeof error?.code === "string" ? error.code : "ADMIN_PROFILE_PROXY_FAILED"
         });
-        sendJson(response, 502, { error: "API_UNAVAILABLE", message: "La revisión de perfiles no responde." });
+        if (!response.headersSent) {
+          sendJson(response, 502, { error: "API_UNAVAILABLE", message: "La revisión de perfiles no responde." });
+        } else response.destroy(error instanceof Error ? error : undefined);
       }
       return;
     }

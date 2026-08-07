@@ -1,6 +1,16 @@
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+
 const PROVIDER_SESSION_COOKIE = "atelier_provider_session";
-const PROFILE_PATTERN = /^\/internal\/provider\/profile(?:\/(submit))?$/i;
+const PROFILE_PATTERN = /^\/internal\/provider\/profile(?:\/(submit|media)(?:\/([0-9a-f-]{36})(?:\/(preview))?)?)?$/i;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,180}$/;
+const SAFE_REQUEST_HEADERS = new Set([
+  "content-type", "content-length", "x-file-name", "x-alt-text", "x-media-kind", "range", "user-agent"
+]);
+const SAFE_RESPONSE_HEADERS = new Set([
+  "content-type", "content-length", "content-disposition", "accept-ranges", "content-range",
+  "cache-control", "x-content-type-options", "content-security-policy", "cross-origin-resource-policy"
+]);
 
 function parseCookies(header) {
   const cookies = new Map();
@@ -53,6 +63,38 @@ function redirectToAccess(response, secure) {
   response.end();
 }
 
+function routeAllows(method, match) {
+  const [, action, mediaId, variant] = match;
+  if (!action) return ["GET", "PATCH"].includes(method);
+  if (action === "submit") return !mediaId && !variant && method === "POST";
+  if (action === "media" && !mediaId) return ["GET", "POST"].includes(method);
+  if (action === "media" && mediaId && !variant) return ["PATCH", "DELETE"].includes(method);
+  if (action === "media" && mediaId && variant === "preview") return method === "GET";
+  return false;
+}
+
+function upstreamHeaders(request, token) {
+  const headers = new Headers({
+    Accept: request.headers.accept ?? "application/json",
+    Authorization: `Bearer ${token}`
+  });
+  for (const [name, value] of Object.entries(request.headers)) {
+    const normalized = name.toLowerCase();
+    if (!SAFE_REQUEST_HEADERS.has(normalized) || value === undefined) continue;
+    headers.set(normalized, Array.isArray(value) ? value[0] : String(value));
+  }
+  return headers;
+}
+
+function copiedHeaders(upstream, { clearCookie = false, secure = false } = {}) {
+  const headers = securityHeaders();
+  for (const [name, value] of upstream.headers) {
+    if (SAFE_RESPONSE_HEADERS.has(name.toLowerCase())) headers[name] = value;
+  }
+  if (clearCookie) headers["Set-Cookie"] = expiredCookie(secure);
+  return headers;
+}
+
 async function sessionIsValid(apiBase, fetchImpl, request, token) {
   try {
     const response = await fetchImpl(new URL("/api/provider/me", apiBase), {
@@ -76,9 +118,7 @@ export function createProviderProfileWebHandler({
   fetchImpl = fetch,
   logger = console
 } = {}) {
-  if (typeof baseHandler !== "function") {
-    throw new TypeError("createProviderProfileWebHandler necesita un handler base.");
-  }
+  if (typeof baseHandler !== "function") throw new TypeError("createProviderProfileWebHandler necesita un handler base.");
   const apiBase = new URL(apiInternalUrl);
 
   return async function providerProfileWebHandler(request, response) {
@@ -86,8 +126,7 @@ export function createProviderProfileWebHandler({
     const match = url.pathname.match(PROFILE_PATTERN);
     if (match) {
       const method = request.method ?? "GET";
-      const allowed = match[1] ? method === "POST" : ["GET", "PATCH"].includes(method);
-      if (!allowed) {
+      if (!routeAllows(method, match)) {
         sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." });
         return;
       }
@@ -98,28 +137,32 @@ export function createProviderProfileWebHandler({
         });
         return;
       }
-      const target = new URL(url.pathname.replace(/^\/internal/, "/api"), apiBase);
+
+      const [, action, mediaId, variant] = match;
+      const target = new URL(`${url.pathname.replace(/^\/internal/, "/api")}${url.search}`, apiBase);
+      const hasBody = !["GET", "HEAD", "DELETE"].includes(method);
+      const binaryUpload = action === "media" && !mediaId && method === "POST";
+      const timeoutMs = binaryUpload ? 120_000 : variant === "preview" ? 60_000 : 15_000;
       try {
         const upstream = await fetchImpl(target, {
           method,
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-            ...(method === "PATCH" ? { "Content-Type": "application/json" } : {}),
-            "User-Agent": String(request.headers["user-agent"] ?? "").slice(0, 500)
-          },
-          ...(!["GET", "HEAD"].includes(method) ? { body: request, duplex: "half" } : {}),
-          signal: AbortSignal.timeout(15_000)
+          headers: upstreamHeaders(request, token),
+          ...(hasBody ? { body: request, duplex: "half" } : {}),
+          signal: AbortSignal.timeout(timeoutMs)
         });
-        const body = await upstream.text();
-        sendJson(response, upstream.status, JSON.parse(body || "{}"), upstream.status === 401 ? {
-          "Set-Cookie": expiredCookie(providerCookieSecure)
-        } : {});
+        response.writeHead(upstream.status, copiedHeaders(upstream, {
+          clearCookie: upstream.status === 401,
+          secure: providerCookieSecure
+        }));
+        if (!upstream.body) response.end();
+        else await pipeline(Readable.fromWeb(upstream.body), response);
       } catch (error) {
         logger.error("No se pudo completar el proxy del perfil del taller.", {
           code: typeof error?.code === "string" ? error.code : "PROVIDER_PROFILE_PROXY_FAILED"
         });
-        sendJson(response, 502, { error: "API_UNAVAILABLE", message: "El perfil del taller no responde." });
+        if (!response.headersSent) {
+          sendJson(response, 502, { error: "API_UNAVAILABLE", message: "El perfil del taller no responde." });
+        } else response.destroy(error instanceof Error ? error : undefined);
       }
       return;
     }

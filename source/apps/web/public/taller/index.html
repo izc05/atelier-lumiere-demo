@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/tienda/store.css">
   <link rel="stylesheet" href="/tienda/cart.css">
   <link rel="stylesheet" href="/taller/provider.css">
+  <link rel="stylesheet" href="/taller/provider-media.css">
   <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
   <script defer src="/public-shell.js"></script>
@@ -37,6 +38,8 @@
 
     <main id="main-content" tabindex="-1">
       <section id="provider-hero" class="provider-hero" hidden aria-labelledby="provider-name">
+        <img id="provider-cover" class="provider-cover" alt="" hidden>
+        <div class="provider-cover-overlay" aria-hidden="true"></div>
         <div class="provider-hero-copy">
           <p class="eyebrow provider-kicker">Taller invitado · Selección Atelier Lumière</p>
           <h1 id="provider-name"></h1>
@@ -56,10 +59,11 @@
         </div>
 
         <aside class="provider-identity" aria-label="Identidad del taller">
-          <div class="provider-monogram-wrap" aria-hidden="true">
-            <span id="provider-monogram" class="provider-monogram">AL</span>
-            <span class="provider-orbit provider-orbit-one"></span>
-            <span class="provider-orbit provider-orbit-two"></span>
+          <div id="provider-monogram-wrap" class="provider-monogram-wrap">
+            <img id="provider-logo" class="provider-logo" alt="" hidden>
+            <span id="provider-monogram" class="provider-monogram" aria-hidden="true">AL</span>
+            <span class="provider-orbit provider-orbit-one" aria-hidden="true"></span>
+            <span class="provider-orbit provider-orbit-two" aria-hidden="true"></span>
           </div>
           <p class="provider-identity-label">Edición de taller</p>
           <strong id="provider-identity-name"></strong>
@@ -85,6 +89,15 @@
           <article><span>02</span><strong id="provider-materials-title">Compra por taller</strong><p id="provider-materials-copy">Un carrito agrupado por artesano para simplificar preparación y envío.</p></article>
           <article><span>03</span><strong id="provider-techniques-title">Piezas con identidad</strong><p id="provider-techniques-copy">El protagonismo sigue siendo del taller, su oficio y su colección.</p></article>
         </div>
+      </section>
+
+      <section id="provider-gallery-section" class="provider-gallery-section" hidden aria-labelledby="provider-gallery-title">
+        <div class="provider-gallery-heading">
+          <p class="eyebrow">Dentro del taller</p>
+          <h2 id="provider-gallery-title">Proceso, materia y detalles.</h2>
+          <p>Una mirada al espacio y al oficio del artesano, seleccionada dentro de su perfil publicado.</p>
+        </div>
+        <div id="provider-gallery" class="provider-gallery"></div>
       </section>
 
       <section id="collection" class="provider-collection" hidden>
