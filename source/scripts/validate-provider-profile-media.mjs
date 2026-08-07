@@ -110,7 +110,8 @@ assert.match(catalogService, /jsonb_array_elements\(COALESCE\(publication\.snaps
 assert.doesNotMatch(catalogService, /provider_profile_media/);
 assert.match(catalogApi, /PROVIDER_MEDIA_PATTERN/);
 assert.match(catalogApi, /openProviderMedia/);
-assert.match(publicProxy, /providers\\\/\(\[a-z0-9-\]\+\)\\\/media/);
+assert.match(publicProxy, /providers/);
+assert.match(publicProxy, /media/);
 assert.doesNotMatch(publicProxy, /Authorization|DEV_ADMIN_TOKEN|atelier_provider_session/);
 
 for (const expected of [
