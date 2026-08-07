@@ -66,21 +66,15 @@ function publishedCheckoutDatabase(database) {
   return Object.freeze({
     async withContext(context, work) {
       return database.withContext(context, async (transaction) => {
-        const query = (statement, values) => {
-          if (isLegacyProductRead(statement)) {
-            return transaction.query(PUBLISHED_PRODUCTS_QUERY, values);
-          }
-          if (isLegacyPersonalizationRead(statement)) {
-            return transaction.query(PUBLISHED_OPTIONS_QUERY, values);
-          }
-          return transaction.query(statement, values);
-        };
-
-        const adaptedTransaction = new Proxy(transaction, {
-          get(target, property, receiver) {
-            if (property === "query") return query;
-            const value = Reflect.get(target, property, receiver);
-            return typeof value === "function" ? value.bind(target) : value;
+        const adaptedTransaction = Object.freeze({
+          query(statement, values) {
+            if (isLegacyProductRead(statement)) {
+              return transaction.query(PUBLISHED_PRODUCTS_QUERY, values);
+            }
+            if (isLegacyPersonalizationRead(statement)) {
+              return transaction.query(PUBLISHED_OPTIONS_QUERY, values);
+            }
+            return transaction.query(statement, values);
           }
         });
 
