@@ -81,8 +81,8 @@ assert.match(mediaService, /await storage\.remove\(key\)/);
 assert.doesNotMatch(mediaService, /video\/mp4/);
 
 for (const expected of [
-  "/api/provider/profile/media",
-  "/api/admin/provider-profiles",
+  "PROVIDER_MEDIA",
+  "ADMIN_MEDIA",
   "x-media-kind",
   "profileMediaService.upload",
   "profileMediaService.openAdmin",
@@ -90,6 +90,8 @@ for (const expected of [
 ]) {
   assert.match(mediaApi, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 }
+assert.match(mediaApi, /api\\\/provider\\\/profile\\\/media/);
+assert.match(mediaApi, /api\\\/admin\\\/provider-profiles/);
 
 assert.match(apiServer, /createProviderProfileMediaService/);
 assert.match(apiServer, /createProviderProfileMediaApiHandler/);
