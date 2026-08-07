@@ -95,12 +95,12 @@ CREATE TRIGGER provider_profile_featured_products_00_guard_write
 BEFORE INSERT OR UPDATE OR DELETE ON provider_profile_featured_products
 FOR EACH ROW EXECUTE FUNCTION app.guard_provider_profile_featured_write();
 
-CREATE OR REPLACE FUNCTION app.require_provider_profile_featured_available_for_review()
+CREATE OR REPLACE FUNCTION app.require_provider_profile_featured_available_for_editorial_transition()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  IF NEW.status = 'IN_REVIEW'
+  IF NEW.status IN ('IN_REVIEW','APPROVED','PUBLISHED')
      AND OLD.status IS DISTINCT FROM NEW.status
      AND EXISTS (
        SELECT 1
@@ -116,7 +116,7 @@ $$;
 
 CREATE TRIGGER provider_profiles_02_require_featured_available
 BEFORE UPDATE ON provider_profiles
-FOR EACH ROW EXECUTE FUNCTION app.require_provider_profile_featured_available_for_review();
+FOR EACH ROW EXECUTE FUNCTION app.require_provider_profile_featured_available_for_editorial_transition();
 
 CREATE OR REPLACE FUNCTION app.build_provider_profile_snapshot(target_provider_id uuid)
 RETURNS jsonb
