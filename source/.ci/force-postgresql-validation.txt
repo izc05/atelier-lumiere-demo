@@ -1,0 +1,2 @@
+Disparador técnico temporal para validar PostgreSQL y aislamiento sobre el estado actual de main.
+Fecha: 2026-08-07
