@@ -143,6 +143,64 @@ function revealProviderSections() {
     byId(id).hidden = false;
   }
 }
+function configureProviderMedia(image, media, options = {}) {
+  if (!media?.path || !window.AtelierImages?.configure) return false;
+  return window.AtelierImages.configure(image, {
+    path: media.path,
+    alt: media.altText || options.alt || "",
+    width: media.width,
+    height: media.height,
+    sizes: options.sizes || "100vw",
+    loading: options.loading || "lazy",
+    priority: options.priority || "auto",
+    defaultWidth: options.defaultWidth || 640
+  });
+}
+function hydrateProviderVisuals(provider, displayName) {
+  const cover = byId("provider-cover");
+  if (provider.cover && configureProviderMedia(cover, provider.cover, {
+    alt: `Taller ${displayName}`,
+    sizes: "(max-width: 1200px) 100vw, 1180px",
+    loading: "eager",
+    priority: "high",
+    defaultWidth: 960
+  })) {
+    cover.hidden = false;
+    byId("provider-hero").classList.add("has-provider-cover");
+  }
+
+  const logo = byId("provider-logo");
+  if (provider.logo && configureProviderMedia(logo, provider.logo, {
+    alt: `Logotipo de ${displayName}`,
+    sizes: "190px",
+    loading: "eager",
+    priority: "high",
+    defaultWidth: 320
+  })) {
+    logo.hidden = false;
+    byId("provider-monogram").hidden = true;
+    byId("provider-monogram-wrap").classList?.add("has-provider-logo");
+  }
+
+  const galleryItems = Array.isArray(provider.gallery) ? provider.gallery.filter((item) => item?.path).slice(0, 6) : [];
+  if (galleryItems.length) {
+    const gallery = byId("provider-gallery");
+    gallery.replaceChildren(...galleryItems.map((item, index) => {
+      const figure = node("figure", "provider-gallery-item");
+      const image = document.createElement("img");
+      configureProviderMedia(image, item, {
+        alt: item.altText || `Detalle ${index + 1} del taller ${displayName}`,
+        sizes: index === 0
+          ? "(max-width: 700px) calc(100vw - 40px), 62vw"
+          : "(max-width: 700px) calc(100vw - 40px), 31vw",
+        defaultWidth: index === 0 ? 960 : 640
+      });
+      figure.append(image);
+      return figure;
+    }));
+    byId("provider-gallery-section").hidden = false;
+  }
+}
 function hydrateProvider(provider) {
   const displayName = provider.displayName || "Taller invitado";
   const specialty = provider.specialty || "Piezas artesanales seleccionadas por Atelier Lumière.";
@@ -184,6 +242,7 @@ function hydrateProvider(provider) {
   if (provider.locationLabel) {
     byId("provider-footer-copy").textContent = `${displayName} · ${provider.locationLabel} · Selección Atelier Lumière`;
   }
+  hydrateProviderVisuals(provider, displayName);
 }
 async function load() {
   const slug = providerSlug();
