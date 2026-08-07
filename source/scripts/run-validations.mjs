@@ -20,6 +20,7 @@ const validations = [
   "validate-admin-products-review.mjs",
   "validate-public-catalog.mjs",
   "validate-public-provider-storefront.mjs",
+  "validate-public-provider-filter.mjs",
   "validate-blog-editorial.mjs",
   "validate-provider-blog-ui.mjs",
   "validate-blog-media.mjs",
