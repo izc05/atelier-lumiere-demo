@@ -67,7 +67,8 @@ BEGIN
 
   SELECT status INTO profile_status
   FROM provider_profiles
-  WHERE provider_id = NEW.provider_id;
+  WHERE provider_id = NEW.provider_id
+  FOR UPDATE;
 
   IF profile_status IS NULL THEN
     RAISE EXCEPTION 'PROVIDER_PROFILE_MEDIA_PROFILE_MISSING' USING ERRCODE = '23514';
