@@ -59,6 +59,8 @@ import { createProviderAuthService } from "./provider-auth-service.mjs";
 import { createProviderOnboardingService } from "./provider-onboarding-service.mjs";
 import { createProviderOrdersApiHandler } from "./provider-orders-api.mjs";
 import { createProviderOrdersService } from "./provider-orders-service.mjs";
+import { createProviderProfileApiHandler } from "./provider-profile-api.mjs";
+import { createProviderProfileService } from "./provider-profile-service.mjs";
 import { createProvidersService } from "./providers-service.mjs";
 import { createPublicBlogApiHandler } from "./public-blog-api.mjs";
 import { createPublicBlogService } from "./public-blog-service.mjs";
@@ -167,6 +169,9 @@ const twoFactorService = database.enabled
   : null;
 const providerAuthService = database.enabled
   ? createProviderAuthService({ database, systemContext: authenticationSystemContext })
+  : null;
+const providerProfileService = database.enabled
+  ? createProviderProfileService({ database })
   : null;
 const customerAuthService = database.enabled
   ? createCustomerAuthService({ database, systemContext: authenticationSystemContext })
@@ -305,8 +310,14 @@ const productMediaFocalHandler = createProductMediaFocalApiHandler({
   focalService: productMediaFocalService,
   providerAuthService
 });
-const providerOrdersHandler = createProviderOrdersApiHandler({
+const providerProfileHandler = createProviderProfileApiHandler({
   baseHandler: productMediaFocalHandler,
+  profileService: providerProfileService,
+  providerAuthService,
+  authenticateRequest
+});
+const providerOrdersHandler = createProviderOrdersApiHandler({
+  baseHandler: providerProfileHandler,
   providerOrdersService,
   providerAuthService
 });
