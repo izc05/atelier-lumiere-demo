@@ -84,7 +84,6 @@ function setLocked(locked) {
   byId("save-button").disabled = locked;
   byId("submit-button").disabled = locked;
   document.body.classList.toggle("profile-locked", locked);
-  for (const button of document.querySelectorAll(".featured-section button")) button.disabled = locked || button.dataset.unavailable === "true";
 }
 
 function populate(profile, { preserveFeatured = false } = {}) {
@@ -236,7 +235,6 @@ function availableFeaturedCard(product) {
   const add = node("button", "mini-button", "Añadir");
   add.type = "button";
   const full = selectedFeaturedIds.length >= 4;
-  add.dataset.unavailable = full ? "true" : "false";
   add.disabled = isLocked() || full;
   add.addEventListener("click", () => addFeatured(product.id));
   card.append(copy, add);
@@ -260,7 +258,6 @@ function renderFeatured() {
       ? "Todas las publicaciones disponibles ya están en tu selección."
       : "Todavía no tienes piezas publicadas y visibles para destacar."));
   }
-  setLocked(isLocked());
 }
 
 function addFeatured(productId) {
