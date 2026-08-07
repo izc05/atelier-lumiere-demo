@@ -1,6 +1,7 @@
 const currentPath = window.location.pathname;
 const isEditorialSection = currentPath.startsWith("/admin/articulos/")
-  || currentPath.startsWith("/admin/publicaciones/");
+  || currentPath.startsWith("/admin/publicaciones/")
+  || currentPath.startsWith("/admin/talleres/");
 
 function hideLinks(path) {
   for (const link of document.querySelectorAll(`a[href="${path}"]`)) link.hidden = true;
@@ -35,6 +36,7 @@ async function applyAdminRoleNavigation() {
     if (role === "PROVIDER_MANAGER") {
       hideLinks("/admin/articulos/");
       hideLinks("/admin/publicaciones/");
+      hideLinks("/admin/talleres/");
       if (isEditorialSection) window.location.replace(targetForRole(role));
       return;
     }

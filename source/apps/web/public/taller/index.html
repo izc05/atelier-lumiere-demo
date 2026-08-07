@@ -48,6 +48,7 @@
           <div class="provider-signals" aria-label="Información del taller">
             <span><strong id="provider-piece-count">0</strong> piezas publicadas</span>
             <span><strong id="provider-category-count">0</strong> categorías</span>
+            <span id="provider-location-signal" hidden></span>
             <span>Compra directa por taller</span>
             <span>Envío compartido</span>
             <span>Selección revisada por Atelier Lumière</span>
@@ -73,16 +74,16 @@
       <section id="provider-editorial" class="provider-editorial" hidden aria-label="Sobre esta selección">
         <div class="provider-editorial-intro">
           <p class="eyebrow">Una colección con oficio</p>
-          <h2>Piezas escogidas para contar una historia propia.</h2>
+          <h2 id="provider-editorial-title">Piezas escogidas para contar una historia propia.</h2>
         </div>
         <div class="provider-editorial-copy">
-          <p>Este escaparate reúne únicamente las piezas publicadas del taller dentro de Atelier Lumière. Cada ficha pasa por un flujo editorial antes de formar parte de la colección.</p>
-          <p>Compra varias piezas del mismo artesano en un único pedido y comparte el envío siempre que sea posible.</p>
+          <p id="provider-story">Este escaparate reúne únicamente las piezas publicadas del taller dentro de Atelier Lumière. Cada ficha pasa por un flujo editorial antes de formar parte de la colección.</p>
+          <p id="provider-craft">Compra varias piezas del mismo artesano en un único pedido y comparte el envío siempre que sea posible.</p>
         </div>
         <div class="provider-trust-grid" aria-label="Compromisos de Atelier Lumière">
           <article><span>01</span><strong>Selección editorial</strong><p>La presentación de cada pieza se revisa antes de su publicación.</p></article>
-          <article><span>02</span><strong>Compra por taller</strong><p>Un carrito agrupado por artesano para simplificar preparación y envío.</p></article>
-          <article><span>03</span><strong>Piezas con identidad</strong><p>El protagonismo sigue siendo del taller, su oficio y su colección.</p></article>
+          <article><span>02</span><strong id="provider-materials-title">Compra por taller</strong><p id="provider-materials-copy">Un carrito agrupado por artesano para simplificar preparación y envío.</p></article>
+          <article><span>03</span><strong id="provider-techniques-title">Piezas con identidad</strong><p id="provider-techniques-copy">El protagonismo sigue siendo del taller, su oficio y su colección.</p></article>
         </div>
       </section>
 
@@ -102,7 +103,7 @@
         <div>
           <p class="eyebrow">Encargos especiales</p>
           <h2 id="provider-bespoke-title">Una pieza puede empezar con una idea.</h2>
-          <p>Algunas creaciones de la colección admiten personalización. Entra en la pieza que te interese para consultar opciones, tiempos y detalles con el taller.</p>
+          <p id="provider-bespoke-copy">Algunas creaciones de la colección admiten personalización. Entra en la pieza que te interese para consultar opciones, tiempos y detalles con el taller.</p>
         </div>
         <div class="provider-bespoke-card">
           <span class="provider-bespoke-mark" aria-hidden="true">AL</span>
@@ -113,7 +114,7 @@
 
       <footer id="provider-footer-note" class="provider-footer-note" hidden>
         <p>Atelier Lumière · Taller invitado</p>
-        <span>Artesanía para celebrar, elegir y conservar.</span>
+        <span id="provider-footer-copy">Artesanía para celebrar, elegir y conservar.</span>
       </footer>
     </main>
   </div>
