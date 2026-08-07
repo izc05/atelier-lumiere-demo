@@ -34,14 +34,77 @@ function framingPercent(value, fallback = 50) {
   return Math.min(100, Math.max(0, parsed));
 }
 
-function applyCoverFraming(image, cover) {
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+function coverGeometry(containerWidth, containerHeight, sourceWidth, sourceHeight, focalX, focalY) {
+  if (
+    ![containerWidth, containerHeight, sourceWidth, sourceHeight].every((value) => Number.isFinite(value) && value > 0)
+  ) return null;
+
+  const scale = Math.max(containerWidth / sourceWidth, containerHeight / sourceHeight);
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+  const desiredLeft = (containerWidth / 2) - (width * focalX / 100);
+  const desiredTop = (containerHeight / 2) - (height * focalY / 100);
+  const left = clamp(desiredLeft, containerWidth - width, 0);
+  const top = clamp(desiredTop, containerHeight - height, 0);
+
+  return { width, height, left, top };
+}
+
+function applyCoverFraming(image, visual, cover) {
   const focalX = framingPercent(cover?.focalX);
   const focalY = framingPercent(cover?.focalY);
-  image.style.setProperty("width", "100%", "important");
-  image.style.setProperty("height", "100%", "important");
+
+  visual.style.setProperty("position", "relative", "important");
+  visual.style.setProperty("overflow", "hidden", "important");
+  visual.dataset.focalX = String(focalX);
+  visual.dataset.focalY = String(focalY);
+
   image.style.setProperty("display", "block", "important");
+  image.style.setProperty("max-width", "none", "important");
+  image.style.setProperty("max-height", "none", "important");
   image.style.setProperty("object-fit", "cover", "important");
   image.style.setProperty("object-position", `${focalX}% ${focalY}%`, "important");
+
+  const render = () => {
+    if (!visual.isConnected) return;
+    const sourceWidth = image.naturalWidth || Number(cover?.width);
+    const sourceHeight = image.naturalHeight || Number(cover?.height);
+    const geometry = coverGeometry(
+      visual.clientWidth,
+      visual.clientHeight,
+      sourceWidth,
+      sourceHeight,
+      focalX,
+      focalY
+    );
+    if (!geometry) return;
+
+    image.style.setProperty("position", "absolute", "important");
+    image.style.setProperty("width", `${geometry.width}px`, "important");
+    image.style.setProperty("height", `${geometry.height}px`, "important");
+    image.style.setProperty("left", `${geometry.left}px`, "important");
+    image.style.setProperty("top", `${geometry.top}px`, "important");
+    image.style.setProperty("object-fit", "fill", "important");
+    image.style.setProperty("object-position", "50% 50%", "important");
+  };
+
+  image.addEventListener("load", render, { once: true });
+  if (image.complete && image.naturalWidth > 0) queueMicrotask(render);
+
+  if (typeof ResizeObserver === "function") {
+    const observer = new ResizeObserver(() => {
+      if (!visual.isConnected) {
+        observer.disconnect();
+        return;
+      }
+      render();
+    });
+    observer.observe(visual);
+  }
 }
 
 function card(product) {
@@ -59,8 +122,8 @@ function card(product) {
       priority: "low",
       defaultWidth: 640
     });
-    applyCoverFraming(image, product.cover);
     visual.replaceChildren(image);
+    applyCoverFraming(image, visual, product.cover);
   }
 
   const body = element("div", "product-body");
