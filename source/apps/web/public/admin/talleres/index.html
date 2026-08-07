@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#59101f">
+  <title>Perfiles de taller · Atelier Lumière</title>
+  <link rel="stylesheet" href="/admin/talleres/profiles.css">
+  <script defer src="/admin/admin-role-navigation.js"></script>
+  <script defer src="/admin/talleres/profiles.js"></script>
+  <link rel="stylesheet" href="/premium-ui.css">
+  <script defer src="/premium-ui.js"></script>
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="topbar">
+      <a class="brand" href="/admin/proveedores/">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Control editorial</small></span>
+      </a>
+      <nav class="top-actions" aria-label="Administración">
+        <a class="button ghost" href="/admin/articulos/">Artículos</a>
+        <a class="button ghost" href="/admin/publicaciones/">Blog</a>
+        <a class="button ghost" href="/admin/proveedores/">Proveedores</a>
+        <button id="logout-button" class="button ghost" type="button">Cerrar sesión</button>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Identidad de los talleres</p>
+        <h1>Perfiles<br>editoriales.</h1>
+        <p>Revisa cómo se presenta cada artesano antes de que su historia, oficio y condiciones sustituyan la versión pública actual.</p>
+      </div>
+      <aside>
+        <span>Flujo controlado</span>
+        <strong>Borrador → revisión → aprobación → publicación</strong>
+        <p>La versión pública anterior permanece intacta hasta el último paso.</p>
+      </aside>
+    </section>
+
+    <section class="metrics" aria-label="Resumen de perfiles">
+      <article><span>Total</span><strong id="metric-total">0</strong><small>Perfiles de taller</small></article>
+      <article><span>En revisión</span><strong id="metric-review">0</strong><small>Pendientes de decisión</small></article>
+      <article><span>Aprobados</span><strong id="metric-approved">0</strong><small>Listos para publicar</small></article>
+      <article><span>Publicados</span><strong id="metric-published">0</strong><small>Versión pública activa</small></article>
+    </section>
+
+    <section class="toolbar">
+      <input id="search-input" type="search" autocomplete="off" placeholder="Buscar por taller">
+      <select id="status-filter">
+        <option value="ALL">Todos los estados</option>
+        <option value="IN_REVIEW" selected>En revisión</option>
+        <option value="APPROVED">Aprobados</option>
+        <option value="CHANGES_REQUESTED">Cambios solicitados</option>
+        <option value="PUBLISHED">Publicados</option>
+        <option value="DRAFT">Borradores</option>
+      </select>
+      <button id="refresh-button" class="button secondary" type="button">Actualizar</button>
+    </section>
+
+    <section id="loading-view" class="state-card">Cargando perfiles…</section>
+    <section id="error-view" class="state-card error" hidden><h2>No se pudo cargar la revisión</h2><p id="error-message"></p></section>
+    <section id="empty-view" class="state-card" hidden><h2>No hay perfiles en este estado</h2><p>Cambia el filtro o espera a que un taller envíe una nueva versión.</p></section>
+    <section id="profiles-list" class="profiles-list" hidden aria-live="polite"></section>
+  </main>
+</body>
+</html>
