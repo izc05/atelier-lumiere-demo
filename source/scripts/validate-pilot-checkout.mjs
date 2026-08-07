@@ -7,6 +7,7 @@ const paths = [
   "apps/api/src/customer-order-email-templates.mjs",
   "apps/api/src/mail-service.mjs",
   "apps/api/src/pilot-checkout-service.mjs",
+  "apps/api/src/pilot-checkout-service-core.mjs",
   "apps/api/src/pilot-checkout-api.mjs",
   "apps/api/src/server.mjs",
   "apps/api/tests/pilot-checkout.test.mjs",
@@ -34,7 +35,9 @@ const migration = files["packages/database/migrations/0028_pilot_checkout_submis
 const singleProviderMigration = files["packages/database/migrations/0032_single_provider_checkout.sql"];
 const emailTemplate = files["apps/api/src/customer-order-email-templates.mjs"];
 const mailService = files["apps/api/src/mail-service.mjs"];
-const service = files["apps/api/src/pilot-checkout-service.mjs"];
+const serviceAdapter = files["apps/api/src/pilot-checkout-service.mjs"];
+const serviceCore = files["apps/api/src/pilot-checkout-service-core.mjs"];
+const service = `${serviceAdapter}\n${serviceCore}`;
 const api = files["apps/api/src/pilot-checkout-api.mjs"];
 const apiServer = files["apps/api/src/server.mjs"];
 const apiTest = files["apps/api/tests/pilot-checkout.test.mjs"];
@@ -64,6 +67,10 @@ assert.match(singleProviderMigration, /BEFORE INSERT OR UPDATE OF checkout_id, p
 assert.match(singleProviderMigration, /existing_order\.provider_id <> NEW\.provider_id/);
 assert.match(singleProviderMigration, /ERRCODE = '23514'/);
 
+assert.match(serviceAdapter, /product_publications/);
+assert.match(serviceAdapter, /publication\.snapshot/);
+assert.match(serviceAdapter, /publication\.visible = true/);
+assert.match(serviceAdapter, /pilot-checkout-service-core\.mjs/);
 assert.match(service, /PILOT_CHECKOUT_ENABLED/);
 assert.match(service, /PILOT_SHIPPING_CENTS/);
 assert.match(service, /ON CONFLICT \(idempotency_key\) DO NOTHING/);
