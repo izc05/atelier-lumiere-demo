@@ -28,12 +28,17 @@ for (const literal of [
   "function galleryOrder(value)",
   "value.length > 6",
   "new Set(normalized).size !== normalized.length",
+  "SELECT status FROM provider_profiles WHERE provider_id = $1 FOR UPDATE",
+  "SELECT MAX(existing.sort_order) + 1",
+  "existing.kind = 'GALLERY'",
   "async reorderGallery",
   "await makeProfileEditable(transaction, context)",
-  "kind = 'GALLERY' AND status = 'READY'",
+  "status NOT IN ('DELETED','REJECTED')",
   "FOR UPDATE",
+  "GALLERY_ORDER_BUSY",
   "GALLERY_ORDER_STALE",
   "unnest($2::uuid[]) WITH ORDINALITY",
+  "SET sort_order = (ordered.position - 1)::smallint",
   "PROVIDER_PROFILE_GALLERY_REORDERED"
 ]) assert.ok(service.includes(literal), `Falta en el servicio de galería: ${literal}`);
 assert.ok(!service.includes("UPDATE provider_profile_publications SET"), "Reordenar el borrador no debe alterar la publicación activa.");
@@ -41,7 +46,7 @@ assert.ok(!service.includes("UPDATE product_publications SET"), "Reordenar la ga
 
 for (const literal of [
   "PROVIDER_GALLERY_ORDER",
-  "/api\\/provider\\/profile\\/media\\/reorder",
+  "galleryOrderMatch",
   "request.method !== \"POST\"",
   "profileMediaService.reorderGallery",
   "await readJson(request)"
@@ -49,7 +54,7 @@ for (const literal of [
 
 for (const literal of [
   "GALLERY_ORDER_PATTERN",
-  "/internal\\/provider\\/profile\\/media\\/reorder",
+  "galleryOrderRoute",
   "if (galleryOrderRoute) return method === \"POST\"",
   "Authorization: `Bearer ${token}`",
   "!galleryOrderRoute"
@@ -80,4 +85,4 @@ assert.match(snapshotMigration, /ORDER BY CASE media\.kind WHEN 'LOGO' THEN 0 WH
 assert.ok(snapshotMigration.includes("WHERE media.provider_id = provider.id"));
 assert.ok(snapshotMigration.includes("AND media.status = 'READY'"));
 
-console.log("Orden de galería validado: máximo seis, escritura atómica, borrador aislado y snapshot público ordenado.");
+console.log("Orden de galería validado: nuevas fotos al final, máximo seis, escritura atómica y snapshot público ordenado.");
