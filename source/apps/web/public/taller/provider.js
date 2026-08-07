@@ -36,6 +36,23 @@ function framingPercent(value, fallback = 50) {
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
 }
+function featuredFirst(products, featuredProductIds) {
+  const priorities = new Map(
+    (Array.isArray(featuredProductIds) ? featuredProductIds : [])
+      .slice(0, 4)
+      .map((productId, index) => [String(productId).toLowerCase(), index])
+  );
+  return products
+    .map((product, originalIndex) => ({
+      product,
+      originalIndex,
+      priority: priorities.has(String(product.id).toLowerCase())
+        ? priorities.get(String(product.id).toLowerCase())
+        : Number.POSITIVE_INFINITY
+    }))
+    .sort((left, right) => left.priority - right.priority || left.originalIndex - right.originalIndex)
+    .map((item) => item.product);
+}
 function coverGeometry(containerWidth, containerHeight, sourceWidth, sourceHeight, focalX, focalY) {
   if (![containerWidth, containerHeight, sourceWidth, sourceHeight].every((value) => Number.isFinite(value) && value > 0)) {
     return null;
@@ -254,12 +271,14 @@ async function load() {
   }
   try {
     const products = await requestCatalog();
-    providerProducts = products.filter((product) => product.provider?.slug === slug);
-    if (providerProducts.length === 0) {
+    const matching = products.filter((product) => product.provider?.slug === slug);
+    if (matching.length === 0) {
       byId("empty-view").hidden = false;
       return;
     }
-    hydrateProvider(providerProducts[0].provider);
+    const provider = matching[0].provider;
+    providerProducts = featuredFirst(matching, provider.featuredProductIds);
+    hydrateProvider(provider);
     revealProviderSections();
     renderProducts();
   } catch (error) {
