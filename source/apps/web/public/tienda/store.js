@@ -28,6 +28,22 @@ function tag(value) {
   return element("span", "tag", value.replaceAll("-", " "));
 }
 
+function framingPercent(value, fallback = 50) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(100, Math.max(0, parsed));
+}
+
+function applyCoverFraming(image, cover) {
+  const focalX = framingPercent(cover?.focalX);
+  const focalY = framingPercent(cover?.focalY);
+  image.style.setProperty("width", "100%", "important");
+  image.style.setProperty("height", "100%", "important");
+  image.style.setProperty("display", "block", "important");
+  image.style.setProperty("object-fit", "cover", "important");
+  image.style.setProperty("object-position", `${focalX}% ${focalY}%`, "important");
+}
+
 function card(product) {
   const article = element("article", "product-card");
   const visual = element("div", "product-image", "Pieza artesanal");
@@ -43,7 +59,7 @@ function card(product) {
       priority: "low",
       defaultWidth: 640
     });
-    image.style.objectPosition = `${product.cover.focalX ?? 50}% ${product.cover.focalY ?? 50}%`;
+    applyCoverFraming(image, product.cover);
     visual.replaceChildren(image);
   }
 
@@ -86,7 +102,8 @@ function updateCategories(items) {
   const options = categories.map((value) => {
     const option = element("option", "", value);
     option.value = value;
-    return option;
+    item.textContent = value;
+    return item;
   });
   select.replaceChildren(defaultOption, ...options);
   if (categories.includes(current)) select.value = current;
