@@ -32,6 +32,22 @@ function uuid(value, field = "providerId") {
   return value.toLowerCase();
 }
 
+function featuredProductIds(value) {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > 4) {
+    throw new ServiceError("VALIDATION_ERROR", "featuredProductIds debe contener como máximo cuatro piezas.", 422, {
+      field: "featuredProductIds"
+    });
+  }
+  const normalized = value.map((item, index) => uuid(item, `featuredProductIds.${index}`));
+  if (new Set(normalized).size !== normalized.length) {
+    throw new ServiceError("VALIDATION_ERROR", "Una pieza no puede aparecer dos veces entre los destacados.", 422, {
+      field: "featuredProductIds"
+    });
+  }
+  return normalized;
+}
+
 function serialize(row) {
   if (!row) return null;
   return {
@@ -51,6 +67,8 @@ function serialize(row) {
     preparationNote: row.preparation_note,
     shippingNote: row.shipping_note,
     acceptsCustomRequests: row.accepts_custom_requests,
+    featuredProductIds: Array.isArray(row.featured_product_ids) ? row.featured_product_ids : [],
+    featuredProductChoices: Array.isArray(row.featured_product_choices) ? row.featured_product_choices : [],
     editorialNote: row.editorial_note,
     version: row.version,
     submittedAt: row.submitted_at,
@@ -70,6 +88,12 @@ const SELECT_PROFILE = `
          provider.slug::text AS provider_slug,
          provider.display_name AS account_display_name,
          provider.specialty AS account_specialty,
+         COALESCE((
+           SELECT array_agg(featured.product_id ORDER BY featured.sort_order)
+           FROM provider_profile_featured_products featured
+           WHERE featured.provider_id = profile.provider_id
+         ), ARRAY[]::uuid[]) AS featured_product_ids,
+         app.provider_featured_product_choices(profile.provider_id) AS featured_product_choices,
          publication.revision AS public_revision,
          publication.published_at AS public_published_at,
          publication.snapshot AS public_snapshot
@@ -122,7 +146,8 @@ export function createProviderProfileService({ database } = {}) {
         techniques: shortList(input.techniques, "techniques"),
         preparationNote: input.preparationNote === undefined ? undefined : optionalText(input.preparationNote, "preparationNote", 1200),
         shippingNote: input.shippingNote === undefined ? undefined : optionalText(input.shippingNote, "shippingNote", 1200),
-        acceptsCustomRequests: input.acceptsCustomRequests === undefined ? undefined : Boolean(input.acceptsCustomRequests)
+        acceptsCustomRequests: input.acceptsCustomRequests === undefined ? undefined : Boolean(input.acceptsCustomRequests),
+        featuredProductIds: featuredProductIds(input.featuredProductIds)
       };
 
       return database.withContext(context, async (transaction) => {
@@ -135,6 +160,35 @@ export function createProviderProfileService({ database } = {}) {
             `UPDATE provider_profiles SET status = 'DRAFT' WHERE provider_id = $1`,
             [context.providerId]
           );
+        }
+
+        if (values.featuredProductIds !== undefined) {
+          const availableIds = new Set(
+            (Array.isArray(current.featured_product_choices) ? current.featured_product_choices : [])
+              .map((item) => String(item?.id ?? "").toLowerCase())
+              .filter((item) => UUID_PATTERN.test(item))
+          );
+          const unavailable = values.featuredProductIds.filter((productId) => !availableIds.has(productId));
+          if (unavailable.length) {
+            throw new ServiceError(
+              "FEATURED_PRODUCT_NOT_AVAILABLE",
+              "Solo puedes destacar piezas de tu taller que tengan una publicación visible.",
+              422,
+              { field: "featuredProductIds" }
+            );
+          }
+
+          await transaction.query(
+            `DELETE FROM provider_profile_featured_products WHERE provider_id = $1`,
+            [context.providerId]
+          );
+          for (const [sortOrder, productId] of values.featuredProductIds.entries()) {
+            await transaction.query(
+              `INSERT INTO provider_profile_featured_products (provider_id, product_id, sort_order)
+               VALUES ($1, $2, $3)`,
+              [context.providerId, productId, sortOrder]
+            );
+          }
         }
 
         const result = await transaction.query(
@@ -168,7 +222,8 @@ export function createProviderProfileService({ database } = {}) {
           ]
         );
         await writeAudit(transaction, context, context.providerId, "PROVIDER_PROFILE_DRAFT_SAVED", {
-          version: result.rows[0].version
+          version: result.rows[0].version,
+          featuredProductCount: values.featuredProductIds?.length ?? current.featured_product_ids?.length ?? 0
         });
         return serialize(await readForProvider(transaction, context.providerId));
       });
@@ -189,10 +244,18 @@ export function createProviderProfileService({ database } = {}) {
             [context.providerId]
           );
         } catch (error) {
+          if (error?.code === "23514" && String(error.message).includes("PROVIDER_PROFILE_FEATURED_PRODUCT_NOT_VISIBLE")) {
+            throw new ServiceError(
+              "FEATURED_PRODUCT_NOT_AVAILABLE",
+              "Una de las piezas destacadas ya no está publicada. Retírala o elige otra antes de enviar el perfil.",
+              422,
+              { field: "featuredProductIds" }
+            );
+          }
           if (error?.code === "23514") {
             throw new ServiceError(
               "PROFILE_NOT_READY_FOR_REVIEW",
-              "Completa nombre público, especialidad, presentación, historia y descripción del oficio antes de enviarlo.",
+              "Completa nombre público, especialidad, presentación, historia, descripción del oficio y portada antes de enviarlo.",
               422
             );
           }
