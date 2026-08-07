@@ -53,6 +53,12 @@ function providerSummary(row) {
     ? row.provider_profile_snapshot
     : {};
   const media = profileMedia(profile, row.provider_slug);
+  const featuredProductIds = Array.isArray(profile.featuredProductIds)
+    ? profile.featuredProductIds
+      .map((value) => String(value || "").toLowerCase())
+      .filter((value, index, values) => UUID_PATTERN.test(value) && values.indexOf(value) === index)
+      .slice(0, 4)
+    : [];
   return {
     slug: row.provider_slug,
     displayName: profile.displayName || row.provider_display_name,
@@ -66,6 +72,7 @@ function providerSummary(row) {
     preparationNote: profile.preparationNote || null,
     shippingNote: profile.shippingNote || null,
     acceptsCustomRequests: Boolean(profile.acceptsCustomRequests),
+    featuredProductIds,
     profileRevision: row.provider_profile_revision ? Number(row.provider_profile_revision) : null,
     logo: media.logo,
     cover: media.cover,
