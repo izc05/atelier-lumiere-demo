@@ -15,6 +15,7 @@ const validations = [
   "validate-provider-profile-editorial.mjs",
   "validate-provider-profile-media.mjs",
   "validate-provider-profile-featured-products.mjs",
+  "validate-provider-profile-gallery-order.mjs",
   "validate-provider-products-ui.mjs",
   "validate-admin-products-review.mjs",
   "validate-public-catalog.mjs",

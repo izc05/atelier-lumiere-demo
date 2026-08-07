@@ -49,6 +49,21 @@ function mediaKind(value) {
   return normalized;
 }
 
+function galleryOrder(value) {
+  if (!Array.isArray(value) || value.length > 6) {
+    throw new ServiceError("VALIDATION_ERROR", "El orden de la galería debe contener como máximo seis fotografías.", 422, {
+      field: "mediaIds"
+    });
+  }
+  const normalized = value.map((item, index) => uuid(item, `mediaIds.${index}`));
+  if (new Set(normalized).size !== normalized.length) {
+    throw new ServiceError("VALIDATION_ERROR", "Una fotografía no puede aparecer dos veces en el orden de la galería.", 422, {
+      field: "mediaIds"
+    });
+  }
+  return normalized;
+}
+
 function originalFilename(value) {
   let decoded;
   try {
@@ -151,7 +166,7 @@ async function audit(transaction, context, providerId, action, mediaId, metadata
 
 async function makeProfileEditable(transaction, context) {
   const result = await transaction.query(
-    "SELECT status FROM provider_profiles WHERE provider_id = $1",
+    "SELECT status FROM provider_profiles WHERE provider_id = $1 FOR UPDATE",
     [context.providerId]
   );
   if (result.rowCount !== 1) {
@@ -265,8 +280,18 @@ export function createProviderProfileMediaService({
           await transaction.query(
             `INSERT INTO provider_profile_media (
                id, provider_id, kind, mime_type, original_filename, storage_key,
-               size_bytes, checksum_sha256, status, alt_text, uploaded_by, upload_expires_at
-             ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'PENDING_UPLOAD',$9,$10,$11)`,
+               size_bytes, checksum_sha256, status, sort_order, alt_text, uploaded_by, upload_expires_at
+             ) VALUES (
+               $1,$2,$3,$4,$5,$6,$7,$8,'PENDING_UPLOAD',
+               CASE WHEN $3 = 'GALLERY' THEN COALESCE((
+                 SELECT MAX(existing.sort_order) + 1
+                 FROM provider_profile_media existing
+                 WHERE existing.provider_id = $2
+                   AND existing.kind = 'GALLERY'
+                   AND existing.status NOT IN ('DELETED','REJECTED')
+               ), 0) ELSE 0 END,
+               $9,$10,$11
+             )`,
             [mediaId, context.providerId, kind, selectedMimeType, filename, key,
              expectedBytes, ZERO_CHECKSUM, selectedAltText, context.userId, expiresAt]
           );
@@ -313,6 +338,68 @@ export function createProviderProfileMediaService({
           error instanceof ServiceError ? error.message : "La carga no se ha podido completar.",
           typeof error?.code === "string" ? error.code : "PROFILE_MEDIA_UPLOAD_FAILED");
         if (error instanceof ServiceError) throw error;
+        throw translateDatabaseError(error);
+      }
+    },
+
+    async reorderGallery(rawContext, input = {}) {
+      const context = providerContext(rawContext);
+      const mediaIds = galleryOrder(input.mediaIds);
+      try {
+        return await database.withContext(context, async (transaction) => {
+          await makeProfileEditable(transaction, context);
+          const current = await transaction.query(
+            `SELECT id, status
+             FROM provider_profile_media
+             WHERE provider_id = $1
+               AND kind = 'GALLERY'
+               AND status NOT IN ('DELETED','REJECTED')
+             ORDER BY sort_order, created_at
+             FOR UPDATE`,
+            [context.providerId]
+          );
+          if (current.rows.some((row) => row.status !== "READY")) {
+            throw new ServiceError(
+              "GALLERY_ORDER_BUSY",
+              "Espera a que terminen las cargas de la galería antes de cambiar su orden.",
+              409
+            );
+          }
+          const currentIds = current.rows.map((row) => row.id);
+          const currentSet = new Set(currentIds);
+          if (currentIds.length !== mediaIds.length || mediaIds.some((mediaId) => !currentSet.has(mediaId))) {
+            throw new ServiceError(
+              "GALLERY_ORDER_STALE",
+              "La galería ha cambiado. Recarga el perfil antes de volver a ordenar las fotografías.",
+              409
+            );
+          }
+
+          if (mediaIds.length) {
+            await transaction.query(
+              `UPDATE provider_profile_media media
+               SET sort_order = (ordered.position - 1)::smallint
+               FROM unnest($2::uuid[]) WITH ORDINALITY AS ordered(id, position)
+               WHERE media.provider_id = $1
+                 AND media.id = ordered.id
+                 AND media.kind = 'GALLERY'
+                 AND media.status = 'READY'`,
+              [context.providerId, mediaIds]
+            );
+            for (const [position, mediaId] of mediaIds.entries()) {
+              await audit(transaction, context, context.providerId, "PROVIDER_PROFILE_GALLERY_REORDERED", mediaId, { position });
+            }
+          }
+
+          const result = await transaction.query(
+            `SELECT * FROM provider_profile_media
+             WHERE provider_id = $1 AND kind = 'GALLERY' AND status = 'READY'
+             ORDER BY sort_order, created_at`,
+            [context.providerId]
+          );
+          return result.rows.map((row) => serializeMedia(row));
+        });
+      } catch (error) {
         throw translateDatabaseError(error);
       }
     },

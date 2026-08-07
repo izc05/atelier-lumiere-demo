@@ -3,6 +3,7 @@ import { pipeline } from "node:stream/promises";
 
 const PROVIDER_SESSION_COOKIE = "atelier_provider_session";
 const PROFILE_PATTERN = /^\/internal\/provider\/profile(?:\/(submit|media)(?:\/([0-9a-f-]{36})(?:\/(preview))?)?)?$/i;
+const GALLERY_ORDER_PATTERN = /^\/internal\/provider\/profile\/media\/reorder$/i;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,180}$/;
 const SAFE_REQUEST_HEADERS = new Set([
   "content-type", "content-length", "x-file-name", "x-alt-text", "x-media-kind", "range", "user-agent"
@@ -63,7 +64,8 @@ function redirectToAccess(response, secure) {
   response.end();
 }
 
-function routeAllows(method, match) {
+function routeAllows(method, match, galleryOrderRoute) {
+  if (galleryOrderRoute) return method === "POST";
   const [, action, mediaId, variant] = match;
   if (!action) return ["GET", "PATCH"].includes(method);
   if (action === "submit") return !mediaId && !variant && method === "POST";
@@ -123,10 +125,11 @@ export function createProviderProfileWebHandler({
 
   return async function providerProfileWebHandler(request, response) {
     const url = new URL(request.url ?? "/", "http://localhost");
-    const match = url.pathname.match(PROFILE_PATTERN);
-    if (match) {
+    const galleryOrderRoute = GALLERY_ORDER_PATTERN.test(url.pathname);
+    const match = galleryOrderRoute ? null : url.pathname.match(PROFILE_PATTERN);
+    if (galleryOrderRoute || match) {
       const method = request.method ?? "GET";
-      if (!routeAllows(method, match)) {
+      if (!routeAllows(method, match, galleryOrderRoute)) {
         sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." });
         return;
       }
@@ -138,10 +141,12 @@ export function createProviderProfileWebHandler({
         return;
       }
 
-      const [, action, mediaId, variant] = match;
+      const action = galleryOrderRoute ? "media" : match[1];
+      const mediaId = galleryOrderRoute ? null : match[2];
+      const variant = galleryOrderRoute ? null : match[3];
       const target = new URL(`${url.pathname.replace(/^\/internal/, "/api")}${url.search}`, apiBase);
       const hasBody = !["GET", "HEAD", "DELETE"].includes(method);
-      const binaryUpload = action === "media" && !mediaId && method === "POST";
+      const binaryUpload = action === "media" && !mediaId && method === "POST" && !galleryOrderRoute;
       const timeoutMs = binaryUpload ? 120_000 : variant === "preview" ? 60_000 : 15_000;
       try {
         const upstream = await fetchImpl(target, {
