@@ -25,6 +25,9 @@ function formatDate(value) {
     return "Sin fecha";
   }
 }
+function internalPath(path) {
+  return typeof path === "string" && path.startsWith("/api/") ? path.replace(/^\/api\//, "/internal/") : null;
+}
 
 async function requestJson(path, options = {}) {
   const response = await fetch(path, {
@@ -136,6 +139,51 @@ function contentBlock(profile) {
   return content;
 }
 
+function mediaFigure(item, label) {
+  const figure = element("figure", `review-media review-media-${String(item.kind || "gallery").toLowerCase()}`);
+  const image = document.createElement("img");
+  const source = internalPath(item.previewPath);
+  if (source) image.src = source;
+  image.alt = item.altText || label;
+  image.loading = "lazy";
+  image.decoding = "async";
+  const caption = element("figcaption");
+  caption.append(element("strong", "", label));
+  caption.append(element("span", "", item.altText || "Sin descripción alternativa"));
+  figure.append(image, caption);
+  return figure;
+}
+
+function mediaBlock(profile) {
+  const section = element("section", "review-media-section");
+  const heading = element("div", "review-media-heading");
+  heading.append(element("h3", "", "Imagen del taller"));
+  const media = Array.isArray(profile.media) ? profile.media : [];
+  const logo = media.find((item) => item.kind === "LOGO");
+  const cover = media.find((item) => item.kind === "COVER");
+  const gallery = media.filter((item) => item.kind === "GALLERY").slice(0, 6);
+  heading.append(element("small", "", `${cover ? "Portada lista" : "Sin portada"} · ${logo ? "Logo listo" : "Sin logo"} · ${gallery.length} foto${gallery.length === 1 ? "" : "s"} de galería`));
+  section.append(heading);
+
+  if (profile.mediaError) {
+    section.append(element("p", "media-review-error", "No se pudieron cargar las imágenes privadas de esta revisión."));
+    return section;
+  }
+
+  const featured = element("div", "review-media-featured");
+  if (cover) featured.append(mediaFigure(cover, "Portada"));
+  else featured.append(element("div", "review-media-missing", "Falta la portada obligatoria."));
+  if (logo) featured.append(mediaFigure(logo, "Logo"));
+  section.append(featured);
+
+  if (gallery.length) {
+    const grid = element("div", "review-media-gallery");
+    gallery.forEach((item, index) => grid.append(mediaFigure(item, `Galería ${index + 1}`)));
+    section.append(grid);
+  }
+  return section;
+}
+
 function reviewPanel(profile) {
   const panel = element("div", "review-panel");
   const publicInfo = profile.publication?.revision
@@ -143,7 +191,9 @@ function reviewPanel(profile) {
     : "Este taller todavía no tiene una versión editorial publicada.";
   panel.append(element("small", "", publicInfo));
 
+  const hasCover = Array.isArray(profile.media) && profile.media.some((item) => item.kind === "COVER" && item.status === "READY");
   if (profile.status === "IN_REVIEW") {
+    if (!hasCover) panel.append(element("p", "media-review-error", "Esta revisión no tiene la portada obligatoria y no debería aprobarse."));
     const textarea = document.createElement("textarea");
     textarea.maxLength = 1200;
     textarea.placeholder = "Nota para el taller. Es obligatoria si solicitas cambios.";
@@ -151,6 +201,7 @@ function reviewPanel(profile) {
     const actions = element("div", "review-actions");
     const approve = element("button", "button primary", "Aprobar perfil");
     approve.type = "button";
+    approve.disabled = !hasCover || Boolean(profile.mediaError);
     approve.addEventListener("click", () => void review(profile, panel, "APPROVE"));
     const changes = element("button", "button danger", "Solicitar cambios");
     changes.type = "button";
@@ -158,9 +209,10 @@ function reviewPanel(profile) {
     actions.append(approve, changes);
     panel.append(actions);
   } else if (profile.status === "APPROVED") {
-    panel.append(element("small", "", "La versión está aprobada. Publicarla sustituirá el snapshot público actual de forma atómica."));
+    panel.append(element("small", "", "La versión está aprobada. Publicarla sustituirá texto e imágenes del snapshot público de forma atómica."));
     const publishButton = element("button", "button primary", "Publicar versión");
     publishButton.type = "button";
+    publishButton.disabled = !hasCover || Boolean(profile.mediaError);
     publishButton.addEventListener("click", () => void publish(profile, panel));
     panel.append(publishButton);
   } else if (profile.status === "PUBLISHED") {
@@ -177,7 +229,9 @@ function reviewPanel(profile) {
 
 function profileCard(profile) {
   const card = element("article", "profile-card");
-  card.append(identityBlock(profile), contentBlock(profile), reviewPanel(profile));
+  const center = element("div", "profile-center");
+  center.append(contentBlock(profile), mediaBlock(profile));
+  card.append(identityBlock(profile), center, reviewPanel(profile));
   return card;
 }
 
@@ -196,6 +250,16 @@ function render() {
   updateMetrics();
 }
 
+async function attachMedia(profile) {
+  try {
+    const payload = await requestJson(`/internal/admin/provider-profiles/${encodeURIComponent(profile.providerId)}/media`);
+    return { ...profile, media: Array.isArray(payload.media) ? payload.media : [], mediaError: false };
+  } catch (error) {
+    if (error.message === "La sesión administrativa ha caducado.") throw error;
+    return { ...profile, media: [], mediaError: true };
+  }
+}
+
 async function load() {
   byId("loading-view").hidden = false;
   byId("error-view").hidden = true;
@@ -212,7 +276,8 @@ async function load() {
       requestJson(`/internal/admin/provider-profiles${suffix}`),
       requestJson("/internal/admin/provider-profiles?status=ALL")
     ]);
-    visibleProfiles = Array.isArray(visiblePayload.profiles) ? visiblePayload.profiles : [];
+    const rawVisible = Array.isArray(visiblePayload.profiles) ? visiblePayload.profiles : [];
+    visibleProfiles = await Promise.all(rawVisible.map(attachMedia));
     allProfiles = Array.isArray(totalsPayload.profiles) ? totalsPayload.profiles : [];
     render();
   } catch (error) {
