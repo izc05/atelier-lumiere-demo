@@ -146,18 +146,44 @@ function revealProviderSections() {
 function hydrateProvider(provider) {
   const displayName = provider.displayName || "Taller invitado";
   const specialty = provider.specialty || "Piezas artesanales seleccionadas por Atelier Lumière.";
+  const lead = provider.tagline || specialty;
   const categories = new Set(providerProducts.map((product) => product.category).filter(Boolean));
   const customizable = providerProducts.filter((product) => product.customizable).length;
 
   document.title = `${displayName} · Atelier Lumière`;
   byId("provider-name").textContent = displayName;
-  byId("provider-specialty").textContent = specialty;
+  byId("provider-specialty").textContent = lead;
   byId("provider-identity-name").textContent = displayName;
   byId("provider-monogram").textContent = initials(displayName);
   byId("provider-piece-count").textContent = String(providerProducts.length);
   byId("provider-category-count").textContent = String(categories.size || 1);
   byId("customizable-count").textContent = String(customizable);
   byId("collection-note").textContent = `${providerProducts.length} ${providerProducts.length === 1 ? "pieza publicada" : "piezas publicadas"} en esta edición del taller.`;
+
+  if (provider.locationLabel) {
+    byId("provider-location-signal").textContent = provider.locationLabel;
+    byId("provider-location-signal").hidden = false;
+  }
+  if (provider.story) byId("provider-story").textContent = provider.story;
+  if (provider.craftDescription) byId("provider-craft").textContent = provider.craftDescription;
+
+  if (Array.isArray(provider.materials) && provider.materials.length > 0) {
+    byId("provider-materials-title").textContent = "Materiales";
+    byId("provider-materials-copy").textContent = provider.materials.join(" · ");
+  }
+  if (Array.isArray(provider.techniques) && provider.techniques.length > 0) {
+    byId("provider-techniques-title").textContent = "Técnicas y oficio";
+    byId("provider-techniques-copy").textContent = provider.techniques.join(" · ");
+  }
+  if (provider.acceptsCustomRequests) {
+    byId("provider-bespoke-copy").textContent = "Este taller está abierto a encargos personalizados. Explora la colección y entra en la pieza más cercana a tu idea para consultar opciones y tiempos.";
+  }
+  if (provider.preparationNote) {
+    byId("collection-note").textContent += ` ${provider.preparationNote}`;
+  }
+  if (provider.locationLabel) {
+    byId("provider-footer-copy").textContent = `${displayName} · ${provider.locationLabel} · Selección Atelier Lumière`;
+  }
 }
 async function load() {
   const slug = providerSlug();
