@@ -21,6 +21,7 @@ const validations = [
   "validate-public-catalog.mjs",
   "validate-public-provider-storefront.mjs",
   "validate-public-provider-filter.mjs",
+  "validate-public-provider-operations.mjs",
   "validate-blog-editorial.mjs",
   "validate-provider-blog-ui.mjs",
   "validate-blog-media.mjs",
