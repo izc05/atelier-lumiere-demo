@@ -89,11 +89,13 @@ assert.match(apiServer, /createProviderProfileService/);
 assert.match(webServer, /createProviderProfileWebHandler/);
 assert.match(webServer, /createAdminProviderProfilesWebHandler/);
 
+assert.match(providerProxy, /const PROFILE_PATTERN/);
+assert.match(providerProxy, /url\.pathname\.match\(PROFILE_PATTERN\)/);
 assert.match(providerProxy, /atelier_provider_session/);
-assert.match(providerProxy, /\/internal\/provider\/profile/);
 assert.match(providerProxy, /Authorization: `Bearer \$\{token\}`/);
+assert.match(adminProxy, /const PROFILE_PATTERN/);
+assert.match(adminProxy, /url\.pathname\.match\(PROFILE_PATTERN\)/);
 assert.match(adminProxy, /DEV_ADMIN_TOKEN/);
-assert.match(adminProxy, /\/internal\/admin\/provider-profiles/);
 
 assert.match(panelHtml, /href="\/proveedor\/perfil\/"/);
 assert.doesNotMatch(panelHtml, />Próximamente</);
