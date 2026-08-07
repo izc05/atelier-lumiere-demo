@@ -161,6 +161,36 @@ function revealProviderSections() {
     byId(id).hidden = false;
   }
 }
+function operationalText(value) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+function setOperationalCard(cardId, copyId, text) {
+  const copy = operationalText(text);
+  if (!copy) return false;
+  byId(copyId).textContent = copy;
+  byId(cardId).hidden = false;
+  return true;
+}
+function hydrateProviderOperations(provider) {
+  const preparationVisible = setOperationalCard(
+    "provider-preparation-card",
+    "provider-preparation-note",
+    provider.preparationNote
+  );
+  const shippingVisible = setOperationalCard(
+    "provider-shipping-card",
+    "provider-shipping-note",
+    provider.shippingNote
+  );
+  const customVisible = setOperationalCard(
+    "provider-custom-card",
+    "provider-custom-note",
+    provider.acceptsCustomRequests
+      ? "Este taller acepta encargos personalizados. Los detalles, plazos y posibilidades se concretan según la pieza elegida."
+      : null
+  );
+  byId("provider-operations").hidden = !(preparationVisible || shippingVisible || customVisible);
+}
 function configureProviderMedia(image, media, options = {}) {
   if (!media?.path || !window.AtelierImages?.configure) return false;
   return window.AtelierImages.configure(image, {
@@ -254,12 +284,10 @@ function hydrateProvider(provider) {
   if (provider.acceptsCustomRequests) {
     byId("provider-bespoke-copy").textContent = "Este taller está abierto a encargos personalizados. Explora la colección y entra en la pieza más cercana a tu idea para consultar opciones y tiempos.";
   }
-  if (provider.preparationNote) {
-    byId("collection-note").textContent += ` ${provider.preparationNote}`;
-  }
   if (provider.locationLabel) {
     byId("provider-footer-copy").textContent = `${displayName} · ${provider.locationLabel} · Selección Atelier Lumière`;
   }
+  hydrateProviderOperations(provider);
   hydrateProviderVisuals(provider, displayName);
 }
 async function load() {
