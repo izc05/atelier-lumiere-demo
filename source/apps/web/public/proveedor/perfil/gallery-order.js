@@ -22,7 +22,7 @@ function renderGalleryOrderControls() {
   if (cards.length !== items.length) return;
 
   cards.forEach((card, index) => {
-    if (card.querySelector(".gallery-order-actions")) return;
+    card.querySelector(".gallery-order-actions")?.remove();
     const item = items[index];
     card.dataset.galleryMediaId = item.id;
 
