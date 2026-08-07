@@ -16,8 +16,9 @@ function providerSlug() {
   const value = new URLSearchParams(window.location.search).get("slug") ?? "";
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : null;
 }
-async function requestCatalog() {
-  const response = await fetch("/internal/catalog/products", { headers: { Accept: "application/json" } });
+async function requestCatalog(rawProviderSlug) {
+  const params = new URLSearchParams({ provider: rawProviderSlug });
+  const response = await fetch(`/internal/catalog/products?${params}`, { headers: { Accept: "application/json" } });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.message || "No se pudo abrir el catálogo.");
   return Array.isArray(payload.products) ? payload.products : [];
@@ -270,14 +271,13 @@ async function load() {
     return;
   }
   try {
-    const products = await requestCatalog();
-    const matching = products.filter((product) => product.provider?.slug === slug);
-    if (matching.length === 0) {
+    const products = await requestCatalog(slug);
+    if (products.length === 0) {
       byId("empty-view").hidden = false;
       return;
     }
-    const provider = matching[0].provider;
-    providerProducts = featuredFirst(matching, provider.featuredProductIds);
+    const provider = products[0].provider;
+    providerProducts = featuredFirst(products, provider.featuredProductIds);
     hydrateProvider(provider);
     revealProviderSections();
     renderProducts();
