@@ -34,34 +34,25 @@ function framingPercent(value, fallback = 50) {
   return Math.min(100, Math.max(0, parsed));
 }
 
-function applyCoverFraming(image, cover) {
+function applyCoverFraming(visual, cover) {
   const focalX = framingPercent(cover?.focalX);
   const focalY = framingPercent(cover?.focalY);
-  image.style.setProperty("width", "100%", "important");
-  image.style.setProperty("height", "100%", "important");
-  image.style.setProperty("display", "block", "important");
-  image.style.setProperty("object-fit", "cover", "important");
-  image.style.setProperty("object-position", `${focalX}% ${focalY}%`, "important");
+  const source = window.AtelierImages.variantUrl(cover?.path, 640);
+  if (!source) return false;
+  visual.textContent = "";
+  visual.style.backgroundImage = `url(${JSON.stringify(source)})`;
+  visual.style.backgroundSize = "cover";
+  visual.style.backgroundRepeat = "no-repeat";
+  visual.style.backgroundPosition = `${focalX}% ${focalY}%`;
+  visual.setAttribute("role", "img");
+  visual.setAttribute("aria-label", cover?.altText || "Pieza artesanal");
+  return true;
 }
 
 function card(product) {
   const article = element("article", "product-card");
   const visual = element("div", "product-image", "Pieza artesanal");
-  if (product.cover?.path) {
-    const image = document.createElement("img");
-    window.AtelierImages.configure(image, {
-      path: product.cover.path,
-      alt: product.cover.altText || product.name,
-      width: product.cover.width,
-      height: product.cover.height,
-      sizes: "(max-width: 700px) calc(100vw - 44px), (max-width: 980px) 50vw, 390px",
-      loading: "lazy",
-      priority: "low",
-      defaultWidth: 640
-    });
-    applyCoverFraming(image, product.cover);
-    visual.replaceChildren(image);
-  }
+  if (product.cover?.path) applyCoverFraming(visual, product.cover);
 
   const body = element("div", "product-body");
   const providerLink = element("a", "provider provider-link", product.provider.displayName);
