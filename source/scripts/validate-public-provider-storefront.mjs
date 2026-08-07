@@ -5,10 +5,11 @@ const paths = [
   "apps/web/public/taller/index.html",
   "apps/web/public/taller/provider.css",
   "apps/web/public/taller/provider.js",
-  "apps/web/public/tienda/store.js"
+  "apps/web/public/tienda/store.js",
+  "apps/api/src/public-catalog-service.mjs"
 ];
 
-const [html, css, providerJs, storeJs] = await Promise.all(paths.map((path) =>
+const [html, css, providerJs, storeJs, catalogService] = await Promise.all(paths.map((path) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8")
 ));
 
@@ -22,7 +23,11 @@ assert.doesNotMatch(html, /\sstyle=/i);
 assert.doesNotMatch(html, /<script[^>]*>[^<]/i);
 
 assert.match(providerJs, /\/internal\/catalog\/products/);
-assert.match(providerJs, /product\.provider\?\.slug === slug/);
+assert.match(providerJs, /URLSearchParams\(\{ provider: rawProviderSlug \}\)/);
+assert.match(providerJs, /requestCatalog\(slug\)/);
+assert.match(providerJs, /featuredFirst\(products, provider\.featuredProductIds\)/);
+assert.doesNotMatch(providerJs, /product\.provider\?\.slug === slug/);
+assert.match(catalogService, /provider\.slug = \$4/);
 assert.match(providerJs, /replaceChildren/);
 assert.match(providerJs, /textContent/);
 assert.match(providerJs, /AtelierCart\.wireCount/);
@@ -35,4 +40,4 @@ assert.doesNotMatch(storeJs, /innerHTML/);
 assert.match(css, /\.provider-hero/);
 assert.match(css, /@media\(max-width:760px\)/);
 
-console.log("Escaparate público del taller validado.");
+console.log("Escaparate público del taller validado con filtro SQL por proveedor.");
