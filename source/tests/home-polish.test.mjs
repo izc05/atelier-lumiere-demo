@@ -16,6 +16,9 @@ test("el pulido de HOME se inyecta una sola vez", () => {
 test("el pulido solo cambia presentación y conserva el hero real", () => {
   assert.match(polish, /#home-hero/);
   assert.match(polish, /atelier-header-logo/);
+  assert.match(polish, /hero-editorial-visual/);
+  assert.match(polish, /position:\s*absolute/);
+  assert.match(polish, /width:\s*min\(47vw, 900px\)/);
   assert.doesNotMatch(polish, /Brisa y Azahar|Tierra Serena|El Taller de Lucía/);
 });
 
