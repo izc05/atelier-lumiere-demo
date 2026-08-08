@@ -8,6 +8,7 @@ const PREMIUM_STYLESHEET = '<link rel="stylesheet" href="/premium-ui.css">';
 const PREMIUM_SCRIPT = '<script src="/premium-ui.js" defer></script>';
 const BRAND_NAV_STYLESHEET = '<link rel="stylesheet" href="/public-brand-nav.css">';
 const BRAND_NAV_SCRIPT = '<script src="/public-brand-nav.js" defer></script>';
+const EDITORIAL_STYLESHEET = '<link rel="stylesheet" href="/atelier-editorial.css">';
 
 export function injectPremiumAssets(source) {
   let html = String(source ?? "");
@@ -26,6 +27,9 @@ export function injectPremiumAssets(source) {
   }
   if (!html.includes('src="/public-brand-nav.js"')) {
     html = html.replace("</head>", `  ${BRAND_NAV_SCRIPT}\n</head>`);
+  }
+  if (!html.includes('href="/atelier-editorial.css"')) {
+    html = html.replace("</head>", `  ${EDITORIAL_STYLESHEET}\n</head>`);
   }
   return html;
 }
