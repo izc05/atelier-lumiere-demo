@@ -141,6 +141,72 @@ function collectWorkshops(products) {
   return Array.from(workshops.values()).slice(0, 3);
 }
 
+function workshopPrimaryMedia(entry) {
+  return entry?.provider?.cover
+    || entry?.provider?.gallery?.[0]
+    || entry?.products?.find((product) => product.cover?.path)?.cover
+    || null;
+}
+
+function workshopDetailMedia(entry, primaryPath) {
+  const candidates = [
+    ...(Array.isArray(entry?.provider?.gallery) ? entry.provider.gallery : []),
+    ...(Array.isArray(entry?.products) ? entry.products.map((product) => product.cover) : [])
+  ].filter((media) => media?.path && media.path !== primaryPath);
+  return candidates[0] || null;
+}
+
+function hydrateHero(products) {
+  const workshops = collectWorkshops(products);
+  if (workshops.length === 0) return;
+
+  const primaryWorkshop = workshops.find((entry) => workshopPrimaryMedia(entry)) || workshops[0];
+  const provider = primaryWorkshop.provider || {};
+  const displayName = provider.displayName || "Taller invitado";
+  const primaryMedia = workshopPrimaryMedia(primaryWorkshop);
+  let detailMedia = workshopDetailMedia(primaryWorkshop, primaryMedia?.path);
+
+  if (!detailMedia) {
+    for (const entry of workshops) {
+      if (entry === primaryWorkshop) continue;
+      const candidate = workshopPrimaryMedia(entry);
+      if (candidate?.path && candidate.path !== primaryMedia?.path) {
+        detailMedia = candidate;
+        break;
+      }
+    }
+  }
+
+  const mainImage = byId("hero-main-image");
+  if (mainImage && configureImage(mainImage, primaryMedia, {
+    alt: primaryMedia?.altText || `Interior o proceso creativo de ${displayName}`,
+    sizes: "(max-width: 780px) calc(100vw - 44px), (max-width: 1200px) 54vw, 760px",
+    loading: "eager",
+    priority: "high",
+    defaultWidth: 1100
+  })) {
+    mainImage.hidden = false;
+    byId("hero-main-placeholder").hidden = true;
+  }
+
+  const detailImage = byId("hero-detail-image");
+  if (detailImage && configureImage(detailImage, detailMedia, {
+    alt: detailMedia?.altText || `Detalle artesanal de ${displayName}`,
+    sizes: "(max-width: 780px) 38vw, 320px",
+    loading: "eager",
+    priority: "high",
+    defaultWidth: 520
+  })) {
+    detailImage.hidden = false;
+    byId("hero-detail-placeholder").hidden = true;
+  }
+
+  byId("hero-workshop-name").textContent = displayName;
+  const workshopLink = byId("hero-workshop-link");
+  workshopLink.href = `/taller/?slug=${encodeURIComponent(provider.slug || "")}`;
+  workshopLink.setAttribute("aria-label", `Conocer el taller ${displayName}`);
+}
+
 function renderWorkshops(products) {
   const loading = byId("atelier-loading");
   const view = byId("atelier-grid");
@@ -186,6 +252,7 @@ async function requestCatalog() {
 async function loadHomeContent() {
   try {
     const products = await requestCatalog();
+    hydrateHero(products);
     renderWorkshops(products);
     renderFeaturedProducts(products);
   } catch {
@@ -220,6 +287,34 @@ function setupScrollReveal() {
   for (const target of targets) observer.observe(target);
 }
 
+function setupHeroMotion() {
+  const hero = byId("home-hero");
+  if (!hero) return;
+
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  const finePointer = window.matchMedia?.("(pointer: fine)")?.matches;
+  if (reducedMotion || !finePointer) return;
+
+  let frame = 0;
+  const render = () => {
+    frame = 0;
+    const rect = hero.getBoundingClientRect();
+    const height = Math.max(hero.offsetHeight, 1);
+    const progress = Math.min(1, Math.max(0, -rect.top / height));
+    hero.style.setProperty("--hero-main-shift", `${progress * 28}px`);
+    hero.style.setProperty("--hero-detail-shift", `${progress * -22}px`);
+    hero.style.setProperty("--hero-copy-shift", `${progress * 14}px`);
+  };
+  const schedule = () => {
+    if (frame) return;
+    frame = window.requestAnimationFrame(render);
+  };
+
+  render();
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule, { passive: true });
+}
+
 function setupCartCount() {
   const count = byId("cart-count");
   if (count && window.AtelierCart?.wireCount) {
@@ -229,4 +324,5 @@ function setupCartCount() {
 
 setupCartCount();
 setupScrollReveal();
+setupHeroMotion();
 void loadHomeContent();
