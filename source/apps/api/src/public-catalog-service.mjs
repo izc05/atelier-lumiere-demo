@@ -74,6 +74,10 @@ function providerSummary(row) {
     acceptsCustomRequests: Boolean(profile.acceptsCustomRequests),
     featuredProductIds,
     profileRevision: row.provider_profile_revision ? Number(row.provider_profile_revision) : null,
+    publishedAt: row.provider_profile_published_at || null,
+    publishedProductCount: row.published_product_count === undefined
+      ? null
+      : Number(row.published_product_count || 0),
     logo: media.logo,
     cover: media.cover,
     gallery: media.gallery
@@ -154,6 +158,7 @@ export function createPublicCatalogService({ database, storage } = {}) {
              provider.display_name AS provider_display_name,
              provider.specialty AS provider_specialty,
              profile_publication.revision AS provider_profile_revision,
+             profile_publication.published_at AS provider_profile_published_at,
              profile_publication.snapshot AS provider_profile_snapshot,
              cover.id AS cover_media_id,
              cover.alt_text AS cover_alt_text,
@@ -211,6 +216,55 @@ export function createPublicCatalogService({ database, storage } = {}) {
       });
     },
 
+    async listProviders({ query, specialty, customOnly = false, limit = 100 } = {}) {
+      const search = cleanQuery(query, 160);
+      const selectedSpecialty = cleanQuery(specialty, 120);
+      const selectedLimit = Number.isInteger(limit) ? Math.min(Math.max(limit, 1), 100) : 100;
+
+      return database.withContext(PUBLIC_CONTEXT, async (transaction) => {
+        const result = await transaction.query(
+          `SELECT
+             provider.slug AS provider_slug,
+             provider.display_name AS provider_display_name,
+             provider.specialty AS provider_specialty,
+             publication.revision AS provider_profile_revision,
+             publication.published_at AS provider_profile_published_at,
+             publication.snapshot AS provider_profile_snapshot,
+             (
+               SELECT COUNT(*)::int
+               FROM products product
+               WHERE product.provider_id = provider.id
+                 AND product.status = 'PUBLISHED'
+             ) AS published_product_count
+           FROM provider_profile_publications publication
+           INNER JOIN providers provider ON provider.id = publication.provider_id
+           WHERE provider.status = 'ACTIVE'
+             AND (
+               $1::text = ''
+               OR provider.display_name ILIKE '%' || $1 || '%'
+               OR COALESCE(publication.snapshot ->> 'displayName', '') ILIKE '%' || $1 || '%'
+               OR COALESCE(publication.snapshot ->> 'specialty', '') ILIKE '%' || $1 || '%'
+               OR COALESCE(publication.snapshot ->> 'tagline', '') ILIKE '%' || $1 || '%'
+               OR COALESCE(publication.snapshot ->> 'locationLabel', '') ILIKE '%' || $1 || '%'
+               OR COALESCE(publication.snapshot -> 'materials', '[]'::jsonb)::text ILIKE '%' || $1 || '%'
+               OR COALESCE(publication.snapshot -> 'techniques', '[]'::jsonb)::text ILIKE '%' || $1 || '%'
+             )
+             AND (
+               $2::text = ''
+               OR COALESCE(publication.snapshot ->> 'specialty', provider.specialty, '') ILIKE '%' || $2 || '%'
+             )
+             AND (
+               NOT $3::boolean
+               OR COALESCE(publication.snapshot ->> 'acceptsCustomRequests', 'false') = 'true'
+             )
+           ORDER BY COALESCE(publication.snapshot ->> 'displayName', provider.display_name), provider.slug
+           LIMIT $4`,
+          [search, selectedSpecialty, Boolean(customOnly), selectedLimit]
+        );
+        return result.rows.map(providerSummary);
+      });
+    },
+
     async get(rawProviderSlug, rawProductSlug) {
       const providerSlug = slug(rawProviderSlug, "providerSlug");
       const productSlug = slug(rawProductSlug, "productSlug");
@@ -222,6 +276,7 @@ export function createPublicCatalogService({ database, storage } = {}) {
              provider.display_name AS provider_display_name,
              provider.specialty AS provider_specialty,
              profile_publication.revision AS provider_profile_revision,
+             profile_publication.published_at AS provider_profile_published_at,
              profile_publication.snapshot AS provider_profile_snapshot,
              cover.id AS cover_media_id,
              cover.alt_text AS cover_alt_text,
