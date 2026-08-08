@@ -1,11 +1,18 @@
 /* Atelier Lumière · sistema editorial y microinteracciones públicas optimizado. */
 :root {
-  --atelier-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, "Times New Roman", serif;
+  --atelier-display: "Iowan Old Style", Baskerville, "Baskerville Old Face", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, "Times New Roman", serif;
   --atelier-text: "Avenir Next", Avenir, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --atelier-wine: #59101f;
   --atelier-wine-dark: #2f0712;
   --atelier-gold: #b7954f;
   --atelier-ivory: #fff8e9;
+}
+
+body {
+  font-family: var(--atelier-text) !important;
+  font-size: .975rem;
+  line-height: 1.62;
+  letter-spacing: .004em;
 }
 
 .hero-section h1,
@@ -21,6 +28,7 @@
 .workshop-card h3,
 .product-card h3 {
   font-family: var(--atelier-display) !important;
+  font-weight: 400 !important;
   text-wrap: balance;
 }
 
@@ -29,7 +37,51 @@
 .workshops-hero h1,
 .provider-hero h1,
 .product-hero h1,
-.article-head h1 { letter-spacing: -.052em !important; }
+.article-head h1 {
+  letter-spacing: -.028em !important;
+  line-height: .96 !important;
+}
+
+/* Jerarquía más contenida: la fotografía vuelve a compartir protagonismo con el texto. */
+#home-hero .hero-copy h1 {
+  max-width: 10ch;
+  font-size: clamp(3.9rem, 5.35vw, 6.35rem) !important;
+  line-height: .91 !important;
+}
+
+.hero h1,
+.workshops-hero h1,
+.provider-hero h1,
+.product-hero h1,
+.article-head h1 {
+  font-size: clamp(3.15rem, 4.7vw, 5.2rem) !important;
+}
+
+.section-heading h2,
+.commission-intro h2,
+.home-stories-heading h2,
+.closing-section h2 {
+  font-size: clamp(2.65rem, 3.75vw, 4.15rem) !important;
+  line-height: 1 !important;
+  letter-spacing: -.024em !important;
+}
+
+.workshop-card h3,
+.featured-grid .product-card h3,
+.product-card h3 {
+  font-size: clamp(1.48rem, 1.65vw, 1.78rem) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -.018em !important;
+}
+
+.hero-lead,
+.lead,
+.workshops-hero .lead,
+.provider-hero .lead,
+.article-head .lead {
+  font-size: clamp(.96rem, 1.05vw, 1.08rem) !important;
+  line-height: 1.68 !important;
+}
 
 .eyebrow,
 [data-public-navigation],
@@ -43,7 +95,31 @@
   font-feature-settings: "kern" 1, "liga" 1;
 }
 
-.eyebrow { letter-spacing: .22em !important; }
+.eyebrow {
+  font-size: .64rem !important;
+  letter-spacing: .24em !important;
+}
+
+[data-public-navigation] a,
+.button,
+.public-menu-toggle,
+.bag-link {
+  font-size: .69rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .135em !important;
+}
+
+.button {
+  min-height: 46px !important;
+  padding-inline: 22px !important;
+}
+
+.product-provider,
+.workshop-location,
+.workshop-card-action {
+  font-size: .64rem !important;
+  letter-spacing: .12em !important;
+}
 
 @media (min-width: 761px) {
   [data-public-navigation] a { position: relative; }
@@ -137,12 +213,47 @@
 .js[data-motion="full"] [data-public-reveal].is-visible { transform: none; }
 
 @media (max-width: 760px) {
-  .hero-section h1,
+  body {
+    font-size: .94rem;
+    line-height: 1.58;
+  }
+
+  #home-hero .hero-copy h1 {
+    max-width: 9ch;
+    font-size: clamp(2.95rem, 12.5vw, 4.15rem) !important;
+    line-height: .94 !important;
+  }
+
   .hero h1,
   .workshops-hero h1,
   .provider-hero h1,
   .product-hero h1,
-  .article-head h1 { letter-spacing: -.043em !important; }
+  .article-head h1 {
+    font-size: clamp(2.65rem, 10.5vw, 3.75rem) !important;
+    letter-spacing: -.026em !important;
+  }
+
+  .section-heading h2,
+  .commission-intro h2,
+  .home-stories-heading h2,
+  .closing-section h2 {
+    font-size: clamp(2.25rem, 9.6vw, 3.15rem) !important;
+  }
+
+  .workshop-card h3,
+  .featured-grid .product-card h3,
+  .product-card h3 {
+    font-size: 1.5rem !important;
+  }
+
+  .eyebrow { font-size: .6rem !important; }
+
+  [data-public-navigation] a,
+  .button,
+  .public-menu-toggle,
+  .bag-link {
+    font-size: .66rem !important;
+  }
 
   /* En móvil priorizamos respuesta inmediata frente a animación decorativa. */
   .js[data-motion="full"] [data-public-reveal] {
