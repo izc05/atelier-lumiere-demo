@@ -53,15 +53,14 @@
     if (opening) return;
     opening = true;
     sessionSet();
-    document.body.classList.add("brand-entry-opening");
     entry.classList.add("is-opening");
 
-    const delay = reducedMotion.matches ? 30 : 1240;
+    const delay = reducedMotion.matches ? 20 : 590;
     window.setTimeout(() => {
       entry.hidden = true;
       entry.removeAttribute("aria-modal");
       setBackgroundInert(false);
-      document.body.classList.remove("brand-entry-active", "brand-entry-opening");
+      document.body.classList.remove("brand-entry-active");
       document.getElementById("main-content")?.focus({ preventScroll: true });
     }, delay);
   };
