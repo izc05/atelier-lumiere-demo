@@ -1,0 +1,216 @@
+/* Atelier Lumière · Entrada de marca integrada en la HOME real. */
+
+.brand-entry {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #fff9ee;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(129, 37, 61, .56), transparent 34rem),
+    linear-gradient(145deg, #2f0712 0%, #4b1020 56%, #2a0710 100%);
+  isolation: isolate;
+}
+
+.brand-entry[hidden] { display: none; }
+
+.brand-entry::before {
+  content: "AL";
+  position: absolute;
+  z-index: -2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -53%);
+  color: transparent;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: min(63vw, 860px);
+  font-weight: 400;
+  letter-spacing: -.11em;
+  line-height: .74;
+  -webkit-text-stroke: 1px rgba(226, 194, 121, .13);
+  opacity: .92;
+  pointer-events: none;
+}
+
+.brand-entry::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.025) 50%, transparent),
+    radial-gradient(circle at 50% 50%, transparent 0 32%, rgba(26, 4, 10, .26) 74%, rgba(20, 3, 8, .56) 100%);
+  pointer-events: none;
+}
+
+.brand-entry-inner {
+  display: grid;
+  width: min(92vw, 760px);
+  justify-items: center;
+  padding: 42px 24px;
+  text-align: center;
+  will-change: transform, opacity;
+  transition:
+    transform 900ms cubic-bezier(.2,.72,.14,1),
+    opacity 430ms ease;
+}
+
+.brand-entry-logo {
+  display: block;
+  width: min(76vw, 560px);
+  max-height: 44vh;
+  filter: drop-shadow(0 22px 50px rgba(12, 1, 5, .22));
+}
+
+.brand-entry-copy {
+  max-width: 520px;
+  margin: 16px 0 0;
+  color: rgba(255, 249, 238, .78);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.65;
+}
+
+.brand-entry-action {
+  position: relative;
+  display: inline-flex;
+  min-width: 220px;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 30px;
+  padding: 14px 28px;
+  border: 1px solid rgba(230, 199, 123, .72);
+  border-radius: 0;
+  background: transparent;
+  color: #fff9ee;
+  font: 800 .71rem/1 Arial, sans-serif;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 240ms ease, color 240ms ease, transform 240ms ease;
+}
+
+.brand-entry-action::after {
+  content: "→";
+  color: #e5c879;
+  font-size: 1rem;
+  transition: transform 240ms ease;
+}
+
+.brand-entry-action:hover,
+.brand-entry-action:focus-visible {
+  background: #fff9ee;
+  color: #4b1020;
+}
+
+.brand-entry-action:hover::after,
+.brand-entry-action:focus-visible::after { transform: translateX(5px); }
+.brand-entry-action:active { transform: scale(.985); }
+
+.brand-entry-action:focus-visible {
+  outline: 2px solid #e5c879;
+  outline-offset: 5px;
+}
+
+.brand-entry-hint {
+  position: absolute;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  color: rgba(255, 249, 238, .52);
+  font: 700 .6rem/1 Arial, sans-serif;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+body.brand-entry-active {
+  overflow: hidden;
+}
+
+body.brand-entry-active > .site-header,
+body.brand-entry-active > main,
+body.brand-entry-active > .site-footer {
+  transform: scale(1.018);
+  filter: blur(13px) saturate(.84);
+  opacity: .62;
+  transition:
+    transform 980ms cubic-bezier(.2,.72,.14,1),
+    filter 980ms ease,
+    opacity 720ms ease;
+}
+
+body.brand-entry-opening > .site-header,
+body.brand-entry-opening > main,
+body.brand-entry-opening > .site-footer {
+  transform: scale(1);
+  filter: blur(0) saturate(1);
+  opacity: 1;
+}
+
+.brand-entry.is-opening {
+  background-color: transparent;
+  animation: brandEntryCurtainAway 1050ms cubic-bezier(.2,.72,.14,1) forwards;
+}
+
+.brand-entry.is-opening .brand-entry-inner {
+  transform: translateY(-23vh) scale(.58);
+  opacity: 0;
+}
+
+.brand-entry.is-opening .brand-entry-hint { opacity: 0; }
+
+@keyframes brandEntryCurtainAway {
+  0% { opacity: 1; backdrop-filter: blur(0); }
+  62% { opacity: .9; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@media (max-width: 720px) {
+  .brand-entry::before {
+    font-size: min(105vw, 560px);
+    transform: translate(-50%, -57%);
+  }
+
+  .brand-entry-inner {
+    width: 100%;
+    padding-inline: 22px;
+  }
+
+  .brand-entry-logo {
+    width: min(92vw, 480px);
+    max-height: 40vh;
+  }
+
+  .brand-entry-copy {
+    max-width: 340px;
+    margin-top: 10px;
+  }
+
+  .brand-entry-action {
+    width: min(82vw, 320px);
+    margin-top: 26px;
+  }
+
+  .brand-entry.is-opening .brand-entry-inner {
+    transform: translateY(-18vh) scale(.66);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-entry,
+  .brand-entry-inner,
+  .brand-entry-action,
+  body.brand-entry-active > .site-header,
+  body.brand-entry-active > main,
+  body.brand-entry-active > .site-footer {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+
+  .brand-entry.is-opening { opacity: 0; visibility: hidden; }
+}
