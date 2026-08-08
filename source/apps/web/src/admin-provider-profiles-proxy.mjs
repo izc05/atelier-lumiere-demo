@@ -1,11 +1,34 @@
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
+// DEV_ADMIN_TOKEN queda reservado al API; este proxy usa exclusivamente la sesión administrativa HttpOnly.
+const ADMIN_SESSION_COOKIE = "atelier_admin_session";
 const PROFILE_PATTERN = /^\/internal\/admin\/provider-profiles(?:\/([0-9a-f-]{36})(?:\/(review|publish|media)(?:\/([0-9a-f-]{36})\/(preview))?)?)?$/i;
 const SAFE_RESPONSE_HEADERS = new Set([
   "content-type", "content-length", "content-disposition", "accept-ranges", "content-range",
   "cache-control", "x-content-type-options", "content-security-policy", "cross-origin-resource-policy"
 ]);
+
+function parseCookies(header) {
+  const cookies = new Map();
+  for (const part of String(header ?? "").split(";")) {
+    const separator = part.indexOf("=");
+    if (separator < 1) continue;
+    try {
+      cookies.set(
+        part.slice(0, separator).trim(),
+        decodeURIComponent(part.slice(separator + 1).trim())
+      );
+    } catch {
+      // Se ignoran cookies mal formadas.
+    }
+  }
+  return cookies;
+}
+
+function adminSessionToken(request) {
+  return parseCookies(request.headers.cookie).get(ADMIN_SESSION_COOKIE) ?? null;
+}
 
 function securityHeaders(extra = {}) {
   return {
@@ -69,15 +92,11 @@ function routeAllows(method, match) {
 export function createAdminProviderProfilesWebHandler({
   baseHandler,
   apiInternalUrl = process.env.API_INTERNAL_URL ?? "http://localhost:4000",
-  apiAdminToken = process.env.DEV_ADMIN_TOKEN,
   enableAdminUi = process.env.ENABLE_ADMIN_UI === "true",
   fetchImpl = fetch,
   logger = console
 } = {}) {
   if (typeof baseHandler !== "function") throw new TypeError("Se necesita un handler base.");
-  if (enableAdminUi && (typeof apiAdminToken !== "string" || apiAdminToken.length < 32)) {
-    throw new TypeError("DEV_ADMIN_TOKEN debe estar configurado para revisar perfiles.");
-  }
   const apiBase = new URL(apiInternalUrl);
 
   return async function adminProviderProfilesWebHandler(request, response) {
@@ -87,7 +106,8 @@ export function createAdminProviderProfilesWebHandler({
       if (!enableAdminUi) return sendNotFound(response);
       const method = request.method ?? "GET";
       if (!routeAllows(method, match)) return sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." });
-      if (!(await adminSessionIsActive(baseHandler, request))) {
+      const sessionToken = adminSessionToken(request);
+      if (!sessionToken || !(await adminSessionIsActive(baseHandler, request))) {
         return sendJson(response, 401, { error: "UNAUTHORIZED", message: "La sesión administrativa ha caducado." });
       }
 
@@ -100,7 +120,7 @@ export function createAdminProviderProfilesWebHandler({
           method,
           headers: {
             Accept: request.headers.accept ?? (isPreview ? "*/*" : "application/json"),
-            Authorization: `Bearer ${apiAdminToken}`,
+            Authorization: `Bearer ${sessionToken}`,
             ...(hasBody ? { "Content-Type": "application/json" } : {}),
             ...(request.headers.range ? { Range: request.headers.range } : {}),
             "User-Agent": String(request.headers["user-agent"] ?? "").slice(0, 500)
@@ -125,7 +145,7 @@ export function createAdminProviderProfilesWebHandler({
     if (["GET", "HEAD"].includes(request.method ?? "GET")
       && (url.pathname === "/admin/talleres" || url.pathname === "/admin/talleres/")) {
       if (!enableAdminUi) return sendNotFound(response);
-      if (!(await adminSessionIsActive(baseHandler, request))) {
+      if (!adminSessionToken(request) || !(await adminSessionIsActive(baseHandler, request))) {
         response.writeHead(302, securityHeaders({ Location: "/admin/proveedores/" }));
         response.end();
         return;
