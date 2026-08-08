@@ -2,6 +2,120 @@
  * Solo presentación: marca, navegación y composición del hero.
  */
 
+/* En la portada el fondo es burdeos: usamos la variante clara del logo real. */
+.site-header .atelier-brand-link {
+  width: clamp(270px, 18vw, 370px);
+  min-height: 76px;
+  background-image: url("/assets/brand/atelier-logo-v2-horizontal-light.svg");
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter: drop-shadow(0 3px 14px rgba(18, 2, 7, .28));
+}
+
+.site-header .atelier-header-logo {
+  width: 100% !important;
+  height: auto;
+  opacity: 0;
+}
+
+/* Las piezas deben sentirse como selección de catálogo, no como fotografías gigantes. */
+.featured-grid .product-visual {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(184, 148, 79, .13), transparent 34%),
+    #f7efe3;
+}
+
+.featured-grid .product-visual img {
+  object-fit: contain !important;
+  object-position: center;
+  padding: clamp(10px, 1.1vw, 18px);
+}
+
+@media (min-width: 981px) {
+  /* Tres piezas: mantenemos jerarquía editorial, pero sin una foto desproporcionada. */
+  .featured-grid:not(:has(> .product-card:nth-child(2):last-child)):not(:has(> .product-card:first-child:last-child)) {
+    grid-template-rows: repeat(2, minmax(220px, 1fr));
+  }
+
+  .featured-grid:not(:has(> .product-card:nth-child(2):last-child)):not(:has(> .product-card:first-child:last-child)) .product-card:first-child {
+    grid-template-rows: minmax(400px, 400px) auto auto auto;
+  }
+
+  .featured-grid:not(:has(> .product-card:nth-child(2):last-child)):not(:has(> .product-card:first-child:last-child)) .product-card:first-child .product-visual {
+    min-height: 400px;
+    height: 400px;
+  }
+
+  /* Dos piezas: dos columnas iguales. No hay una pieza gigante por falta de una tercera. */
+  .featured-grid:has(> .product-card:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+    gap: 22px;
+    max-width: 1240px;
+  }
+
+  .featured-grid:has(> .product-card:nth-child(2):last-child) > .product-card {
+    grid-column: auto;
+    grid-row: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 350px auto auto auto;
+    padding: 0 26px 24px;
+  }
+
+  .featured-grid:has(> .product-card:nth-child(2):last-child) > .product-card .product-visual {
+    grid-column: 1;
+    grid-row: 1;
+    height: 350px;
+    min-height: 350px;
+    margin: 0 -26px;
+  }
+
+  .featured-grid:has(> .product-card:nth-child(2):last-child) > .product-card .product-provider,
+  .featured-grid:has(> .product-card:nth-child(2):last-child) > .product-card h3,
+  .featured-grid:has(> .product-card:nth-child(2):last-child) > .product-card .product-meta {
+    grid-column: 1;
+    grid-row: auto;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .featured-grid:has(> .product-card:nth-child(2):last-child) > .product-card .product-provider {
+    margin-top: 22px;
+  }
+
+  .featured-grid:has(> .product-card:nth-child(2):last-child) > .product-card h3 {
+    margin-top: 8px;
+    font-size: clamp(1.8rem, 2.2vw, 2.45rem);
+    line-height: 1.02;
+  }
+
+  .featured-grid:has(> .product-card:nth-child(2):last-child) > .product-card .product-meta {
+    align-self: end;
+    margin-top: 18px;
+    margin-bottom: 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* Una sola pieza: centrada y contenida mientras llega el resto de la colección. */
+  .featured-grid:has(> .product-card:first-child:last-child) {
+    grid-template-columns: minmax(0, 760px);
+    grid-template-rows: auto;
+  }
+
+  .featured-grid:has(> .product-card:first-child:last-child) > .product-card:first-child {
+    grid-row: auto;
+    grid-template-rows: 390px auto auto auto;
+  }
+
+  .featured-grid:has(> .product-card:first-child:last-child) > .product-card:first-child .product-visual {
+    min-height: 390px;
+    height: 390px;
+  }
+}
+
 @media (min-width: 1100px) {
   #home-hero.hero-editorial {
     display: block;
@@ -84,9 +198,12 @@
 }
 
 @media (min-width: 761px) {
+  .site-header .atelier-brand-link {
+    width: clamp(285px, 18vw, 380px);
+  }
+
   .site-header .atelier-header-logo {
-    width: clamp(265px, 18vw, 350px);
-    max-height: 76px;
+    max-height: 82px;
   }
 
   .site-header .main-nav {
@@ -129,13 +246,27 @@
 }
 
 @media (max-width: 780px) {
+  .site-header .atelier-brand-link {
+    width: clamp(180px, 52vw, 220px);
+    min-height: 56px;
+  }
+
   .site-header .atelier-header-logo {
-    width: clamp(170px, 50vw, 210px);
     max-height: 54px;
   }
 
   #home-hero.hero-editorial {
     display: grid;
+  }
+
+  .featured-grid .product-card:first-child,
+  .featured-grid .product-card:nth-child(n + 2) {
+    grid-template-rows: minmax(260px, 66vw) auto auto auto;
+  }
+
+  .featured-grid .product-card:first-child .product-visual,
+  .featured-grid .product-card:nth-child(n + 2) .product-visual {
+    min-height: 260px;
   }
 }
 
