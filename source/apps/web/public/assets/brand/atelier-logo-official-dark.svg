@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 128" role="img" aria-labelledby="title desc">
+  <title id="title">Atelier Lumière</title>
+  <desc id="desc">Logo oficial horizontal de Atelier Lumière con monograma AL e hilo dorado.</desc>
+  <g fill="none" fill-rule="evenodd">
+    <g transform="translate(8 8)">
+      <text x="10" y="78" fill="#59101F" font-family="Georgia, 'Times New Roman', serif" font-size="82" font-weight="400" letter-spacing="-6">A</text>
+      <text x="57" y="83" fill="#59101F" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-weight="400">L</text>
+      <path d="M18 87C34 73 49 75 59 89C69 103 91 108 117 97C136 89 151 90 170 100" stroke="#B7954F" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M18 88C6 97 6 108 17 111C28 114 37 105 33 98" stroke="#B7954F" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M169 100C183 101 193 107 190 115C187 122 177 124 169 118" stroke="#B7954F" stroke-width="1.6" stroke-linecap="round"/>
+    </g>
+    <path d="M205 23V105" stroke="#CBB890" stroke-width="1.2"/>
+    <text x="235" y="52" fill="#7B3544" font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="8.5">ATELIER</text>
+    <text x="232" y="91" fill="#59101F" font-family="Georgia, 'Times New Roman', serif" font-size="43" font-weight="400" letter-spacing="2.2">LUMIÈRE</text>
+  </g>
+</svg>
