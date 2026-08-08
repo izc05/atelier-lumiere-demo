@@ -9,11 +9,16 @@
   <meta name="description" content="Piezas artesanales seleccionadas para bodas, comuniones, nacimientos y celebraciones especiales.">
   <title>Atelier Lumière · Artesanía para celebrar</title>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/home-editorial.css">
+  <link rel="stylesheet" href="/home-featured.css">
+  <link rel="stylesheet" href="/home-commissions.css">
+  <link rel="stylesheet" href="/home-stories.css">
   <link rel="stylesheet" href="/tienda/cart.css">
   <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
   <script defer src="/public-shell.js"></script>
   <script defer src="/home.js"></script>
+  <script defer src="/home-stories.js"></script>
   <link rel="stylesheet" href="/premium-ui.css">
   <script src="/premium-ui.js" defer></script>
 </head>
@@ -25,8 +30,8 @@
       <strong>Lumière</strong>
     </a>
     <nav class="main-nav public-navigation" id="public-navigation" aria-label="Navegación principal" data-public-navigation>
-      <a href="#talleres">Talleres</a>
       <a href="/tienda/">Tienda</a>
+      <a href="/talleres/">Talleres</a>
       <a href="/blog/">Historias</a>
       <a href="/legal/">Legal</a>
       <a href="/proveedor/acceso/">Acceso talleres</a>
@@ -41,15 +46,14 @@
   </header>
 
   <main id="main-content" tabindex="-1">
-    <section class="hero-section" aria-labelledby="hero-title">
-      <div class="hero-thread" aria-hidden="true"></div>
-      <div class="hero-copy">
-        <p class="eyebrow">El hilo de la celebración</p>
+    <section class="hero-section hero-editorial" id="home-hero" aria-labelledby="hero-title">
+      <div class="hero-copy" id="hero-copy">
+        <p class="eyebrow">Atelier Lumière · Artesanía para celebrar</p>
         <h1 id="hero-title">Cada pieza guarda un instante.</h1>
-        <p class="hero-lead">Artesanía seleccionada para bodas, comuniones, nacimientos y momentos que merecen recordarse sin prisas.</p>
+        <p class="hero-lead">Descubre piezas creadas por talleres independientes para bodas, comuniones, nacimientos y momentos que merecen recordarse sin prisas.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="/tienda/">Encontrar una pieza</a>
-          <a class="button button-quiet" href="#como-funciona">Crear algo propio</a>
+          <a class="button button-primary" href="/tienda/">Descubrir la colección</a>
+          <a class="button button-quiet" href="/talleres/">Conocer los talleres</a>
         </div>
         <dl class="hero-facts" aria-label="Compromisos de Atelier Lumière">
           <div><dt>Selección</dt><dd>Talleres invitados</dd></div>
@@ -57,52 +61,42 @@
           <div><dt>Cuidado</dt><dd>Acompañamiento humano</dd></div>
         </dl>
       </div>
-      <div class="hero-composition" aria-label="Composición inspirada en un taller artesanal">
-        <div class="hero-card hero-card-main">
-          <span class="hero-card-label">Pieza 01</span>
-          <div class="hero-object hero-object-fan" aria-hidden="true"></div>
-          <p>Detalles que comienzan en una conversación y terminan formando parte de tu historia.</p>
-        </div>
-        <div class="hero-card hero-card-note">
-          <span>Edición limitada</span>
-          <strong>Hecho despacio</strong>
-        </div>
-        <div class="hero-seal" aria-hidden="true"><span>AL</span></div>
+
+      <div class="hero-composition hero-editorial-visual" id="hero-visual" aria-label="Una mirada al interior de los talleres de Atelier Lumière">
+        <figure class="hero-photo hero-photo-main">
+          <img id="hero-main-image" alt="" hidden>
+          <span class="hero-photo-placeholder" id="hero-main-placeholder" aria-hidden="true">AL</span>
+          <figcaption class="hero-photo-caption"><span>01</span><strong>Dentro del taller</strong></figcaption>
+        </figure>
+        <figure class="hero-photo hero-photo-detail">
+          <img id="hero-detail-image" alt="" hidden>
+          <span class="hero-photo-placeholder hero-photo-placeholder-small" id="hero-detail-placeholder" aria-hidden="true">L</span>
+        </figure>
+        <aside class="hero-workshop-note" id="hero-workshop-note">
+          <span>Taller invitado</span>
+          <strong id="hero-workshop-name">Creado despacio</strong>
+          <a id="hero-workshop-link" href="/talleres/">Conocer el taller →</a>
+        </aside>
+        <div class="hero-seal hero-editorial-seal" aria-hidden="true"><span>AL</span></div>
       </div>
-      <a class="scroll-cue" href="#talleres">Descubrir los talleres <span aria-hidden="true">↓</span></a>
+      <a class="scroll-cue" href="#talleres">Conocer quién lo crea <span aria-hidden="true">↓</span></a>
     </section>
 
     <section class="manifesto-section" id="talleres">
       <div class="section-heading split-heading">
         <div>
-          <p class="eyebrow">Una selección con criterio</p>
-          <h2>Del taller a tu celebración.</h2>
+          <p class="eyebrow">Talleres seleccionados</p>
+          <h2>Conoce quién está detrás de cada pieza.</h2>
         </div>
         <p>No somos un catálogo infinito. Invitamos a creadores independientes cuya técnica, materiales y forma de trabajar merecen ser conocidos.</p>
       </div>
-      <div class="atelier-grid">
-        <article class="atelier-card atelier-card-light">
-          <span class="card-number">01</span>
-          <p class="eyebrow">Materia</p>
-          <h3>Textiles que guardan nombres</h3>
-          <p>Bordados, lino y fibras elegidas para convertirse en recuerdos que puedan tocarse.</p>
-          <a href="/tienda/?category=textil">Explorar textiles <span aria-hidden="true">→</span></a>
-        </article>
-        <article class="atelier-card atelier-card-wine">
-          <span class="card-number">02</span>
-          <p class="eyebrow">Papel</p>
-          <h3>Historias que empiezan con una invitación</h3>
-          <p>Ilustración, caligrafía y papelería de autor creada para dar tono a cada celebración.</p>
-          <a href="/tienda/?category=papeleria">Explorar papelería <span aria-hidden="true">→</span></a>
-        </article>
-        <article class="atelier-card atelier-card-gold">
-          <span class="card-number">03</span>
-          <p class="eyebrow">Forma</p>
-          <h3>Objetos pequeños, gestos inolvidables</h3>
-          <p>Piezas decorativas y detalles personalizados pensados para quedarse después del evento.</p>
-          <a href="/tienda/">Ver todos los talleres <span aria-hidden="true">→</span></a>
-        </article>
+      <div id="atelier-loading" class="atelier-status" role="status">Abriendo las puertas de los talleres…</div>
+      <div id="atelier-grid" class="atelier-grid atelier-grid-live" hidden aria-live="polite"></div>
+      <div id="atelier-empty" class="atelier-empty" hidden>
+        <p>Los primeros talleres están preparando su escaparate.</p>
+        <a class="button button-outline" href="/talleres/">Ver el directorio</a>
       </div>
+      <div class="section-action"><a class="text-link" href="/talleres/">Descubrir todos los talleres <span aria-hidden="true">→</span></a></div>
     </section>
 
     <section class="featured-section" aria-labelledby="featured-title">
@@ -120,34 +114,113 @@
       <div class="section-action"><a class="text-link" href="/tienda/">Ver toda la tienda <span aria-hidden="true">→</span></a></div>
     </section>
 
-    <section class="process-section" id="como-funciona" aria-labelledby="process-title">
-      <div class="process-intro">
-        <p class="eyebrow">Diseño propio</p>
+    <section class="process-section commission-section" id="como-funciona" aria-labelledby="process-title">
+      <div class="commission-intro">
+        <p class="eyebrow">Diseño propio · Encargos</p>
         <h2 id="process-title">Una idea también puede convertirse en pieza.</h2>
-        <p>Cuando no encuentres exactamente lo que imaginas, puedes partir de una pieza publicada y explicar al taller qué necesitas.</p>
-        <a class="button button-light" href="/tienda/">Elegir un punto de partida</a>
+        <p class="commission-lead">No hace falta llegar con un diseño terminado. Una fecha, una cantidad, unos colores o una historia pueden ser suficientes para empezar a hablar con el taller adecuado.</p>
+
+        <article class="commission-brief" aria-label="Ejemplo de un encargo">
+          <div class="commission-brief-head">
+            <span>Ejemplo de idea</span>
+            <strong>Comunión · Mayo</strong>
+          </div>
+          <dl>
+            <div><dt>Cantidad</dt><dd>40 unidades</dd></div>
+            <div><dt>Paleta</dt><dd>Marfil + burdeos</dd></div>
+            <div><dt>Detalle</dt><dd>Nombre y fecha</dd></div>
+            <div><dt>Deseo</dt><dd>Algo sencillo y personal</dd></div>
+          </dl>
+          <p>El taller convierte estas pistas en una propuesta concreta antes de fabricar la pieza.</p>
+        </article>
+
+        <div class="commission-actions">
+          <a class="button button-light" href="/talleres/?encargos=1">Buscar talleres para encargos</a>
+          <a class="commission-text-link" href="/tienda/">Partir de una pieza de la tienda <span aria-hidden="true">→</span></a>
+        </div>
       </div>
-      <ol class="process-list">
-        <li><span>01</span><div><h3>Encuentra un lenguaje</h3><p>Elige la pieza, técnica o taller que se acerca a tu idea.</p></div></li>
-        <li><span>02</span><div><h3>Cuéntanos el momento</h3><p>Describe nombres, fecha, colores, cantidades y cualquier detalle importante.</p></div></li>
-        <li><span>03</span><div><h3>Recibe una propuesta</h3><p>El taller prepara un presupuesto versionado que solo tú puedes aprobar.</p></div></li>
-        <li><span>04</span><div><h3>Sigue el proceso</h3><p>Consulta mensajes, avances e incidencias desde tu acceso privado.</p></div></li>
-      </ol>
+
+      <div class="commission-journey" aria-label="Cómo funciona un encargo personalizado">
+        <ol class="commission-route">
+          <li>
+            <span class="commission-number">01</span>
+            <div class="commission-step-copy">
+              <p class="commission-kicker">Tu punto de partida</p>
+              <h3>Cuéntanos el momento.</h3>
+              <p>Explica para quién es, cuándo lo necesitas, cuántas piezas buscas y qué detalles te gustaría conservar.</p>
+            </div>
+            <span class="commission-signal" aria-hidden="true">Idea</span>
+          </li>
+          <li>
+            <span class="commission-number">02</span>
+            <div class="commission-step-copy">
+              <p class="commission-kicker">El oficio adecuado</p>
+              <h3>Encuentra un taller que encaje contigo.</h3>
+              <p>Descubre su historia, técnicas, materiales y piezas antes de decidir con quién quieres desarrollar el encargo.</p>
+            </div>
+            <span class="commission-signal" aria-hidden="true">Taller</span>
+          </li>
+          <li>
+            <span class="commission-number">03</span>
+            <div class="commission-step-copy">
+              <p class="commission-kicker">Antes de fabricar</p>
+              <h3>Recibe una propuesta y un presupuesto.</h3>
+              <p>El taller concreta el diseño, cantidades, plazos y precio. La propuesta queda preparada para que puedas revisarla y aprobarla.</p>
+            </div>
+            <span class="commission-signal" aria-hidden="true">Propuesta</span>
+          </li>
+          <li>
+            <span class="commission-number">04</span>
+            <div class="commission-step-copy">
+              <p class="commission-kicker">Hecho para ti</p>
+              <h3>Sigue el proceso hasta la pieza final.</h3>
+              <p>Una vez aceptada la propuesta, el encargo entra en el taller y puedes seguir sus avances desde tu espacio privado.</p>
+            </div>
+            <span class="commission-signal" aria-hidden="true">Pieza</span>
+          </li>
+        </ol>
+        <aside class="commission-note">
+          <span aria-hidden="true">AL</span>
+          <p><strong>Primero se entiende la idea.</strong> Después se decide qué fabricar.</p>
+        </aside>
+      </div>
     </section>
 
-    <section class="story-section">
+    <section class="home-stories-section" id="historias" aria-labelledby="home-stories-title">
+      <div class="home-stories-heading">
+        <div>
+          <p class="eyebrow">Historias desde los talleres</p>
+          <h2 id="home-stories-title">Antes de una pieza, hay una forma de hacer.</h2>
+        </div>
+        <div class="home-stories-heading-copy">
+          <p>Entramos en los talleres para conocer materiales, procesos, decisiones y a las personas que trabajan detrás de cada colección.</p>
+          <a class="text-link" href="/blog/">Ver todas las historias <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <div id="home-stories-loading" class="home-stories-status" role="status">Abriendo el diario de los talleres…</div>
+      <div id="home-stories-grid" class="home-stories-grid" hidden aria-live="polite"></div>
+      <div id="home-stories-empty" class="home-stories-empty" hidden>
+        <p>Las primeras historias están pasando por la mesa editorial.</p>
+        <a class="button button-outline" href="/blog/">Entrar en Historias</a>
+      </div>
+    </section>
+
+    <section class="story-section home-story-manifesto">
       <div class="story-mark" aria-hidden="true">“</div>
       <blockquote>
         <p>Lo artesanal no consiste solo en hacer algo a mano. Consiste en saber para quién se está haciendo.</p>
         <footer>La filosofía de Atelier Lumière</footer>
       </blockquote>
-      <a class="text-link light-link" href="/blog/">Leer historias de los talleres <span aria-hidden="true">→</span></a>
+      <a class="text-link light-link" href="/talleres/">Conocer a quienes lo hacen <span aria-hidden="true">→</span></a>
     </section>
 
     <section class="closing-section">
       <p class="eyebrow">Tu celebración empieza aquí</p>
       <h2>Encuentra una pieza que ya se sienta tuya.</h2>
-      <a class="button button-primary" href="/tienda/">Entrar en la tienda</a>
+      <div class="hero-actions">
+        <a class="button button-primary" href="/tienda/">Entrar en la tienda</a>
+        <a class="button button-outline" href="/talleres/">Explorar talleres</a>
+      </div>
     </section>
   </main>
 
@@ -155,6 +228,7 @@
     <div class="footer-brand"><strong>Atelier Lumière</strong><span>Artesanía para celebrar</span></div>
     <nav aria-label="Enlaces del pie">
       <a href="/tienda/">Tienda</a>
+      <a href="/talleres/">Talleres</a>
       <a href="/blog/">Historias</a>
       <a href="/legal/">Legal y privacidad</a>
       <a href="/proveedor/acceso/">Acceso talleres</a>

@@ -2,6 +2,7 @@ import { pipeline } from "node:stream/promises";
 import { ServiceError } from "./providers-service.mjs";
 
 const COLLECTION_PATH = "/api/catalog/products";
+const PROVIDER_COLLECTION_PATH = "/api/catalog/providers";
 const DETAIL_PATTERN = /^\/api\/catalog\/products\/([a-z0-9-]+)\/([a-z0-9-]+)$/i;
 const MEDIA_PATTERN = /^\/api\/catalog\/products\/([0-9a-f-]{36})\/media\/([0-9a-f-]{36})\/(preview|content)$/i;
 const PROVIDER_MEDIA_PATTERN = /^\/api\/catalog\/providers\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})\/preview$/i;
@@ -84,7 +85,11 @@ export function createPublicCatalogApiHandler({
     const detailMatch = url.pathname.match(DETAIL_PATTERN);
     const mediaMatch = url.pathname.match(MEDIA_PATTERN);
     const providerMediaMatch = url.pathname.match(PROVIDER_MEDIA_PATTERN);
-    const matches = url.pathname === COLLECTION_PATH || detailMatch || mediaMatch || providerMediaMatch;
+    const matches = url.pathname === COLLECTION_PATH
+      || url.pathname === PROVIDER_COLLECTION_PATH
+      || detailMatch
+      || mediaMatch
+      || providerMediaMatch;
     if (!matches) return baseHandler(request, response);
 
     try {
@@ -102,6 +107,16 @@ export function createPublicCatalogApiHandler({
           provider: url.searchParams.get("provider") ?? ""
         });
         sendJson(response, 200, { products }, "public, max-age=60, stale-while-revalidate=300");
+        return;
+      }
+
+      if (url.pathname === PROVIDER_COLLECTION_PATH) {
+        const providers = await publicCatalogService.listProviders({
+          query: url.searchParams.get("q") ?? "",
+          specialty: url.searchParams.get("specialty") ?? "",
+          customOnly: url.searchParams.get("custom") === "true"
+        });
+        sendJson(response, 200, { providers }, "public, max-age=60, stale-while-revalidate=300");
         return;
       }
 

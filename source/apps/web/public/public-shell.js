@@ -23,6 +23,9 @@ const REVEAL_SELECTOR = [
   ".empty-cart",
   ".article-head",
   ".article-layout",
+  ".workshops-hero",
+  ".workshops-toolbar",
+  ".workshops-grid",
   "#grid"
 ].join(",");
 
@@ -83,6 +86,35 @@ window.AtelierImages = Object.freeze({
   variantUrl: imageVariantUrl,
   configure: configurePublicImage
 });
+
+function ensureWorkshopsNavigation(navigation) {
+  const links = [...navigation.querySelectorAll("a[href]")];
+  const hasWorkshops = links.some((link) => {
+    try {
+      const target = new URL(link.href, window.location.href);
+      return target.origin === window.location.origin && normalizedPath(target.pathname) === "/talleres";
+    } catch {
+      return false;
+    }
+  });
+  if (hasWorkshops) return;
+
+  const storeLink = links.find((link) => {
+    try {
+      const target = new URL(link.href, window.location.href);
+      return target.origin === window.location.origin && normalizedPath(target.pathname) === "/tienda";
+    } catch {
+      return false;
+    }
+  });
+  if (!storeLink) return;
+
+  const workshopsLink = document.createElement("a");
+  workshopsLink.href = "/talleres/";
+  workshopsLink.textContent = "Talleres";
+  workshopsLink.className = storeLink.className;
+  storeLink.insertAdjacentElement("afterend", workshopsLink);
+}
 
 function markCurrentPage(navigation) {
   const current = normalizedPath(window.location.pathname);
@@ -150,6 +182,8 @@ function initializeNavigation(header) {
   const toggle = header.querySelector("[data-public-menu-toggle]");
   const navigation = header.querySelector("[data-public-navigation]");
   if (!toggle || !navigation) return;
+
+  ensureWorkshopsNavigation(navigation);
 
   const mobile = window.matchMedia(MOBILE_QUERY);
   const background = [

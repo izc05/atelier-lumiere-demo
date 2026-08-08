@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#59101f">
+  <meta name="description" content="Descubre los talleres y artesanos seleccionados por Atelier Lumière.">
+  <title>Talleres · Atelier Lumière</title>
+  <link rel="stylesheet" href="/tienda/store.css">
+  <link rel="stylesheet" href="/talleres/talleres.css">
+  <link rel="stylesheet" href="/public-shell.css">
+  <script defer src="/public-shell.js"></script>
+  <script defer src="/talleres/talleres.js"></script>
+  <link rel="stylesheet" href="/premium-ui.css">
+  <script defer src="/premium-ui.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
+  <div class="shell workshops-shell">
+    <header class="topbar" data-public-header>
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      </a>
+      <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-public-menu-toggle>Menú</button>
+      <nav class="nav public-navigation" id="public-navigation" aria-label="Navegación principal" data-public-navigation>
+        <a class="button ghost" href="/">Inicio</a>
+        <a class="button ghost" href="/tienda/">Tienda</a>
+        <a class="button ghost" href="/talleres/">Talleres</a>
+        <a class="button ghost" href="/blog/">Historias</a>
+        <a class="button ghost" href="/proveedor/acceso/">Acceso talleres</a>
+      </nav>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+      <section class="workshops-hero" aria-labelledby="workshops-title">
+        <div class="workshops-hero-copy">
+          <p class="eyebrow">Directorio de talleres</p>
+          <h1 id="workshops-title">Personas, oficio y piezas con historia.</h1>
+          <p class="lead">Conoce los talleres seleccionados por Atelier Lumière, descubre cómo trabajan y entra en su espacio antes de elegir una pieza.</p>
+        </div>
+        <aside class="workshops-hero-note" aria-label="Sobre la selección">
+          <span class="workshops-hero-mark" aria-hidden="true">AL</span>
+          <div>
+            <strong id="workshops-total">—</strong>
+            <p>Talleres con perfil editorial publicado y revisado por Atelier Lumière.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="workshops-toolbar" aria-label="Filtrar talleres">
+        <label class="workshops-field workshops-search">
+          <span>Buscar</span>
+          <input id="workshop-search" type="search" autocomplete="off" placeholder="Nombre, oficio, material o lugar">
+        </label>
+        <label class="workshops-field">
+          <span>Especialidad</span>
+          <select id="workshop-specialty">
+            <option value="">Todas las especialidades</option>
+          </select>
+        </label>
+        <label class="workshops-field">
+          <span>Encargos</span>
+          <select id="workshop-custom">
+            <option value="all">Todos los talleres</option>
+            <option value="custom">Aceptan encargos</option>
+          </select>
+        </label>
+        <div class="workshops-result-count" aria-live="polite">
+          <strong id="visible-count">0</strong>
+          <span id="visible-label">talleres</span>
+        </div>
+      </section>
+
+      <section id="workshops-loading" class="workshops-state" role="status">
+        <p>Abriendo las puertas de los talleres…</p>
+      </section>
+
+      <section id="workshops-error" class="workshops-state workshops-state-error" hidden>
+        <div>
+          <h2>No hemos podido cargar los talleres</h2>
+          <p id="workshops-error-message">Inténtalo de nuevo en unos minutos.</p>
+          <button id="workshops-retry" class="button primary" type="button">Volver a intentar</button>
+        </div>
+      </section>
+
+      <section id="workshops-empty" class="workshops-state" hidden>
+        <div>
+          <h2>No hay talleres que coincidan</h2>
+          <p>Prueba otra búsqueda o elimina alguno de los filtros.</p>
+          <button id="workshops-clear" class="button secondary" type="button">Limpiar filtros</button>
+        </div>
+      </section>
+
+      <section id="workshops-grid" class="workshops-grid" hidden aria-label="Talleres publicados" aria-live="polite"></section>
+
+      <section class="workshops-closing" aria-labelledby="workshops-closing-title">
+        <p class="eyebrow">¿Buscas una pieza concreta?</p>
+        <h2 id="workshops-closing-title">Puedes empezar por el artesano o directamente por la colección.</h2>
+        <div class="workshops-closing-actions">
+          <a class="button primary" href="/tienda/">Explorar la tienda</a>
+          <a class="button ghost" href="/blog/">Leer sus historias</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="workshops-footer">
+      <div><strong>Atelier Lumière</strong><span>Artesanía para celebrar</span></div>
+      <nav aria-label="Enlaces del pie">
+        <a href="/tienda/">Tienda</a>
+        <a href="/talleres/">Talleres</a>
+        <a href="/blog/">Historias</a>
+        <a href="/legal/">Legal y privacidad</a>
+      </nav>
+    </footer>
+  </div>
+</body>
+</html>
