@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Atelier Lumière</title>
+  <desc id="desc">Monograma AL de Atelier Lumière.</desc>
+  <rect width="96" height="96" rx="18" fill="#4B1020"/>
+  <text x="23" y="62" fill="#FFF9EE" font-family="Georgia, 'Times New Roman', serif" font-size="50" font-weight="400" letter-spacing="-3">A</text>
+  <text x="49" y="63" fill="#FFF9EE" font-family="Georgia, 'Times New Roman', serif" font-size="33" font-weight="400">L</text>
+  <path d="M20 55c12-15 23-13 28-4 4 8 13 13 24 9 9-3 15-1 22 4" fill="none" stroke="#D8B761" stroke-width="2.1" stroke-linecap="round"/>
+</svg>
