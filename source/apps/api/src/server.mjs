@@ -71,6 +71,7 @@ import { createPublicCatalogService } from "./public-catalog-service.mjs";
 import { createRequestFileStorage } from "./request-file-storage.mjs";
 import { createSecuredAdminAccountsService } from "./secured-admin-accounts-service.mjs";
 import { createTwoFactorService } from "./two-factor-service.mjs";
+import { createWorkshopApplicationsService } from "./workshop-applications-service.mjs";
 
 const host = process.env.API_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.API_PORT ?? "4000", 10);
@@ -142,6 +143,14 @@ const baseEmailVerificationService = database.enabled
   ? createEmailVerificationService({ database, systemContext: authenticationSystemContext })
   : null;
 const providersService = withProviderInvitationDelivery({ providersService: baseProvidersService, mailService, database });
+const workshopApplicationsService = database.enabled
+  ? createWorkshopApplicationsService({
+      database,
+      systemContext: authenticationSystemContext,
+      providersService,
+      mailService
+    })
+  : null;
 const onboardingService = withOnboardingEmailDelivery({ onboardingService: baseOnboardingService, mailService });
 const emailVerificationService = baseEmailVerificationService
   ? withVerificationEmailDelivery({
@@ -230,6 +239,7 @@ const baseApiHandler = createApiHandler({
   emailVerificationService,
   twoFactorService,
   providerAuthService,
+  workshopApplicationsService,
   mailService,
   authenticateRequest
 });

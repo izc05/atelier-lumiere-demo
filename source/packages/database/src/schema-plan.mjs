@@ -1,4 +1,5 @@
 export const CORE_TABLES = Object.freeze([
+  "workshop_applications",
   "users",
   "user_credentials",
   "email_verification_tokens",

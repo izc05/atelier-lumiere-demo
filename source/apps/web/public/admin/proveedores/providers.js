@@ -25,11 +25,15 @@ const elements = {
   copyTokenButton: document.querySelector("#copy-token-button"),
   auditDialog: document.querySelector("#audit-dialog"),
   auditTitle: document.querySelector("#audit-title"),
-  auditList: document.querySelector("#audit-list")
+  auditList: document.querySelector("#audit-list"),
+  applicationsList: document.querySelector("#applications-list"),
+  applicationsCount: document.querySelector("#applications-count"),
+  applicationsMessage: document.querySelector("#applications-message")
 };
 
 const state = {
   providers: [],
+  applications: [],
   search: ""
 };
 
@@ -136,7 +140,91 @@ function showLogin(message = "") {
 async function showAdmin() {
   elements.loginView.hidden = true;
   elements.adminView.hidden = false;
-  await loadProviders();
+  await Promise.all([loadProviders(), loadApplications()]);
+}
+
+function renderApplications() {
+  elements.applicationsList.replaceChildren();
+  elements.applicationsCount.textContent = `${state.applications.length} ${state.applications.length === 1 ? "pendiente" : "pendientes"}`;
+  if (state.applications.length === 0) {
+    elements.applicationsList.append(createElement("div", "empty-card", "No hay solicitudes pendientes."));
+    return;
+  }
+  for (const application of state.applications) {
+    const card = createElement("article", "application-row");
+    const copy = createElement("div", "application-copy");
+    const title = createElement("div", "application-title");
+    title.append(createElement("h3", "", application.displayName), createElement("span", "application-badge", "Pendiente"));
+    const meta = createElement("p", "application-meta", `${application.specialty} · ${application.contactName} · ${application.contactEmail}`);
+    copy.append(title, meta);
+    if (application.websiteUrl) {
+      const link = createElement("a", "application-link", "Ver web o red social");
+      link.href = application.websiteUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      copy.append(link);
+    }
+    if (application.message) copy.append(createElement("p", "application-note", application.message));
+    copy.append(createElement("time", "application-date", `Recibida ${formatDate(application.createdAt, true)}`));
+
+    const actions = createElement("div", "application-actions");
+    actions.append(
+      actionButton("Aprobar e invitar", "primary", (button) => reviewApplication(application, "approve", button)),
+      actionButton("Rechazar", "danger", (button) => reviewApplication(application, "reject", button))
+    );
+    card.append(copy, actions);
+    elements.applicationsList.append(card);
+  }
+}
+
+async function loadApplications({ quiet = false } = {}) {
+  if (!elements.applicationsList) return;
+  if (!quiet) elements.applicationsList.replaceChildren(createElement("div", "loading-card", "Cargando solicitudes…"));
+  setMessage(elements.applicationsMessage);
+  try {
+    const payload = await requestJson("/internal/admin/workshop-applications?status=PENDING");
+    state.applications = Array.isArray(payload.applications) ? payload.applications : [];
+    renderApplications();
+  } catch (error) {
+    if (error.status === 401) return showLogin("La sesión ha caducado.");
+    elements.applicationsList.replaceChildren(createElement("div", "empty-card", "No se han podido cargar las solicitudes."));
+    setMessage(elements.applicationsMessage, error.message, "error");
+  }
+}
+
+async function reviewApplication(application, action, button) {
+  const approving = action === "approve";
+  const question = approving
+    ? `¿Aprobar “${application.displayName}” y enviar su invitación de acceso?`
+    : `¿Rechazar la solicitud de “${application.displayName}”?`;
+  if (!window.confirm(question)) return;
+  const reviewNote = window.prompt(
+    approving ? "Nota interna opcional:" : "Mensaje opcional para explicar la decisión:",
+    ""
+  );
+  if (reviewNote === null) return;
+  setBusy(button, true, approving ? "Aprobando…" : "Rechazando…");
+  setMessage(elements.applicationsMessage);
+  try {
+    const payload = await requestJson(`/internal/admin/workshop-applications/${application.id}/${action}`, {
+      method: "POST",
+      body: JSON.stringify(reviewNote.trim() ? { reviewNote: reviewNote.trim() } : {})
+    });
+    if (approving && payload.activationPath) showInvitation(payload);
+    setMessage(
+      elements.applicationsMessage,
+      approving
+        ? `“${application.displayName}” ha sido aprobado y su invitación está preparada.`
+        : `La solicitud de “${application.displayName}” ha sido rechazada.`,
+      "success"
+    );
+    await Promise.all([loadApplications({ quiet: true }), loadProviders({ quiet: true })]);
+  } catch (error) {
+    if (error.status === 401) return showLogin("La sesión ha caducado.");
+    setMessage(elements.applicationsMessage, error.message, "error");
+  } finally {
+    setBusy(button, false);
+  }
 }
 
 function updateMetrics() {
@@ -418,7 +506,7 @@ elements.logoutButton.addEventListener("click", async () => {
 
 elements.refreshButton.addEventListener("click", async () => {
   setBusy(elements.refreshButton, true, "Actualizando…");
-  await loadProviders();
+  await Promise.all([loadProviders(), loadApplications()]);
   setBusy(elements.refreshButton, false);
 });
 
