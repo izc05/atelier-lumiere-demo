@@ -42,15 +42,14 @@
   </header>
 
   <main id="main-content" tabindex="-1">
-    <section class="hero-section" aria-labelledby="hero-title">
-      <div class="hero-thread" aria-hidden="true"></div>
-      <div class="hero-copy">
-        <p class="eyebrow">El hilo de la celebración</p>
+    <section class="hero-section hero-editorial" id="home-hero" aria-labelledby="hero-title">
+      <div class="hero-copy" id="hero-copy">
+        <p class="eyebrow">Atelier Lumière · Artesanía para celebrar</p>
         <h1 id="hero-title">Cada pieza guarda un instante.</h1>
-        <p class="hero-lead">Artesanía seleccionada para bodas, comuniones, nacimientos y momentos que merecen recordarse sin prisas.</p>
+        <p class="hero-lead">Descubre piezas creadas por talleres independientes para bodas, comuniones, nacimientos y momentos que merecen recordarse sin prisas.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="/tienda/">Encontrar una pieza</a>
-          <a class="button button-quiet" href="#como-funciona">Crear algo propio</a>
+          <a class="button button-primary" href="/tienda/">Descubrir la colección</a>
+          <a class="button button-quiet" href="#talleres">Conocer los talleres</a>
         </div>
         <dl class="hero-facts" aria-label="Compromisos de Atelier Lumière">
           <div><dt>Selección</dt><dd>Talleres invitados</dd></div>
@@ -58,19 +57,25 @@
           <div><dt>Cuidado</dt><dd>Acompañamiento humano</dd></div>
         </dl>
       </div>
-      <div class="hero-composition" aria-label="Composición inspirada en un taller artesanal">
-        <div class="hero-card hero-card-main">
-          <span class="hero-card-label">Pieza 01</span>
-          <div class="hero-object hero-object-fan" aria-hidden="true"></div>
-          <p>Detalles que comienzan en una conversación y terminan formando parte de tu historia.</p>
-        </div>
-        <div class="hero-card hero-card-note">
-          <span>Edición limitada</span>
-          <strong>Hecho despacio</strong>
-        </div>
-        <div class="hero-seal" aria-hidden="true"><span>AL</span></div>
+
+      <div class="hero-composition hero-editorial-visual" id="hero-visual" aria-label="Una mirada al interior de los talleres de Atelier Lumière">
+        <figure class="hero-photo hero-photo-main">
+          <img id="hero-main-image" alt="" hidden>
+          <span class="hero-photo-placeholder" id="hero-main-placeholder" aria-hidden="true">AL</span>
+          <figcaption class="hero-photo-caption"><span>01</span><strong>Dentro del taller</strong></figcaption>
+        </figure>
+        <figure class="hero-photo hero-photo-detail">
+          <img id="hero-detail-image" alt="" hidden>
+          <span class="hero-photo-placeholder hero-photo-placeholder-small" id="hero-detail-placeholder" aria-hidden="true">L</span>
+        </figure>
+        <aside class="hero-workshop-note" id="hero-workshop-note">
+          <span>Taller invitado</span>
+          <strong id="hero-workshop-name">Creado despacio</strong>
+          <a id="hero-workshop-link" href="#talleres">Conocer el taller →</a>
+        </aside>
+        <div class="hero-seal hero-editorial-seal" aria-hidden="true"><span>AL</span></div>
       </div>
-      <a class="scroll-cue" href="#talleres">Descubrir los talleres <span aria-hidden="true">↓</span></a>
+      <a class="scroll-cue" href="#talleres">Conocer quién lo crea <span aria-hidden="true">↓</span></a>
     </section>
 
     <section class="manifesto-section" id="talleres">
