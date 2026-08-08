@@ -1,0 +1,292 @@
+/* Atelier Lumière · capa editorial recta y optimización desktop.
+ * Esta hoja solo modifica presentación. No altera flujos ni datos.
+ */
+
+:root {
+  --atelier-radius-sm: 2px;
+  --atelier-radius-md: 3px;
+  --atelier-radius-lg: 4px;
+  --atelier-desktop-max: 1480px;
+}
+
+/* Lenguaje editorial: superficies rectas en lugar de tarjetas redondeadas. */
+:where(
+  .topbar,
+  .site-header,
+  .toolbar,
+  .hero-note,
+  .provider-note,
+  .checkout-panel,
+  .login-card,
+  .activation-overview,
+  .create-panel,
+  .providers-panel,
+  .metrics article,
+  .legal-card,
+  .draft-banner,
+  .error-card,
+  .loading,
+  .empty,
+  .empty-cart,
+  .panel,
+  .card,
+  .product-card,
+  .post-card,
+  .order-card,
+  .provider-card,
+  .state-card,
+  .workflow-card,
+  .form-section,
+  .preview-card,
+  .actions-card,
+  .preview-hero,
+  .media-uploader,
+  .media-card,
+  .media-empty,
+  .profile-card,
+  .identity,
+  .review-media,
+  .review-media-missing,
+  .review-panel,
+  .provider-identity,
+  .provider-collection,
+  .provider-bespoke,
+  .provider-bespoke-card,
+  .provider-gallery-item
+) {
+  border-radius: var(--atelier-radius-md) !important;
+}
+
+:where(
+  .button,
+  .icon-button,
+  .text-button,
+  .filter-button,
+  input,
+  select,
+  textarea,
+  .status-badge,
+  .status,
+  .tag,
+  .chips span,
+  .provider-signals span,
+  .environment-badge,
+  .activation-summary,
+  .mini-button,
+  .readiness,
+  .toggle-field,
+  .review-media figcaption,
+  .media-review-error
+) {
+  border-radius: var(--atelier-radius-sm) !important;
+}
+
+/* El símbolo corporativo AL puede seguir siendo circular: es marca, no tarjeta. */
+:where(.brand-mark, .mark, .provider-avatar) {
+  border-radius: 50% !important;
+}
+
+/* Logo real del taller: contenedor editorial, sin óvalo ni círculo forzado. */
+.provider-monogram-wrap.has-provider-logo {
+  width: min(100%, 250px) !important;
+  aspect-ratio: 4 / 3 !important;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .28);
+  background: #fffaf2;
+  box-shadow: 0 16px 42px rgba(25, 4, 9, .18);
+}
+
+.provider-monogram-wrap.has-provider-logo .provider-orbit {
+  display: none !important;
+}
+
+.provider-monogram-wrap.has-provider-logo .provider-logo {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  background: #fffaf2 !important;
+  box-shadow: none !important;
+  transform: scale(1.08);
+}
+
+/* La vista previa privada usa el mismo tratamiento visual del logo publicado. */
+.preview-identity {
+  width: min(38%, 150px);
+}
+
+.preview-logo {
+  display: block !important;
+  width: 100% !important;
+  height: 94px !important;
+  aspect-ratio: 4 / 3 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  background: #fffaf2 !important;
+}
+
+.preview-logo[hidden] {
+  display: none !important;
+}
+
+/* Revisión administrativa: evita presentar el logo como una miniatura diminuta con grandes márgenes. */
+.review-media-logo > img {
+  object-fit: cover !important;
+  object-position: center !important;
+  padding: 0 !important;
+  background: #fffaf2 !important;
+}
+
+/* Heroes interiores rectos. Se excluye la portada principal, que conserva su composición propia. */
+html:not([data-atelier-page="home"]) :where(
+  .hero,
+  .page-head,
+  .provider-hero,
+  .product-hero,
+  .article-head,
+  .technical-hero
+) {
+  border-radius: var(--atelier-radius-lg) !important;
+}
+
+/* Escritorio: aprovechar el monitor y reducir alturas vacías. */
+@media (min-width: 1000px) {
+  :where(.shell, .page-shell, .admin-shell, .profile-shell) {
+    width: min(var(--atelier-desktop-max), calc(100% - 48px)) !important;
+    max-width: none !important;
+    margin-inline: auto !important;
+  }
+
+  :where(.admin-shell, .profile-shell) {
+    padding-top: 12px !important;
+    padding-bottom: 48px !important;
+  }
+
+  html:not([data-atelier-page="home"]) :where(.topbar, .site-header, .profile-topbar) {
+    top: 8px !important;
+  }
+
+  /* Administración y pantallas privadas: cabecera editorial más compacta. */
+  html[data-atelier-page="admin"] :where(.hero, .page-heading),
+  html[data-atelier-page="provider-private"] :where(.profile-intro, .page-heading),
+  html[data-atelier-page="customer"] .page-heading {
+    padding-top: 34px !important;
+    padding-bottom: 28px !important;
+  }
+
+  html[data-atelier-page="admin"] :where(.hero h1, .page-heading h1),
+  html[data-atelier-page="provider-private"] :where(.profile-intro h1, .page-heading h1) {
+    font-size: clamp(3.4rem, 5.4vw, 5.8rem) !important;
+    line-height: .9 !important;
+  }
+
+  html[data-atelier-page="admin"] .hero {
+    gap: clamp(2rem, 5vw, 5.5rem) !important;
+  }
+
+  html[data-atelier-page="admin"] .hero aside,
+  html[data-atelier-page="provider-private"] .workflow-card {
+    padding: 1.1rem 1.25rem !important;
+  }
+
+  /* Editor de perfil: más información visible sin hacer scroll inicial excesivo. */
+  .profile-intro {
+    grid-template-columns: minmax(0, 1.55fr) minmax(280px, .55fr) !important;
+    gap: clamp(2rem, 5vw, 5rem) !important;
+  }
+
+  .editor-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 360px) !important;
+    gap: 1rem !important;
+  }
+
+  .form-section {
+    padding: 1.55rem 1.7rem !important;
+  }
+
+  /* Taller público: portada menos alta y mejor aprovechada. */
+  .provider-hero {
+    grid-template-columns: minmax(0, 1.75fr) minmax(250px, .55fr) !important;
+    gap: clamp(2rem, 4vw, 4rem) !important;
+    min-height: 0 !important;
+    margin-top: 10px !important;
+    padding: clamp(2.25rem, 4vw, 3.8rem) clamp(2rem, 4vw, 4rem) !important;
+  }
+
+  .provider-hero h1 {
+    font-size: clamp(3.8rem, 6vw, 6.2rem) !important;
+    margin-bottom: .65rem !important;
+  }
+
+  .provider-identity {
+    min-height: 300px !important;
+    padding: 1.4rem !important;
+  }
+
+  .provider-actions {
+    margin-top: 1.4rem !important;
+  }
+
+  .provider-signals {
+    margin-top: 1.45rem !important;
+  }
+
+  .provider-editorial,
+  .provider-gallery-section,
+  .provider-bespoke {
+    margin-top: clamp(2.8rem, 5vw, 4.8rem) !important;
+  }
+
+  .provider-collection {
+    margin-top: clamp(2.3rem, 4vw, 4rem) !important;
+  }
+
+  /* Catálogos y administración: más columnas/ancho útil cuando hay espacio. */
+  .products {
+    gap: clamp(.8rem, 1.4vw, 1.2rem) !important;
+  }
+
+  .metrics {
+    gap: .65rem !important;
+  }
+
+  .metrics article {
+    padding: 1rem 1.15rem !important;
+  }
+
+  .profile-card {
+    grid-template-columns: minmax(190px, .48fr) minmax(0, 1.7fr) minmax(250px, .58fr) !important;
+    gap: .9rem !important;
+    padding: 1rem !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  :where(.shell, .page-shell, .admin-shell, .profile-shell) {
+    width: min(1520px, calc(100% - 64px)) !important;
+  }
+
+  .provider-products .product-image {
+    height: 245px !important;
+  }
+}
+
+@media (max-width: 999px) {
+  /* También en tablet/móvil eliminamos las curvas grandes, pero no forzamos layout de escritorio. */
+  :where(.topbar, .site-header, .provider-hero, .form-section, .profile-card) {
+    border-radius: var(--atelier-radius-md) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .provider-monogram-wrap.has-provider-logo .provider-logo {
+    transform: none;
+  }
+}
