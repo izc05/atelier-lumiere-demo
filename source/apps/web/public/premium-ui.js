@@ -1,6 +1,14 @@
 const atelierRoot = document.documentElement;
 atelierRoot.classList.add("atelier-premium");
 
+if (!document.querySelector('link[data-atelier-editorial-desktop]')) {
+  const editorialStyles = document.createElement("link");
+  editorialStyles.rel = "stylesheet";
+  editorialStyles.href = "/editorial-desktop.css";
+  editorialStyles.dataset.atelierEditorialDesktop = "";
+  document.head.append(editorialStyles);
+}
+
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 const FINE_POINTER = "(pointer: fine)";
 const INTRO_KEY = "atelier-lumiere-opening-seen";
