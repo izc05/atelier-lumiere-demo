@@ -8,6 +8,7 @@ ENV WEB_PORT=3000
 COPY source/apps/web ./apps/web
 
 RUN node apps/web/scripts/prepare-premium-ui.mjs /app/apps/web/public \
+  && node apps/web/scripts/prepare-home-polish.mjs /app/apps/web/public/index.html \
   && find /app/apps/web -type d -exec chmod 755 {} + \
   && find /app/apps/web -type f -exec chmod 644 {} +
 
