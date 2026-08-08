@@ -2,11 +2,14 @@
   "use strict";
 
   const SESSION_KEY = "atelier_brand_entry_seen";
+  const OFFICIAL_LOGO = "/assets/brand/atelier-logo-official-light.svg";
   const entry = document.getElementById("brand-entry");
   const enterButton = document.getElementById("brand-entry-action");
+  const entryLogo = entry?.querySelector(".brand-entry-logo");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   if (!entry || !enterButton) return;
+  if (entryLogo instanceof HTMLImageElement) entryLogo.src = OFFICIAL_LOGO;
 
   const params = new URLSearchParams(window.location.search);
   const forceEntry = params.get("intro") === "1";
@@ -53,7 +56,7 @@
     document.body.classList.add("brand-entry-opening");
     entry.classList.add("is-opening");
 
-    const delay = reducedMotion.matches ? 30 : 1080;
+    const delay = reducedMotion.matches ? 30 : 1240;
     window.setTimeout(() => {
       entry.hidden = true;
       entry.removeAttribute("aria-modal");
