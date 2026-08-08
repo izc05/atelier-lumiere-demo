@@ -5,6 +5,7 @@ import { ServiceError } from "./providers-service.mjs";
 const BRAND = "Atelier Lumière";
 const MAX_JSON_BODY_BYTES = 64 * 1024;
 const PROVIDER_ROUTE = /^\/api\/admin\/providers\/([0-9a-f-]+)\/(status|invitations|audit)$/i;
+const WORKSHOP_APPLICATION_ROUTE = /^\/api\/admin\/workshop-applications\/([0-9a-f-]+)\/(approve|reject)$/i;
 
 function sendJson(response, statusCode, body, extraHeaders = {}) {
   response.writeHead(statusCode, {
@@ -140,6 +141,7 @@ export function createApiHandler({
   emailVerificationService,
   twoFactorService,
   providerAuthService,
+  workshopApplicationsService,
   mailService,
   authenticateRequest = async () => null,
   logger = console
@@ -184,12 +186,28 @@ export function createApiHandler({
             providerIsolation: Boolean(database?.enabled),
             providerManagementApi: Boolean(providersService),
             providerInvitationAcceptance: Boolean(onboardingService),
+            workshopApplications: Boolean(workshopApplicationsService),
             emailVerification: Boolean(emailVerificationService),
             emailDelivery: Boolean(mailService?.enabled),
             // Transición histórica comprobada: twoFactorAuthentication: false.
             twoFactorAuthentication: Boolean(twoFactorService),
             mediaStorage: false,
             editorialBlog: false
+          }
+        });
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/workshop-applications") {
+        if (!workshopApplicationsService) {
+          throw new DatabaseUnavailableError("Las solicitudes de talleres no están habilitadas.");
+        }
+        const application = await workshopApplicationsService.submit(await readJson(request));
+        sendJson(response, 201, {
+          application: {
+            id: application.id,
+            status: application.status,
+            createdAt: application.createdAt
           }
         });
         return;
@@ -325,6 +343,38 @@ export function createApiHandler({
       }
 
       const context = adminOnly(await authenticateRequest(request));
+
+      if (url.pathname === "/api/admin/workshop-applications" && request.method === "GET") {
+        if (!workshopApplicationsService) throw new DatabaseUnavailableError("Las solicitudes no están configuradas.");
+        const applications = await workshopApplicationsService.list(context, url.searchParams.get("status") ?? "PENDING");
+        sendJson(response, 200, { applications });
+        return;
+      }
+
+      const applicationRoute = url.pathname.match(WORKSHOP_APPLICATION_ROUTE);
+      if (applicationRoute && request.method === "POST") {
+        if (!workshopApplicationsService) throw new DatabaseUnavailableError("Las solicitudes no están configuradas.");
+        const [, applicationId, action] = applicationRoute;
+        const input = await readJson(request);
+        if (action === "reject") {
+          const application = await workshopApplicationsService.reject(context, applicationId, input);
+          sendJson(response, 200, { application });
+          return;
+        }
+        const approved = await workshopApplicationsService.approve(context, applicationId, input);
+        const responseBody = {
+          application: approved.application,
+          provider: approved.provider,
+          invitation: approved.invitation,
+          delivery: deliveryLabel(approved.emailDelivery, environment)
+        };
+        if (environment !== "production") {
+          responseBody.activationToken = approved.token;
+          responseBody.activationPath = `/proveedor/activar?token=${encodeURIComponent(approved.token)}`;
+        }
+        sendJson(response, 201, responseBody);
+        return;
+      }
 
       if (url.pathname === "/api/admin/providers" && request.method === "GET") {
         const providers = await providersService.list(context);

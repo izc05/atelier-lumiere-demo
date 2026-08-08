@@ -9,6 +9,11 @@ import {
   createPasswordResetEmail,
   createTwoFactorResetEmail
 } from "./recovery-email-templates.mjs";
+import {
+  createWorkshopApplicationAdminEmail,
+  createWorkshopApplicationConfirmationEmail,
+  createWorkshopApplicationRejectedEmail
+} from "./workshop-application-email-templates.mjs";
 
 function booleanValue(value, fallback = false) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -87,6 +92,9 @@ function disabledService() {
     sendAdminRecovery: disabled,
     sendCustomerOrderAccess: disabled,
     sendOrderNotification: disabled,
+    sendWorkshopApplicationAdmin: disabled,
+    sendWorkshopApplicationConfirmation: disabled,
+    sendWorkshopApplicationRejected: disabled,
     close() {}
   });
 }
@@ -313,6 +321,18 @@ export function createMailService({
           "X-Atelier-Lumiere-Notification": String(id)
         }
       });
+    },
+
+    async sendWorkshopApplicationAdmin({ to, application }) {
+      return send({ to, template: createWorkshopApplicationAdminEmail({ application }) });
+    },
+
+    async sendWorkshopApplicationConfirmation({ to, application }) {
+      return send({ to, template: createWorkshopApplicationConfirmationEmail({ application }) });
+    },
+
+    async sendWorkshopApplicationRejected({ to, application }) {
+      return send({ to, template: createWorkshopApplicationRejectedEmail({ application }) });
     },
 
     close() {

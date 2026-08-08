@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Solicita formar parte de la selección de talleres de Atelier Lumière.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#4b1020">
+  <title>Únete como taller · Atelier Lumière</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/public-shell.css">
+  <link rel="stylesheet" href="/unete/join.css">
+  <link rel="stylesheet" href="/premium-ui.css">
+  <script src="/public-shell.js" defer></script>
+  <script src="/unete/join.js" defer></script>
+  <script src="/premium-ui.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
+  <header class="site-header" data-public-header>
+    <a class="wordmark" href="/" aria-label="Atelier Lumière, inicio"><span>Atelier</span><strong>Lumière</strong></a>
+    <nav class="main-nav public-navigation" id="public-navigation" aria-label="Navegación principal" data-public-navigation>
+      <a href="/tienda/">Tienda</a><a href="/talleres/">Talleres</a><a href="/blog/">Historias</a><a href="/unete/" aria-current="page">Únete como taller</a><a href="/proveedor/acceso/">Acceso talleres</a>
+    </nav>
+    <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-public-menu-toggle>Menú</button>
+  </header>
+
+  <main id="main-content" class="join-shell" tabindex="-1">
+    <section class="join-intro">
+      <p class="eyebrow">Convocatoria para talleres</p>
+      <h1>Tu oficio puede tener un lugar aquí.</h1>
+      <p class="join-lead">Buscamos talleres independientes con una identidad cuidada, procesos honestos y piezas capaces de acompañar momentos especiales.</p>
+      <div class="join-process" aria-label="Proceso de incorporación">
+        <article><span>01</span><h2>Cuéntanos</h2><p>Conocemos tu especialidad, tu historia y cómo trabajas.</p></article>
+        <article><span>02</span><h2>Revisamos</h2><p>Estudiamos personalmente cada solicitud. No es un alta automática.</p></article>
+        <article><span>03</span><h2>Te invitamos</h2><p>Si encaja, recibirás por correo el acceso para preparar tu taller.</p></article>
+      </div>
+    </section>
+
+    <section class="application-card" aria-labelledby="application-title">
+      <div id="form-view">
+        <p class="eyebrow">Solicitud de incorporación</p>
+        <h2 id="application-title">Háblanos de tu taller</h2>
+        <p class="form-intro">Los campos marcados con * son necesarios. Tu información solo se usa para revisar esta solicitud.</p>
+        <form id="workshop-application-form" novalidate>
+          <label>Nombre comercial *<input name="displayName" maxlength="140" autocomplete="organization" required placeholder="Ej. Cerámica de la Sierra"></label>
+          <label>Nombre legal <span>opcional</span><input name="legalName" maxlength="180" placeholder="Razón social o nombre completo"></label>
+          <div class="field-row">
+            <label>Persona responsable *<input name="contactName" maxlength="120" autocomplete="name" required></label>
+            <label>Correo de contacto *<input name="contactEmail" type="email" maxlength="254" autocomplete="email" required></label>
+          </div>
+          <label>Especialidad *<input name="specialty" maxlength="160" required placeholder="Cerámica, bordado, joyería, papel…"></label>
+          <label>Web o red social <span>opcional</span><input name="websiteUrl" type="url" maxlength="500" inputmode="url" placeholder="https://"></label>
+          <label>Cuéntanos qué haces y por qué te gustaría unirte <span>opcional</span><textarea name="message" minlength="10" maxlength="2000" rows="6" placeholder="Háblanos de tus técnicas, materiales y forma de trabajar."></textarea></label>
+          <label class="honey-field" aria-hidden="true">Sitio de la empresa<input name="companyWebsite" tabindex="-1" autocomplete="off"></label>
+          <label class="privacy-check"><input name="privacyAccepted" type="checkbox" required><span>He leído la <a href="/legal/privacidad/">política de privacidad</a> y acepto que se usen estos datos para revisar mi solicitud. *</span></label>
+          <p id="application-message" class="form-message" role="status" aria-live="polite"></p>
+          <button class="submit-button" type="submit">Enviar mi solicitud</button>
+        </form>
+      </div>
+      <div id="success-view" class="success-view" hidden tabindex="-1">
+        <span class="success-mark" aria-hidden="true">✓</span>
+        <p class="eyebrow">Solicitud recibida</p>
+        <h2>Gracias por enseñarnos tu taller.</h2>
+        <p>La revisaremos personalmente. Recibirás nuestra respuesta en el correo que nos has indicado.</p>
+        <p class="reference">Referencia: <strong id="application-reference"></strong></p>
+        <a class="submit-button link-button" href="/">Volver a Atelier Lumière</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="footer-brand"><strong>Atelier Lumière</strong><span>Artesanía para celebrar</span></div><nav aria-label="Enlaces del pie"><a href="/">Inicio</a><a href="/talleres/">Talleres</a><a href="/legal/">Legal</a><a href="/proveedor/acceso/">Acceso talleres</a></nav></footer>
+</body>
+</html>

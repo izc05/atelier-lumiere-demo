@@ -8,7 +8,7 @@ const MAX_BODY_BYTES = 64 * 1024;
 const ADMIN_SESSION_COOKIE = "atelier_admin_session";
 const PROVIDER_SESSION_COOKIE = "atelier_provider_session";
 // Marcador de compatibilidad validado: Authorization: `Bearer ${apiAdminToken}`
-const ADMIN_PROXY_PATTERN = /^\/internal\/admin\/providers(?:\/[0-9a-f-]+\/(?:status|invitations|audit))?$/i;
+const ADMIN_PROXY_PATTERN = /^(?:\/internal\/admin\/providers(?:\/[0-9a-f-]+\/(?:status|invitations|audit))?|\/internal\/admin\/workshop-applications(?:\/[0-9a-f-]+\/(?:approve|reject))?)$/i;
 const PROVIDER_PROXY_ROUTES = new Map([
   ["/internal/provider/invitation-preview", "/api/provider-invitations/preview"],
   ["/internal/provider/invitation-accept", "/api/provider-invitations/accept"],
@@ -183,6 +183,21 @@ export function createWebHandler({
   }
 
   const adminSessions = new Map();
+  const applicationSubmissions = new Map();
+
+  function submissionAllowed(request) {
+    const key = request.socket?.remoteAddress ?? "unknown";
+    const current = now();
+    const windowMs = 60 * 60 * 1000;
+    const recent = (applicationSubmissions.get(key) ?? []).filter((timestamp) => timestamp > current - windowMs);
+    if (recent.length >= 5) {
+      applicationSubmissions.set(key, recent);
+      return false;
+    }
+    recent.push(current);
+    applicationSubmissions.set(key, recent);
+    return true;
+  }
 
   function cleanAdminSessions() {
     const current = now();
@@ -269,6 +284,44 @@ export function createWebHandler({
       sendJson(response, 502, {
         error: "API_UNAVAILABLE",
         message: "El servicio no responde. Inténtalo de nuevo en unos minutos."
+      });
+    }
+  }
+
+  async function proxyWorkshopApplication(request, response) {
+    if (request.method !== "POST") {
+      sendJson(response, 405, { error: "METHOD_NOT_ALLOWED" }, { Allow: "POST" });
+      return;
+    }
+    if (!submissionAllowed(request)) {
+      sendJson(response, 429, {
+        error: "RATE_LIMITED",
+        message: "Has enviado varias solicitudes. Espera un poco antes de intentarlo de nuevo."
+      }, { "Retry-After": "3600" });
+      return;
+    }
+    const body = await readBody(request);
+    if (!String(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) {
+      sendJson(response, 415, { error: "UNSUPPORTED_MEDIA_TYPE", message: "El cuerpo debe ser JSON." });
+      return;
+    }
+    try {
+      const upstream = await apiRequest("/api/workshop-applications", {
+        method: "POST",
+        body,
+        timeoutMs: 10000,
+        userAgent: request.headers["user-agent"]
+      });
+      const responseBody = await upstream.text();
+      response.writeHead(upstream.status, securityHeaders({
+        "Content-Type": "application/json; charset=utf-8"
+      }));
+      response.end(responseBody);
+    } catch (error) {
+      logger.error("No se pudo enviar la solicitud de taller.", error);
+      sendJson(response, 502, {
+        error: "API_UNAVAILABLE",
+        message: "No hemos podido guardar la solicitud. Inténtalo de nuevo en unos minutos."
       });
     }
   }
@@ -419,6 +472,11 @@ export function createWebHandler({
     try {
       if (request.method === "GET" && url.pathname === "/internal/api-health") {
         await proxyHealth(response);
+        return;
+      }
+
+      if (url.pathname === "/internal/workshop-applications") {
+        await proxyWorkshopApplication(request, response);
         return;
       }
 
