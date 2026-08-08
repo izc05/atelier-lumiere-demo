@@ -5,6 +5,7 @@ root.classList.add("js");
 const MOBILE_QUERY = "(max-width: 760px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const PUBLIC_IMAGE_WIDTHS = Object.freeze([320, 640, 960]);
+const BRAND_ASSET_BASE = "/assets/brand/";
 const REVEAL_SELECTOR = [
   ".hero-section",
   ".manifesto-section",
@@ -86,6 +87,30 @@ window.AtelierImages = Object.freeze({
   variantUrl: imageVariantUrl,
   configure: configurePublicImage
 });
+
+function initializeBrandAssets() {
+  let favicon = document.querySelector('link[rel="icon"]');
+  if (!favicon) {
+    favicon = document.createElement("link");
+    favicon.rel = "icon";
+    favicon.type = "image/svg+xml";
+    document.head.append(favicon);
+  }
+  favicon.href = `${BRAND_ASSET_BASE}atelier-mark-v2.svg`;
+
+  for (const brand of document.querySelectorAll("a.wordmark")) {
+    if (brand.dataset.atelierBrand === "v2") continue;
+    const image = document.createElement("img");
+    image.src = `${BRAND_ASSET_BASE}atelier-logo-v2-horizontal.svg`;
+    image.alt = "Atelier Lumière";
+    image.className = "atelier-header-logo";
+    image.decoding = "async";
+    brand.replaceChildren(image);
+    brand.classList.add("atelier-brand-link");
+    brand.dataset.atelierBrand = "v2";
+    brand.setAttribute("aria-label", "Atelier Lumière, inicio");
+  }
+}
 
 function ensureWorkshopsNavigation(navigation) {
   const links = [...navigation.querySelectorAll("a[href]")];
@@ -272,6 +297,7 @@ function initializeNavigation(header) {
   render();
 }
 
+initializeBrandAssets();
 initializeMotionPreference();
 initializeReveals();
 for (const header of document.querySelectorAll("[data-public-header]")) {

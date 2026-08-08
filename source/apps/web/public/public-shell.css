@@ -29,6 +29,22 @@
   scroll-margin-top: 110px;
 }
 
+.atelier-brand-link {
+  display: inline-flex !important;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-start;
+  text-decoration: none !important;
+}
+
+.atelier-header-logo {
+  display: block;
+  width: clamp(176px, 14vw, 228px);
+  max-width: 100%;
+  height: auto;
+  max-height: 56px;
+}
+
 .public-menu-toggle {
   display: none;
   min-width: 44px;
@@ -77,6 +93,11 @@ body.public-menu-open {
 }
 
 @media (max-width: 760px) {
+  .atelier-header-logo {
+    width: clamp(148px, 46vw, 184px);
+    max-height: 48px;
+  }
+
   .js .public-menu-toggle {
     position: relative;
     z-index: 92;

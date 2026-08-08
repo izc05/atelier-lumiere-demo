@@ -9,6 +9,7 @@
   <meta name="description" content="Piezas artesanales seleccionadas para bodas, comuniones, nacimientos y celebraciones especiales.">
   <title>Atelier Lumière · Artesanía para celebrar</title>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/brand-entry.css">
   <link rel="stylesheet" href="/home-editorial.css">
   <link rel="stylesheet" href="/home-featured.css">
   <link rel="stylesheet" href="/home-commissions.css">
@@ -19,10 +20,20 @@
   <script defer src="/public-shell.js"></script>
   <script defer src="/home.js"></script>
   <script defer src="/home-stories.js"></script>
+  <script defer src="/brand-entry.js"></script>
   <link rel="stylesheet" href="/premium-ui.css">
   <script src="/premium-ui.js" defer></script>
 </head>
 <body>
+  <section class="brand-entry" id="brand-entry" aria-label="Entrada a Atelier Lumière" hidden>
+    <div class="brand-entry-inner">
+      <img class="brand-entry-logo" src="/assets/brand/atelier-logo-v2-light.svg" alt="Atelier Lumière · Artesanía para celebrar">
+      <p class="brand-entry-copy">Piezas con oficio para momentos que merecen quedarse.</p>
+      <button class="brand-entry-action" id="brand-entry-action" type="button">Entrar</button>
+    </div>
+    <p class="brand-entry-hint">Descubre el atelier</p>
+  </section>
+
   <a class="skip-link" href="#main-content">Saltar al contenido</a>
   <header class="site-header" id="site-header" data-public-header>
     <a class="wordmark" href="/" aria-label="Atelier Lumière, inicio">
