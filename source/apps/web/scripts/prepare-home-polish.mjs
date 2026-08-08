@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const HOME_STYLESHEET = '<link rel="stylesheet" href="/home-polish.css">';
+const HOME_FRAMING_SCRIPT = '<script defer src="/home-product-framing.js"></script>';
 
 export function injectHomePolish(source) {
   let html = String(source ?? "");
@@ -13,6 +14,9 @@ export function injectHomePolish(source) {
   }
   if (!html.includes('href="/home-polish.css"')) {
     html = html.replace("</head>", `  ${HOME_STYLESHEET}\n</head>`);
+  }
+  if (!html.includes('src="/home-product-framing.js"')) {
+    html = html.replace("</head>", `  ${HOME_FRAMING_SCRIPT}\n</head>`);
   }
   return html;
 }
