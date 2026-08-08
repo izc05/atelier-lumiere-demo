@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/home-editorial.css">
   <link rel="stylesheet" href="/home-featured.css">
+  <link rel="stylesheet" href="/home-commissions.css">
   <link rel="stylesheet" href="/tienda/cart.css">
   <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
@@ -111,19 +112,76 @@
       <div class="section-action"><a class="text-link" href="/tienda/">Ver toda la tienda <span aria-hidden="true">→</span></a></div>
     </section>
 
-    <section class="process-section" id="como-funciona" aria-labelledby="process-title">
-      <div class="process-intro">
-        <p class="eyebrow">Diseño propio</p>
+    <section class="process-section commission-section" id="como-funciona" aria-labelledby="process-title">
+      <div class="commission-intro">
+        <p class="eyebrow">Diseño propio · Encargos</p>
         <h2 id="process-title">Una idea también puede convertirse en pieza.</h2>
-        <p>Cuando no encuentres exactamente lo que imaginas, puedes partir de una pieza publicada y explicar al taller qué necesitas.</p>
-        <a class="button button-light" href="/tienda/">Elegir un punto de partida</a>
+        <p class="commission-lead">No hace falta llegar con un diseño terminado. Una fecha, una cantidad, unos colores o una historia pueden ser suficientes para empezar a hablar con el taller adecuado.</p>
+
+        <article class="commission-brief" aria-label="Ejemplo de un encargo">
+          <div class="commission-brief-head">
+            <span>Ejemplo de idea</span>
+            <strong>Comunión · Mayo</strong>
+          </div>
+          <dl>
+            <div><dt>Cantidad</dt><dd>40 unidades</dd></div>
+            <div><dt>Paleta</dt><dd>Marfil + burdeos</dd></div>
+            <div><dt>Detalle</dt><dd>Nombre y fecha</dd></div>
+            <div><dt>Deseo</dt><dd>Algo sencillo y personal</dd></div>
+          </dl>
+          <p>El taller convierte estas pistas en una propuesta concreta antes de fabricar la pieza.</p>
+        </article>
+
+        <div class="commission-actions">
+          <a class="button button-light" href="/talleres/?encargos=1">Buscar talleres para encargos</a>
+          <a class="commission-text-link" href="/tienda/">Partir de una pieza de la tienda <span aria-hidden="true">→</span></a>
+        </div>
       </div>
-      <ol class="process-list">
-        <li><span>01</span><div><h3>Encuentra un lenguaje</h3><p>Elige la pieza, técnica o taller que se acerca a tu idea.</p></div></li>
-        <li><span>02</span><div><h3>Cuéntanos el momento</h3><p>Describe nombres, fecha, colores, cantidades y cualquier detalle importante.</p></div></li>
-        <li><span>03</span><div><h3>Recibe una propuesta</h3><p>El taller prepara un presupuesto versionado que solo tú puedes aprobar.</p></div></li>
-        <li><span>04</span><div><h3>Sigue el proceso</h3><p>Consulta mensajes, avances e incidencias desde tu acceso privado.</p></div></li>
-      </ol>
+
+      <div class="commission-journey" aria-label="Cómo funciona un encargo personalizado">
+        <ol class="commission-route">
+          <li>
+            <span class="commission-number">01</span>
+            <div class="commission-step-copy">
+              <p class="commission-kicker">Tu punto de partida</p>
+              <h3>Cuéntanos el momento.</h3>
+              <p>Explica para quién es, cuándo lo necesitas, cuántas piezas buscas y qué detalles te gustaría conservar.</p>
+            </div>
+            <span class="commission-signal" aria-hidden="true">Idea</span>
+          </li>
+          <li>
+            <span class="commission-number">02</span>
+            <div class="commission-step-copy">
+              <p class="commission-kicker">El oficio adecuado</p>
+              <h3>Encuentra un taller que encaje contigo.</h3>
+              <p>Descubre su historia, técnicas, materiales y piezas antes de decidir con quién quieres desarrollar el encargo.</p>
+            </div>
+            <span class="commission-signal" aria-hidden="true">Taller</span>
+          </li>
+          <li>
+            <span class="commission-number">03</span>
+            <div class="commission-step-copy">
+              <p class="commission-kicker">Antes de fabricar</p>
+              <h3>Recibe una propuesta y un presupuesto.</h3>
+              <p>El taller concreta el diseño, cantidades, plazos y precio. La propuesta queda preparada para que puedas revisarla y aprobarla.</p>
+            </div>
+            <span class="commission-signal" aria-hidden="true">Propuesta</span>
+          </li>
+          <li>
+            <span class="commission-number">04</span>
+            <div class="commission-step-copy">
+              <p class="commission-kicker">Hecho para ti</p>
+              <h3>Sigue el proceso hasta la pieza final.</h3>
+              <p>Una vez aceptada la propuesta, el encargo entra en el taller y puedes seguir sus avances desde tu espacio privado.</p>
+            </div>
+            <span class="commission-signal" aria-hidden="true">Pieza</span>
+          </li>
+        </ol>
+        <aside class="commission-note">
+          <span aria-hidden="true">AL</span>
+          <p><strong>Primero se entiende la idea.</strong> Después se decide qué fabricar.</p>
+        </aside>
+      </div>
     </section>
 
     <section class="story-section">
