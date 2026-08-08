@@ -1,6 +1,7 @@
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
+// DEV_ADMIN_TOKEN queda reservado al API; este proxy usa exclusivamente la sesión administrativa HttpOnly.
 const ADMIN_SESSION_COOKIE = "atelier_admin_session";
 const PROFILE_PATTERN = /^\/internal\/admin\/provider-profiles(?:\/([0-9a-f-]{36})(?:\/(review|publish|media)(?:\/([0-9a-f-]{36})\/(preview))?)?)?$/i;
 const SAFE_RESPONSE_HEADERS = new Set([
