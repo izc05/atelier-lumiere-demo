@@ -11,6 +11,12 @@
   const params = new URLSearchParams(window.location.search);
   const forceEntry = params.get("intro") === "1";
   const skipEntry = params.get("intro") === "0";
+  const background = [
+    document.querySelector(".skip-link"),
+    document.querySelector(".site-header"),
+    document.getElementById("main-content"),
+    ...document.querySelectorAll("body > .site-footer")
+  ].filter(Boolean);
 
   const sessionGet = () => {
     try { return sessionStorage.getItem(SESSION_KEY); } catch { return null; }
@@ -20,12 +26,22 @@
     try { sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* almacenamiento no disponible */ }
   };
 
+  const setBackgroundInert = (value) => {
+    for (const element of background) {
+      if (value) element.setAttribute("inert", "");
+      else element.removeAttribute("inert");
+    }
+  };
+
   if (skipEntry || (!forceEntry && sessionGet() === "1")) {
     entry.hidden = true;
     return;
   }
 
+  entry.setAttribute("role", "dialog");
+  entry.setAttribute("aria-modal", "true");
   document.body.classList.add("brand-entry-active");
+  setBackgroundInert(true);
   entry.hidden = false;
 
   let opening = false;
@@ -40,6 +56,8 @@
     const delay = reducedMotion.matches ? 30 : 1080;
     window.setTimeout(() => {
       entry.hidden = true;
+      entry.removeAttribute("aria-modal");
+      setBackgroundInert(false);
       document.body.classList.remove("brand-entry-active", "brand-entry-opening");
       document.getElementById("main-content")?.focus({ preventScroll: true });
     }, delay);
