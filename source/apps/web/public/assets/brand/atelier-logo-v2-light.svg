@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 330" role="img" aria-labelledby="title desc">
+  <title id="title">Atelier Lumière</title>
+  <desc id="desc">Identidad Atelier Lumière con monograma AL e hilo dorado.</desc>
+  <g fill="none" fill-rule="evenodd" text-anchor="middle">
+    <g transform="translate(150 8)">
+      <text x="86" y="108" fill="#FFF9EE" font-family="Georgia, 'Times New Roman', serif" font-size="112" font-weight="400" letter-spacing="-7">A</text>
+      <text x="139" y="109" fill="#FFF9EE" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="400">L</text>
+      <path d="M35 85c27-31 50-24 59-2 8 20 26 30 48 23 26-8 38-2 61 13" stroke="#D8B761" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M203 119c18 4 27 14 22 26-5 12-20 13-30 4-7-7-5-17 4-21 10-5 21 1 23 12" stroke="#D8B761" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="280" y="176" fill="#FFF9EE" font-family="Arial, sans-serif" font-size="16" font-weight="600" letter-spacing="13">ATELIER</text>
+    <text x="280" y="239" fill="#FFF9EE" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="400" letter-spacing="3">LUMIÈRE</text>
+    <path d="M112 270h116m104 0h116" stroke="#D8B761" stroke-width="1.4"/>
+    <circle cx="280" cy="270" r="4.5" fill="#D8B761"/>
+    <text x="280" y="307" fill="#E5C879" font-family="Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="5.5">ARTESANÍA PARA CELEBRAR</text>
+  </g>
+</svg>
