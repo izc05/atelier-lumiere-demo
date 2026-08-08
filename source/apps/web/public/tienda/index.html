@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#59101f">
   <title>Tienda · Atelier Lumière</title>
   <link rel="stylesheet" href="/tienda/store.css">
+  <link rel="stylesheet" href="/tienda/storefront.css">
   <link rel="stylesheet" href="/tienda/cart.css">
   <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
@@ -16,7 +17,7 @@
   <link rel="stylesheet" href="/premium-ui.css">
   <script src="/premium-ui.js" defer></script>
 </head>
-<body>
+<body class="store-page">
   <a class="skip-link" href="#main-content">Saltar al contenido</a>
   <div class="shell">
     <header class="topbar" data-public-header>
@@ -29,26 +30,31 @@
         <a class="button ghost" href="/">Inicio</a>
         <a class="button ghost" href="/tienda/">Tienda</a>
         <a class="button ghost" href="/blog/">Historias</a>
-        <a class="button ghost" href="/legal/">Legal</a>
         <a class="button ghost cart-link" href="/carrito/">Carrito <span id="cart-count" class="cart-count">0</span></a>
         <a class="button secondary" href="/proveedor/acceso/">Acceso talleres</a>
       </nav>
     </header>
 
     <main id="main-content" tabindex="-1">
-      <section class="hero">
-        <div>
+      <section class="hero storefront-hero" aria-labelledby="storefront-title">
+        <div class="storefront-copy">
           <p class="eyebrow">Piezas con historia</p>
-          <h1>La tienda de los talleres invitados.</h1>
+          <h1 id="storefront-title">La tienda de los talleres invitados.</h1>
           <p class="lead">Descubre artículos artesanales revisados por Atelier Lumière. Solo mostramos talleres activos y piezas aprobadas y publicadas.</p>
+          <div class="storefront-meta" aria-label="Compromisos del catálogo">
+            <span>Talleres invitados</span>
+            <span>Piezas revisadas</span>
+            <span>Pequeñas series</span>
+          </div>
         </div>
         <aside class="hero-note">
+          <span class="storefront-note-kicker">Selección Atelier</span>
           <strong>Catálogo editorial</strong>
           <p>Cada pieza pasa por un flujo de borrador, revisión, aprobación y publicación antes de aparecer aquí.</p>
         </aside>
       </section>
 
-      <section class="toolbar" aria-label="Filtros del catálogo">
+      <section class="toolbar storefront-toolbar" aria-label="Filtros del catálogo">
         <input id="search-input" type="search" autocomplete="off" placeholder="Buscar pieza, categoría o taller" aria-label="Buscar pieza, categoría o taller">
         <select id="category-filter" aria-label="Filtrar por categoría"><option value="">Todas las categorías</option></select>
         <select id="event-filter" aria-label="Filtrar por ocasión">
@@ -69,6 +75,18 @@
       <section id="error-view" class="error" hidden><div><h2>No se pudo abrir la tienda</h2><p id="error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div></section>
       <section id="products-view" class="products" aria-live="polite" hidden></section>
     </main>
+
+    <footer class="storefront-footer">
+      <div>
+        <strong>Atelier Lumière</strong>
+        <p>Una selección de talleres independientes y piezas creadas despacio.</p>
+      </div>
+      <nav aria-label="Enlaces de la tienda">
+        <a href="/">Inicio</a>
+        <a href="/blog/">Historias</a>
+        <a href="/proveedor/acceso/">Acceso talleres</a>
+      </nav>
+    </footer>
   </div>
 </body>
 </html>

@@ -54,6 +54,11 @@
   text-underline-offset: 5px;
 }
 
+/* Legal queda accesible únicamente desde el pie de la portada principal. */
+[data-public-navigation].public-navigation a[href="/legal/"] {
+  display: none !important;
+}
+
 body.public-menu-open {
   overflow: hidden;
 }
