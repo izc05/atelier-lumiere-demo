@@ -6,16 +6,10 @@ ENV WEB_HOST=0.0.0.0
 ENV WEB_PORT=3000
 
 COPY source/apps/web ./apps/web
-COPY index.html /demo/index.html
-COPY _next /demo/_next
-COPY images /demo/images
-COPY assets /demo/assets
 
-RUN node apps/web/scripts/prepare-original-home.mjs /demo /app/apps/web/public \
-  && node apps/web/scripts/prepare-premium-ui.mjs /app/apps/web/public \
+RUN node apps/web/scripts/prepare-premium-ui.mjs /app/apps/web/public \
   && find /app/apps/web -type d -exec chmod 755 {} + \
-  && find /app/apps/web -type f -exec chmod 644 {} + \
-  && rm -rf /demo
+  && find /app/apps/web -type f -exec chmod 644 {} +
 
 EXPOSE 3000
 

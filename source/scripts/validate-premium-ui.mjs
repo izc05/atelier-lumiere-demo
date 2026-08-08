@@ -98,13 +98,26 @@ for (const expected of [
   assert.ok(prepare.includes(expected), `Falta una protección del generador premium: ${expected}`);
 }
 
-assert.ok(original.includes('href="/premium-ui.css"'), "La portada original debe cargar premium-ui.css.");
-assert.ok(original.includes('src="/premium-ui.js"'), "La portada original debe cargar premium-ui.js.");
+assert.ok(original.includes('href="/premium-ui.css"'), "La utilidad de demo debe seguir cargando premium-ui.css si se usa manualmente.");
+assert.ok(original.includes('src="/premium-ui.js"'), "La utilidad de demo debe seguir cargando premium-ui.js si se usa manualmente.");
 
-const originalIndex = dockerfile.indexOf("prepare-original-home.mjs");
 const premiumIndex = dockerfile.indexOf("prepare-premium-ui.mjs");
-assert.ok(originalIndex >= 0, "Docker debe preparar la portada original.");
-assert.ok(premiumIndex > originalIndex, "Docker debe aplicar el sistema premium después de preparar la portada original.");
+assert.ok(premiumIndex >= 0, "Docker debe aplicar el sistema visual premium a la aplicación real.");
+assert.equal(
+  dockerfile.includes("prepare-original-home.mjs"),
+  false,
+  "Docker de producción no debe sobrescribir la HOME real con la demo antigua."
+);
+assert.equal(
+  dockerfile.includes("COPY index.html /demo/index.html"),
+  false,
+  "Docker de producción no debe copiar el index de la demo antigua."
+);
+assert.match(
+  dockerfile,
+  /COPY\s+source\/apps\/web\s+\.\/apps\/web/,
+  "Docker debe construir la web desde source/apps/web."
+);
 
 const [cssStat, jsStat] = await Promise.all([stat(paths.css), stat(paths.browser)]);
 assert.ok(cssStat.size < 40_000, `premium-ui.css es demasiado pesado: ${cssStat.size} bytes.`);
