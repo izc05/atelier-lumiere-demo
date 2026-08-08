@@ -10,6 +10,7 @@
   <title>Talleres · Atelier Lumière</title>
   <link rel="stylesheet" href="/tienda/store.css">
   <link rel="stylesheet" href="/talleres/talleres.css">
+  <link rel="stylesheet" href="/talleres/brand-fix.css">
   <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/public-shell.js"></script>
   <script defer src="/talleres/talleres.js"></script>
@@ -20,9 +21,8 @@
   <a class="skip-link" href="#main-content">Saltar al contenido</a>
   <div class="shell workshops-shell">
     <header class="topbar" data-public-header>
-      <a class="brand" href="/">
-        <span class="brand-mark" aria-hidden="true">AL</span>
-        <span><strong>Atelier Lumière</strong><small>Artesanía para celebrar</small></span>
+      <a class="brand atelier-brand-link" href="/" aria-label="Atelier Lumière, inicio" data-atelier-brand="official" data-atelier-brand-tone="dark">
+        <img class="atelier-header-logo atelier-official-logo" src="/assets/brand/atelier-logo-official-dark.svg" alt="Atelier Lumière" fetchpriority="high">
       </a>
       <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-public-menu-toggle>Menú</button>
       <nav class="nav public-navigation" id="public-navigation" aria-label="Navegación principal" data-public-navigation>
@@ -42,7 +42,7 @@
           <p class="lead">Conoce los talleres seleccionados por Atelier Lumière, descubre cómo trabajan y entra en su espacio antes de elegir una pieza.</p>
         </div>
         <aside class="workshops-hero-note" aria-label="Sobre la selección">
-          <span class="workshops-hero-mark" aria-hidden="true">AL</span>
+          <img class="workshops-hero-mark" src="/assets/brand/atelier-mark-official.svg" alt="" aria-hidden="true">
           <div>
             <strong id="workshops-total">—</strong>
             <p>Talleres con perfil editorial publicado y revisado por Atelier Lumière.</p>
@@ -107,7 +107,10 @@
     </main>
 
     <footer class="workshops-footer">
-      <div><strong>Atelier Lumière</strong><span>Artesanía para celebrar</span></div>
+      <div class="workshops-footer-brand">
+        <img class="workshops-footer-logo" src="/assets/brand/atelier-logo-official-dark.svg" alt="Atelier Lumière">
+        <span>Artesanía para celebrar</span>
+      </div>
       <nav aria-label="Enlaces del pie">
         <a href="/tienda/">Tienda</a>
         <a href="/talleres/">Talleres</a>

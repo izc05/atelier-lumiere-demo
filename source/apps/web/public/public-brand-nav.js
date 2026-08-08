@@ -5,6 +5,9 @@
     mark: "/assets/brand/atelier-mark-official.svg"
   });
   const MOBILE_QUERY = "(max-width: 760px)";
+  const providerArea = window.location.pathname.startsWith("/proveedor/");
+
+  if (providerArea) document.documentElement.dataset.atelierArea = "provider";
 
   function applyOfficialBrand() {
     let favicon = document.querySelector('link[rel="icon"]');
@@ -19,12 +22,16 @@
     const entryLogo = document.querySelector(".brand-entry-logo");
     if (entryLogo instanceof HTMLImageElement) entryLogo.src = OFFICIAL.light;
 
-    const brands = document.querySelectorAll(
-      "[data-public-header] a.wordmark, [data-public-header] a.brand"
-    );
+    const selectors = [
+      "[data-public-header] a.wordmark",
+      "[data-public-header] a.brand"
+    ];
+    if (providerArea) selectors.push("a.brand");
+
+    const brands = document.querySelectorAll(selectors.join(", "));
     for (const brand of brands) {
       const header = brand.closest("[data-public-header]");
-      const light = brand.classList.contains("wordmark") || header?.classList.contains("site-header");
+      const light = !providerArea && (brand.classList.contains("wordmark") || header?.classList.contains("site-header"));
       const image = document.createElement("img");
       image.src = light ? OFFICIAL.light : OFFICIAL.dark;
       image.alt = "Atelier Lumière";
@@ -35,7 +42,7 @@
       brand.classList.add("atelier-brand-link");
       brand.dataset.atelierBrand = "official";
       brand.dataset.atelierBrandTone = light ? "light" : "dark";
-      brand.setAttribute("aria-label", "Atelier Lumière, inicio");
+      if (!brand.getAttribute("aria-label")) brand.setAttribute("aria-label", "Atelier Lumière");
     }
   }
 
