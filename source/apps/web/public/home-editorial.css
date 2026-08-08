@@ -1,0 +1,252 @@
+/* Atelier Lumière · capa editorial específica de la portada.
+ * Mantiene intactos catálogo, pedidos, pagos y perfiles.
+ */
+
+.atelier-status,
+.atelier-empty {
+  margin-top: 54px;
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.atelier-empty p {
+  margin: 0 0 20px;
+}
+
+.atelier-grid-live {
+  align-items: stretch;
+}
+
+.workshop-card {
+  min-height: 560px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(88, 17, 36, 0.12);
+  border-radius: 3px;
+  background: #fffaf2;
+  box-shadow: 0 26px 70px rgba(47, 7, 18, 0.08);
+  opacity: 0;
+  transform: translateY(28px);
+  transition: transform 720ms cubic-bezier(.22,.7,.2,1), opacity 620ms ease, box-shadow 240ms ease;
+}
+
+.workshop-card:nth-child(2) { transition-delay: 90ms; }
+.workshop-card:nth-child(3) { transition-delay: 180ms; }
+.workshop-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.workshop-card:hover {
+  box-shadow: 0 34px 88px rgba(47, 7, 18, 0.15);
+}
+
+.workshop-card-link {
+  min-height: inherit;
+  display: grid;
+  grid-template-rows: minmax(295px, 1.08fr) minmax(240px, .92fr);
+  color: inherit;
+  text-decoration: none;
+}
+
+.workshop-card-media {
+  position: relative;
+  min-height: 295px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 74% 20%, rgba(221, 200, 148, .6), transparent 34%),
+    linear-gradient(145deg, #efe1ca, #c5a878);
+}
+
+.workshop-card-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 295px;
+  object-fit: cover;
+  transition: transform 900ms cubic-bezier(.22,.7,.2,1), filter 420ms ease;
+}
+
+.workshop-card:hover .workshop-card-media img {
+  transform: scale(1.035);
+  filter: saturate(.92) contrast(1.02);
+}
+
+.workshop-card-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(88, 17, 36, .54);
+  font-family: var(--serif);
+  font-size: clamp(4.8rem, 8vw, 7rem);
+  letter-spacing: -.06em;
+}
+
+.workshop-card-veil {
+  position: absolute;
+  inset: auto 0 0;
+  height: 44%;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgba(47, 7, 18, .24));
+}
+
+.workshop-card-content {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 30px 30px;
+  background: rgba(255, 250, 242, .98);
+}
+
+.workshop-card-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--line);
+}
+
+.workshop-card .card-number {
+  position: static;
+  color: var(--wine-soft);
+  font-family: var(--serif);
+  font-size: 1.05rem;
+}
+
+.workshop-location {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.workshop-card .eyebrow {
+  margin-bottom: 8px;
+  color: var(--gold);
+}
+
+.workshop-card h3 {
+  color: var(--wine-dark);
+  font-size: clamp(2rem, 2.7vw, 3rem);
+  line-height: .98;
+}
+
+.workshop-card-copy {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: .94rem;
+  line-height: 1.62;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.workshop-card-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  margin-top: 20px;
+  color: var(--wine-soft);
+  font-size: .65rem;
+  font-weight: 750;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.workshop-card-signals span + span::before {
+  content: "·";
+  margin-right: 14px;
+  color: var(--gold);
+}
+
+.workshop-card-action {
+  margin-top: auto;
+  padding-top: 23px;
+  color: var(--wine);
+  font-size: .72rem;
+  font-weight: 850;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.editorial-reveal {
+  opacity: 0;
+  transform: translateY(34px);
+  transition: opacity 720ms ease, transform 780ms cubic-bezier(.22,.7,.2,1);
+}
+.editorial-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (min-width: 1180px) {
+  .atelier-grid-live {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .atelier-grid-live .workshop-card:nth-child(2) {
+    transform: translateY(42px);
+  }
+  .atelier-grid-live .workshop-card:nth-child(2).is-visible {
+    transform: translateY(18px);
+  }
+}
+
+@media (max-width: 1080px) {
+  .atelier-grid-live .workshop-card:last-child {
+    grid-column: 1 / -1;
+    min-height: 500px;
+  }
+  .atelier-grid-live .workshop-card:last-child .workshop-card-link {
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+    grid-template-rows: 1fr;
+  }
+}
+
+@media (max-width: 780px) {
+  .atelier-status,
+  .atelier-empty {
+    margin-top: 34px;
+  }
+
+  .workshop-card,
+  .atelier-grid-live .workshop-card:last-child {
+    min-height: 0;
+  }
+
+  .atelier-grid-live .workshop-card:last-child {
+    grid-column: auto;
+  }
+
+  .workshop-card-link,
+  .atelier-grid-live .workshop-card:last-child .workshop-card-link {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(260px, 54vw) auto;
+  }
+
+  .workshop-card-media,
+  .workshop-card-media img {
+    min-height: 260px;
+  }
+
+  .workshop-card-content {
+    padding: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workshop-card,
+  .editorial-reveal,
+  .workshop-card-media img {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
