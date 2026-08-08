@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">AL · Atelier Lumière</title>
+  <desc id="desc">Monograma oficial AL con hilo dorado.</desc>
+  <rect width="160" height="160" rx="30" fill="#59101F"/>
+  <text x="32" y="96" fill="#FFF8E9" font-family="Georgia, 'Times New Roman', serif" font-size="82" font-weight="400" letter-spacing="-7">A</text>
+  <text x="79" y="101" fill="#FFF8E9" font-family="Georgia, 'Times New Roman', serif" font-size="59" font-weight="400">L</text>
+  <path d="M30 108C47 94 63 96 73 110C83 123 104 127 130 116" fill="none" stroke="#D8B761" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 109C18 117 19 130 31 132C42 134 49 126 45 119" fill="none" stroke="#D8B761" stroke-width="2" stroke-linecap="round"/>
+</svg>
