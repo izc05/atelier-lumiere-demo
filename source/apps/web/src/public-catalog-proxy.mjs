@@ -1,7 +1,7 @@
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-const CATALOG_PATTERN = /^\/internal\/catalog\/(?:products(?:\/([a-z0-9-]+)\/([a-z0-9-]+)|\/([0-9a-f-]{36})\/media\/([0-9a-f-]{36})\/(preview|content))?|providers\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})\/preview)$/i;
+const CATALOG_PATTERN = /^\/internal\/catalog\/(?:products(?:\/([a-z0-9-]+)\/([a-z0-9-]+)|\/([0-9a-f-]{36})\/media\/([0-9a-f-]{36})\/(preview|content))?|providers(?:\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})\/preview)?)$/i;
 const SAFE_RESPONSE_HEADERS = new Set([
   "content-type", "content-length", "content-disposition",
   "accept-ranges", "content-range", "cache-control",
@@ -49,7 +49,7 @@ export function createPublicCatalogWebHandler({
 
     const targetPath = url.pathname.replace(/^\/internal/, "/api");
     const target = new URL(`${targetPath}${url.search}`, apiBase);
-    const isMedia = Boolean(match[3] || match[7]);
+    const isMedia = /\/media\/[0-9a-f-]{36}\/(?:preview|content)$/i.test(url.pathname);
     try {
       const upstream = await fetchImpl(target, {
         method: "GET",
