@@ -1,0 +1,168 @@
+/* Atelier Lumière · sistema editorial y microinteracciones públicas. */
+:root {
+  --atelier-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, "Times New Roman", serif;
+  --atelier-text: "Avenir Next", Avenir, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --atelier-wine: #59101f;
+  --atelier-wine-dark: #2f0712;
+  --atelier-gold: #b7954f;
+  --atelier-ivory: #fff8e9;
+}
+
+.hero-section h1,
+.hero h1,
+.workshops-hero h1,
+.provider-hero h1,
+.product-hero h1,
+.article-head h1,
+.section-heading h2,
+.commission-intro h2,
+.home-stories-heading h2,
+.closing-section h2,
+.workshop-card h3,
+.product-card h3 {
+  font-family: var(--atelier-display) !important;
+  text-wrap: balance;
+}
+
+.hero-section h1,
+.hero h1,
+.workshops-hero h1,
+.provider-hero h1,
+.product-hero h1,
+.article-head h1 {
+  letter-spacing: -.052em !important;
+}
+
+.eyebrow,
+[data-public-navigation],
+.button,
+.public-menu-toggle,
+.bag-link,
+.product-provider,
+.workshop-location,
+.workshop-card-action {
+  font-family: var(--atelier-text) !important;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.eyebrow { letter-spacing: .22em !important; }
+
+@media (min-width: 761px) {
+  [data-public-navigation] a { position: relative; }
+  [data-public-navigation] a::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -7px;
+    left: 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right center;
+    opacity: .72;
+    transition: transform 300ms cubic-bezier(.2,.7,.2,1);
+  }
+  [data-public-navigation] a:hover::after,
+  [data-public-navigation] a:focus-visible::after,
+  [data-public-navigation] a[aria-current="page"]::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+#home-hero::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 73% 42%, rgba(216,183,97,.11), transparent 27rem);
+  mix-blend-mode: screen;
+}
+
+#home-hero .hero-photo-main img,
+#home-hero .hero-photo-detail img {
+  transition: transform 900ms cubic-bezier(.16,.72,.18,1), filter 500ms ease;
+}
+
+#home-hero .hero-editorial-visual:hover .hero-photo-main img {
+  transform: scale(1.018);
+  filter: saturate(.94) contrast(1.025);
+}
+
+.workshop-card,
+.featured-grid .product-card,
+.home-story-card {
+  transition: transform 420ms cubic-bezier(.2,.72,.2,1), box-shadow 420ms ease, border-color 300ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .workshop-card:hover,
+  .featured-grid .product-card:hover,
+  .home-story-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 64px rgba(47,7,18,.12);
+  }
+}
+
+.workshop-card-action,
+.featured-grid .product-meta a,
+.home-story-card a,
+.closing-section a { position: relative; }
+
+.workshop-card-action::after,
+.featured-grid .product-meta a::after,
+.home-story-card a::after,
+.closing-section a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -5px;
+  left: 0;
+  height: 1px;
+  background: var(--atelier-gold);
+  transform: scaleX(.22);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(.2,.72,.2,1);
+}
+
+.workshop-card:hover .workshop-card-action::after,
+.featured-grid .product-meta a:hover::after,
+.home-story-card a:hover::after,
+.closing-section a:hover::after { transform: scaleX(1); }
+
+.js[data-motion="full"] [data-public-reveal] {
+  filter: blur(4px);
+  transform: translateY(32px) scale(.995);
+  transition:
+    opacity 720ms cubic-bezier(.2,.65,.25,1),
+    transform 820ms cubic-bezier(.16,.72,.18,1),
+    filter 720ms ease;
+}
+
+.js[data-motion="full"] [data-public-reveal].is-visible {
+  filter: blur(0);
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .hero-section h1,
+  .hero h1,
+  .workshops-hero h1,
+  .provider-hero h1,
+  .product-hero h1,
+  .article-head h1 { letter-spacing: -.043em !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #home-hero .hero-photo-main img,
+  #home-hero .hero-photo-detail img,
+  .workshop-card,
+  .featured-grid .product-card,
+  .home-story-card,
+  [data-public-navigation] a::after {
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
