@@ -22,6 +22,19 @@ test("el pulido solo cambia presentación y conserva el hero real", () => {
   assert.doesNotMatch(polish, /Brisa y Azahar|Tierra Serena|El Taller de Lucía/);
 });
 
+test("las piezas de HOME usan una ventana de catálogo equivalente a Tienda", () => {
+  assert.match(polish, /height:\s*240px\s*!important/);
+  assert.match(polish, /object-fit:\s*cover\s*!important/);
+  assert.match(polish, /grid-template-columns:\s*repeat\(2, minmax\(0, 390px\)\)/);
+});
+
+test("la HOME tiene una composición móvil específica", () => {
+  assert.match(polish, /@media \(max-width:\s*780px\)/);
+  assert.match(polish, /hero-photo-detail[\s\S]*display:\s*none\s*!important/);
+  assert.match(polish, /hero-actions[\s\S]*grid-template-columns:\s*1fr/);
+  assert.match(polish, /workshop-card-link[\s\S]*grid-template-rows:\s*250px auto\s*!important/);
+});
+
 test("Docker aplica el pulido después del sistema premium", () => {
   const premium = dockerfile.indexOf("prepare-premium-ui.mjs");
   const home = dockerfile.indexOf("prepare-home-polish.mjs");
