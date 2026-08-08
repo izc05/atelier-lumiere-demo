@@ -1,0 +1,148 @@
+/* Atelier Lumière · pulido visual de HOME tras validación en mini PC.
+ * Solo presentación: marca, navegación y composición del hero.
+ */
+
+@media (min-width: 1100px) {
+  #home-hero.hero-editorial {
+    display: block;
+    min-height: 100svh;
+    padding-top: 154px;
+    padding-right: clamp(44px, 5vw, 96px);
+    padding-bottom: 82px;
+    padding-left: clamp(44px, 5vw, 96px);
+  }
+
+  #home-hero .hero-copy {
+    width: min(44vw, 760px);
+    max-width: 760px;
+  }
+
+  #home-hero .hero-copy h1 {
+    max-width: 700px;
+    font-size: clamp(4.6rem, 6.35vw, 7.55rem);
+    line-height: .9;
+  }
+
+  #home-hero .hero-lead {
+    max-width: 540px;
+    margin-top: 28px;
+  }
+
+  #home-hero .hero-facts {
+    max-width: 610px;
+    margin-top: 44px;
+  }
+
+  #home-hero .hero-editorial-visual {
+    position: absolute;
+    z-index: 2;
+    top: 132px;
+    right: clamp(36px, 4.6vw, 90px);
+    bottom: 58px;
+    width: min(47vw, 900px);
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+  }
+
+  #home-hero .hero-photo-main {
+    inset: 0 4% 0 0;
+  }
+
+  #home-hero .hero-photo-detail {
+    right: 0;
+    bottom: 5%;
+    width: 29%;
+    height: 31%;
+  }
+
+  #home-hero .hero-workshop-note {
+    top: 8%;
+    left: -4%;
+    width: min(250px, 34%);
+    padding: 20px 22px;
+  }
+
+  #home-hero .hero-editorial-seal {
+    right: 5%;
+    bottom: 1%;
+  }
+
+  #home-hero .scroll-cue {
+    left: clamp(44px, 5vw, 96px);
+  }
+}
+
+@media (min-width: 1500px) {
+  #home-hero .hero-editorial-visual {
+    width: min(48vw, 980px);
+  }
+
+  #home-hero .hero-copy {
+    width: min(42vw, 780px);
+  }
+}
+
+@media (min-width: 761px) {
+  .site-header .atelier-header-logo {
+    width: clamp(265px, 18vw, 350px);
+    max-height: 76px;
+  }
+
+  .site-header .main-nav {
+    gap: clamp(24px, 2.2vw, 38px);
+  }
+
+  .site-header .main-nav a,
+  .site-header .header-link,
+  .site-header .bag-link {
+    font-size: .78rem;
+    letter-spacing: .12em;
+  }
+}
+
+@media (min-width: 1100px) and (max-width: 1360px) {
+  #home-hero .hero-copy {
+    width: min(46vw, 650px);
+  }
+
+  #home-hero .hero-editorial-visual {
+    width: min(43vw, 700px);
+  }
+
+  #home-hero .hero-copy h1 {
+    font-size: clamp(4.15rem, 6vw, 6.2rem);
+  }
+}
+
+@media (max-width: 1099px) {
+  #home-hero.hero-editorial {
+    grid-template-columns: minmax(0, 1fr) minmax(400px, .9fr);
+    gap: clamp(28px, 4vw, 48px);
+  }
+
+  #home-hero .hero-editorial-visual {
+    width: 100%;
+    max-width: 680px;
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 780px) {
+  .site-header .atelier-header-logo {
+    width: clamp(170px, 50vw, 210px);
+    max-height: 54px;
+  }
+
+  #home-hero.hero-editorial {
+    display: grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #home-hero .hero-copy,
+  #home-hero .hero-photo-main,
+  #home-hero .hero-photo-detail {
+    transform: none !important;
+  }
+}
