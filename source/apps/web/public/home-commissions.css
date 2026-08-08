@@ -1,0 +1,374 @@
+/* Atelier Lumière · recorrido editorial de encargos personalizados. */
+
+.commission-section {
+  position: relative;
+  overflow: hidden;
+  grid-template-columns: minmax(0, .82fr) minmax(540px, 1.18fr);
+  align-items: start;
+  gap: clamp(54px, 8vw, 126px);
+  padding-top: clamp(92px, 11vw, 164px);
+  padding-bottom: clamp(92px, 11vw, 164px);
+  background:
+    radial-gradient(circle at 84% 18%, rgba(221, 200, 148, .13), transparent 28rem),
+    radial-gradient(circle at 12% 92%, rgba(125, 48, 65, .3), transparent 30rem),
+    linear-gradient(130deg, #26050d 0%, #360812 48%, #4b1020 100%);
+}
+
+.commission-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .42;
+  background:
+    linear-gradient(90deg, transparent 0 62%, rgba(255, 250, 242, .055) 62% 62.08%, transparent 62.08%),
+    repeating-linear-gradient(122deg, transparent 0 29px, rgba(255,255,255,.014) 30px 31px);
+}
+
+.commission-intro,
+.commission-journey {
+  position: relative;
+  z-index: 2;
+}
+
+.commission-intro {
+  align-self: start;
+  max-width: 620px;
+}
+
+.commission-intro h2 {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--serif);
+  font-size: clamp(3.5rem, 5.6vw, 6.2rem);
+  font-weight: 400;
+  letter-spacing: -.048em;
+  line-height: .94;
+}
+
+.commission-lead {
+  max-width: 570px;
+  margin: 28px 0 0;
+  color: rgba(255, 250, 242, .68);
+  font-size: clamp(.98rem, 1.25vw, 1.12rem);
+  line-height: 1.75;
+}
+
+.commission-brief {
+  position: relative;
+  margin-top: 48px;
+  padding: 26px 28px 25px;
+  border: 1px solid rgba(255, 250, 242, .2);
+  border-radius: 2px;
+  color: var(--cream);
+  background: rgba(255, 250, 242, .055);
+  box-shadow: 0 26px 78px rgba(13, 1, 5, .18);
+  backdrop-filter: blur(12px);
+}
+
+.commission-brief::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 34px;
+  width: 56px;
+  height: 14px;
+  transform: rotate(2deg);
+  background: rgba(221, 200, 148, .62);
+  opacity: .72;
+}
+
+.commission-brief-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid rgba(255, 250, 242, .17);
+}
+
+.commission-brief-head span,
+.commission-kicker {
+  color: var(--gold-soft);
+  font-size: .65rem;
+  font-weight: 850;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.commission-brief-head strong {
+  font-family: var(--serif);
+  font-size: 1.12rem;
+  font-weight: 400;
+}
+
+.commission-brief dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24px;
+  margin: 8px 0 0;
+}
+
+.commission-brief dl div {
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 250, 242, .12);
+}
+
+.commission-brief dt {
+  margin-bottom: 5px;
+  color: rgba(255, 250, 242, .46);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.commission-brief dd {
+  margin: 0;
+  color: rgba(255, 250, 242, .9);
+  font-family: var(--serif);
+  font-size: 1.03rem;
+}
+
+.commission-brief > p {
+  margin: 20px 0 0;
+  color: rgba(255, 250, 242, .58);
+  font-size: .8rem;
+  line-height: 1.65;
+}
+
+.commission-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 19px;
+  margin-top: 30px;
+}
+
+.commission-text-link {
+  display: inline-flex;
+  gap: 10px;
+  color: rgba(255, 250, 242, .8);
+  font-size: .7rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.commission-text-link:hover,
+.commission-text-link:focus-visible {
+  color: var(--gold-soft);
+}
+
+.commission-journey {
+  min-width: 0;
+  padding: 5px 0 0;
+}
+
+.commission-route {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commission-route::before {
+  content: "";
+  position: absolute;
+  top: 34px;
+  bottom: 34px;
+  left: 34px;
+  width: 1px;
+  background: linear-gradient(var(--gold-soft), rgba(221, 200, 148, .12));
+}
+
+.commission-route li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: start;
+  min-height: 182px;
+  padding: 26px 0 30px;
+  border-top: 1px solid rgba(255, 250, 242, .16);
+}
+
+.commission-route li:last-child {
+  border-bottom: 1px solid rgba(255, 250, 242, .16);
+}
+
+.commission-number {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  border: 1px solid rgba(221, 200, 148, .55);
+  border-radius: 50%;
+  color: var(--gold-soft);
+  background: #310711;
+  font-family: var(--serif);
+  font-size: 1.24rem;
+}
+
+.commission-step-copy {
+  padding-top: 3px;
+}
+
+.commission-kicker {
+  margin: 0 0 8px;
+}
+
+.commission-step-copy h3 {
+  max-width: 610px;
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--serif);
+  font-size: clamp(1.65rem, 2.35vw, 2.5rem);
+  font-weight: 400;
+  line-height: 1.02;
+}
+
+.commission-step-copy > p:last-child {
+  max-width: 570px;
+  margin: 12px 0 0;
+  color: rgba(255, 250, 242, .58);
+  font-size: .88rem;
+  line-height: 1.68;
+}
+
+.commission-signal {
+  align-self: center;
+  margin-top: 9px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 250, 242, .13);
+  color: rgba(255, 250, 242, .48);
+  font-size: .57rem;
+  font-weight: 850;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.commission-note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: center;
+  margin: 34px 0 0 92px;
+  padding: 18px 20px;
+  border-left: 1px solid var(--gold-soft);
+  color: rgba(255, 250, 242, .65);
+  background: rgba(255, 250, 242, .035);
+}
+
+.commission-note > span {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1px solid rgba(221, 200, 148, .4);
+  border-radius: 50%;
+  color: var(--gold-soft);
+  font-family: var(--serif);
+  font-size: 1rem;
+}
+
+.commission-note p {
+  margin: 0;
+  font-size: .78rem;
+  line-height: 1.58;
+}
+
+.commission-note strong {
+  color: var(--cream);
+  font-weight: 700;
+}
+
+@media (max-width: 1120px) {
+  .commission-section {
+    grid-template-columns: 1fr;
+  }
+
+  .commission-intro {
+    max-width: 820px;
+  }
+
+  .commission-brief {
+    max-width: 720px;
+  }
+
+  .commission-journey {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .commission-section {
+    gap: 58px;
+    padding-inline: 22px;
+  }
+
+  .commission-intro h2 {
+    font-size: clamp(3.2rem, 14vw, 5rem);
+  }
+
+  .commission-brief {
+    padding: 22px 20px;
+  }
+
+  .commission-brief dl {
+    grid-template-columns: 1fr;
+  }
+
+  .commission-route::before {
+    left: 24px;
+  }
+
+  .commission-route li {
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 16px;
+    min-height: 0;
+    padding: 24px 0 28px;
+  }
+
+  .commission-number {
+    width: 48px;
+    height: 48px;
+    font-size: 1rem;
+  }
+
+  .commission-signal {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 2px;
+  }
+
+  .commission-note {
+    margin-left: 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .commission-actions .button {
+    width: 100%;
+  }
+
+  .commission-brief-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .commission-note {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .commission-route *,
+  .commission-section * {
+    transition: none !important;
+  }
+}
