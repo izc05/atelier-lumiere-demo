@@ -9,6 +9,7 @@
   <meta name="description" content="Piezas artesanales seleccionadas para bodas, comuniones, nacimientos y celebraciones especiales.">
   <title>Atelier Lumière · Artesanía para celebrar</title>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/home-editorial.css">
   <link rel="stylesheet" href="/tienda/cart.css">
   <link rel="stylesheet" href="/public-shell.css">
   <script defer src="/tienda/cart-store.js"></script>
@@ -75,34 +76,18 @@
     <section class="manifesto-section" id="talleres">
       <div class="section-heading split-heading">
         <div>
-          <p class="eyebrow">Una selección con criterio</p>
-          <h2>Del taller a tu celebración.</h2>
+          <p class="eyebrow">Talleres seleccionados</p>
+          <h2>Conoce quién está detrás de cada pieza.</h2>
         </div>
         <p>No somos un catálogo infinito. Invitamos a creadores independientes cuya técnica, materiales y forma de trabajar merecen ser conocidos.</p>
       </div>
-      <div class="atelier-grid">
-        <article class="atelier-card atelier-card-light">
-          <span class="card-number">01</span>
-          <p class="eyebrow">Materia</p>
-          <h3>Textiles que guardan nombres</h3>
-          <p>Bordados, lino y fibras elegidas para convertirse en recuerdos que puedan tocarse.</p>
-          <a href="/tienda/?category=textil">Explorar textiles <span aria-hidden="true">→</span></a>
-        </article>
-        <article class="atelier-card atelier-card-wine">
-          <span class="card-number">02</span>
-          <p class="eyebrow">Papel</p>
-          <h3>Historias que empiezan con una invitación</h3>
-          <p>Ilustración, caligrafía y papelería de autor creada para dar tono a cada celebración.</p>
-          <a href="/tienda/?category=papeleria">Explorar papelería <span aria-hidden="true">→</span></a>
-        </article>
-        <article class="atelier-card atelier-card-gold">
-          <span class="card-number">03</span>
-          <p class="eyebrow">Forma</p>
-          <h3>Objetos pequeños, gestos inolvidables</h3>
-          <p>Piezas decorativas y detalles personalizados pensados para quedarse después del evento.</p>
-          <a href="/tienda/">Ver todos los talleres <span aria-hidden="true">→</span></a>
-        </article>
+      <div id="atelier-loading" class="atelier-status" role="status">Abriendo las puertas de los talleres…</div>
+      <div id="atelier-grid" class="atelier-grid atelier-grid-live" hidden aria-live="polite"></div>
+      <div id="atelier-empty" class="atelier-empty" hidden>
+        <p>Los primeros talleres están preparando su escaparate.</p>
+        <a class="button button-outline" href="/tienda/">Explorar la tienda</a>
       </div>
+      <div class="section-action"><a class="text-link" href="/tienda/">Descubrir todos los talleres <span aria-hidden="true">→</span></a></div>
     </section>
 
     <section class="featured-section" aria-labelledby="featured-title">
