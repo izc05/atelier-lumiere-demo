@@ -144,6 +144,23 @@ function populateSpecialties(workshops) {
   }
 }
 
+function applyUrlFilters() {
+  const params = new URLSearchParams(window.location.search);
+  const query = String(params.get("q") || "").trim().slice(0, 160);
+  const specialty = String(params.get("especialidad") || "").trim().slice(0, 160);
+  const custom = params.get("encargos");
+
+  if (query) byId("workshop-search").value = query;
+  if (specialty) {
+    const matching = [...byId("workshop-specialty").options]
+      .find((option) => normalize(option.value) === normalize(specialty));
+    if (matching) byId("workshop-specialty").value = matching.value;
+  }
+  if (["1", "true", "si", "sí"].includes(normalize(custom))) {
+    byId("workshop-custom").value = "custom";
+  }
+}
+
 function visibleWorkshops() {
   const query = normalize(byId("workshop-search").value);
   const specialty = normalize(byId("workshop-specialty").value);
@@ -211,6 +228,7 @@ async function load() {
     publishedWorkshops = await requestWorkshops();
     byId("workshops-total").textContent = String(publishedWorkshops.length);
     populateSpecialties(publishedWorkshops);
+    applyUrlFilters();
     render();
   } catch (error) {
     byId("workshops-error-message").textContent = error.message;
