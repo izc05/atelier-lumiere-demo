@@ -73,6 +73,15 @@ test("el BFF administrativo guarda la sesión en cookie y no filtra el token", a
       assert.equal(authorization, `Bearer ${SESSION_TOKEN}`);
       return Response.json({ providers: [{ id: "provider-a", displayName: "Taller A" }] });
     }
+    if (target.pathname === "/api/admin/workshop-applications") {
+      assert.equal(authorization, `Bearer ${SESSION_TOKEN}`);
+      assert.equal(target.searchParams.get("status"), "PENDING");
+      return Response.json({ applications: [{
+        id: "00000000-0000-4000-8000-000000000501",
+        displayName: "Taller solicitante",
+        status: "PENDING"
+      }] });
+    }
     if (target.pathname.endsWith("/preview")) {
       assert.equal(authorization, `Bearer ${SESSION_TOKEN}`);
       return new Response(Buffer.from("preview-bytes"), {
@@ -148,6 +157,13 @@ test("el BFF administrativo guarda la sesión en cookie y no filtra el token", a
   });
   assert.equal(providersResponse.status, 200);
   assert.equal((await json(providersResponse)).providers[0].displayName, "Taller A");
+
+  const applicationsResponse = await fetch(
+    `${app.baseUrl}/internal/admin/workshop-applications?status=PENDING`,
+    { headers: { Cookie: cookie } }
+  );
+  assert.equal(applicationsResponse.status, 200);
+  assert.equal((await json(applicationsResponse)).applications[0].displayName, "Taller solicitante");
 
   const previewResponse = await fetch(
     `${app.baseUrl}/internal/admin/products/00000000-0000-4000-8000-000000000201/media/00000000-0000-4000-8000-000000000301/preview`,

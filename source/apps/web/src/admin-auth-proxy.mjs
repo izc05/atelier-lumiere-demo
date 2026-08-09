@@ -14,6 +14,7 @@ const SAFE_RESPONSE_HEADERS = new Set([
   "content-security-policy"
 ]);
 const PROVIDERS_PATTERN = /^\/internal\/admin\/providers(?:\/([0-9a-f-]{36})\/(status|invitations|audit))?$/i;
+const WORKSHOP_APPLICATIONS_PATTERN = /^\/internal\/admin\/workshop-applications(?:\/([0-9a-f-]{36})\/(approve|reject))?$/i;
 const PRODUCTS_PATTERN = /^\/internal\/admin\/products(?:\/([0-9a-f-]{36})(?:\/(review|publish)|\/media\/([0-9a-f-]{36})\/(preview))?)?$/i;
 const BLOG_PATTERN = /^\/internal\/admin\/blog-posts(?:\/([0-9a-f-]{36})(?:\/(review|publish)|\/media\/([0-9a-f-]{36})\/(preview))?)?$/i;
 const PROTECTED_ADMIN_PAGES = new Set([
@@ -123,6 +124,13 @@ function routeAllowed(pathname, method) {
     return action === "audit" && method === "GET";
   }
 
+  const application = pathname.match(WORKSHOP_APPLICATIONS_PATTERN);
+  if (application) {
+    const [, id, action] = application;
+    if (!id) return method === "GET";
+    return (action === "approve" || action === "reject") && method === "POST";
+  }
+
   for (const pattern of [PRODUCTS_PATTERN, BLOG_PATTERN]) {
     const match = pathname.match(pattern);
     if (!match) continue;
@@ -214,6 +222,7 @@ export function createAdminAuthenticationWebHandler({
     const isSecondFactor = url.pathname === "/internal/admin-auth/second-factor";
     const isSession = url.pathname === "/internal/admin/session";
     const isAdminProxy = PROVIDERS_PATTERN.test(url.pathname)
+      || WORKSHOP_APPLICATIONS_PATTERN.test(url.pathname)
       || PRODUCTS_PATTERN.test(url.pathname)
       || BLOG_PATTERN.test(url.pathname);
 
