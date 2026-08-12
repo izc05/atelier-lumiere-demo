@@ -773,13 +773,19 @@ input::placeholder {
   backdrop-filter: blur(5px);
 }
 
-.dialog-card > p:not(.eyebrow):not(.warning-note) {
+.dialog-card > p:not(.eyebrow):not(.warning-note):not(.form-message),
+.dialog-card form > p:not(.eyebrow):not(.warning-note):not(.form-message),
+#invitation-copy-fields > p {
   color: var(--muted);
   line-height: 1.6;
 }
 
 .dialog-card label {
   margin-top: 18px;
+}
+
+#invitation-copy-fields[hidden] {
+  display: none;
 }
 
 .dialog-close-row {
