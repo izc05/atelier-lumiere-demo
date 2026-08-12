@@ -27,6 +27,7 @@ const api = files["apps/api/src/public-catalog-api.mjs"];
 const proxy = files["apps/web/src/public-catalog-proxy.mjs"];
 const listHtml = files["apps/web/public/tienda/index.html"];
 const listJs = files["apps/web/public/tienda/store.js"];
+const storeCss = files["apps/web/public/tienda/store.css"];
 const detailHtml = files["apps/web/public/tienda/articulo/index.html"];
 const detailJs = files["apps/web/public/tienda/product.js"];
 
@@ -65,6 +66,10 @@ assert.match(listHtml, /La tienda de los talleres invitados/);
 assert.match(listJs, /\/internal\/catalog\/products/);
 assert.match(detailJs, /\/internal\/catalog\/products/);
 assert.match(detailJs, /item\.kind === "VIDEO"/);
+assert.match(storeCss, /\.responsive-image\s*\{[^}]*max-width:\s*100%/s);
+assert.match(storeCss, /\.product-hero\s*\{[^}]*grid-template-columns:/s);
+assert.match(storeCss, /\.hero-media img\s*\{[^}]*width:\s*100%/s);
+assert.match(storeCss, /@media \(max-width:\s*980px\)[\s\S]*\.product-hero[^\{]*\{[^}]*grid-template-columns:\s*1fr/s);
 assert.doesNotMatch(listJs, /Authorization|Bearer|localStorage|sessionStorage|document\.cookie/);
 assert.doesNotMatch(detailJs, /Authorization|Bearer|localStorage|sessionStorage|document\.cookie/);
 assert.doesNotMatch(listJs, /\.innerHTML\s*=/);
