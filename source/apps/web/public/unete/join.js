@@ -23,6 +23,7 @@ form.addEventListener("submit", async (event) => {
       .filter(([key]) => key !== "privacyAccepted")
       .map(([key, value]) => [key, String(value).trim()])
   );
+  values.privacyAccepted = form.elements.privacyAccepted.checked;
 
   try {
     const response = await fetch("/internal/workshop-applications", {

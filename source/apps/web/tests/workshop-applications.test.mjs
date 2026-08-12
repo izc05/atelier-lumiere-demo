@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
+import { readFile } from "node:fs/promises";
 import { createWebHandler } from "../src/app.mjs";
 
 async function listen(server) {
@@ -48,6 +49,13 @@ test("la solicitud pública llega a la API sin credenciales administrativas", as
   assert.equal((await response.json()).application.status, "PENDING");
   assert.equal(receivedAuthorization, null);
   assert.equal(receivedBody.displayName, "Taller del Mar");
+});
+
+test("el formulario transmite la aceptación sin cambiar su presentación", async () => {
+  const script = await readFile(new URL("../public/unete/join.js", import.meta.url), "utf8");
+  const html = await readFile(new URL("../public/unete/index.html", import.meta.url), "utf8");
+  assert.match(html, /name="privacyAccepted"[^>]*required/);
+  assert.match(script, /values\.privacyAccepted = form\.elements\.privacyAccepted\.checked/);
 });
 
 test("la bandeja de solicitudes exige sesión y oculta el token interno", async (t) => {

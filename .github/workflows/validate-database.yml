@@ -74,6 +74,37 @@ jobs:
         working-directory: source
         run: npm install --ignore-scripts
 
+      - name: Verificar actualización real desde 0054
+        working-directory: source
+        run: |
+          createdb -h 127.0.0.1 -U postgres atelier_upgrade_test
+          for migration in $(find packages/database/migrations -maxdepth 1 -type f -name '*.sql' | sort); do
+            if [ "$(basename "${migration}")" = "0055_expand_workshop_applications.sql" ]; then
+              break
+            fi
+            psql -h 127.0.0.1 -U postgres -d atelier_upgrade_test -v ON_ERROR_STOP=1 -f "${migration}"
+          done
+
+          psql -h 127.0.0.1 -U postgres -d atelier_upgrade_test -v ON_ERROR_STOP=1 <<'SQL'
+          SET app.role = 'AUTH_SERVICE';
+          SET app.user_id = '00000000-0000-4000-8000-000000000008';
+          INSERT INTO workshop_applications (
+            id, display_name, contact_name, contact_email, specialty, message
+          ) VALUES (
+            '00000000-0000-4000-8000-000000000655',
+            'Solicitud histórica',
+            'Persona histórica',
+            'historica@example.test',
+            'Cerámica',
+            'Solicitud creada antes de ampliar el modelo.'
+          );
+          SQL
+
+          psql -h 127.0.0.1 -U postgres -d atelier_upgrade_test -v ON_ERROR_STOP=1 \
+            -f packages/database/migrations/0055_expand_workshop_applications.sql
+          test "$(psql -h 127.0.0.1 -U postgres -d atelier_upgrade_test -tAc \
+            "SELECT count(*) FROM workshop_applications WHERE id = '00000000-0000-4000-8000-000000000655' AND submission_version = 1 AND privacy_accepted_at IS NULL AND privacy_document_version IS NULL AND social_networks = '{}'::jsonb")" = "1"
+
       - name: Aplicar migraciones con el ejecutor real
         working-directory: source
         run: npm run migrate
@@ -89,6 +120,9 @@ jobs:
           test "${actual}" = "${expected}"
           psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 \
             -c "SELECT filename, version, checksum_sha256 FROM schema_migrations ORDER BY filename"
+
+      - name: Verificar modelo y aislamiento de solicitudes de taller
+        run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/tests/workshop_applications.sql
 
       - name: Cargar dos talleres ficticios
         run: psql -h 127.0.0.1 -U postgres -d atelier_test -v ON_ERROR_STOP=1 -f source/packages/database/seeds/0001_two_providers.sql

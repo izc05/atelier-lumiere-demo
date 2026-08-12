@@ -1,14 +1,21 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import {
   loadMigrations,
   MigrationError,
   runMigrationsWithClient,
   stripTransactionWrapper
 } from "../src/migrate-database.mjs";
+
+const REAL_MIGRATIONS_DIRECTORY = fileURLToPath(
+  new URL("../../../packages/database/migrations/", import.meta.url)
+);
+const HISTORICAL_MIGRATIONS_SHA256 = "ae36ce06fea8dcbf07ec2501dfcc069690a0b57b756eb50c4b7f7fc5ec79af69";
 
 function migration(filename, checksum, sql = "SELECT 1;") {
   return Object.freeze({
@@ -76,6 +83,29 @@ test("descubre migraciones por orden de nombre y calcula su checksum", async () 
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+test("conserva intactas las migraciones históricas y descubre 0055 al final", async () => {
+  const filenames = (await readdir(REAL_MIGRATIONS_DIRECTORY))
+    .filter((filename) => filename.endsWith(".sql"))
+    .sort();
+  const historical = filenames.filter((filename) => filename <= "0054_workshop_applications.sql");
+  const hash = createHash("sha256");
+  for (const filename of historical) {
+    hash.update(filename);
+    hash.update("\0");
+    const sql = await readFile(path.join(REAL_MIGRATIONS_DIRECTORY, filename), "utf8");
+    hash.update(sql.replace(/\r\n/g, "\n"));
+    hash.update("\0");
+  }
+
+  assert.equal(historical.length, 55);
+  assert.equal(hash.digest("hex"), HISTORICAL_MIGRATIONS_SHA256);
+  assert.equal(filenames.at(-1), "0055_expand_workshop_applications.sql");
+
+  const migrations = await loadMigrations(REAL_MIGRATIONS_DIRECTORY);
+  assert.equal(migrations.at(-1).filename, "0055_expand_workshop_applications.sql");
+  assert.match(migrations.at(-1).checksum, /^[a-f0-9]{64}$/);
 });
 
 test("acepta prefijos numéricos repetidos y mantiene el orden por nombre completo", async () => {

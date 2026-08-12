@@ -109,3 +109,33 @@ La prueba `tests/tenant_isolation.sql` crea un rol PostgreSQL sin privilegios es
 - Administración puede supervisar ambos talleres.
 
 Los correos de `seeds/` utilizan el dominio reservado `.example` y no representan personas reales.
+
+## Solicitudes de taller
+
+`workshop_applications` reutiliza el flujo de incorporación existente y mantiene estos estados reales:
+
+- `PENDING`: solicitud nueva o reenviada, sin revisión activa ni provider asignado.
+- `CHANGES_REQUESTED`: administración ha revisado la solicitud y espera una nueva versión.
+- `APPROVED`: estado terminal con revisión y `provider_id` asignado.
+- `REJECTED`: estado terminal revisado y sin provider asignado.
+
+Las únicas transiciones de estado son `PENDING -> CHANGES_REQUESTED`, `PENDING -> APPROVED`,
+`PENDING -> REJECTED` y `CHANGES_REQUESTED -> PENDING`. El reenvío incrementa
+`submission_version` y vuelve a registrar la aceptación de privacidad. Las filas anteriores a la
+migración `0055` conservan la versión 1 sin inventar evidencia de consentimiento; toda inserción
+nueva usa la versión 2 o una posterior y exige `privacy_accepted_at` y
+`privacy_document_version`.
+
+Solo `ADMIN` y el contexto interno `AUTH_SERVICE` estrictamente necesario pueden leer solicitudes.
+El servicio de autenticación puede insertar solicitudes y devolver una solicitud con cambios a
+`PENDING`; proveedores, clientes, catálogo y contextos anónimos no tienen visibilidad. Los eventos
+de auditoría de solicitudes no reciben `provider_id` ni contenido sensible.
+
+El correo tiene unicidad parcial mientras la solicitud está `PENDING` o `CHANGES_REQUESTED`; una
+persona puede volver a solicitar después de un rechazo. `proposed_slug` se contrasta con slugs de
+providers existentes y se indexa para solicitudes activas, pero no es único entre solicitudes ni
+reserva el slug definitivo. La asignación continúa perteneciendo a la aprobación.
+
+La conversión actual de una solicitud aprobada crea primero el provider y la invitación y marca la
+solicitud en una transacción posterior. Esa falta de atomicidad queda deliberadamente pendiente para
+la fase de aprobación/conversión; la migración `0055` no modifica ese flujo.

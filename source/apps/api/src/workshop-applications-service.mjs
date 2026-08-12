@@ -1,6 +1,9 @@
 import { ServiceError } from "./providers-service.mjs";
 
-const STATUSES = new Set(["PENDING", "APPROVED", "REJECTED"]);
+const STATUSES = new Set(["PENDING", "CHANGES_REQUESTED", "APPROVED", "REJECTED"]);
+const SUBMISSION_VERSION = 2;
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PHONE_PATTERN = /^[0-9+() ./xX-]+$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function requiredText(value, field, min, max) {
@@ -39,6 +42,35 @@ function website(value) {
   }
 }
 
+function phone(value) {
+  const normalized = optionalText(value, "phone", 7, 40);
+  if (normalized !== null && (!PHONE_PATTERN.test(normalized) || !/[0-9]/.test(normalized))) {
+    throw new ServiceError("VALIDATION_ERROR", "phone no tiene un formato válido.", 422, { field: "phone" });
+  }
+  return normalized;
+}
+
+function proposedSlug(value) {
+  if (value === undefined || value === null || String(value).trim() === "") return null;
+  const normalized = String(value).trim().toLowerCase();
+  if (normalized.length < 2 || normalized.length > 80 || !SLUG_PATTERN.test(normalized)) {
+    throw new ServiceError("VALIDATION_ERROR", "proposedSlug no tiene un formato válido.", 422, {
+      field: "proposedSlug"
+    });
+  }
+  return normalized;
+}
+
+function socialNetworks(value) {
+  if (value === undefined || value === null) return {};
+  if (typeof value !== "object" || Array.isArray(value)) {
+    throw new ServiceError("VALIDATION_ERROR", "socialNetworks debe ser un objeto.", 422, {
+      field: "socialNetworks"
+    });
+  }
+  return value;
+}
+
 function uuid(value, field = "applicationId") {
   if (typeof value !== "string" || !UUID_PATTERN.test(value)) {
     throw new ServiceError("VALIDATION_ERROR", `${field} no es válido.`, 422, { field });
@@ -56,6 +88,15 @@ function serialize(row) {
     specialty: row.specialty,
     websiteUrl: row.website_url,
     message: row.message,
+    phone: row.phone,
+    proposedSlug: row.proposed_slug,
+    workDescription: row.work_description,
+    applicantStory: row.applicant_story,
+    socialNetworks: row.social_networks,
+    adminNotes: row.admin_notes,
+    privacyAcceptedAt: row.privacy_accepted_at,
+    privacyDocumentVersion: row.privacy_document_version,
+    submissionVersion: row.submission_version,
     status: row.status,
     reviewNote: row.review_note,
     reviewedAt: row.reviewed_at,
@@ -71,10 +112,16 @@ export function createWorkshopApplicationsService({
   providersService,
   mailService,
   notificationEmail = process.env.WORKSHOP_APPLICATION_NOTIFICATION_EMAIL,
+  privacyDocumentVersion = process.env.WORKSHOP_PRIVACY_DOCUMENT_VERSION ?? "0.1.0",
   logger = console
 } = {}) {
   if (!database || typeof database.withContext !== "function") throw new TypeError("Falta la base de datos de solicitudes.");
   if (!systemContext) throw new TypeError("Falta el contexto de solicitudes.");
+  if (typeof privacyDocumentVersion !== "string" || privacyDocumentVersion.trim().length < 1
+      || privacyDocumentVersion.trim().length > 80) {
+    throw new TypeError("La versión de privacidad de solicitudes no es válida.");
+  }
+  const currentPrivacyDocumentVersion = privacyDocumentVersion.trim();
 
   async function safelyNotify(operation, kind, applicationId) {
     if (!mailService?.enabled || typeof operation !== "function") return { status: "DISABLED" };
@@ -91,6 +138,14 @@ export function createWorkshopApplicationsService({
       if (input?.companyWebsite) {
         throw new ServiceError("INVALID_SUBMISSION", "No se pudo enviar la solicitud.", 422);
       }
+      if (input?.privacyAccepted !== true) {
+        throw new ServiceError(
+          "PRIVACY_CONSENT_REQUIRED",
+          "Debes aceptar la política de privacidad para enviar la solicitud.",
+          422,
+          { field: "privacyAccepted" }
+        );
+      }
       const values = {
         displayName: requiredText(input?.displayName, "displayName", 2, 140),
         legalName: optionalText(input?.legalName, "legalName", 2, 180),
@@ -98,7 +153,12 @@ export function createWorkshopApplicationsService({
         contactEmail: email(input?.contactEmail),
         specialty: requiredText(input?.specialty, "specialty", 2, 160),
         websiteUrl: website(input?.websiteUrl),
-        message: optionalText(input?.message, "message", 10, 2000)
+        message: optionalText(input?.message, "message", 10, 2000),
+        phone: phone(input?.phone),
+        proposedSlug: proposedSlug(input?.proposedSlug),
+        workDescription: optionalText(input?.workDescription, "workDescription", 20, 4000),
+        applicantStory: optionalText(input?.applicantStory, "applicantStory", 20, 4000),
+        socialNetworks: socialNetworks(input?.socialNetworks)
       };
 
       let application;
@@ -106,15 +166,28 @@ export function createWorkshopApplicationsService({
         application = await database.withContext(systemContext, async (transaction) => {
           const result = await transaction.query(
             `INSERT INTO workshop_applications
-              (display_name, legal_name, contact_name, contact_email, specialty, website_url, message)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)
+              (display_name, legal_name, contact_name, contact_email, specialty, website_url, message,
+               phone, proposed_slug, work_description, applicant_story, social_networks,
+               privacy_accepted_at, privacy_document_version, submission_version)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb,
+               now(), $13, $14)
              RETURNING *`,
             [values.displayName, values.legalName, values.contactName, values.contactEmail,
-              values.specialty, values.websiteUrl, values.message]
+              values.specialty, values.websiteUrl, values.message, values.phone, values.proposedSlug,
+              values.workDescription, values.applicantStory, JSON.stringify(values.socialNetworks),
+              currentPrivacyDocumentVersion, SUBMISSION_VERSION]
           );
           return serialize(result.rows[0]);
         });
       } catch (error) {
+        if (error?.constraint === "workshop_applications_proposed_slug_provider_conflict") {
+          throw new ServiceError(
+            "PROPOSED_SLUG_UNAVAILABLE",
+            "El identificador propuesto ya pertenece a un taller.",
+            409,
+            { field: "proposedSlug" }
+          );
+        }
         if (error?.code === "23505") {
           throw new ServiceError(
             "APPLICATION_ALREADY_PENDING",
