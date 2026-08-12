@@ -22,7 +22,7 @@ const login = files[paths[3]];
 const test = files[paths[4]];
 const env = files[paths[5]];
 const compose = files[paths[6]];
-const webServiceMatch = compose.match(/^  web:\n[\s\S]*?(?=^  api:\n)/m);
+const webServiceMatch = compose.match(/^  web:\r?\n[\s\S]*?(?=^  [a-z][\w-]*:\r?$)/m);
 assert.ok(webServiceMatch, "No se ha encontrado el bloque web de Docker Compose.");
 const webService = webServiceMatch[0];
 

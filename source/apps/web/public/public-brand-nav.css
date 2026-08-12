@@ -18,12 +18,23 @@
   max-width: min(280px, 52vw);
 }
 
-/* HOME: la composición usa un wordmark de fondo; lo actualizamos a la marca oficial. */
+/* Cada cabecera usa el contraste que declara: claro en portada, oscuro en páginas crema. */
 .site-header .atelier-brand-link {
-  background-image: url("/assets/brand/atelier-logo-official-light.svg") !important;
+  background-image: none !important;
+  background-position: left center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
 }
 
 .site-header .atelier-header-logo {
+  opacity: 1 !important;
+}
+
+.site-header .atelier-brand-link[data-atelier-brand-tone="light"] {
+  background-image: url("/assets/brand/atelier-logo-official-light.svg") !important;
+}
+
+.site-header .atelier-brand-link[data-atelier-brand-tone="light"] .atelier-header-logo {
   opacity: 0 !important;
 }
 

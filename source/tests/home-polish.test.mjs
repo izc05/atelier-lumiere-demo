@@ -30,7 +30,7 @@ test("las piezas de HOME usan una ventana de catálogo equivalente a Tienda", ()
 
 test("la HOME tiene una composición móvil específica", () => {
   assert.match(polish, /@media \(max-width:\s*780px\)/);
-  assert.match(polish, /hero-photo-detail[\s\S]*display:\s*none\s*!important/);
+  assert.doesNotMatch(polish, /hero-photo-detail/);
   assert.match(polish, /hero-actions[\s\S]*grid-template-columns:\s*1fr/);
   assert.match(polish, /workshop-card-link[\s\S]*grid-template-rows:\s*250px auto\s*!important/);
 });

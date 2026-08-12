@@ -153,8 +153,7 @@ body {
   background: radial-gradient(circle at 73% 42%, rgba(216,183,97,.1), transparent 27rem);
 }
 
-#home-hero .hero-photo-main img,
-#home-hero .hero-photo-detail img {
+#home-hero .hero-photo-main img {
   transition: transform 360ms ease;
   will-change: transform;
 }
@@ -264,7 +263,6 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   #home-hero .hero-photo-main img,
-  #home-hero .hero-photo-detail img,
   .workshop-card,
   .featured-grid .product-card,
   .home-story-card,

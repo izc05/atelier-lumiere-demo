@@ -48,10 +48,26 @@
   entry.hidden = false;
 
   let opening = false;
+  let pointerFrame = 0;
+
+  const updateLight = (event) => {
+    if (reducedMotion.matches || opening) return;
+    if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
+    pointerFrame = window.requestAnimationFrame(() => {
+      const x = Math.max(28, Math.min(72, event.clientX / window.innerWidth * 100));
+      const y = Math.max(24, Math.min(68, event.clientY / window.innerHeight * 100));
+      entry.style.setProperty("--entry-light-x", `${x}%`);
+      entry.style.setProperty("--entry-light-y", `${y}%`);
+      pointerFrame = 0;
+    });
+  };
+
+  entry.addEventListener("pointermove", updateLight, { passive: true });
 
   const openHome = () => {
     if (opening) return;
     opening = true;
+    if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
     sessionSet();
     entry.classList.add("is-opening");
 

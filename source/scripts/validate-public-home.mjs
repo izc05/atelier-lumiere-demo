@@ -10,7 +10,12 @@ const paths = [
   "apps/web/public/tienda/articulo/index.html",
   "apps/web/public/carrito/index.html",
   "apps/web/public/public-shell.css",
-  "apps/web/public/public-shell.js"
+  "apps/web/public/public-shell.js",
+  "apps/web/public/unete/index.html",
+  "apps/web/public/public-brand-nav.css",
+  "apps/web/public/public-brand-nav.js",
+  "apps/web/public/brand-entry.css",
+  "apps/web/public/brand-entry.js"
 ];
 
 const files = Object.fromEntries(await Promise.all(paths.map(async (path) => [
@@ -27,6 +32,11 @@ const product = files[paths[5]];
 const cart = files[paths[6]];
 const publicShellCss = files[paths[7]];
 const publicShellScript = files[paths[8]];
+const join = files[paths[9]];
+const brandNavCss = files[paths[10]];
+const brandNavScript = files[paths[11]];
+const brandEntryCss = files[paths[12]];
+const brandEntryScript = files[paths[13]];
 
 for (const html of [home, technical, store, product, cart]) {
   assert.match(html, /noindex,nofollow/);
@@ -39,6 +49,8 @@ assert.match(home, /Cada pieza guarda un instante/);
 assert.match(home, /id="featured-products"/);
 assert.match(home, /id="hero-workshop-controls"/);
 assert.match(home, /id="hero-workshop-logo"/);
+assert.match(home, /data-atelier-brand-tone="light"/);
+assert.doesNotMatch(home, /hero-photo-detail|hero-detail-image/);
 assert.match(home, /id="atelier-quote-text"/);
 assert.match(home, /data-public-navigation/);
 assert.match(home, /data-public-menu-toggle/);
@@ -58,6 +70,7 @@ assert.match(script, /setupQuoteRotation/);
 assert.match(script, /pointermove/);
 assert.match(script, /setupCommissionParallax/);
 assert.match(script, /provider\.logo/);
+assert.doesNotMatch(script, /hero-detail-image|workshopDetailMedia/);
 assert.match(script, /collectWorkshops\(products\)\.slice\(0, 3\)/);
 assert.doesNotMatch(script, /innerHTML|localStorage|sessionStorage|Authorization|Bearer/);
 
@@ -69,6 +82,15 @@ assert.match(publicShellCss, /\.public-menu-toggle/);
 assert.match(publicShellCss, /prefers-reduced-motion/);
 assert.match(publicShellScript, /event\.key === "Escape"/);
 assert.match(publicShellScript, /aria-expanded/);
+assert.match(join, /data-atelier-brand-tone="dark"/);
+assert.match(brandNavCss, /data-atelier-brand-tone="light"/);
+assert.match(brandNavCss, /background-image: none !important/);
+assert.match(brandNavScript, /requestedTone/);
+assert.match(brandEntryCss, /atelierBackdropLetters/);
+assert.match(brandEntryCss, /atelierEntryGlow/);
+assert.match(brandEntryCss, /prefers-reduced-motion/);
+assert.match(brandEntryScript, /--entry-light-x/);
+assert.match(brandEntryScript, /pointermove/);
 
 assert.match(technical, /Estado de Atelier Lumière/);
 assert.match(technical, /id="api-status"/);

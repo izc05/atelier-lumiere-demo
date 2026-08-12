@@ -2,17 +2,13 @@
  * Mantiene intactos catálogo, pedidos, pagos y perfiles.
  */
 
-/* Hero editorial: dos fotografías reales del catálogo sustituyen la ilustración decorativa. */
+/* Hero editorial: una fotografía real y el logo del taller activo. */
 .hero-editorial {
   --hero-main-shift: 0px;
-  --hero-detail-shift: 0px;
   --hero-copy-shift: 0px;
   --hero-main-x: 0px;
-  --hero-detail-x: 0px;
   --hero-tilt-x: 0deg;
   --hero-tilt-y: 0deg;
-  --hero-detail-tilt-x: 0deg;
-  --hero-detail-tilt-y: 0deg;
   grid-template-columns: minmax(0, .92fr) minmax(500px, 1.08fr);
   gap: clamp(42px, 6vw, 96px);
   min-height: 100svh;
@@ -100,19 +96,6 @@
     linear-gradient(90deg, rgba(47, 7, 18, .12), transparent 32%);
 }
 
-.hero-photo-detail {
-  z-index: 4;
-  right: -1%;
-  bottom: 7%;
-  width: 34%;
-  height: 36%;
-  transform: translate3d(var(--hero-detail-x), var(--hero-detail-shift), 36px) rotateX(var(--hero-detail-tilt-x)) rotateY(var(--hero-detail-tilt-y));
-  border-color: rgba(255, 250, 242, .52);
-  box-shadow: 0 24px 70px rgba(24, 2, 8, .38);
-  will-change: transform;
-  transition: opacity 180ms ease, transform 220ms cubic-bezier(.22,.7,.2,1);
-}
-
 .hero-photo-placeholder {
   position: absolute;
   inset: 0;
@@ -122,10 +105,6 @@
   font-family: var(--serif);
   font-size: clamp(6rem, 12vw, 10rem);
   letter-spacing: -.08em;
-}
-
-.hero-photo-placeholder-small {
-  font-size: clamp(4rem, 7vw, 6rem);
 }
 
 .hero-photo-caption {
@@ -256,28 +235,30 @@
   z-index: 7;
   top: auto;
   left: auto;
-  right: 1%;
-  bottom: 2%;
-  width: 102px;
-  height: 102px;
-  overflow: hidden;
-  border-color: rgba(221, 200, 148, .78);
-  background: rgba(255, 250, 242, .96);
-  box-shadow: 0 18px 50px rgba(24, 2, 8, .34);
+  right: 2.5%;
+  bottom: 3.5%;
+  width: 116px;
+  height: 116px;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
   transition: opacity 180ms ease;
 }
 
 .hero-editorial-seal::before {
-  border-color: rgba(88, 17, 36, .28);
+  display: none;
 }
 
 .hero-workshop-logo {
   position: relative;
   z-index: 2;
   display: block;
-  width: 76%;
-  height: 76%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 14px 22px rgba(40, 8, 19, .32));
 }
 
 .hero-workshop-logo[hidden],
@@ -288,6 +269,14 @@
 .hero-editorial-seal > span {
   position: relative;
   z-index: 2;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  border: 1px solid rgba(213, 172, 72, .58);
+  border-radius: 50%;
+  background: #6f1127;
+  box-shadow: 0 14px 22px rgba(40, 8, 19, .32);
   color: var(--wine);
 }
 
@@ -538,14 +527,6 @@
     transform: none;
   }
 
-  .hero-photo-detail {
-    right: 0;
-    bottom: 5%;
-    width: 38%;
-    height: 31%;
-    transform: none;
-  }
-
   .hero-workshop-note {
     top: 5%;
     left: auto;
@@ -614,11 +595,6 @@
     right: 4%;
   }
 
-  .hero-photo-detail {
-    width: 42%;
-    height: 29%;
-  }
-
   .hero-workshop-note {
     width: 48%;
   }
@@ -631,7 +607,6 @@
 @media (prefers-reduced-motion: reduce) {
   .hero-editorial .hero-copy,
   .hero-photo-main,
-  .hero-photo-detail,
   .workshop-card,
   .editorial-reveal,
   .workshop-card-media img {
