@@ -18,7 +18,15 @@ const elements = {
   metricActive: document.querySelector("#metric-active"),
   metricInvited: document.querySelector("#metric-invited"),
   metricSuspended: document.querySelector("#metric-suspended"),
+  renewInvitationDialog: document.querySelector("#renew-invitation-dialog"),
+  renewInvitationForm: document.querySelector("#renew-invitation-form"),
+  renewInvitationTitle: document.querySelector("#renew-invitation-title"),
+  renewInvitationEmail: document.querySelector("#renew-invitation-email"),
+  renewInvitationMessage: document.querySelector("#renew-invitation-message"),
+  cancelRenewInvitation: document.querySelector("#cancel-renew-invitation"),
   invitationDialog: document.querySelector("#invitation-dialog"),
+  invitationDeliveryStatus: document.querySelector("#invitation-delivery-status"),
+  invitationCopyFields: document.querySelector("#invitation-copy-fields"),
   invitationLink: document.querySelector("#invitation-link"),
   invitationToken: document.querySelector("#invitation-token"),
   copyLinkButton: document.querySelector("#copy-link-button"),
@@ -34,7 +42,8 @@ const elements = {
 const state = {
   providers: [],
   applications: [],
-  search: ""
+  search: "",
+  renewalProvider: null
 };
 
 const statusLabels = {
@@ -307,7 +316,7 @@ function renderProviderCard(provider) {
       : "Pausar";
   actions.append(
     actionButton(statusLabel, nextStatus === "ACTIVE" ? "secondary" : "danger", (button) => changeStatus(provider, nextStatus, button)),
-    actionButton("Nueva invitación", "secondary", (button) => renewInvitation(provider, button)),
+    actionButton("Nueva invitación", "secondary", () => openRenewInvitation(provider)),
     actionButton("Auditoría", "secondary", (button) => openAudit(provider, button))
   );
 
@@ -389,25 +398,58 @@ function showInvitation(payload) {
   const path = payload.activationPath ?? "";
   elements.invitationLink.value = path ? new URL(path, window.location.origin).toString() : "";
   elements.invitationToken.value = payload.activationToken ?? "";
+  const hasManualAccess = Boolean(elements.invitationLink.value || elements.invitationToken.value);
+  elements.invitationCopyFields.hidden = !hasManualAccess;
+
+  const recipient = payload.invitation?.email ?? "el correo indicado";
+  if (payload.delivery === "sent") {
+    setMessage(elements.invitationDeliveryStatus, `La invitación se ha enviado a ${recipient}.`, "success");
+  } else if (payload.delivery === "failed") {
+    setMessage(elements.invitationDeliveryStatus, "La invitación se creó, pero el correo no pudo entregarse. Revisa la dirección o la configuración SMTP y genera otra invitación.", "error");
+  } else if (payload.delivery === "disabled" && !hasManualAccess) {
+    setMessage(elements.invitationDeliveryStatus, "La invitación se creó, pero el envío de correo no está configurado. No hay un enlace manual disponible en producción.", "error");
+  } else if (hasManualAccess) {
+    setMessage(elements.invitationDeliveryStatus, "La invitación está disponible para copiar en este entorno.", "success");
+  } else {
+    setMessage(elements.invitationDeliveryStatus, "La invitación se creó, pero no se recibió confirmación de entrega.", "error");
+  }
   elements.invitationDialog.showModal();
 }
 
-async function renewInvitation(provider, button) {
-  if (!window.confirm(`Se revocará cualquier invitación pendiente de “${provider.displayName}”. ¿Continuar?`)) return;
+function openRenewInvitation(provider) {
+  state.renewalProvider = provider;
+  elements.renewInvitationTitle.textContent = `Nueva invitación · ${provider.displayName}`;
+  elements.renewInvitationEmail.value = provider.contactEmail ?? "";
+  setMessage(elements.renewInvitationMessage);
+  elements.renewInvitationDialog.showModal();
+  elements.renewInvitationEmail.focus();
+  elements.renewInvitationEmail.select();
+}
 
+async function renewInvitation(provider, email, button) {
   setBusy(button, true);
-  setMessage(elements.globalMessage);
+  setMessage(elements.renewInvitationMessage);
   try {
     const payload = await requestJson(`/internal/admin/providers/${provider.id}/invitations`, {
       method: "POST",
-      body: JSON.stringify({ role: "PROVIDER_OWNER" })
+      body: JSON.stringify({ role: "PROVIDER_OWNER", email })
     });
+    elements.renewInvitationDialog.close();
     showInvitation(payload);
-    setMessage(elements.globalMessage, "Se ha generado una invitación nueva.", "success");
+    setMessage(
+      elements.globalMessage,
+      payload.delivery === "sent"
+        ? `La invitación se ha enviado a ${payload.invitation?.email ?? email}.`
+        : "Se ha generado una invitación nueva. Revisa el resultado de entrega.",
+      payload.delivery === "sent" || payload.activationPath ? "success" : "error"
+    );
     await loadProviders({ quiet: true });
   } catch (error) {
-    if (error.status === 401) return showLogin("La sesión ha caducado.");
-    setMessage(elements.globalMessage, error.message, "error");
+    if (error.status === 401) {
+      elements.renewInvitationDialog.close();
+      return showLogin("La sesión ha caducado.");
+    }
+    setMessage(elements.renewInvitationMessage, error.message, "error");
   } finally {
     setBusy(button, false);
   }
@@ -553,12 +595,30 @@ elements.closeCreateButton.addEventListener("click", () => {
   elements.providersList.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
+elements.renewInvitationForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!state.renewalProvider) return;
+  const button = elements.renewInvitationForm.querySelector('button[type="submit"]');
+  const email = elements.renewInvitationEmail.value.trim();
+  void renewInvitation(state.renewalProvider, email, button);
+});
+
+elements.cancelRenewInvitation.addEventListener("click", () => elements.renewInvitationDialog.close());
+
+elements.renewInvitationDialog.addEventListener("close", () => {
+  state.renewalProvider = null;
+  elements.renewInvitationForm.reset();
+  setMessage(elements.renewInvitationMessage);
+});
+
 elements.copyLinkButton.addEventListener("click", () => void copyValue(elements.invitationLink, elements.copyLinkButton));
 elements.copyTokenButton.addEventListener("click", () => void copyValue(elements.invitationToken, elements.copyTokenButton));
 
 elements.invitationDialog.addEventListener("close", () => {
   elements.invitationLink.value = "";
   elements.invitationToken.value = "";
+  elements.invitationCopyFields.hidden = true;
+  setMessage(elements.invitationDeliveryStatus);
 });
 
 async function initialize() {

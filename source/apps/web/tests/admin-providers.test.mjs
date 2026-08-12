@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
+import { readFile } from "node:fs/promises";
 import { createWebHandler } from "../src/app.mjs";
 
 async function listen(server) {
@@ -37,6 +38,7 @@ test("el panel mantiene el token de API fuera del navegador", async (t) => {
   const apiToken = "api-internal-token-not-visible-000000000000001";
   const accessKey = "clave-web-privada-de-prueba-00000001";
   const receivedAuthorizations = [];
+  let renewedInvitationInput = null;
 
   const apiServer = createServer(async (request, response) => {
     receivedAuthorizations.push(request.headers.authorization ?? null);
@@ -70,6 +72,18 @@ test("el panel mantiene el token de API fuera del navegador", async (t) => {
         invitation: { status: "PENDING" },
         activationToken: "one-time-provider-token",
         activationPath: "/proveedor/activar?token=one-time-provider-token"
+      }));
+      return;
+    }
+
+    if (request.method === "POST" && request.url === "/api/admin/providers/00000000-0000-4000-8000-000000000201/invitations") {
+      let raw = "";
+      for await (const chunk of request) raw += chunk;
+      renewedInvitationInput = JSON.parse(raw);
+      response.writeHead(201, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({
+        invitation: { status: "PENDING", email: renewedInvitationInput.email },
+        delivery: "sent"
       }));
       return;
     }
@@ -144,6 +158,21 @@ test("el panel mantiene el token de API fuera del navegador", async (t) => {
   assert.equal(created.payload.activationToken, "one-time-provider-token");
   assert.equal(JSON.stringify(created.payload).includes(apiToken), false);
 
+  const renewed = await jsonRequest(webUrl, "/internal/admin/providers/00000000-0000-4000-8000-000000000201/invitations", {
+    method: "POST",
+    cookie,
+    body: {
+      role: "PROVIDER_OWNER",
+      email: "correo-accesible@atelier.example"
+    }
+  });
+  assert.equal(renewed.response.status, 201);
+  assert.equal(renewed.payload.delivery, "sent");
+  assert.deepEqual(renewedInvitationInput, {
+    role: "PROVIDER_OWNER",
+    email: "correo-accesible@atelier.example"
+  });
+
   currentTime += 31 * 60 * 1000;
   const expired = await jsonRequest(webUrl, "/internal/admin/providers", { cookie });
   assert.equal(expired.response.status, 401);
@@ -162,4 +191,19 @@ test("el panel y el proxy desaparecen cuando no están habilitados", async (t) =
 
   const proxy = await jsonRequest(baseUrl, "/internal/admin/providers");
   assert.equal(proxy.response.status, 404);
+});
+
+test("la renovación permite elegir correo y no muestra controles de copia vacíos", async () => {
+  const root = new URL("../public/admin/proveedores/", import.meta.url);
+  const [html, browser] = await Promise.all([
+    readFile(new URL("index.html", root), "utf8"),
+    readFile(new URL("providers.js", root), "utf8")
+  ]);
+
+  assert.match(html, /id="renew-invitation-email"/);
+  assert.match(html, /id="invitation-delivery-status"/);
+  assert.match(html, /id="invitation-copy-fields" hidden/);
+  assert.match(browser, /JSON\.stringify\(\{ role: "PROVIDER_OWNER", email \}\)/);
+  assert.match(browser, /invitationCopyFields\.hidden = !hasManualAccess/);
+  assert.match(browser, /payload\.delivery === "sent"/);
 });

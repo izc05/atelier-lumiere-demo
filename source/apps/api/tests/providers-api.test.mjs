@@ -141,14 +141,15 @@ test("la API administra proveedores sin filtrar secretos ni saltarse RLS", {
   const renewal = await jsonRequest(baseUrl, `/api/admin/providers/${providerId}/invitations`, {
     method: "POST",
     token: developmentAdminToken,
-    body: { role: "PROVIDER_OWNER" }
+    body: { role: "PROVIDER_OWNER", email: `accesible-${suffix}@atelier.example` }
   });
   assert.equal(renewal.response.status, 201);
   assert.notEqual(renewal.payload.activationToken, firstToken);
+  assert.equal(renewal.payload.invitation.email, `accesible-${suffix}@atelier.example`);
 
   const invitationRows = await database.withContext(adminContext, async (transaction) => {
     const result = await transaction.query(
-      `SELECT status, token_hash
+      `SELECT status, token_hash, email
        FROM provider_invitations
        WHERE provider_id = $1
        ORDER BY created_at ASC`,
@@ -159,6 +160,7 @@ test("la API administra proveedores sin filtrar secretos ni saltarse RLS", {
   assert.equal(invitationRows.filter((row) => row.status === "PENDING").length, 1);
   assert.equal(invitationRows.filter((row) => row.status === "REVOKED").length, 1);
   assert.equal(invitationRows.some((row) => row.token_hash === firstToken), false);
+  assert.equal(invitationRows.find((row) => row.status === "PENDING").email, `accesible-${suffix}@atelier.example`);
 
   const audit = await jsonRequest(baseUrl, `/api/admin/providers/${providerId}/audit`, {
     token: developmentAdminToken

@@ -175,12 +175,26 @@
     </section>
   </main>
 
+  <dialog id="renew-invitation-dialog" class="dialog-card">
+    <form id="renew-invitation-form" class="provider-form">
+      <div class="dialog-close-row"><button id="cancel-renew-invitation" class="icon-button" type="button" aria-label="Cerrar">Cerrar</button></div>
+      <p class="eyebrow">Nueva invitación</p><h2 id="renew-invitation-title">Elige dónde recibirla</h2>
+      <p>La invitación pendiente anterior quedará revocada. Usa un correo al que puedas acceder ahora.</p>
+      <label>Correo de esta invitación<input id="renew-invitation-email" name="email" type="email" maxlength="254" autocomplete="email" required></label>
+      <p id="renew-invitation-message" class="form-message" role="status" aria-live="polite"></p>
+      <button class="button primary full" type="submit">Revocar y enviar invitación</button>
+    </form>
+  </dialog>
+
   <dialog id="invitation-dialog" class="dialog-card">
     <form method="dialog" class="dialog-close-row"><button class="icon-button" value="close" aria-label="Cerrar">Cerrar</button></form>
-    <p class="eyebrow">Invitación creada</p><h2>Guarda este acceso ahora</h2>
-    <p>El token original no volverá a mostrarse. Durante el piloto puedes copiarlo como respaldo aunque SMTP esté activado.</p>
-    <label>Enlace provisional<span class="copy-field"><input id="invitation-link" readonly><button id="copy-link-button" class="button secondary" type="button">Copiar</button></span></label>
-    <label>Token de un solo uso<span class="copy-field"><input id="invitation-token" readonly><button id="copy-token-button" class="button secondary" type="button">Copiar</button></span></label>
+    <p class="eyebrow">Invitación creada</p><h2>Invitación preparada</h2>
+    <p id="invitation-delivery-status" class="form-message" role="status" aria-live="polite"></p>
+    <div id="invitation-copy-fields" hidden>
+      <p>El token original no volverá a mostrarse. Guarda ahora el enlace si estás trabajando en un entorno de desarrollo.</p>
+      <label>Enlace provisional<span class="copy-field"><input id="invitation-link" readonly><button id="copy-link-button" class="button secondary" type="button">Copiar</button></span></label>
+      <label>Token de un solo uso<span class="copy-field"><input id="invitation-token" readonly><button id="copy-token-button" class="button secondary" type="button">Copiar</button></span></label>
+    </div>
     <p class="warning-note">En producción el token no se mostrará en pantalla: la invitación se entregará exclusivamente mediante el correo configurado.</p>
   </dialog>
 
