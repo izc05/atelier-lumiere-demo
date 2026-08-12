@@ -148,14 +148,6 @@ function workshopPrimaryMedia(entry) {
     || null;
 }
 
-function workshopDetailMedia(entry, primaryPath) {
-  const candidates = [
-    ...(Array.isArray(entry?.provider?.gallery) ? entry.provider.gallery : []),
-    ...(Array.isArray(entry?.products) ? entry.products.map((product) => product.cover) : [])
-  ].filter((media) => media?.path && media.path !== primaryPath);
-  return candidates[0] || null;
-}
-
 const ROTATION_INTERVAL = 8000;
 const atelierQuotes = [
   "Lo artesanal no consiste solo en hacer algo a mano. Consiste en saber para quién se está haciendo.",
@@ -170,12 +162,6 @@ function configureHeroWorkshop(entry, index, total) {
   const provider = entry?.provider || {};
   const displayName = provider.displayName || "Taller invitado";
   const primaryMedia = workshopPrimaryMedia(entry);
-  let detailMedia = workshopDetailMedia(entry, primaryMedia?.path);
-
-  if (!detailMedia) {
-    const productMedia = entry?.products?.find((product) => product.cover?.path)?.cover;
-    if (productMedia?.path !== primaryMedia?.path) detailMedia = productMedia;
-  }
 
   const visual = byId("hero-visual");
   visual?.classList.add("is-changing");
@@ -190,18 +176,6 @@ function configureHeroWorkshop(entry, index, total) {
     })) {
       mainImage.hidden = false;
       byId("hero-main-placeholder").hidden = true;
-    }
-
-    const detailImage = byId("hero-detail-image");
-    if (detailImage && configureImage(detailImage, detailMedia || primaryMedia, {
-      alt: detailMedia?.altText || `Detalle artesanal de ${displayName}`,
-      sizes: "(max-width: 780px) 38vw, 320px",
-      loading: "eager",
-      priority: "high",
-      defaultWidth: 520
-    })) {
-      detailImage.hidden = false;
-      byId("hero-detail-placeholder").hidden = true;
     }
 
     const workshopLogo = byId("hero-workshop-logo");
@@ -369,13 +343,9 @@ function setupHeroMotion() {
     const height = Math.max(hero.offsetHeight, 1);
     const progress = Math.min(1, Math.max(0, -rect.top / height));
     hero.style.setProperty("--hero-main-shift", `${progress * 28 + pointerY * 8}px`);
-    hero.style.setProperty("--hero-detail-shift", `${progress * -22 + pointerY * -13}px`);
     hero.style.setProperty("--hero-main-x", `${pointerX * 8}px`);
-    hero.style.setProperty("--hero-detail-x", `${pointerX * -13}px`);
     hero.style.setProperty("--hero-tilt-x", `${pointerY * -1.4}deg`);
     hero.style.setProperty("--hero-tilt-y", `${pointerX * 1.8}deg`);
-    hero.style.setProperty("--hero-detail-tilt-x", `${pointerY * .95}deg`);
-    hero.style.setProperty("--hero-detail-tilt-y", `${pointerX * -1.2}deg`);
     hero.style.setProperty("--hero-copy-shift", `${progress * 14}px`);
   };
   const schedule = () => {

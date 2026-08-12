@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const publicRoot = new URL("../apps/web/public/", import.meta.url);
+const localPath = (relativePath) => fileURLToPath(new URL(relativePath, import.meta.url));
+const publicRoot = localPath("../apps/web/public/");
 
 async function collectHtml(directory) {
   const files = [];
@@ -16,11 +18,11 @@ async function collectHtml(directory) {
 }
 
 const paths = {
-  css: new URL("../apps/web/public/premium-ui.css", import.meta.url),
-  browser: new URL("../apps/web/public/premium-ui.js", import.meta.url),
-  prepare: new URL("../apps/web/scripts/prepare-premium-ui.mjs", import.meta.url),
-  original: new URL("../apps/web/scripts/prepare-original-home.mjs", import.meta.url),
-  dockerfile: new URL("../infra/docker/Dockerfile.web", import.meta.url)
+  css: localPath("../apps/web/public/premium-ui.css"),
+  browser: localPath("../apps/web/public/premium-ui.js"),
+  prepare: localPath("../apps/web/scripts/prepare-premium-ui.mjs"),
+  original: localPath("../apps/web/scripts/prepare-original-home.mjs"),
+  dockerfile: localPath("../infra/docker/Dockerfile.web")
 };
 
 const [css, browser, prepare, original, dockerfile] = await Promise.all([
@@ -32,11 +34,11 @@ const [css, browser, prepare, original, dockerfile] = await Promise.all([
 ]);
 
 for (const file of [paths.browser, paths.prepare, paths.original]) {
-  const result = spawnSync(process.execPath, ["--check", file.pathname], { encoding: "utf8" });
-  assert.equal(result.status, 0, `${file.pathname} no supera node --check:\n${result.stderr || result.stdout}`);
+  const result = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" });
+  assert.equal(result.status, 0, `${file} no supera node --check:\n${result.stderr || result.stdout}`);
 }
 
-const htmlFiles = await collectHtml(publicRoot.pathname);
+const htmlFiles = await collectHtml(publicRoot);
 assert.ok(htmlFiles.length >= 45, `Se esperaban al menos 45 páginas HTML y se encontraron ${htmlFiles.length}.`);
 
 for (const file of htmlFiles) {

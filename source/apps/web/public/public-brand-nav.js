@@ -31,7 +31,9 @@
     const brands = document.querySelectorAll(selectors.join(", "));
     for (const brand of brands) {
       const header = brand.closest("[data-public-header]");
-      const light = !providerArea && (brand.classList.contains("wordmark") || header?.classList.contains("site-header"));
+      const requestedTone = brand.dataset.atelierBrandTone;
+      const light = requestedTone === "light"
+        || (!requestedTone && !providerArea && document.documentElement.dataset.atelierPage === "home");
       const image = document.createElement("img");
       image.src = light ? OFFICIAL.light : OFFICIAL.dark;
       image.alt = "Atelier Lumière";
