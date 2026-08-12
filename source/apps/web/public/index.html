@@ -23,6 +23,8 @@
   <script defer src="/brand-entry.js"></script>
   <link rel="stylesheet" href="/premium-ui.css">
   <script src="/premium-ui.js" defer></script>
+  <link rel="stylesheet" href="/home-polish.css">
+  <script defer src="/home-product-framing.js"></script>
 </head>
 <body>
   <section class="brand-entry" id="brand-entry" aria-label="Entrada a Atelier Lumière" hidden>
@@ -94,7 +96,10 @@
             <button id="hero-workshop-next" type="button" aria-label="Mostrar el taller siguiente">→</button>
           </div>
         </aside>
-        <div class="hero-seal hero-editorial-seal" aria-hidden="true"><span>AL</span></div>
+        <div class="hero-seal hero-editorial-seal" aria-hidden="true">
+          <img id="hero-workshop-logo" class="hero-workshop-logo" alt="" hidden>
+          <span id="hero-workshop-logo-fallback">AL</span>
+        </div>
       </div>
       <a class="scroll-cue" href="#talleres">Conocer quién lo crea <span aria-hidden="true">↓</span></a>
     </section>

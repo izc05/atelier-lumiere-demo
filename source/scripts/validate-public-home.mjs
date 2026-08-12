@@ -38,6 +38,7 @@ assert.match(home, /Artesanía para celebrar/);
 assert.match(home, /Cada pieza guarda un instante/);
 assert.match(home, /id="featured-products"/);
 assert.match(home, /id="hero-workshop-controls"/);
+assert.match(home, /id="hero-workshop-logo"/);
 assert.match(home, /id="atelier-quote-text"/);
 assert.match(home, /data-public-navigation/);
 assert.match(home, /data-public-menu-toggle/);
@@ -55,6 +56,8 @@ assert.match(script, /replaceChildren/);
 assert.match(script, /ROTATION_INTERVAL = 8000/);
 assert.match(script, /setupQuoteRotation/);
 assert.match(script, /pointermove/);
+assert.match(script, /setupCommissionParallax/);
+assert.match(script, /provider\.logo/);
 assert.match(script, /collectWorkshops\(products\)\.slice\(0, 3\)/);
 assert.doesNotMatch(script, /innerHTML|localStorage|sessionStorage|Authorization|Bearer/);
 

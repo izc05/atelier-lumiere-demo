@@ -152,17 +152,17 @@
   #home-hero .hero-editorial-visual {
     position: absolute;
     z-index: 2;
-    top: 132px;
-    right: clamp(36px, 4.6vw, 90px);
-    bottom: 58px;
-    width: min(47vw, 900px);
+    top: 118px;
+    right: clamp(24px, 3vw, 58px);
+    bottom: 40px;
+    width: min(51vw, 1040px);
     min-height: 0;
     max-width: none;
     margin: 0;
   }
 
   #home-hero .hero-photo-main {
-    inset: 0 4% 0 0;
+    inset: 0 2% 0 0;
   }
 
   #home-hero .hero-photo-detail {
@@ -180,8 +180,8 @@
   }
 
   #home-hero .hero-editorial-seal {
-    right: 5%;
-    bottom: 1%;
+    right: 3.5%;
+    bottom: .5%;
   }
 
   #home-hero .scroll-cue {
@@ -191,7 +191,7 @@
 
 @media (min-width: 1500px) {
   #home-hero .hero-editorial-visual {
-    width: min(48vw, 980px);
+    width: min(52vw, 1080px);
   }
 
   #home-hero .hero-copy {

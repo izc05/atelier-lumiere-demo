@@ -204,6 +204,29 @@ function configureHeroWorkshop(entry, index, total) {
       byId("hero-detail-placeholder").hidden = true;
     }
 
+    const workshopLogo = byId("hero-workshop-logo");
+    const workshopLogoFallback = byId("hero-workshop-logo-fallback");
+    if (workshopLogo && configureImage(workshopLogo, provider.logo, {
+      alt: "",
+      sizes: "110px",
+      loading: "eager",
+      priority: "high",
+      defaultWidth: 320
+    })) {
+      workshopLogo.hidden = false;
+      if (workshopLogoFallback) workshopLogoFallback.hidden = true;
+    } else {
+      if (workshopLogo) {
+        workshopLogo.hidden = true;
+        workshopLogo.removeAttribute("src");
+        workshopLogo.removeAttribute("srcset");
+      }
+      if (workshopLogoFallback) {
+        workshopLogoFallback.hidden = false;
+        workshopLogoFallback.textContent = initials(displayName);
+      }
+    }
+
     byId("hero-workshop-name").textContent = displayName;
     const workshopLink = byId("hero-workshop-link");
     workshopLink.href = `/taller/?slug=${encodeURIComponent(provider.slug || "")}`;
@@ -376,6 +399,36 @@ function setupHeroMotion() {
   window.addEventListener("resize", schedule, { passive: true });
 }
 
+function setupCommissionParallax() {
+  const section = document.querySelector(".commission-section");
+  if (!section) return;
+
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  const desktopLayout = window.matchMedia?.("(min-width: 1121px)");
+  if (reducedMotion || !desktopLayout?.matches) return;
+
+  let frame = 0;
+  const render = () => {
+    frame = 0;
+    const rect = section.getBoundingClientRect();
+    const travel = Math.max(window.innerHeight + rect.height, 1);
+    const progress = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / travel));
+    const centered = (progress - .5) * 2;
+    section.style.setProperty("--commission-intro-shift", `${centered * -24}px`);
+    section.style.setProperty("--commission-route-shift", `${centered * 34}px`);
+    section.style.setProperty("--commission-brief-shift", `${centered * 15}px`);
+    section.style.setProperty("--commission-texture-shift", `${centered * -18}px`);
+  };
+  const schedule = () => {
+    if (frame) return;
+    frame = window.requestAnimationFrame(render);
+  };
+
+  render();
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule, { passive: true });
+}
+
 function setupQuoteRotation() {
   const section = document.querySelector(".home-story-manifesto");
   const quote = byId("atelier-quote");
@@ -423,5 +476,6 @@ function setupCartCount() {
 setupCartCount();
 setupScrollReveal();
 setupHeroMotion();
+setupCommissionParallax();
 setupQuoteRotation();
 void loadHomeContent();

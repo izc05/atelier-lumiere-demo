@@ -1,6 +1,10 @@
 /* Atelier Lumière · recorrido editorial de encargos personalizados. */
 
 .commission-section {
+  --commission-intro-shift: 0px;
+  --commission-route-shift: 0px;
+  --commission-brief-shift: 0px;
+  --commission-texture-shift: 0px;
   position: relative;
   overflow: hidden;
   grid-template-columns: minmax(0, .82fr) minmax(540px, 1.18fr);
@@ -20,6 +24,9 @@
   inset: 0;
   pointer-events: none;
   opacity: .42;
+  transform: translate3d(0, var(--commission-texture-shift), 0) scale(1.04);
+  transform-origin: center;
+  will-change: transform;
   background:
     linear-gradient(90deg, transparent 0 62%, rgba(255, 250, 242, .055) 62% 62.08%, transparent 62.08%),
     repeating-linear-gradient(122deg, transparent 0 29px, rgba(255,255,255,.014) 30px 31px);
@@ -34,6 +41,8 @@
 .commission-intro {
   align-self: start;
   max-width: 620px;
+  transform: translate3d(0, var(--commission-intro-shift), 0);
+  will-change: transform;
 }
 
 .commission-intro h2 {
@@ -64,6 +73,8 @@
   background: rgba(255, 250, 242, .055);
   box-shadow: 0 26px 78px rgba(13, 1, 5, .18);
   backdrop-filter: blur(12px);
+  transform: translate3d(0, var(--commission-brief-shift), 0);
+  will-change: transform;
 }
 
 .commission-brief::after {
@@ -164,6 +175,8 @@
 .commission-journey {
   min-width: 0;
   padding: 5px 0 0;
+  transform: translate3d(0, var(--commission-route-shift), 0);
+  will-change: transform;
 }
 
 .commission-route {
@@ -302,6 +315,14 @@
   .commission-journey {
     width: 100%;
   }
+
+  .commission-intro,
+  .commission-brief,
+  .commission-journey,
+  .commission-section::before {
+    transform: none;
+    will-change: auto;
+  }
 }
 
 @media (max-width: 720px) {
@@ -367,6 +388,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .commission-intro,
+  .commission-brief,
+  .commission-journey,
+  .commission-section::before {
+    transform: none !important;
+    will-change: auto;
+  }
+
   .commission-route *,
   .commission-section * {
     transition: none !important;
