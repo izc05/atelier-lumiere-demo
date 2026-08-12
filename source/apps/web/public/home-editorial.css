@@ -7,6 +7,12 @@
   --hero-main-shift: 0px;
   --hero-detail-shift: 0px;
   --hero-copy-shift: 0px;
+  --hero-main-x: 0px;
+  --hero-detail-x: 0px;
+  --hero-tilt-x: 0deg;
+  --hero-tilt-y: 0deg;
+  --hero-detail-tilt-x: 0deg;
+  --hero-detail-tilt-y: 0deg;
   grid-template-columns: minmax(0, .92fr) minmax(500px, 1.08fr);
   gap: clamp(42px, 6vw, 96px);
   min-height: 100svh;
@@ -48,6 +54,12 @@
   min-height: clamp(560px, 67vh, 700px);
   width: min(100%, 760px);
   justify-self: end;
+  perspective: 1200px;
+}
+
+.hero-editorial-visual.is-changing .hero-photo,
+.hero-editorial-visual.is-changing .hero-workshop-note {
+  opacity: .2;
 }
 
 .hero-photo {
@@ -71,7 +83,9 @@
 
 .hero-photo-main {
   inset: 2% 8% 4% 3%;
-  transform: translate3d(0, var(--hero-main-shift), 0);
+  transform: translate3d(var(--hero-main-x), var(--hero-main-shift), 0) rotateX(var(--hero-tilt-x)) rotateY(var(--hero-tilt-y));
+  transform-style: preserve-3d;
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(.22,.7,.2,1);
   will-change: transform;
 }
 
@@ -91,10 +105,11 @@
   bottom: 7%;
   width: 34%;
   height: 36%;
-  transform: translate3d(0, var(--hero-detail-shift), 0);
+  transform: translate3d(var(--hero-detail-x), var(--hero-detail-shift), 36px) rotateX(var(--hero-detail-tilt-x)) rotateY(var(--hero-detail-tilt-y));
   border-color: rgba(255, 250, 242, .52);
   box-shadow: 0 24px 70px rgba(24, 2, 8, .38);
   will-change: transform;
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(.22,.7,.2,1);
 }
 
 .hero-photo-placeholder {
@@ -151,6 +166,60 @@
   background: rgba(47, 7, 18, .8);
   box-shadow: 0 20px 54px rgba(24, 2, 8, .25);
   backdrop-filter: blur(12px);
+  transition: opacity 180ms ease;
+}
+
+.hero-workshop-controls,
+.story-quote-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-workshop-controls {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 250, 242, .2);
+}
+
+.hero-workshop-controls[hidden] { display: none; }
+
+.hero-workshop-controls button,
+.story-quote-controls button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(255, 250, 242, .34);
+  border-radius: 50%;
+  color: var(--cream);
+  background: transparent;
+  cursor: pointer;
+}
+
+.hero-workshop-controls span,
+.story-quote-controls span {
+  color: var(--gold-soft);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.home-story-manifesto blockquote {
+  transition: opacity 170ms ease, transform 170ms ease;
+}
+
+.home-story-manifesto blockquote.is-changing {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.story-quote-controls {
+  position: absolute;
+  z-index: 3;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .hero-workshop-note > span {
@@ -469,6 +538,9 @@
     font-size: .56rem;
   }
 
+  .hero-workshop-controls { margin-top: 12px; padding-top: 10px; }
+  .hero-workshop-controls button { width: 29px; height: 29px; }
+
   .hero-editorial-seal {
     display: none;
   }
@@ -541,4 +613,6 @@
     transform: none !important;
     transition: none !important;
   }
+
+  .home-story-manifesto blockquote { transition: none !important; }
 }

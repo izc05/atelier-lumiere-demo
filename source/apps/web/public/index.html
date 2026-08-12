@@ -88,6 +88,11 @@
           <span>Taller invitado</span>
           <strong id="hero-workshop-name">Creado despacio</strong>
           <a id="hero-workshop-link" href="/talleres/">Conocer el taller →</a>
+          <div class="hero-workshop-controls" id="hero-workshop-controls" aria-label="Cambiar taller" hidden>
+            <button id="hero-workshop-previous" type="button" aria-label="Mostrar el taller anterior">←</button>
+            <span id="hero-workshop-position" aria-live="polite">01 / 01</span>
+            <button id="hero-workshop-next" type="button" aria-label="Mostrar el taller siguiente">→</button>
+          </div>
         </aside>
         <div class="hero-seal hero-editorial-seal" aria-hidden="true"><span>AL</span></div>
       </div>
@@ -219,10 +224,15 @@
 
     <section class="story-section home-story-manifesto">
       <div class="story-mark" aria-hidden="true">“</div>
-      <blockquote>
-        <p>Lo artesanal no consiste solo en hacer algo a mano. Consiste en saber para quién se está haciendo.</p>
-        <footer>La filosofía de Atelier Lumière</footer>
+      <blockquote id="atelier-quote" aria-live="polite">
+        <p id="atelier-quote-text">Lo artesanal no consiste solo en hacer algo a mano. Consiste en saber para quién se está haciendo.</p>
+        <footer id="atelier-quote-source">La filosofía de Atelier Lumière</footer>
       </blockquote>
+      <div class="story-quote-controls" aria-label="Cambiar reflexión">
+        <button id="atelier-quote-previous" type="button" aria-label="Mostrar la reflexión anterior">←</button>
+        <span id="atelier-quote-position">01 / 06</span>
+        <button id="atelier-quote-next" type="button" aria-label="Mostrar la reflexión siguiente">→</button>
+      </div>
       <a class="text-link light-link" href="/talleres/">Conocer a quienes lo hacen <span aria-hidden="true">→</span></a>
     </section>
 
