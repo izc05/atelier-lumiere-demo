@@ -37,6 +37,8 @@ for (const html of [home, technical, store, product, cart]) {
 assert.match(home, /Artesanía para celebrar/);
 assert.match(home, /Cada pieza guarda un instante/);
 assert.match(home, /id="featured-products"/);
+assert.match(home, /id="hero-workshop-controls"/);
+assert.match(home, /id="atelier-quote-text"/);
 assert.match(home, /data-public-navigation/);
 assert.match(home, /data-public-menu-toggle/);
 assert.match(home, /id="cart-count"/);
@@ -50,6 +52,10 @@ assert.doesNotMatch(home, /id="mobile-nav"|id="menu-toggle"/);
 assert.match(script, /\/internal\/catalog\/products/);
 assert.match(script, /window\.AtelierCart\?\.wireCount/);
 assert.match(script, /replaceChildren/);
+assert.match(script, /ROTATION_INTERVAL = 8000/);
+assert.match(script, /setupQuoteRotation/);
+assert.match(script, /pointermove/);
+assert.match(script, /collectWorkshops\(products\)\.slice\(0, 3\)/);
 assert.doesNotMatch(script, /innerHTML|localStorage|sessionStorage|Authorization|Bearer/);
 
 assert.match(css, /prefers-reduced-motion/);
