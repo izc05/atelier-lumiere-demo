@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#f4eddf">
+  <title>Pueblo Atelier WebGL · Laboratorio P9.8</title>
+  <link rel="stylesheet" href="/premium-ui.css">
+  <script defer src="/premium-ui.js"></script>
+  <link rel="stylesheet" href="/visual-v2-tokens.css">
+  <link rel="stylesheet" href="/entrada/webgl/scene.css">
+  <link rel="stylesheet" href="/entrada/webgl/interaction.css">
+  <link rel="stylesheet" href="/entrada/webgl/transition.css">
+  <link rel="stylesheet" href="/entrada/webgl/providers.css">
+  <link rel="stylesheet" href="/entrada/webgl/quality.css">
+  <link rel="stylesheet" href="/entrada/webgl/illustration-render.css">
+  <link rel="stylesheet" href="/entrada/webgl/page-transition.css">
+  <link rel="stylesheet" href="/entrada/webgl/cinematic-ui.css">
+  <script defer src="/entrada/webgl/bootstrap.js"></script>
+</head>
+<body>
+  <main class="webgl-village" data-webgl-village>
+    <canvas class="webgl-village-canvas" data-webgl-canvas aria-label="Vista aérea tridimensional e interactiva del Pueblo Atelier"></canvas>
+
+    <header class="webgl-village-header">
+      <a href="/" class="webgl-village-brand" aria-label="Atelier Lumière, inicio">
+        <img src="/assets/brand/atelier-logo-official-dark.svg" alt="Atelier Lumière">
+      </a>
+      <div class="webgl-village-heading">
+        <span>Laboratorio P9.8 · parcelas orgánicas</span>
+        <strong>El pueblo de los oficios</strong>
+        <small>Pasa sobre una parcela · selecciona para acercarte</small>
+      </div>
+      <a class="webgl-village-fallback" href="/entrada/">Mapa ligero</a>
+    </header>
+
+    <section class="webgl-village-caption" aria-live="polite">
+      <p>Atelier Lumière</p>
+      <h1>El territorio también forma parte de cada oficio.</h1>
+      <span>Las parcelas responden como manchas integradas en el paisaje, sin placas rectangulares sobre la escena.</span>
+    </section>
+
+    <nav class="webgl-village-legend" aria-label="Hitos del laboratorio 3D">
+      <button type="button" data-camera-place="overview"><b>00</b><span>Vista general</span></button>
+      <button type="button" data-camera-place="atelier"><b>01</b><span>Atelier Lumière</span></button>
+      <button type="button" data-camera-place="izc"><b>02</b><span>IZC</span></button>
+      <button type="button" data-camera-place="stitch"><b>03</b><span>The Gentle Stitch</span></button>
+    </nav>
+
+    <div class="webgl-village-status" data-webgl-status>Comprobando compatibilidad WebGL2…</div>
+  </main>
+</body>
+</html>

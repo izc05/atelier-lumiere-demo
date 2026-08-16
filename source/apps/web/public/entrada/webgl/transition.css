@@ -1,0 +1,79 @@
+/* Pueblo Atelier · P8.2C · transición acuarelada entre zonas 3D */
+
+.webgl-watercolor-layer {
+  position: absolute;
+  z-index: 18;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+.webgl-watercolor-wash,
+.webgl-watercolor-particle {
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform, opacity, filter;
+}
+.webgl-watercolor-wash {
+  width: clamp(180px, 28vw, 430px);
+  aspect-ratio: 1;
+  border-radius: 46% 54% 58% 42% / 48% 43% 57% 52%;
+  background:
+    radial-gradient(circle at 42% 38%, rgba(255,253,248,.88), rgba(247,237,222,.62) 36%, rgba(167,131,66,.16) 61%, rgba(79,16,32,.06) 76%, transparent 78%);
+  opacity: 0;
+  filter: blur(7px) saturate(.82);
+  mix-blend-mode: multiply;
+  animation: webgl-watercolor-wash 940ms cubic-bezier(.18,.72,.22,1) forwards;
+}
+.webgl-watercolor-particle {
+  width: var(--size, 26px);
+  height: calc(var(--size, 26px) * var(--ratio, 1));
+  border-radius: var(--radius, 50% 42% 56% 44%);
+  background: var(--particle-color, rgba(79,16,32,.22));
+  opacity: 0;
+  filter: blur(var(--blur, 2px));
+  mix-blend-mode: multiply;
+  animation: webgl-watercolor-particle var(--duration, 820ms) cubic-bezier(.2,.68,.2,1) var(--delay, 0ms) forwards;
+}
+.webgl-watercolor-particle[data-tone="gold"] { --particle-color: rgba(167,131,66,.28); }
+.webgl-watercolor-particle[data-tone="wine"] { --particle-color: rgba(79,16,32,.22); }
+.webgl-watercolor-particle[data-tone="rose"] { --particle-color: rgba(145,86,98,.18); }
+.webgl-watercolor-particle[data-tone="paper"] { --particle-color: rgba(225,208,187,.42); }
+
+@keyframes webgl-watercolor-wash {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.18) rotate(-4deg); filter: blur(11px) saturate(.7); }
+  22% { opacity: .66; }
+  58% { opacity: .42; }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(2.05) rotate(3deg); filter: blur(16px) saturate(.82); }
+}
+@keyframes webgl-watercolor-particle {
+  0% { opacity: 0; transform: translate(-50%,-50%) translate(0,0) scale(.2) rotate(0deg); }
+  18% { opacity: .68; }
+  55% { opacity: .44; }
+  100% { opacity: 0; transform: translate(-50%,-50%) translate(var(--dx,0px),var(--dy,0px)) scale(var(--end-scale,1.55)) rotate(var(--rotation,0deg)); filter: blur(calc(var(--blur,2px) + 3px)); }
+}
+
+.webgl-village[data-watercolor-transition="true"] .webgl-village-header,
+.webgl-village[data-watercolor-transition="true"] .webgl-village-legend,
+.webgl-village[data-watercolor-transition="true"] .webgl-village-status {
+  opacity: .78;
+  transition: opacity 220ms ease;
+}
+
+@media (max-width: 760px) {
+  .webgl-watercolor-wash { width: min(76vw, 310px); }
+  .webgl-watercolor-particle:nth-of-type(n+18) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-watercolor-layer { display: none !important; }
+  .webgl-village[data-watercolor-transition="true"] .webgl-village-header,
+  .webgl-village[data-watercolor-transition="true"] .webgl-village-legend,
+  .webgl-village[data-watercolor-transition="true"] .webgl-village-status {
+    opacity: 1;
+    transition: none !important;
+  }
+}

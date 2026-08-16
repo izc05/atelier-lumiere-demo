@@ -1,0 +1,86 @@
+/* Pueblo Atelier · P8.2B · interacción territorial sobre coordenadas WebGL reales */
+
+.webgl-place-tooltip {
+  position: absolute;
+  z-index: 26;
+  display: grid;
+  min-width: 150px;
+  max-width: min(260px, calc(100vw - 36px));
+  gap: 3px;
+  padding: 10px 12px 11px;
+  border: 1px solid rgba(79,16,32,.14);
+  border-radius: 2px;
+  color: var(--webgl-wine-dark);
+  background: rgba(255,253,248,.94);
+  box-shadow: 0 14px 36px rgba(49,7,18,.11);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(14px, 14px) translateY(5px);
+  transition: opacity 150ms ease, transform 210ms cubic-bezier(.22,.7,.2,1);
+  backdrop-filter: blur(12px) saturate(1.04);
+}
+.webgl-place-tooltip.is-visible {
+  opacity: 1;
+  transform: translate(14px, 14px) translateY(0);
+}
+.webgl-place-tooltip small {
+  color: var(--webgl-gold);
+  font-size: .45rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.webgl-place-tooltip strong {
+  overflow: hidden;
+  color: var(--webgl-wine-dark);
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.webgl-place-tooltip span {
+  color: var(--webgl-muted);
+  font-size: .48rem;
+  letter-spacing: .04em;
+}
+
+.webgl-village[data-hover-place] .webgl-village-canvas { cursor: pointer; }
+.webgl-village[data-camera-moving="true"] .webgl-village-caption {
+  opacity: .72;
+  transform: translateY(-48%) translateX(-4px);
+  transition: opacity 240ms ease, transform 420ms cubic-bezier(.22,.7,.2,1);
+}
+.webgl-village-caption {
+  transition: opacity 260ms ease, transform 460ms cubic-bezier(.22,.7,.2,1);
+}
+.webgl-village-caption [data-place-context] {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 2px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(79,16,32,.2);
+  color: var(--webgl-wine);
+  font-size: .5rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 760px) {
+  .webgl-place-tooltip { display: none; }
+  .webgl-village[data-camera-moving="true"] .webgl-village-caption {
+    transform: none;
+  }
+  .webgl-village-caption [data-place-context] {
+    font-size: .44rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-place-tooltip,
+  .webgl-village-caption {
+    transition: none !important;
+  }
+}

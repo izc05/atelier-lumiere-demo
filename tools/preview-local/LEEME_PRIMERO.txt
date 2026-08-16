@@ -1,0 +1,25 @@
+ATELIER LUMIÈRE · PREVIEW COMPLETA V2 + PUEBLO WEBGL · CANDIDATO ACTUAL
+
+1. Descomprime todo el ZIP en una carpeta normal de Windows.
+2. Haz doble clic en ABRIR_ATELIER_V2.bat.
+3. Se abrirá automáticamente http://127.0.0.1:4177/entrada/webgl/
+4. Empieza en el Pueblo Atelier WebGL del candidato actual.
+5. Selecciona Atelier Lumière y entra para llegar a la Home V2.
+6. Desde la navegación puedes recorrer Tienda, Talleres, Historias, Encargos y Carrito.
+
+IMPORTANTE
+- Es una preview local y aislada.
+- No modifica main.
+- No modifica el mini-PC.
+- No escribe datos reales.
+- El catálogo de esta preview usa datos de demostración para que las pantallas no aparezcan vacías.
+- Las funciones privadas, pagos, pedidos y administración no deben considerarse una prueba funcional en este paquete: aquí estamos revisando diseño público y navegación.
+
+RESPONSIVE
+Para ver tablet/móvil en Chrome:
+- pulsa F12;
+- pulsa el icono de móvil/tablet o Ctrl+Shift+M;
+- prueba 390 px, 768/820 px y escritorio.
+
+PARA CERRAR
+Vuelve a la ventana negra del lanzador y pulsa Ctrl+C.
