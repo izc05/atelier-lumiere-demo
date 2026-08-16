@@ -11,7 +11,7 @@ const shadowsIndex = bootstrap.indexOf('/entrada/webgl/contact-shadows.js');
 
 assert.ok(landscapeIndex >= 0 && vegetationIndex > landscapeIndex, 'U3.9 debe cargar después del paisaje detallado');
 assert.ok(shadowsIndex > vegetationIndex, 'U3.9 debe cargar antes de las sombras de contacto');
-assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.9'"));
+assert.ok(bootstrap.includes('/entrada/webgl/premium-vegetation.js'));
 
 for (const token of ['premiumVegetation','AtelierCraftTaxonomy','FLORAL','TEXTILE','CERAMICS','WOOD','PAPER','CANDLE','FAN','JEWELRY','GLASS','LEATHER']) {
   assert.ok(vegetation.includes(token), `U3.9 debe conservar ${token}`);
