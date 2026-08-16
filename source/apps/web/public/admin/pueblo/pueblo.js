@@ -58,14 +58,47 @@ function providerName(provider) {
   return provider?.displayName || provider?.name || provider?.slug || 'Taller sin nombre';
 }
 
+function craftTaxonomy() {
+  return window.AtelierCraftTaxonomy || null;
+}
+
+function architectureFor(value) {
+  return craftTaxonomy()?.resolve(value) || { key: 'NEUTRAL', label: 'Atelier neutro', matched: false };
+}
+
+function providerForSlug(slug) {
+  return providers.find((item) => item.slug === slug) || null;
+}
+
+function architectureSource(typeValue, providerSlug) {
+  const type = String(typeValue || '').trim();
+  if (type) return type;
+  const provider = providerForSlug(providerSlug);
+  return provider?.specialty || '';
+}
+
+function ensureCraftDatalist() {
+  if (document.getElementById('village-craft-types')) return;
+  const list = document.createElement('datalist');
+  list.id = 'village-craft-types';
+  for (const suggestion of craftTaxonomy()?.suggestions || []) {
+    const option = document.createElement('option');
+    option.value = suggestion;
+    list.append(option);
+  }
+  document.body.append(list);
+}
+
 function zoneSummary(zone) {
   const values = [];
   if (zone.workshopType) values.push(zone.workshopType);
   if (zone.providerSlug) {
-    const provider = providers.find((item) => item.slug === zone.providerSlug);
+    const provider = providerForSlug(zone.providerSlug);
     values.push(provider ? providerName(provider) : zone.providerSlug);
   }
-  if (!values.length) values.push('Sin oficio ni taller asignado');
+  const resolved = architectureFor(architectureSource(zone.workshopType, zone.providerSlug));
+  values.push(`Arquitectura · ${resolved.label}`);
+  if (!zone.workshopType && !zone.providerSlug) values.unshift('Sin oficio ni taller asignado');
   return values;
 }
 
@@ -127,6 +160,19 @@ function statusSelect(selected) {
   return select;
 }
 
+function updateArchitecturePreview(card) {
+  const type = card.querySelector('[data-field="type"]')?.value || '';
+  const providerSlug = card.querySelector('[data-field="provider"]')?.value || '';
+  const resolved = architectureFor(architectureSource(type, providerSlug));
+  const preview = card.querySelector('[data-architecture-preview]');
+  if (!preview) return;
+  preview.dataset.architecture = resolved.key;
+  preview.querySelector('strong').textContent = resolved.label;
+  preview.querySelector('span').textContent = resolved.matched
+    ? 'El oficio activa esta familia visual automáticamente.'
+    : 'Oficio libre: se usa Atelier neutro hasta que exista una familia específica.';
+}
+
 async function saveZone(card, zone) {
   if (busyZone) return;
   busyZone = zone.zoneKey;
@@ -180,6 +226,8 @@ function zoneCard(zone) {
 
   const type = input('text', zone.workshopType, 80, 'Cerámica, bordado, joyería…');
   type.dataset.field = 'type';
+  type.setAttribute('list', 'village-craft-types');
+  type.autocomplete = 'off';
   const label = input('text', zone.displayLabel, 120, 'Nombre visible opcional');
   label.dataset.field = 'label';
   const provider = providerSelect(zone.providerSlug);
@@ -195,6 +243,10 @@ function zoneCard(zone) {
     fieldLabel('Taller asociado', provider)
   );
 
+  const architecture = node('div', 'village-zone-architecture');
+  architecture.dataset.architecturePreview = 'true';
+  architecture.append(node('small', '', 'Familia arquitectónica'), node('strong', '', ''), node('span', '', ''));
+
   const summary = node('div', 'village-zone-summary');
   summary.append(...zoneSummary(zone).map((value) => node('span', '', value)));
 
@@ -209,12 +261,16 @@ function zoneCard(zone) {
   save.addEventListener('click', () => void saveZone(card, zone));
   reset.addEventListener('click', () => void resetZone(card, zone));
   status.addEventListener('change', () => { card.dataset.status = status.value; });
+  type.addEventListener('input', () => updateArchitecturePreview(card));
+  provider.addEventListener('change', () => updateArchitecturePreview(card));
 
-  card.append(head, fields, summary, actions);
+  card.append(head, fields, architecture, summary, actions);
+  updateArchitecturePreview(card);
   return card;
 }
 
 function render() {
+  ensureCraftDatalist();
   const target = byId('zones-grid');
   target.replaceChildren(...zones.map(zoneCard));
   target.hidden = false;
