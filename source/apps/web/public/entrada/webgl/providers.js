@@ -1,23 +1,23 @@
-/* Pueblo Atelier · P8.2D · catálogo real + parcelas procedimentales WebGL */
+/* Pueblo Atelier · U3.3B · catálogo real + zonas estables configurables */
 
 const webglDynamicProviderPlaces = Object.create(null);
 const webglProviderByPlace = new Map();
 let webglProviderCard = null;
 
-const webglProviderSlots = [
-  { x: -16, z: -9, scale: .84 },
-  { x: -8, z: -7, scale: .78 },
-  { x: 9, z: -10, scale: .78 },
-  { x: 17, z: -3, scale: .74 },
-  { x: -16, z: 5, scale: .76 },
-  { x: -7, z: 8, scale: .78 },
-  { x: 6, z: 8, scale: .75 },
-  { x: 15, z: 7, scale: .78 },
-  { x: -13, z: 11, scale: .72 },
-  { x: -3, z: 10, scale: .70 },
-  { x: 8, z: 11, scale: .72 },
-  { x: 16, z: 10, scale: .70 }
-];
+const webglProviderSlots = (window.AtelierVillageZones?.registry || [
+  { zoneKey: 'ZONE_03', x: -16, z: -9, scale: .84 },
+  { zoneKey: 'ZONE_04', x: -8, z: -7, scale: .78 },
+  { zoneKey: 'ZONE_05', x: 9, z: -10, scale: .78 },
+  { zoneKey: 'ZONE_06', x: 17, z: -3, scale: .74 },
+  { zoneKey: 'ZONE_07', x: -16, z: 5, scale: .76 },
+  { zoneKey: 'ZONE_08', x: -7, z: 8, scale: .78 },
+  { zoneKey: 'ZONE_09', x: 6, z: 8, scale: .75 },
+  { zoneKey: 'ZONE_10', x: 15, z: 7, scale: .78 },
+  { zoneKey: 'ZONE_11', x: -13, z: 11, scale: .72 },
+  { zoneKey: 'ZONE_12', x: -3, z: 10, scale: .70 },
+  { zoneKey: 'ZONE_13', x: 8, z: 11, scale: .72 },
+  { zoneKey: 'ZONE_14', x: 16, z: 10, scale: .70 }
+]).filter((zone) => !zone.existingPlace);
 
 function webglNormalizeProvider(value) {
   return String(value || '')
@@ -38,6 +38,7 @@ function webglPreferredProviderMedia(provider) {
   return provider?.cover || provider?.gallery?.[0] || provider?.logo || null;
 }
 
+/* Se conserva como fallback histórico para previews sin configuración de zonas. */
 function webglExistingPlaceForProvider(provider) {
   const name = webglNormalizeProvider(provider?.displayName);
   const slug = webglNormalizeProvider(provider?.slug);
@@ -46,24 +47,46 @@ function webglExistingPlaceForProvider(provider) {
   return null;
 }
 
-function webglProviderKicker(provider) {
-  return [provider?.locationLabel, provider?.specialty].filter(Boolean).join(' · ') || 'Taller asociado';
+function webglProviderKicker(provider, workshopType = '') {
+  return [provider?.locationLabel, workshopType || provider?.specialty].filter(Boolean).join(' · ') || 'Taller asociado';
 }
 
 function webglProviderCaption(provider) {
   return provider?.tagline || provider?.craftDescription || provider?.story || 'Piezas creadas con oficio y seleccionadas por Atelier Lumière.';
 }
 
-function webglUpdateExistingProvider(place, provider) {
+function webglZonePlaceName(zoneKey, fallbackIndex = 0) {
+  const match = String(zoneKey || '').toUpperCase().match(/^ZONE_(\d{2})$/);
+  return match ? `zone-${match[1]}` : `zone-${String(fallbackIndex + 3).padStart(2, '0')}`;
+}
+
+function webglUpdateExistingProvider(place, provider, zone = null, zoneConfig = null) {
   const config = webglInteractionPlaces[place];
   if (!config) return;
-  config.title = provider.displayName || config.title;
-  config.kicker = webglProviderKicker(provider);
+  config.title = zoneConfig?.displayLabel || provider.displayName || config.title;
+  config.kicker = webglProviderKicker(provider, zoneConfig?.workshopType);
   config.detail = provider.acceptsCustomRequests ? 'Encargos disponibles' : 'Taller asociado';
   config.caption = webglProviderCaption(provider);
+  config.provider = provider;
+  config.zoneKey = zone?.zoneKey || null;
+  config.workshopType = zoneConfig?.workshopType || provider?.specialty || '';
   webglProviderByPlace.set(place, provider);
   const button = document.querySelector(`[data-camera-place="${place}"] span`);
   if (button) button.textContent = config.title;
+}
+
+function webglConfigureReservedSignature(zone, zoneConfig) {
+  const place = zone?.existingPlace;
+  const config = place ? webglInteractionPlaces[place] : null;
+  if (!config || !zoneConfig) return;
+  config.title = zoneConfig.displayLabel || zoneConfig.workshopType || config.title;
+  config.kicker = zoneConfig.workshopType || 'Parcela reservada';
+  config.detail = 'Zona preparada para un taller';
+  config.caption = zoneConfig.workshopType
+    ? `Espacio reservado para un taller de ${zoneConfig.workshopType.toLocaleLowerCase('es')}.`
+    : 'Espacio reservado para un futuro taller de Atelier Lumière.';
+  config.zoneKey = zone.zoneKey;
+  config.workshopType = zoneConfig.workshopType || '';
 }
 
 function webglSlugKey(slug, index) {
@@ -85,39 +108,49 @@ function webglProviderAccent(index) {
   return accents[index % accents.length];
 }
 
-function webglCreateDynamicBuilding(placeName, provider, slot, index) {
-  const before = objects.length;
-  building(slot.x, slot.z, slot.scale, webglProviderAccent(index), mix3(palette.paperDeep, palette.paperLight, .7));
+function webglRegisterDynamicPlace(placeName, slot, config) {
   const height = atelierTerrainHeight(slot.x, slot.z);
-  for (let cursor = before; cursor < objects.length; cursor++) objects[cursor].position[1] += height;
-
   const point = [slot.x, height + 1.45 * slot.scale, slot.z];
   const plot = [slot.x, height + .11, slot.z];
-  const config = {
+  const placeConfig = {
     point,
     plot,
     scale: [2.0 * slot.scale, .025, 1.8 * slot.scale],
-    title: provider.displayName || 'Taller invitado',
-    kicker: webglProviderKicker(provider),
-    detail: provider.acceptsCustomRequests ? 'Encargos disponibles' : 'Taller asociado',
-    caption: webglProviderCaption(provider),
-    provider
+    ...config
   };
-  webglDynamicProviderPlaces[placeName] = config;
-  webglProviderByPlace.set(placeName, provider);
+  webglDynamicProviderPlaces[placeName] = placeConfig;
   places[placeName] = { target: [slot.x, height, slot.z], distance: 14.5 };
 
   const highlightColor = [palette.wine[0], palette.wine[1], palette.wine[2], 0];
   const highlight = {
     mesh: meshes.box,
     position: [...plot],
-    scale: [...config.scale],
+    scale: [...placeConfig.scale],
     color: highlightColor,
     rotation: 0,
     edges: false
   };
   objects.push(highlight);
   webglHighlightObjects.set(placeName, highlight);
+  return placeConfig;
+}
+
+function webglCreateDynamicBuilding(placeName, provider, slot, index, zoneConfig = null) {
+  const before = objects.length;
+  building(slot.x, slot.z, slot.scale, webglProviderAccent(index), mix3(palette.paperDeep, palette.paperLight, .7));
+  const height = atelierTerrainHeight(slot.x, slot.z);
+  for (let cursor = before; cursor < objects.length; cursor++) objects[cursor].position[1] += height;
+
+  const config = webglRegisterDynamicPlace(placeName, slot, {
+    title: zoneConfig?.displayLabel || provider.displayName || 'Taller invitado',
+    kicker: webglProviderKicker(provider, zoneConfig?.workshopType),
+    detail: provider.acceptsCustomRequests ? 'Encargos disponibles' : 'Taller asociado',
+    caption: webglProviderCaption(provider),
+    provider,
+    zoneKey: slot.zoneKey || null,
+    workshopType: zoneConfig?.workshopType || provider?.specialty || ''
+  });
+  webglProviderByPlace.set(placeName, provider);
 
   const nav = document.querySelector('.webgl-village-legend');
   if (nav) {
@@ -130,6 +163,26 @@ function webglCreateDynamicBuilding(placeName, provider, slot, index) {
     button.addEventListener('click', () => webglFocusPlace(placeName));
     nav.append(button);
   }
+}
+
+function webglCreateReservedZonePlace(zone, zoneConfig, index) {
+  if (!zone || !zoneConfig) return;
+  if (zone.existingPlace) {
+    webglConfigureReservedSignature(zone, zoneConfig);
+    return;
+  }
+  const placeName = webglZonePlaceName(zone.zoneKey, index);
+  webglRegisterDynamicPlace(placeName, zone, {
+    title: zoneConfig.displayLabel || zoneConfig.workshopType || zone.zoneKey,
+    kicker: zoneConfig.workshopType || 'Parcela reservada',
+    detail: 'Zona preparada para un taller',
+    caption: zoneConfig.workshopType
+      ? `Espacio reservado para un taller de ${zoneConfig.workshopType.toLocaleLowerCase('es')}.`
+      : 'Espacio reservado para un futuro taller de Atelier Lumière.',
+    provider: null,
+    zoneKey: zone.zoneKey,
+    workshopType: zoneConfig.workshopType || ''
+  });
 }
 
 function webglDynamicNearest(clientX, clientY, currentHit) {
@@ -214,12 +267,17 @@ function webglProviderSignal(container, text) {
   container.append(span);
 }
 
+function webglPlaceConfig(placeName) {
+  return webglDynamicProviderPlaces[placeName] || webglInteractionPlaces[placeName] || null;
+}
+
 function webglShowProviderCard(placeName) {
   const provider = webglProviderByPlace.get(placeName);
   if (!provider) {
     if (webglProviderCard) webglProviderCard.hidden = true;
     return;
   }
+  const placeConfig = webglPlaceConfig(placeName);
   const card = webglEnsureProviderCard();
   const media = webglPreferredProviderMedia(provider);
   const cover = card.querySelector('[data-provider-cover]');
@@ -243,11 +301,12 @@ function webglShowProviderCard(placeName) {
     logoWrap.hidden = true;
   }
 
-  card.querySelector('.webgl-provider-kicker').textContent = webglProviderKicker(provider);
+  card.querySelector('.webgl-provider-kicker').textContent = webglProviderKicker(provider, placeConfig?.workshopType);
   card.querySelector('h2').textContent = provider.displayName || 'Taller invitado';
   card.querySelector('.webgl-provider-copy').textContent = webglProviderCaption(provider);
   const signals = card.querySelector('.webgl-provider-signals');
   signals.replaceChildren();
+  if (placeConfig?.workshopType) webglProviderSignal(signals, placeConfig.workshopType);
   if (Number.isFinite(provider.publishedProductCount)) {
     webglProviderSignal(signals, `${provider.publishedProductCount} ${provider.publishedProductCount === 1 ? 'pieza' : 'piezas'}`);
   }
@@ -267,7 +326,10 @@ webglFocusPlace = function webglFocusPlaceWithProviderCard(name) {
   webglProviderBaseFocusPlace(name);
   webglShowProviderCard(name);
   const provider = webglProviderByPlace.get(name);
-  if (provider && status) status.textContent = `${provider.displayName || 'Taller'} · identidad pública cargada`;
+  const config = webglPlaceConfig(name);
+  if (status) status.textContent = provider
+    ? `${provider.displayName || 'Taller'} · identidad pública cargada`
+    : `${config?.title || 'Zona'} · parcela reservada`;
 };
 
 const webglProviderBaseFocusOverview = webglFocusOverview;
@@ -278,33 +340,49 @@ webglFocusOverview = function webglFocusOverviewWithProviderCard() {
 
 async function webglLoadProviders() {
   try {
+    const zoneModel = window.AtelierVillageZones || null;
+    if (zoneModel?.ready) await zoneModel.ready;
+
     const response = await fetch('/internal/catalog/providers', { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error('catalog');
     const payload = await response.json().catch(() => ({}));
     const providers = Array.isArray(payload.providers) ? payload.providers : [];
 
-    const remaining = [];
-    for (const provider of providers) {
-      const place = webglExistingPlaceForProvider(provider);
-      if (place) webglUpdateExistingProvider(place, provider);
-      else remaining.push(provider);
-    }
+    const assignments = zoneModel?.assignProviders
+      ? zoneModel.assignProviders(providers)
+      : providers.map((provider, index) => ({
+          provider,
+          zone: webglProviderSlots[index],
+          config: { workshopType: '', displayLabel: '' },
+          source: 'legacy'
+        })).filter((item) => item.zone);
 
-    remaining.slice(0, webglProviderSlots.length).forEach((provider, index) => {
-      const name = webglSlugKey(provider.slug, index);
-      webglCreateDynamicBuilding(name, provider, webglProviderSlots[index], index);
+    assignments.forEach(({ provider, zone, config }, index) => {
+      if (zone.existingPlace) {
+        webglUpdateExistingProvider(zone.existingPlace, provider, zone, config);
+        return;
+      }
+      const placeName = webglZonePlaceName(zone.zoneKey, index);
+      webglCreateDynamicBuilding(placeName, provider, zone, index, config);
     });
 
-    if (root) root.dataset.webglProviders = String(providers.length);
+    const reserved = zoneModel?.reservedZones ? zoneModel.reservedZones(assignments) : [];
+    reserved.forEach(({ zone, config }, index) => webglCreateReservedZonePlace(zone, config, index));
+
+    if (root) {
+      root.dataset.webglProviders = String(providers.length);
+      root.dataset.webglAssignedZones = String(assignments.length);
+      root.dataset.webglReservedZones = String(reserved.length);
+    }
     if (status) status.textContent = providers.length
-      ? `${providers.length} ${providers.length === 1 ? 'taller publicado' : 'talleres publicados'} · WebGL conectado`
-      : 'Pueblo WebGL · catálogo sin talleres publicados';
+      ? `${assignments.length} ${assignments.length === 1 ? 'taller ubicado' : 'talleres ubicados'} · ${reserved.length} zonas reservadas`
+      : `${reserved.length} zonas reservadas · catálogo sin talleres publicados`;
   } catch {
     if (status) status.textContent = 'Pueblo WebGL · usando identidad local de laboratorio';
   }
 }
 
 void webglLoadProviders();
-if (root) root.dataset.webglPhase = 'p8.2d';
+if (root) root.dataset.webglPhase = 'u3.3b';
 const webglProvidersPhaseLabel = document.querySelector('.webgl-village-heading > span');
-if (webglProvidersPhaseLabel) webglProvidersPhaseLabel.textContent = 'Laboratorio P8.2D · talleres reales en WebGL';
+if (webglProvidersPhaseLabel) webglProvidersPhaseLabel.textContent = 'U3.3B · zonas escalables del Pueblo Atelier';
