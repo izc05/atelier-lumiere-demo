@@ -12,9 +12,9 @@ const focusButtons = [...document.querySelectorAll("[data-focus-place]")];
 const zoomButtons = [...document.querySelectorAll("[data-village-zoom]")];
 
 const places = Object.freeze({
-  atelier: { x: 1200, y: 720, desktopScale: 1.05, mobileScale: .72 },
-  izc: { x: 615, y: 1015, desktopScale: 1.18, mobileScale: .78 },
-  stitch: { x: 1810, y: 370, desktopScale: 1.16, mobileScale: .78 }
+  atelier: { x: 1200, y: 720, desktopScale: 1.05, mobileScale: .82 },
+  izc: { x: 615, y: 1015, desktopScale: 1.18, mobileScale: .84 },
+  stitch: { x: 1810, y: 370, desktopScale: 1.16, mobileScale: .84 }
 });
 
 let state = {
@@ -111,9 +111,27 @@ function setSelected(place) {
   for (const button of focusButtons) {
     const active = button.dataset.focusPlace === place;
     button.classList.toggle("is-active", active);
-    if (active) button.setAttribute("aria-current", "true");
-    else button.removeAttribute("aria-current");
+    if (active) {
+      button.setAttribute("aria-current", "true");
+      if (mobile.matches) {
+        button.scrollIntoView({
+          behavior: reducedMotion.matches ? "auto" : "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+    } else {
+      button.removeAttribute("aria-current");
+    }
   }
+}
+
+function updateHint() {
+  const label = hint?.querySelector("span");
+  if (!label) return;
+  label.textContent = mobile.matches
+    ? "Toca un destino o arrastra el pueblo"
+    : "Arrastra para recorrer el pueblo";
 }
 
 function hideHint() {
@@ -158,7 +176,7 @@ function focusPlace(name, { animate = true } = {}) {
   const desired = mobile.matches ? place.mobileScale : place.desktopScale;
   state.scale = Math.min(bounds.max, Math.max(bounds.min, desired));
 
-  const verticalBias = mobile.matches ? -10 : 22;
+  const verticalBias = mobile.matches ? -18 : 22;
   state.x = width / 2 - place.x * state.scale;
   state.y = height / 2 - place.y * state.scale + verticalBias;
   setSelected(name);
@@ -264,6 +282,7 @@ function onKeydown(event) {
 function onResize() {
   window.clearTimeout(resizeTimer);
   resizeTimer = window.setTimeout(() => {
+    updateHint();
     if (state.selected === "overview") focusOverview({ animate: false });
     else if (places[state.selected]) focusPlace(state.selected, { animate: false });
     else render();
@@ -290,7 +309,9 @@ window.addEventListener("resize", onResize, { passive: true });
 mobile.addEventListener?.("change", () => onResize());
 reducedMotion.addEventListener?.("change", () => render());
 
-focusOverview({ animate: false });
+updateHint();
+if (mobile.matches) focusPlace("atelier", { animate: false });
+else focusOverview({ animate: false });
 window.setTimeout(hideHint, 6500);
 
 if (experience) {
