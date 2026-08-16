@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 
-const root = path.resolve('source/apps/web/public');
+const root = path.resolve('public');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
 const bootstrap = read('entrada/webgl/bootstrap.js');
