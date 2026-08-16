@@ -71,6 +71,7 @@
     '/entrada/webgl/material-textures.js',
     '/entrada/webgl/craft-details.js',
     '/entrada/webgl/facade-details.js',
+    '/entrada/webgl/roof-patina.js',
     '/entrada/webgl/landscape-details.js',
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
@@ -95,7 +96,7 @@
       for (const src of scripts) await loadScript(src);
       if (root) {
         root.dataset.webglBootstrapped = 'true';
-        root.dataset.graphicsCheckpoint = 'u3.7';
+        root.dataset.graphicsCheckpoint = 'u3.8';
       }
     } catch (error) {
       console.error(error);
