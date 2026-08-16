@@ -184,12 +184,13 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  const startUrl = `http://${HOST}:${PORT}/entrada/webgl/`;
+  const startUrl = `http://${HOST}:${PORT}/?intro=1`;
   console.log('');
   console.log('============================================================');
-  console.log(' ATELIER LUMIÈRE · PREVIEW COMPLETA V2 + PUEBLO WEBGL');
+  console.log(' ATELIER LUMIÈRE · EXPERIENCIA UNIFICADA · PREVIEW LOCAL');
   console.log('============================================================');
-  console.log(' Candidato actual de la rama de diseño · no producción');
+  console.log(' Entrada cinematográfica → Pueblo WebGL → Visual V2');
+  console.log(' Candidato de diseño · no producción');
   console.log(` Abierto en: ${startUrl}`);
   console.log(' Pulsa Ctrl+C para cerrar la preview.');
   console.log('');
