@@ -1,0 +1,87 @@
+.p10-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+.p10-atmosphere-wash {
+  position: absolute;
+  inset: -12%;
+  opacity: .20;
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255,255,255,.60), transparent 28%),
+    radial-gradient(circle at 78% 28%, rgba(167,131,66,.07), transparent 24%),
+    radial-gradient(circle at 54% 72%, rgba(79,16,32,.035), transparent 31%);
+  transform: translate3d(0,0,0) scale(1.02);
+  animation: p10-wash-drift 32s cubic-bezier(.42,0,.58,1) infinite alternate;
+}
+
+.p10-mote {
+  --p10-size: 3px;
+  --p10-x: 50%;
+  --p10-y: 50%;
+  --p10-dx: 30px;
+  --p10-dy: -45px;
+  --p10-duration: 24s;
+  --p10-delay: 0s;
+  position: absolute;
+  left: var(--p10-x);
+  top: var(--p10-y);
+  width: var(--p10-size);
+  height: var(--p10-size);
+  border-radius: 999px;
+  background: rgba(167,131,66,.52);
+  opacity: .16;
+  box-shadow: 0 0 0 1px rgba(255,253,248,.16);
+  transform: translate3d(0,0,0);
+  animation: p10-mote-drift var(--p10-duration) ease-in-out var(--p10-delay) infinite alternate;
+}
+
+.p10-mote:nth-child(3n) {
+  background: rgba(79,16,32,.38);
+  opacity: .11;
+}
+
+.p10-mote:nth-child(4n) {
+  background: rgba(255,253,248,.88);
+  opacity: .22;
+}
+
+@keyframes p10-wash-drift {
+  0% { transform: translate3d(-1.2%, -.7%, 0) scale(1.02); }
+  50% { transform: translate3d(.8%, .6%, 0) scale(1.035); }
+  100% { transform: translate3d(1.3%, -.4%, 0) scale(1.025); }
+}
+
+@keyframes p10-mote-drift {
+  0% { transform: translate3d(calc(var(--p10-dx) * -.3), calc(var(--p10-dy) * -.15), 0) scale(.78); opacity: .07; }
+  40% { opacity: .18; }
+  100% { transform: translate3d(var(--p10-dx), var(--p10-dy), 0) scale(1.12); opacity: .10; }
+}
+
+[data-webgl-quality="lite"] .p10-atmosphere-wash {
+  animation: none;
+  opacity: .13;
+}
+
+[data-webgl-quality="lite"] .p10-mote:nth-of-type(n+6) {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .p10-atmosphere-wash { opacity: .14; }
+  .p10-mote { opacity: .10; }
+  .p10-mote:nth-of-type(n+8) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p10-atmosphere-wash,
+  .p10-mote {
+    animation: none !important;
+  }
+  .p10-mote { display: none; }
+  .p10-atmosphere-wash { opacity: .12; }
+}
