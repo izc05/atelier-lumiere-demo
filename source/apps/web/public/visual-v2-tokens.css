@@ -1,0 +1,88 @@
+/* Atelier Lumière · Visual V2 · Fase 1.1
+ * Fundación visual compartida. Esta capa define el lenguaje V2 sin sustituir todavía
+ * componentes ni alterar la lógica funcional de ninguna página.
+ */
+:root {
+  /* Color */
+  --v2-wine-950: #2a0710;
+  --v2-wine-900: #3a0b16;
+  --v2-wine-800: #4f1020;
+  --v2-wine-700: #65182b;
+  --v2-wine-600: #7d2b3e;
+  --v2-wine-500: #965064;
+
+  --v2-gold-700: #9d7b3f;
+  --v2-gold-600: #b28d4b;
+  --v2-gold-500: #c6a15d;
+  --v2-gold-300: #dec99c;
+
+  --v2-ivory-50: #fffdf9;
+  --v2-ivory-100: #fbf7f1;
+  --v2-ivory-200: #f4eee6;
+  --v2-ivory-300: #ebe1d6;
+
+  --v2-ink-950: #21181a;
+  --v2-ink-800: #3d3335;
+  --v2-ink-600: #6f6466;
+  --v2-ink-500: #887d7f;
+
+  --v2-line-soft: rgba(79, 16, 32, .10);
+  --v2-line: rgba(79, 16, 32, .17);
+  --v2-line-strong: rgba(79, 16, 32, .28);
+
+  /* Typography */
+  --v2-font-display: "Iowan Old Style", Baskerville, "Baskerville Old Face", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, "Times New Roman", serif;
+  --v2-font-ui: "Avenir Next", Avenir, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --v2-display-xl: clamp(4.2rem, 7.2vw, 8.5rem);
+  --v2-display-lg: clamp(3.2rem, 5.2vw, 6.2rem);
+  --v2-display-md: clamp(2.5rem, 3.8vw, 4.4rem);
+  --v2-heading-sm: clamp(1.65rem, 2.1vw, 2.35rem);
+
+  /* Layout */
+  --v2-shell: 1500px;
+  --v2-gutter: clamp(20px, 4.5vw, 72px);
+  --v2-section-y: clamp(72px, 8vw, 132px);
+  --v2-section-y-compact: clamp(48px, 5.5vw, 88px);
+  --v2-grid-gap: clamp(18px, 2vw, 30px);
+
+  /* Shape: V2 is flatter and more editorial than the current UI */
+  --v2-radius-xs: 2px;
+  --v2-radius-sm: 6px;
+  --v2-radius-md: 12px;
+  --v2-radius-lg: 20px;
+
+  /* Shadows: deliberately restrained */
+  --v2-shadow-xs: 0 8px 24px rgba(42, 7, 16, .045);
+  --v2-shadow-sm: 0 14px 38px rgba(42, 7, 16, .065);
+  --v2-shadow-md: 0 24px 64px rgba(42, 7, 16, .09);
+
+  /* Motion */
+  --v2-ease-standard: cubic-bezier(.22, .68, .2, 1);
+  --v2-ease-emphasis: cubic-bezier(.16, .78, .18, 1);
+  --v2-duration-fast: 180ms;
+  --v2-duration-base: 320ms;
+  --v2-duration-slow: 700ms;
+
+  /* Image behaviour */
+  --v2-image-hover-scale: 1.025;
+  --v2-image-saturation: .94;
+
+  /* Compatibility aliases. They will replace the old visual system gradually. */
+  --v2-surface: var(--v2-ivory-50);
+  --v2-surface-warm: var(--v2-ivory-100);
+  --v2-accent: var(--v2-wine-800);
+  --v2-accent-dark: var(--v2-wine-950);
+  --v2-metal: var(--v2-gold-600);
+  --v2-text: var(--v2-ink-950);
+  --v2-text-muted: var(--v2-ink-600);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --v2-duration-fast: 0ms;
+    --v2-duration-base: 0ms;
+    --v2-duration-slow: 0ms;
+    --v2-image-hover-scale: 1;
+  }
+}
