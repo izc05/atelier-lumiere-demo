@@ -14,7 +14,8 @@ const plaquesIndex = bootstrap.indexOf('/entrada/webgl/workshop-plaques.js');
 assert.ok(focusIndex >= 0 && governorIndex > focusIndex, 'U3.14 debe cargar después del foco atmosférico');
 assert.ok(lodIndex > governorIndex, 'U3.14 debe preparar la escala antes del LOD');
 assert.ok(plaquesIndex > lodIndex, 'U3.14/U3.12 deben mantenerse antes de UI');
-assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.14'"));
+const checkpoint = bootstrap.match(/graphicsCheckpoint = 'u3\.(\d+)'/);
+assert.ok(checkpoint && Number(checkpoint[1]) >= 14, 'U3.14 debe seguir incluida en checkpoints posteriores');
 
 for (const token of ['AtelierVillageDynamicDetailScale','performanceGovernor','requestAnimationFrame','saveData','ema','protect','enhance']) {
   assert.ok(governor.includes(token), `U3.14 debe conservar ${token}`);
