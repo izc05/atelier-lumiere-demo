@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Atelier Lumiere - Preview V2
+title Atelier Lumiere - Preview V2 + Pueblo WebGL
 
 where node >nul 2>nul
 if errorlevel 1 (
@@ -14,7 +14,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Iniciando Atelier Lumiere V2 + Pueblo P9.8...
+echo Iniciando Atelier Lumiere V2 + Pueblo WebGL - candidato actual...
 echo Se abrira en el navegador. Para cerrar la prueba, vuelve aqui y pulsa Ctrl+C.
 echo.
 node preview-server.cjs
