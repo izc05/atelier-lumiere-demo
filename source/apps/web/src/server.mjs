@@ -20,6 +20,7 @@ import { createPublicBlogWebHandler } from "./public-blog-proxy.mjs";
 import { createPublicCatalogWebHandler } from "./public-catalog-proxy.mjs";
 import { createPublicErrorPagesWebHandler } from "./public-error-pages-handler.mjs";
 import { createRequestFilesWebHandler } from "./request-files-proxy.mjs";
+import { createShowcaseWebHandler } from "./showcase-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.WEB_PORT ?? "3000", 10);
@@ -57,7 +58,11 @@ const adminProviderProfilesHandler = createAdminProviderProfilesWebHandler({
   baseHandler: adminAuthenticationHandler,
   enableAdminUi
 });
-const publicErrorPagesHandler = createPublicErrorPagesWebHandler({ baseHandler: adminProviderProfilesHandler });
+const showcaseHandler = createShowcaseWebHandler({
+  baseHandler: adminProviderProfilesHandler,
+  enableAdminUi
+});
+const publicErrorPagesHandler = createPublicErrorPagesWebHandler({ baseHandler: showcaseHandler });
 const legacyRouteRedirectHandler = createLegacyRouteRedirectWebHandler({ baseHandler: publicErrorPagesHandler });
 const server = createServer(legacyRouteRedirectHandler);
 
