@@ -11,10 +11,13 @@ const overviewButton = document.querySelector("[data-village-overview]");
 const focusButtons = [...document.querySelectorAll("[data-focus-place]")];
 const zoomButtons = [...document.querySelectorAll("[data-village-zoom]")];
 
+/* E1.2 · Los talleres se separan de la plaza para que el pueblo se recorra,
+ * en lugar de percibirse como tres iconos alrededor de un único centro.
+ */
 const places = Object.freeze({
-  atelier: { x: 1200, y: 720, desktopScale: 1.05, mobileScale: .82 },
-  izc: { x: 615, y: 1015, desktopScale: 1.18, mobileScale: .84 },
-  stitch: { x: 1810, y: 370, desktopScale: 1.16, mobileScale: .84 }
+  atelier: { x: 1200, y: 735, desktopScale: .98, mobileScale: .82 },
+  izc: { x: 430, y: 1190, desktopScale: 1.14, mobileScale: .84 },
+  stitch: { x: 2010, y: 285, desktopScale: 1.12, mobileScale: .84 }
 });
 
 let state = {
@@ -36,6 +39,53 @@ const mobile = window.matchMedia(MOBILE_QUERY);
 document.documentElement.classList.remove("no-js");
 document.documentElement.classList.add("js");
 
+function applyPhaseE12Layout() {
+  const atelier = document.querySelector('[data-place="atelier"]');
+  const izc = document.querySelector('[data-place="izc"]');
+  const stitch = document.querySelector('[data-place="stitch"]');
+  if (atelier) {
+    atelier.style.setProperty("--x", String(places.atelier.x));
+    atelier.style.setProperty("--y", String(places.atelier.y));
+    atelier.style.setProperty("--scale", "1.02");
+  }
+  if (izc) {
+    izc.style.setProperty("--x", String(places.izc.x));
+    izc.style.setProperty("--y", String(places.izc.y));
+    izc.style.setProperty("--scale", ".92");
+  }
+  if (stitch) {
+    stitch.style.setProperty("--x", String(places.stitch.x));
+    stitch.style.setProperty("--y", String(places.stitch.y));
+    stitch.style.setProperty("--scale", ".9");
+  }
+
+  const style = document.createElement("style");
+  style.dataset.villagePhase = "e12";
+  style.textContent = `
+    /* E1.2: más territorio aparente, menos densidad y más profundidad. */
+    .village-ground { filter: saturate(.92) contrast(.99); }
+    .village-houses { opacity: .82; }
+    .village-houses .house { transform-origin: 50% 100%; }
+    .village-trees { opacity: .82; }
+    .roads { opacity: .86; }
+    .road-lines { opacity: .34 !important; }
+    .future-quarter { opacity: .58; }
+    .village-compass { opacity: .7; }
+    .village-header { background: linear-gradient(to bottom, rgba(247,240,231,.92), rgba(247,240,231,.55) 72%, transparent); }
+    .village-navigation { background: rgba(255,253,249,.84); }
+    .village-lab-note { font-size: 0; }
+    .village-lab-note::after {
+      content: "Laboratorio E1.2 · escala y cámara · sin conexión todavía con la Home";
+      font-size: .48rem;
+    }
+    @media (min-width: 761px) {
+      .village-landmark { width: 255px; height: 270px; }
+      .village-houses .house { width: 102px; height: 77px; }
+    }
+  `;
+  document.head.append(style);
+}
+
 function viewportSize() {
   return {
     width: Math.max(1, viewport?.clientWidth || window.innerWidth),
@@ -47,7 +97,7 @@ function limitsForScale(scale) {
   const { width, height } = viewportSize();
   const scaledWidth = WORLD_WIDTH * scale;
   const scaledHeight = WORLD_HEIGHT * scale;
-  const overscroll = mobile.matches ? 70 : 120;
+  const overscroll = mobile.matches ? 70 : 150;
 
   let minX;
   let maxX;
@@ -81,8 +131,8 @@ function scaleBounds() {
   const { width, height } = viewportSize();
   const fit = Math.min(width / WORLD_WIDTH, height / WORLD_HEIGHT);
   return {
-    min: mobile.matches ? Math.max(.27, fit * .98) : Math.max(.5, fit * .92),
-    max: mobile.matches ? 1.18 : 1.75
+    min: mobile.matches ? Math.max(.27, fit * .96) : Math.max(.42, fit * .86),
+    max: mobile.matches ? 1.18 : 1.7
   };
 }
 
@@ -93,10 +143,10 @@ function setTransition(active) {
     world.style.transition = "none";
     return;
   }
-  world.style.transition = "transform 920ms cubic-bezier(.22,.72,.18,1)";
+  world.style.transition = "transform 980ms cubic-bezier(.22,.72,.18,1)";
   transitionTimer = window.setTimeout(() => {
     if (!state.dragging) world.style.transition = "none";
-  }, 980);
+  }, 1040);
 }
 
 function render({ animate = false } = {}) {
@@ -131,7 +181,7 @@ function updateHint() {
   if (!label) return;
   label.textContent = mobile.matches
     ? "Toca un destino o arrastra el pueblo"
-    : "Arrastra para recorrer el pueblo";
+    : "Arrastra para recorrer el pueblo · usa la rueda para acercarte";
 }
 
 function hideHint() {
@@ -140,18 +190,18 @@ function hideHint() {
 
 function overviewTransform() {
   const { width, height } = viewportSize();
-  const horizontalPadding = mobile.matches ? 30 : 90;
-  const verticalPadding = mobile.matches ? 120 : 90;
+  const horizontalPadding = mobile.matches ? 30 : 120;
+  const verticalPadding = mobile.matches ? 120 : 112;
   const scaleX = Math.max(1, width - horizontalPadding * 2) / WORLD_WIDTH;
   const scaleY = Math.max(1, height - verticalPadding * 2) / WORLD_HEIGHT;
   const natural = Math.min(scaleX, scaleY);
   const scale = mobile.matches
-    ? Math.max(.31, Math.min(.48, natural * 1.35))
-    : Math.max(.54, Math.min(.72, natural * 1.08));
+    ? Math.max(.31, Math.min(.46, natural * 1.28))
+    : Math.max(.46, Math.min(.62, natural * 1.01));
   return {
     scale,
     x: (width - WORLD_WIDTH * scale) / 2,
-    y: (height - WORLD_HEIGHT * scale) / 2 + (mobile.matches ? -12 : 14)
+    y: (height - WORLD_HEIGHT * scale) / 2 + (mobile.matches ? -12 : 20)
   };
 }
 
@@ -176,7 +226,7 @@ function focusPlace(name, { animate = true } = {}) {
   const desired = mobile.matches ? place.mobileScale : place.desktopScale;
   state.scale = Math.min(bounds.max, Math.max(bounds.min, desired));
 
-  const verticalBias = mobile.matches ? -18 : 22;
+  const verticalBias = mobile.matches ? -18 : 28;
   state.x = width / 2 - place.x * state.scale;
   state.y = height / 2 - place.y * state.scale + verticalBias;
   setSelected(name);
@@ -251,13 +301,13 @@ function onWheel(event) {
   const rect = viewport.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
-  const factor = Math.exp(-event.deltaY * .00115);
+  const factor = Math.exp(-event.deltaY * .00105);
   zoomAt(x, y, factor);
 }
 
 function onKeydown(event) {
   if (event.defaultPrevented || ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) return;
-  const step = event.shiftKey ? 85 : 42;
+  const step = event.shiftKey ? 95 : 48;
   if (event.key === "+" || event.key === "=") {
     event.preventDefault();
     zoomFromCenter(1.14);
@@ -309,6 +359,7 @@ window.addEventListener("resize", onResize, { passive: true });
 mobile.addEventListener?.("change", () => onResize());
 reducedMotion.addEventListener?.("change", () => render());
 
+applyPhaseE12Layout();
 updateHint();
 if (mobile.matches) focusPlace("atelier", { animate: false });
 else focusOverview({ animate: false });
@@ -316,5 +367,6 @@ window.setTimeout(hideHint, 6500);
 
 if (experience) {
   experience.dataset.villageReady = "true";
-  window.dispatchEvent(new CustomEvent("atelier:village-ready"));
+  experience.dataset.villagePhase = "e1.2";
+  window.dispatchEvent(new CustomEvent("atelier:village-ready", { detail: { phase: "e1.2" } }));
 }
