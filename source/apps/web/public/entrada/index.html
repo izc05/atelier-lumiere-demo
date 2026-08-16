@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#f7f0e7">
+  <meta name="description" content="Explora el Pueblo Atelier y descubre sus talleres artesanos.">
+  <title>Pueblo Atelier · Atelier Lumière</title>
+  <link rel="stylesheet" href="/premium-ui.css">
+  <script defer src="/premium-ui.js"></script>
+  <link rel="stylesheet" href="/visual-v2-tokens.css">
+  <link rel="stylesheet" href="/entrada/village.css">
+  <script defer src="/entrada/village.js"></script>
+  <script defer src="/entrada/village-workshops.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#village-navigation">Saltar a los destinos</a>
+
+  <main class="village-experience" data-village-experience>
+    <header class="village-header">
+      <a class="village-brand" href="/" aria-label="Atelier Lumière, inicio">
+        <img src="/assets/brand/atelier-logo-official-dark.svg" alt="Atelier Lumière">
+      </a>
+      <div class="village-header-copy" aria-hidden="true">
+        <span>El pueblo de los oficios</span>
+        <small>Arrastra para explorar · rueda para acercarte</small>
+      </div>
+      <button class="village-help" type="button" data-village-overview aria-label="Volver a la vista general">
+        Vista general
+      </button>
+    </header>
+
+    <section class="village-viewport" data-village-viewport aria-label="Mapa interactivo del Pueblo Atelier">
+      <div class="village-world" data-village-world>
+        <svg class="village-ground" viewBox="0 0 2400 1500" aria-hidden="true" focusable="false">
+          <defs>
+            <radialGradient id="ground-wash" cx="50%" cy="45%" r="68%">
+              <stop offset="0" stop-color="#fffdf9"/>
+              <stop offset=".62" stop-color="#f7f0e7"/>
+              <stop offset="1" stop-color="#eee2d4"/>
+            </radialGradient>
+            <linearGradient id="road-wash" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#e7d9c7"/>
+              <stop offset="1" stop-color="#ddccb6"/>
+            </linearGradient>
+            <filter id="paper-soft" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="7"/>
+            </filter>
+          </defs>
+
+          <rect width="2400" height="1500" fill="url(#ground-wash)"/>
+
+          <g class="terrain-washes" opacity=".68">
+            <ellipse cx="430" cy="330" rx="360" ry="220" fill="#eadfce" filter="url(#paper-soft)"/>
+            <ellipse cx="1940" cy="350" rx="390" ry="250" fill="#efe4d7" filter="url(#paper-soft)"/>
+            <ellipse cx="2040" cy="1210" rx="410" ry="230" fill="#e9dfcf" filter="url(#paper-soft)"/>
+            <ellipse cx="410" cy="1210" rx="360" ry="210" fill="#f0e6d9" filter="url(#paper-soft)"/>
+          </g>
+
+          <g class="roads" fill="none" stroke="url(#road-wash)" stroke-linecap="round">
+            <path d="M 70 820 C 410 760, 690 820, 1030 770 S 1650 650, 2320 770" stroke-width="102"/>
+            <path d="M 1180 90 C 1165 350, 1210 525, 1200 760 S 1160 1120, 1250 1450" stroke-width="90"/>
+            <path d="M 350 230 C 650 420, 825 560, 1010 690" stroke-width="66"/>
+            <path d="M 1380 690 C 1630 545, 1830 410, 2140 250" stroke-width="66"/>
+            <path d="M 480 1230 C 690 1080, 900 945, 1070 850" stroke-width="64"/>
+            <path d="M 1370 850 C 1580 945, 1810 1080, 2080 1250" stroke-width="64"/>
+          </g>
+
+          <g class="road-lines" fill="none" stroke="#cdb899" stroke-width="2" stroke-dasharray="9 13" opacity=".48">
+            <path d="M 70 820 C 410 760, 690 820, 1030 770 S 1650 650, 2320 770"/>
+            <path d="M 1180 90 C 1165 350, 1210 525, 1200 760 S 1160 1120, 1250 1450"/>
+          </g>
+
+          <g class="plaza-lines" fill="none" stroke="#b9914d" opacity=".34">
+            <circle cx="1200" cy="760" r="210" stroke-width="2"/>
+            <circle cx="1200" cy="760" r="158" stroke-width="1" stroke-dasharray="5 11"/>
+            <path d="M1050 760H1350M1200 610V910" stroke-width="1"/>
+          </g>
+
+          <g class="gardens" fill="#d9d4bc" opacity=".58">
+            <path d="M220 560c180-130 330-100 410 60-70 100-245 145-410 70z"/>
+            <path d="M1720 900c180-110 380-65 470 90-120 100-330 105-470 20z"/>
+            <path d="M1660 150c170-90 330-55 420 75-95 90-290 100-420 25z"/>
+            <path d="M250 1050c150-90 310-50 390 75-100 90-270 90-390 22z"/>
+          </g>
+
+          <g class="water" fill="none" stroke="#c6d6d3" opacity=".52" stroke-linecap="round">
+            <path d="M-40 1340 C 400 1180, 640 1400, 980 1280 S 1640 1190, 2440 1370" stroke-width="42"/>
+            <path d="M-40 1340 C 400 1180, 640 1400, 980 1280 S 1640 1190, 2440 1370" stroke="#edf5f1" stroke-width="15"/>
+          </g>
+        </svg>
+
+        <div class="village-compass" aria-hidden="true"><span>N</span></div>
+
+        <section class="village-landmark village-landmark--atelier" data-place="atelier" style="--x:1200;--y:760;--scale:1.08;">
+          <button class="landmark-hit" type="button" data-focus-place="atelier" aria-label="Enfocar Atelier Lumière, plaza central"></button>
+          <div class="landmark-building landmark-building--atelier">
+            <span class="roof"></span>
+            <span class="facade">
+              <img src="/assets/brand/atelier-mark-official.svg" alt="" aria-hidden="true">
+              <strong>Atelier</strong>
+            </span>
+            <span class="door"></span>
+            <span class="window window--left"></span>
+            <span class="window window--right"></span>
+          </div>
+          <div class="landmark-copy">
+            <small>Plaza central</small>
+            <strong>Atelier Lumière</strong>
+            <span>El punto de encuentro</span>
+          </div>
+        </section>
+
+        <section class="village-landmark village-landmark--izc" data-place="izc" style="--x:615;--y:1060;--scale:.96;">
+          <button class="landmark-hit" type="button" data-focus-place="izc" aria-label="Enfocar taller IZC"></button>
+          <div class="landmark-building landmark-building--workshop landmark-building--wine">
+            <span class="awning"><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="shop-sign"><strong>IZC</strong><small>Abanicos</small></span>
+            <span class="shop-window"><i class="fan fan--one"></i><i class="fan fan--two"></i></span>
+            <span class="shop-door"></span>
+          </div>
+          <div class="landmark-copy">
+            <small>Jaén · Abanicos</small>
+            <strong>IZC</strong>
+            <span>Taller asociado</span>
+          </div>
+        </section>
+
+        <section class="village-landmark village-landmark--stitch" data-place="stitch" style="--x:1810;--y:420;--scale:.94;">
+          <button class="landmark-hit" type="button" data-focus-place="stitch" aria-label="Enfocar taller The Gentle Stitch"></button>
+          <div class="landmark-building landmark-building--workshop landmark-building--linen">
+            <span class="roof roof--soft"></span>
+            <span class="shop-sign"><strong>TGS</strong><small>Bordado</small></span>
+            <span class="shop-window shop-window--linen"><i></i><i></i><i></i></span>
+            <span class="shop-door"></span>
+          </div>
+          <div class="landmark-copy">
+            <small>Textil · Bordado</small>
+            <strong>The Gentle Stitch</strong>
+            <span>Taller asociado</span>
+          </div>
+        </section>
+
+        <div class="future-quarter future-quarter--north" aria-hidden="true"><span>Distrito de los oficios</span></div>
+        <div class="future-quarter future-quarter--east" aria-hidden="true"><span>Nuevos talleres</span></div>
+
+        <div class="village-houses" aria-hidden="true">
+          <span class="house house--1"></span><span class="house house--2"></span><span class="house house--3"></span>
+          <span class="house house--4"></span><span class="house house--5"></span><span class="house house--6"></span>
+          <span class="house house--7"></span><span class="house house--8"></span><span class="house house--9"></span>
+          <span class="house house--10"></span><span class="house house--11"></span><span class="house house--12"></span>
+          <span class="house house--13"></span><span class="house house--14"></span><span class="house house--15"></span>
+          <span class="house house--16"></span><span class="house house--17"></span><span class="house house--18"></span>
+          <span class="house house--19"></span><span class="house house--20"></span><span class="house house--21"></span>
+          <span class="house house--22"></span><span class="house house--23"></span><span class="house house--24"></span>
+        </div>
+
+        <div class="village-trees" aria-hidden="true">
+          <i style="--x:320;--y:320;--s:1.05"></i><i style="--x:420;--y:430;--s:.8"></i><i style="--x:555;--y:320;--s:.92"></i>
+          <i style="--x:760;--y:250;--s:1.1"></i><i style="--x:930;--y:390;--s:.72"></i><i style="--x:1430;--y:320;--s:.9"></i>
+          <i style="--x:1570;--y:210;--s:1.15"></i><i style="--x:2050;--y:420;--s:.8"></i><i style="--x:2180;--y:570;--s:1.08"></i>
+          <i style="--x:260;--y:820;--s:.86"></i><i style="--x:420;--y:940;--s:1.08"></i><i style="--x:815;--y:1170;--s:.78"></i>
+          <i style="--x:980;--y:1080;--s:.96"></i><i style="--x:1450;--y:1110;--s:1.12"></i><i style="--x:1680;--y:1200;--s:.82"></i>
+          <i style="--x:1950;--y:1000;--s:1.05"></i><i style="--x:2160;--y:1140;--s:.92"></i><i style="--x:2260;--y:930;--s:.72"></i>
+        </div>
+      </div>
+
+      <div class="village-cursor-hint" data-village-hint aria-hidden="true"><span>Arrastra para recorrer el pueblo</span></div>
+    </section>
+
+    <nav id="village-navigation" class="village-navigation" aria-label="Destinos del Pueblo Atelier">
+      <button type="button" data-focus-place="overview"><span>00</span><strong>Vista general</strong><small>El pueblo completo</small></button>
+      <button type="button" data-focus-place="atelier"><span>01</span><strong>Atelier Lumière</strong><small>Plaza central</small></button>
+      <button type="button" data-focus-place="izc"><span>02</span><strong>IZC</strong><small>Abanicos · Jaén</small></button>
+      <button type="button" data-focus-place="stitch"><span>03</span><strong>The Gentle Stitch</strong><small>Bordado textil</small></button>
+    </nav>
+
+    <div class="village-zoom" aria-label="Controles de zoom">
+      <button type="button" data-village-zoom="out" aria-label="Alejar">−</button>
+      <button type="button" data-village-zoom="in" aria-label="Acercar">+</button>
+    </div>
+
+    <p class="village-lab-note">Laboratorio E2.1 · identidad real de talleres · sin navegación final todavía</p>
+  </main>
+</body>
+</html>

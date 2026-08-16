@@ -1,0 +1,423 @@
+@import url("/entrada/village-premium.css");
+
+/* Pueblo Atelier · E2-E5 · identidad, transición y talleres dinámicos */
+
+.landmark-brand-badge {
+  position: absolute;
+  z-index: 18;
+  right: 12px;
+  top: 42px;
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  padding: 7px;
+  border: 1px solid rgba(79,16,32,.14);
+  border-radius: 50%;
+  background: rgba(255,253,249,.96);
+  box-shadow: 0 10px 26px rgba(49,7,18,.14);
+  pointer-events: none;
+}
+.landmark-brand-badge img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.village-workshop-card {
+  position: absolute;
+  z-index: 58;
+  top: 118px;
+  right: clamp(18px,3vw,42px);
+  display: grid;
+  width: min(350px, calc(100vw - 36px));
+  overflow: hidden;
+  border: 1px solid rgba(79,16,32,.14);
+  border-radius: 3px;
+  background: rgba(255,253,249,.95);
+  box-shadow: 0 22px 64px rgba(49,7,18,.14);
+  backdrop-filter: blur(16px) saturate(1.05);
+  transition: opacity 280ms ease, transform 360ms cubic-bezier(.22,.7,.2,1);
+}
+.village-workshop-card[hidden] { display: none !important; }
+.village-workshop-card.is-entering {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.village-workshop-card-media {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+  background: #efe4d7;
+}
+.village-workshop-card-cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(.94) contrast(1.015);
+}
+.village-workshop-card-logo {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  display: grid;
+  width: 86px;
+  height: 70px;
+  place-items: center;
+  padding: 8px;
+  border: 1px solid rgba(79,16,32,.12);
+  background: rgba(255,253,249,.96);
+  box-shadow: 0 8px 22px rgba(49,7,18,.12);
+}
+.village-workshop-card-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.village-workshop-card-body { padding: 19px 20px 20px; }
+.village-workshop-card-kicker {
+  margin: 0 0 7px;
+  color: var(--village-gold);
+  font-size: .52rem;
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.village-workshop-card h2 {
+  margin: 0;
+  color: var(--village-wine-dark);
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: 1.9rem;
+  font-weight: 400;
+  line-height: .96;
+  letter-spacing: -.025em;
+}
+.village-workshop-card-copy {
+  margin: 11px 0 0;
+  color: var(--village-muted);
+  font-size: .72rem;
+  line-height: 1.58;
+}
+.village-workshop-card-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  margin-top: 15px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(79,16,32,.10);
+  color: var(--village-wine-soft);
+  font-size: .49rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.village-workshop-card-signals span + span::before {
+  content: "·";
+  margin-right: 12px;
+  color: var(--village-gold);
+}
+.village-workshop-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  color: var(--village-muted);
+  font-size: .48rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.village-workshop-enter {
+  min-height: 34px;
+  padding: 8px 11px;
+  border: 1px solid rgba(79,16,32,.18);
+  border-radius: 999px;
+  color: #fffdf9;
+  background: var(--village-wine);
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.village-workshop-enter:hover,
+.village-workshop-enter:focus-visible {
+  outline: none;
+  background: var(--village-wine-dark);
+  border-color: rgba(167,131,66,.7);
+}
+
+/* E5 · parcelas que se convierten en talleres publicados. */
+.village-houses .house.is-village-parcel-occupied {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.village-landmark--dynamic {
+  z-index: 11;
+}
+.village-landmark--dynamic .landmark-building--dynamic {
+  width: 178px;
+  height: 158px;
+  background: linear-gradient(145deg,#f6ede3,#e8d9ca);
+  box-shadow: 0 14px 30px rgba(49,7,18,.07);
+}
+.village-landmark--dynamic .landmark-building--dynamic .shop-sign {
+  left: 9px;
+  top: 12px;
+  width: 158px;
+  height: 38px;
+  background: linear-gradient(90deg,#5a1021,#763044);
+}
+.village-landmark--dynamic .shop-sign strong {
+  max-width: 60px;
+  overflow: hidden;
+  font-size: .98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.village-landmark--dynamic .shop-sign small {
+  max-width: 82px;
+  overflow: hidden;
+  font-size: .42rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.village-landmark--dynamic .landmark-building--dynamic .awning {
+  left: 9px;
+  top: 50px;
+  width: 158px;
+  height: 23px;
+}
+.village-landmark--dynamic .landmark-building--dynamic .shop-window {
+  left: 16px;
+  bottom: 16px;
+  width: 92px;
+  height: 66px;
+}
+.village-landmark--dynamic .landmark-building--dynamic .shop-door {
+  right: 17px;
+  bottom: 14px;
+  width: 39px;
+  height: 78px;
+  background: linear-gradient(90deg,#866754,#a88670);
+}
+.shop-window--generic {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px;
+}
+.shop-window--generic i {
+  display: block;
+  width: 17px;
+  border-radius: 50% 50% 5px 5px;
+  background: #7a3345;
+}
+.shop-window--generic i:nth-child(1) { height: 25px; }
+.shop-window--generic i:nth-child(2) { height: 38px; background: #b08a49; }
+.shop-window--generic i:nth-child(3) { height: 30px; background: #8b977b; }
+.village-landmark--dynamic .landmark-copy {
+  max-width: 220px;
+}
+.village-landmark--dynamic .landmark-copy strong {
+  max-width: 195px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.village-navigation.has-dynamic-workshops {
+  display: flex;
+  width: min(1080px, calc(100% - 150px));
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+.village-navigation.has-dynamic-workshops button {
+  flex: 0 0 190px;
+  min-width: 0;
+  scroll-snap-align: center;
+}
+
+/* E3 · salida cinematográfica breve hacia Home o taller. */
+.village-landmark.is-village-exit-target {
+  z-index: 80;
+  filter: drop-shadow(0 24px 34px rgba(49,7,18,.2));
+  transform: translate(-50%,-70%) scale(calc(var(--scale,1) * 1.085));
+}
+[data-village-experience][data-village-leaving] .village-header,
+[data-village-experience][data-village-leaving] .village-navigation,
+[data-village-experience][data-village-leaving] .village-zoom,
+[data-village-experience][data-village-leaving] .village-cursor-hint,
+[data-village-experience][data-village-leaving] .village-lab-note {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 260ms ease;
+}
+.village-exit-layer {
+  position: absolute;
+  z-index: 120;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 28px;
+  color: var(--village-wine-dark);
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,.99), rgba(247,240,231,.96) 48%, rgba(237,225,211,.98)),
+    #f7f0e7;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.02);
+  transition: opacity 520ms cubic-bezier(.22,.72,.18,1), transform 720ms cubic-bezier(.22,.72,.18,1);
+}
+.village-exit-layer[hidden] { display: none !important; }
+.village-exit-layer.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+.village-exit-mark {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  margin-bottom: 12px;
+  border: 1px solid rgba(167,131,66,.5);
+  border-radius: 50%;
+  color: var(--village-wine);
+  background: rgba(255,253,249,.8);
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: 1.45rem;
+  letter-spacing: -.05em;
+}
+.village-exit-layer p {
+  margin: 0;
+  color: var(--village-gold);
+  font-size: .55rem;
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.village-exit-layer strong {
+  max-width: 13ch;
+  color: var(--village-wine-dark);
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: clamp(2.5rem,6vw,5.8rem);
+  font-weight: 400;
+  line-height: .92;
+  letter-spacing: -.045em;
+}
+
+@media (max-width: 900px) and (min-width: 761px) {
+  .village-workshop-card {
+    top: 104px;
+    right: 18px;
+    width: 310px;
+  }
+  .village-workshop-card-media { height: 165px; }
+  .village-navigation.has-dynamic-workshops {
+    left: 18px;
+    right: 78px;
+    width: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .landmark-brand-badge {
+    width: 56px;
+    height: 56px;
+    right: 10px;
+    top: 44px;
+  }
+  .village-workshop-card {
+    top: auto;
+    left: 10px;
+    right: 62px;
+    bottom: 80px;
+    width: auto;
+    grid-template-columns: 105px minmax(0,1fr);
+    max-height: 172px;
+  }
+  .village-workshop-card-media {
+    height: 100%;
+    min-height: 170px;
+  }
+  .village-workshop-card-logo {
+    left: 8px;
+    right: auto;
+    bottom: 8px;
+    width: 70px;
+    height: 54px;
+    padding: 6px;
+  }
+  .village-workshop-card-body {
+    min-width: 0;
+    padding: 14px 13px;
+  }
+  .village-workshop-card h2 {
+    overflow: hidden;
+    font-size: 1.28rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .village-workshop-card-copy {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-top: 6px;
+    font-size: .59rem;
+    line-height: 1.42;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .village-workshop-card-signals {
+    gap: 5px 9px;
+    margin-top: 8px;
+    padding-top: 7px;
+    font-size: .41rem;
+  }
+  .village-workshop-card-foot { margin-top: 8px; }
+  .village-workshop-card-foot > span { display: none; }
+  .village-workshop-enter {
+    width: 100%;
+    min-height: 30px;
+    padding: 6px 9px;
+    font-size: .42rem;
+  }
+  .village-navigation.has-dynamic-workshops {
+    left: 10px;
+    right: 62px;
+    width: auto;
+  }
+  .village-navigation.has-dynamic-workshops button { flex-basis: 154px; }
+  .village-landmark--dynamic .landmark-building--dynamic {
+    transform: translateX(-50%) scale(.95);
+    transform-origin: 50% 100%;
+  }
+  .village-exit-mark {
+    width: 62px;
+    height: 62px;
+    font-size: 1.2rem;
+  }
+  .village-exit-layer strong { font-size: clamp(2.8rem,15vw,4.6rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .village-workshop-card,
+  .village-landmark.is-village-exit-target,
+  .village-exit-layer,
+  [data-village-experience][data-village-leaving] .village-header,
+  [data-village-experience][data-village-leaving] .village-navigation,
+  [data-village-experience][data-village-leaving] .village-zoom {
+    transition: none !important;
+  }
+}
