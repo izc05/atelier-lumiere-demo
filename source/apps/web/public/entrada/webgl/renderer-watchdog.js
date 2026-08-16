@@ -1,4 +1,4 @@
-/* Atelier Lumière · U3.17N.3 · renderer resiliente y cámara única */
+/* Atelier Lumière · U3.17N.4 · renderer resiliente, cámara única y objetos válidos */
 (() => {
   if (!root || !canvas || typeof gl === 'undefined' || typeof frame !== 'function') return;
 
@@ -10,6 +10,7 @@
   let fps = 0;
   let lastError = null;
   let fallbackDraws = 0;
+  let invalidObjects = 0;
 
   function rememberError(error) {
     const message = String(error?.message || error || 'Error desconocido').slice(0, 180);
@@ -19,7 +20,34 @@
     console.error('[Atelier Renderer]', error);
   }
 
+  function isRenderableObject(object) {
+    return Boolean(
+      object
+      && object.mesh
+      && Array.isArray(object.position)
+      && object.position.length >= 3
+      && Array.isArray(object.scale)
+      && object.scale.length >= 3
+    );
+  }
+
+  function pruneInvalidObjects() {
+    let removed = 0;
+    for (let index = objects.length - 1; index >= 0; index -= 1) {
+      if (isRenderableObject(objects[index])) continue;
+      objects.splice(index, 1);
+      removed += 1;
+    }
+    if (removed) {
+      invalidObjects += removed;
+      root.dataset.rendererInvalidObjects = String(invalidObjects);
+      console.warn(`[Atelier Renderer] ${removed} objetos inválidos eliminados antes de dibujar.`);
+    }
+    return removed;
+  }
+
   function safeBaseDraw(object, vp, cameraPositionValue) {
+    if (!isRenderableObject(object)) return;
     const model = modelMatrix(object);
     const color = object?.color?.length >= 4 ? object.color : [1, 1, 1, 1];
 
@@ -54,6 +82,7 @@
       root.dataset.rendererFps = String(fps);
       root.dataset.rendererFrames = String(renderedFrames);
       root.dataset.rendererFallbackDraws = String(fallbackDraws);
+      root.dataset.rendererInvalidObjects = String(invalidObjects);
     }
   }
 
@@ -80,12 +109,17 @@
 
   function refreshBadge() {
     if (!badge) return;
+    const invalidText = invalidObjects ? ` · INVALID ${invalidObjects}` : '';
+    const fallbackText = fallbackDraws ? ` · FALLBACK ${fallbackDraws}` : '';
     const errorText = lastError ? ` · ERR ${lastError.slice(0, 52)}` : '';
-    badge.textContent = `RENDER LIVE · ${fps || '--'} FPS · FRAME ${renderedFrames}${fallbackDraws ? ` · FALLBACK ${fallbackDraws}` : ''}${errorText}`;
+    badge.textContent = `RENDER LIVE · ${fps || '--'} FPS · FRAME ${renderedFrames}${invalidText}${fallbackText}${errorText}`;
     requestAnimationFrame(refreshBadge);
   }
 
-  frame = function u317n3SafeFrame(now) {
+  /* Todas las capas de geometría ya han cargado cuando llega este watchdog. */
+  pruneInvalidObjects();
+
+  frame = function u317n4SafeFrame(now) {
     /* Dos RAF pueden quedar pendientes al sustituir el frame original; dibujamos solo una vez por timestamp. */
     if (now === duplicateStamp) return;
     duplicateStamp = now;
@@ -110,7 +144,15 @@
       gl.clearColor(...palette.paperLight);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      for (const object of objects) {
+      for (let index = 0; index < objects.length; index += 1) {
+        const object = objects[index];
+        if (!isRenderableObject(object)) {
+          objects.splice(index, 1);
+          index -= 1;
+          invalidObjects += 1;
+          root.dataset.rendererInvalidObjects = String(invalidObjects);
+          continue;
+        }
         try {
           drawObject(object, vp, eye);
         } catch (error) {
@@ -137,12 +179,14 @@
   requestAnimationFrame(frame);
   if (localDebug) requestAnimationFrame(refreshBadge);
 
-  root.dataset.rendererWatchdog = 'u3.17n.3';
-  root.dataset.navigationCheckpoint = 'u3.17n.3';
+  root.dataset.rendererWatchdog = 'u3.17n.4';
+  root.dataset.navigationCheckpoint = 'u3.17n.4';
   window.AtelierVillageRendererWatchdog = Object.freeze({
     frames: () => renderedFrames,
     fps: () => fps,
     lastError: () => lastError,
-    fallbackDraws: () => fallbackDraws
+    fallbackDraws: () => fallbackDraws,
+    invalidObjects: () => invalidObjects,
+    pruneInvalidObjects
   });
 })();
