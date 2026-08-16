@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#4f1020">
+  <title>Pueblo Atelier · Administración</title>
+  <link rel="stylesheet" href="/admin/articulos/review.css">
+  <link rel="stylesheet" href="/admin/pueblo/pueblo.css">
+  <script defer src="/admin/admin-role-navigation.js"></script>
+  <script defer src="/admin/pueblo/pueblo.js"></script>
+  <link rel="stylesheet" href="/premium-ui.css">
+  <script src="/premium-ui.js" defer></script>
+</head>
+<body>
+  <main class="shell village-admin-shell">
+    <header class="topbar">
+      <a class="brand" href="/admin/proveedores/" aria-label="Volver a Administración">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Pueblo Atelier</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/admin/proveedores/">Proveedores</a>
+        <a class="button ghost" href="/admin/escaparate/">Escaparate</a>
+        <a class="button ghost" href="/entrada/webgl/?intro=0" target="_blank" rel="noopener">Ver Pueblo</a>
+        <button id="refresh-button" class="button secondary" type="button">Actualizar</button>
+      </div>
+    </header>
+
+    <section class="page-head village-admin-head">
+      <div>
+        <p class="eyebrow">Dirección del Pueblo</p>
+        <h1>Configura qué vive en cada zona.</h1>
+        <p class="lead">La posición de las parcelas es estable. Tú decides qué oficio representa cada una y qué taller real ocupa ese espacio. Cambiar una asignación no obliga a rehacer el mapa.</p>
+      </div>
+      <aside class="village-admin-note">
+        <strong>Solo PLATFORM_OWNER</strong>
+        <p>Los tipos de taller son libres. Puedes escribir Cerámica, Bordado, Joyería, Abanicos o cualquier oficio que necesites.</p>
+      </aside>
+    </section>
+
+    <section class="village-admin-legend" aria-label="Cómo funciona">
+      <article><strong>Activa</strong><span>La zona aparece y puede tener taller asociado.</span></article>
+      <article><strong>Reservada</strong><span>La zona conserva su oficio aunque todavía no tenga artesano.</span></article>
+      <article><strong>Oculta</strong><span>La zona deja de formar parte de la navegación pública.</span></article>
+    </section>
+
+    <section id="loading-view" class="loading"><p>Cargando parcelas del Pueblo Atelier…</p></section>
+    <section id="error-view" class="error-card" hidden>
+      <div>
+        <h2>No se pudo abrir el Pueblo</h2>
+        <p id="error-message"></p>
+        <button id="retry-button" class="button primary" type="button">Volver a intentar</button>
+      </div>
+    </section>
+    <section id="zones-grid" class="village-zones-grid" hidden aria-live="polite"></section>
+  </main>
+</body>
+</html>
