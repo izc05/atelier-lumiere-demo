@@ -6,6 +6,7 @@ const { exec } = require('child_process');
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.ATELIER_PREVIEW_PORT || 4177);
 const ROOT = path.resolve(__dirname, 'site');
+const VILLAGE_STATE_FILE = path.resolve(__dirname, 'preview-village-zones.json');
 
 const providers = [
   {
@@ -60,6 +61,47 @@ const products = productSeed.map(([slug,name,category,priceCents,event,providerS
   cover: { path: `/api/preview/${image}`, altText: name, width: 1200, height: 1500, focalX: 50, focalY: 48 }
 }));
 
+const villageZoneMeta = Array.from({ length: 26 }, (_, index) => {
+  const number = index + 1;
+  return {
+    zoneKey: `ZONE_${String(number).padStart(2, '0')}`,
+    label: number === 1 ? 'Zona 01 · Pabellón oeste' : number === 2 ? 'Zona 02 · Estudio este' : `Zona ${String(number).padStart(2, '0')} · Casa / taller`,
+    family: number <= 2 ? 'SIGNATURE' : 'HOUSE'
+  };
+});
+const villageZoneMetaByKey = new Map(villageZoneMeta.map((item) => [item.zoneKey, item]));
+
+function loadVillageState() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(VILLAGE_STATE_FILE, 'utf8'));
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return new Map();
+    return new Map(Object.entries(parsed).filter(([key]) => villageZoneMetaByKey.has(key)));
+  } catch {
+    return new Map();
+  }
+}
+
+let villageState = loadVillageState();
+
+function saveVillageState() {
+  const value = Object.fromEntries(villageState.entries());
+  fs.writeFileSync(VILLAGE_STATE_FILE, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+}
+
+function serializePreviewZone(meta, value = null) {
+  return {
+    zoneKey: meta.zoneKey,
+    label: meta.label,
+    family: meta.family,
+    workshopType: value?.workshopType || '',
+    displayLabel: value?.displayLabel || '',
+    providerSlug: value?.providerSlug || null,
+    status: value?.status || 'RESERVED',
+    configured: Boolean(value),
+    updatedAt: value?.updatedAt || null
+  };
+}
+
 function json(res, value, status = 200) {
   const body = Buffer.from(JSON.stringify(value));
   res.writeHead(status, {
@@ -112,7 +154,92 @@ function sendPreviewImage(reqPath, res) {
   res.end(svg);
 }
 
-function handleMock(url, res) {
+async function readJsonBody(req) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > 32 * 1024) throw new Error('BODY_TOO_LARGE');
+    chunks.push(chunk);
+  }
+  if (!chunks.length) return {};
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+}
+
+function cleanPreviewText(value, maximum) {
+  return String(value || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, maximum);
+}
+
+async function handleVillageMock(req, url, res) {
+  if (url.pathname === '/internal/admin/session') {
+    json(res, { authenticated: true, account: { role: 'PLATFORM_OWNER', displayName: 'Preview local' } });
+    return true;
+  }
+
+  if (url.pathname === '/internal/village-zones' && req.method === 'GET') {
+    json(res, { zones: [...villageState.entries()].map(([key, value]) => serializePreviewZone(villageZoneMetaByKey.get(key), value)) });
+    return true;
+  }
+
+  if (url.pathname === '/internal/admin/village-zones' && req.method === 'GET') {
+    json(res, { zones: villageZoneMeta.map((meta) => serializePreviewZone(meta, villageState.get(meta.zoneKey))) });
+    return true;
+  }
+
+  const match = url.pathname.match(/^\/internal\/admin\/village-zones\/(ZONE_\d{2})$/);
+  if (!match) return false;
+  const zoneKey = match[1];
+  const meta = villageZoneMetaByKey.get(zoneKey);
+  if (!meta) {
+    json(res, { error: 'VILLAGE_ZONE_INVALID', message: 'La zona no existe en esta preview.' }, 422);
+    return true;
+  }
+
+  if (req.method === 'DELETE') {
+    const reset = villageState.delete(zoneKey);
+    saveVillageState();
+    json(res, { zoneKey, reset });
+    return true;
+  }
+
+  if (req.method !== 'PATCH') {
+    json(res, { error: 'METHOD_NOT_ALLOWED', message: 'Método no permitido.' }, 405);
+    return true;
+  }
+
+  try {
+    const body = await readJsonBody(req);
+    const providerSlug = body.providerSlug ? String(body.providerSlug).trim().toLowerCase() : null;
+    if (providerSlug && !providerBySlug.has(providerSlug)) {
+      json(res, { error: 'VALIDATION_ERROR', message: 'El taller seleccionado no existe en la preview.' }, 422);
+      return true;
+    }
+    if (providerSlug) {
+      const duplicate = [...villageState.entries()].find(([key, value]) => key !== zoneKey && value.providerSlug === providerSlug);
+      if (duplicate) {
+        json(res, { error: 'VILLAGE_PROVIDER_ALREADY_ASSIGNED', message: 'Ese taller ya está asociado a otra zona.' }, 409);
+        return true;
+      }
+    }
+    const status = ['ACTIVE','RESERVED','HIDDEN'].includes(body.status) ? body.status : 'RESERVED';
+    const value = {
+      workshopType: cleanPreviewText(body.workshopType, 80),
+      displayLabel: cleanPreviewText(body.displayLabel, 120),
+      providerSlug,
+      status,
+      updatedAt: new Date().toISOString()
+    };
+    villageState.set(zoneKey, value);
+    saveVillageState();
+    json(res, { zone: serializePreviewZone(meta, value) });
+  } catch {
+    json(res, { error: 'INVALID_JSON', message: 'No se pudo guardar la configuración local.' }, 400);
+  }
+  return true;
+}
+
+async function handleMock(req, url, res) {
+  if (await handleVillageMock(req, url, res)) return true;
   if (url.pathname === '/internal/catalog/providers') {
     json(res, { providers });
     return true;
@@ -177,14 +304,20 @@ function serveStatic(url, res) {
   }
 }
 
-const server = http.createServer((req, res) => {
-  const url = new URL(req.url || '/', `http://${HOST}:${PORT}`);
-  if (handleMock(url, res)) return;
-  serveStatic(url, res);
+const server = http.createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url || '/', `http://${HOST}:${PORT}`);
+    if (await handleMock(req, url, res)) return;
+    serveStatic(url, res);
+  } catch (error) {
+    res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end(`Error de preview: ${error.message}`);
+  }
 });
 
 server.listen(PORT, HOST, () => {
   const startUrl = `http://${HOST}:${PORT}/?intro=1`;
+  const adminUrl = `http://${HOST}:${PORT}/admin/pueblo/`;
   console.log('');
   console.log('============================================================');
   console.log(' ATELIER LUMIÈRE · EXPERIENCIA UNIFICADA · PREVIEW LOCAL');
@@ -192,6 +325,8 @@ server.listen(PORT, HOST, () => {
   console.log(' Entrada cinematográfica → Pueblo WebGL → Visual V2');
   console.log(' Candidato de diseño · no producción');
   console.log(` Abierto en: ${startUrl}`);
+  console.log(` Configurar Pueblo: ${adminUrl}`);
+  console.log(' Las zonas editadas en la preview se guardan solo en este ZIP.');
   console.log(' Pulsa Ctrl+C para cerrar la preview.');
   console.log('');
   if (process.platform === 'win32') exec(`start "" "${startUrl}"`);
