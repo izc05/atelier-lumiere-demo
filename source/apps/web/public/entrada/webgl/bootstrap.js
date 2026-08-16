@@ -89,7 +89,8 @@
     '/entrada/webgl/final-art-direction.js',
     '/entrada/webgl/capture-tuning.js',
     '/entrada/webgl/arrival-transition.js',
-    '/entrada/webgl/map-drag-navigation.js'
+    '/entrada/webgl/map-drag-navigation.js',
+    '/entrada/webgl/renderer-watchdog.js'
   ];
 
   const loadScript = (src) => new Promise((resolve, reject) => {
@@ -107,7 +108,7 @@
       if (root) {
         root.dataset.webglBootstrapped = 'true';
         root.dataset.graphicsCheckpoint = 'u3.16';
-        root.dataset.navigationCheckpoint = 'u3.17n.2';
+        root.dataset.navigationCheckpoint = 'u3.17n.3';
       }
     } catch (error) {
       console.error(error);
