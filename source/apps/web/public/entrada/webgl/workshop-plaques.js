@@ -1,4 +1,4 @@
-/* Atelier Lumière · U3.2/U3.3B · placas proyectadas y adaptativas */
+/* Atelier Lumière · U3.2/U3.16 · placas proyectadas, adaptativas y despejadas */
 (() => {
   const styleHref = '/entrada/webgl/workshop-plaques.css';
   if (!document.querySelector(`link[href="${styleHref}"]`)) {
@@ -28,7 +28,7 @@
 
   const qualityLimit = () => {
     const quality = typeof webglQualityMode === 'string' ? webglQualityMode : 'balanced';
-    return quality === 'high' ? 18 : quality === 'balanced' ? 10 : 5;
+    return quality === 'high' ? 6 : quality === 'balanced' ? 5 : 3;
   };
 
   function initials(value) {
@@ -122,11 +122,29 @@
     });
   }
 
+  function pickOverviewPlaques(projected, rootRect) {
+    const max = qualityLimit();
+    const chosen = [];
+    const minX = rootRect.width <= 760 ? 108 : rootRect.width <= 1050 ? 126 : 145;
+    const minY = rootRect.width <= 760 ? 58 : 72;
+
+    for (const item of projected) {
+      const collides = chosen.some((other) => (
+        Math.abs(other.localX - item.localX) < minX &&
+        Math.abs(other.localY - item.localY) < minY
+      ));
+      if (collides) continue;
+      chosen.push(item);
+      if (chosen.length >= max) break;
+    }
+    return new Set(chosen.map((item) => item.name));
+  }
+
   function positionPlaques() {
     const rootRect = root.getBoundingClientRect();
     const selected = typeof webglSelectedPlace === 'string' ? webglSelectedPlace : 'overview';
     const focused = selected && selected !== 'overview';
-    const distanceScale = clamp(1.16 - (camera.distance - 12) * .012, .76, 1.05);
+    const distanceScale = clamp(1.02 - (camera.distance - 12) * .010, .68, .94);
     const centerX = rootRect.width / 2;
     const centerY = rootRect.height / 2;
     const projected = [];
@@ -136,8 +154,8 @@
       const localX = screen?.x - rootRect.left;
       const localY = screen?.y - rootRect.top;
       const inside = screen?.visible
-        && localX > -120 && localX < rootRect.width + 120
-        && localY > 60 && localY < rootRect.height - 40;
+        && localX > -100 && localX < rootRect.width + 100
+        && localY > 62 && localY < rootRect.height - 44;
       if (!inside) continue;
       const priority = name === selected
         ? -1e6
@@ -146,7 +164,9 @@
     }
 
     projected.sort((left, right) => left.priority - right.priority);
-    const allowed = new Set(projected.slice(0, qualityLimit()).map((item) => item.name));
+    const allowed = focused
+      ? new Set(projected.filter((item) => item.name === selected).map((item) => item.name))
+      : pickOverviewPlaques(projected, rootRect);
     const byName = new Map(projected.map((item) => [item.name, item]));
 
     for (const [name] of visiblePlaces) {
@@ -159,8 +179,8 @@
       }
       plaque.hidden = false;
       plaque.style.left = `${item.localX}px`;
-      plaque.style.top = `${item.localY - 12}px`;
-      plaque.style.setProperty('--plaque-scale', String(name === selected ? Math.min(1.12, distanceScale + .13) : distanceScale));
+      plaque.style.top = `${item.localY - 10}px`;
+      plaque.style.setProperty('--plaque-scale', String(name === selected ? Math.min(1.02, distanceScale + .10) : distanceScale));
       plaque.classList.toggle('is-selected', name === selected);
       plaque.classList.toggle('is-muted', focused && name !== selected);
     }
@@ -182,4 +202,5 @@
   requestAnimationFrame(positionPlaques);
 
   root.dataset.webglPlaques = 'true';
+  root.dataset.webglPlaqueLimit = String(qualityLimit());
 })();
