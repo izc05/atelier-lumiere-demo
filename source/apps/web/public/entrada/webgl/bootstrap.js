@@ -62,7 +62,8 @@
     '/entrada/webgl/cinematic-ui.js',
     '/entrada/webgl/overview-composition.js',
     '/entrada/webgl/ambient-atmosphere.js',
-    '/entrada/webgl/world-signage.js'
+    '/entrada/webgl/world-signage.js',
+    '/entrada/webgl/distant-depth.js'
   ];
 
   const loadScript = (src) => new Promise((resolve, reject) => {
