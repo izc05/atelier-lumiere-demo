@@ -48,6 +48,8 @@ test("PLATFORM_OWNER conserva todas las capacidades administrativas", () => {
     "/api/admin/products/00000000-0000-4000-8000-000000000301/review",
     "/api/admin/blog-posts",
     "/api/admin/blog-posts/00000000-0000-4000-8000-000000000401/publish",
+    "/api/admin/showcase",
+    "/api/admin/showcase/HOME_HERO_DESKTOP",
     "/api/admin/future-platform-control"
   ]) {
     const authorized = authorizeAdminRequest(context("PLATFORM_OWNER"), request(path));
@@ -64,6 +66,8 @@ test("PROVIDER_MANAGER solo gestiona talleres", () => {
   assert.deepEqual(provider.capabilities, [ADMIN_CAPABILITIES.MANAGE_PROVIDERS]);
   forbidden("PROVIDER_MANAGER", "/api/admin/products", ADMIN_CAPABILITIES.REVIEW_PRODUCTS);
   forbidden("PROVIDER_MANAGER", "/api/admin/blog-posts", ADMIN_CAPABILITIES.REVIEW_BLOG);
+  forbidden("PROVIDER_MANAGER", "/api/admin/showcase", ADMIN_CAPABILITIES.PLATFORM_CONTROL);
+  forbidden("PROVIDER_MANAGER", "/api/admin/showcase/HOME_HERO_DESKTOP", ADMIN_CAPABILITIES.PLATFORM_CONTROL);
   forbidden("PROVIDER_MANAGER", "/api/admin/future-platform-control", ADMIN_CAPABILITIES.PLATFORM_CONTROL);
 });
 
@@ -73,6 +77,8 @@ test("EDITORIAL_REVIEWER revisa catálogo y blog sin acceder a talleres", () => 
     assert.equal(authorized.capabilities.length, 2);
   }
   forbidden("EDITORIAL_REVIEWER", "/api/admin/providers", ADMIN_CAPABILITIES.MANAGE_PROVIDERS);
+  forbidden("EDITORIAL_REVIEWER", "/api/admin/showcase", ADMIN_CAPABILITIES.PLATFORM_CONTROL);
+  forbidden("EDITORIAL_REVIEWER", "/api/admin/showcase/STORIES_HERO_MOBILE", ADMIN_CAPABILITIES.PLATFORM_CONTROL);
   forbidden("EDITORIAL_REVIEWER", "/api/admin/future-platform-control", ADMIN_CAPABILITIES.PLATFORM_CONTROL);
 });
 
@@ -100,6 +106,10 @@ test("el autenticador aplica el rol de una sesión real", async () => {
     () => authenticator(request("/api/admin/providers")),
     (error) => error?.code === "ADMIN_ROLE_FORBIDDEN" && error?.statusCode === 403
   );
+  await assert.rejects(
+    () => authenticator(request("/api/admin/showcase")),
+    (error) => error?.code === "ADMIN_ROLE_FORBIDDEN" && error?.statusCode === 403
+  );
 });
 
 test("el token temporal de desarrollo equivale solo localmente a PLATFORM_OWNER", async () => {
@@ -110,7 +120,7 @@ test("el token temporal de desarrollo equivale solo localmente a PLATFORM_OWNER"
     developmentAdminToken: token,
     developmentAdminUserId: USER_ID
   });
-  const authorized = await authenticator(request("/api/admin/future-platform-control", token));
+  const authorized = await authenticator(request("/api/admin/showcase", token));
   assert.equal(authorized.adminRole, "PLATFORM_OWNER");
   assert.equal(authorized.capabilities.includes(ADMIN_CAPABILITIES.PLATFORM_CONTROL), true);
 });
