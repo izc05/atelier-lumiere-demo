@@ -1,0 +1,92 @@
+/* Atelier Lumière · U2.4 · fotografía editorial administrable de la entrada */
+.brand-entry-media {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 520ms ease;
+}
+
+.brand-entry-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(10,7,8,.16) 0%, rgba(10,7,8,.28) 35%, rgba(10,7,8,.72) 67%, rgba(8,6,7,.94) 100%),
+    linear-gradient(180deg, rgba(8,6,7,.12), transparent 24%, transparent 72%, rgba(8,6,7,.48));
+}
+
+.brand-entry-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(.78) contrast(1.04) brightness(.72) sepia(.08);
+  transform: scale(1.015);
+  transform-origin: center;
+}
+
+.brand-entry--has-media .brand-entry-media {
+  opacity: 1;
+}
+
+.brand-entry--has-media .brand-entry-media img {
+  animation: atelierEntryMediaDrift 18s ease-in-out infinite alternate;
+}
+
+.brand-entry--has-media::before {
+  opacity: .24;
+  mix-blend-mode: screen;
+}
+
+.brand-entry--has-media::after {
+  z-index: 1;
+  opacity: .58;
+}
+
+.brand-entry--has-media.is-opening .brand-entry-media {
+  opacity: .18;
+  transform: scale(1.035);
+  transition: opacity 620ms ease, transform 760ms cubic-bezier(.2,.72,.18,1);
+}
+
+@keyframes atelierEntryMediaDrift {
+  0% { transform: scale(1.015) translate3d(-.25%, .1%, 0); }
+  100% { transform: scale(1.055) translate3d(.45%, -.35%, 0); }
+}
+
+@media (max-width: 980px) {
+  .brand-entry-media::after {
+    background:
+      linear-gradient(180deg, rgba(8,6,7,.22) 0%, rgba(8,6,7,.30) 42%, rgba(8,6,7,.78) 78%, rgba(8,6,7,.92) 100%),
+      radial-gradient(circle at 50% 35%, transparent, rgba(8,6,7,.28) 76%);
+  }
+
+  .brand-entry-media img {
+    filter: saturate(.76) contrast(1.03) brightness(.66) sepia(.09);
+  }
+}
+
+@media (max-width: 640px) {
+  .brand-entry-media::after {
+    background:
+      linear-gradient(180deg, rgba(8,6,7,.28) 0%, rgba(8,6,7,.34) 38%, rgba(8,6,7,.72) 68%, rgba(8,6,7,.94) 100%),
+      linear-gradient(90deg, rgba(8,6,7,.18), rgba(8,6,7,.28));
+  }
+
+  .brand-entry-media img {
+    filter: saturate(.72) contrast(1.02) brightness(.62) sepia(.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-entry-media,
+  .brand-entry-media img {
+    animation: none !important;
+    transition-duration: .01ms !important;
+    transform: none !important;
+  }
+}
