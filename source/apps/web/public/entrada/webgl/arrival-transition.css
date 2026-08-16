@@ -1,0 +1,128 @@
+/* Atelier Lumière · U2.2 · continuidad Entrada cinematográfica → Pueblo WebGL */
+.webgl-arrival {
+  position: fixed;
+  z-index: 320;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #fff8ea;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(131,48,64,.2), transparent 20rem),
+    linear-gradient(145deg,#130b0d,#211114 58%,#0b0808);
+  pointer-events: none;
+  opacity: 1;
+  isolation: isolate;
+  transition: opacity 760ms cubic-bezier(.2,.72,.18,1), visibility 760ms step-end;
+}
+
+.webgl-arrival::before,
+.webgl-arrival::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: min(68vw, 740px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%,-50%) scale(.42);
+  pointer-events: none;
+}
+
+.webgl-arrival::before {
+  border: 1px solid rgba(218,188,117,.34);
+  box-shadow:
+    0 0 0 26px rgba(218,188,117,.028),
+    0 0 0 80px rgba(218,188,117,.014),
+    0 0 120px rgba(151,64,80,.14);
+  opacity: .88;
+  transition: transform 980ms cubic-bezier(.18,.72,.16,1), opacity 720ms ease;
+}
+
+.webgl-arrival::after {
+  width: min(32vw, 360px);
+  background: radial-gradient(circle,rgba(226,197,126,.12),transparent 66%);
+  filter: blur(16px);
+  opacity: .7;
+  transition: transform 980ms cubic-bezier(.18,.72,.16,1), opacity 640ms ease;
+}
+
+.webgl-arrival-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+  transition: transform 620ms cubic-bezier(.2,.72,.18,1), opacity 420ms ease;
+}
+
+.webgl-arrival-inner img {
+  width: min(42vw, 260px);
+  max-height: 22vh;
+  filter: drop-shadow(0 14px 30px rgba(0,0,0,.32));
+}
+
+.webgl-arrival-inner span {
+  color: rgba(241,216,156,.82);
+  font: 800 .58rem/1.2 "Avenir Next",Avenir,Arial,sans-serif;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+
+.webgl-arrival-inner strong {
+  color: #fff9ef;
+  font: 400 clamp(1.8rem,3.2vw,3.8rem)/1 "Iowan Old Style","Palatino Linotype",Georgia,serif;
+  letter-spacing: -.025em;
+}
+
+.webgl-arrival.is-revealing {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.webgl-arrival.is-revealing::before {
+  transform: translate(-50%,-50%) scale(2.35);
+  opacity: 0;
+}
+
+.webgl-arrival.is-revealing::after {
+  transform: translate(-50%,-50%) scale(4.1);
+  opacity: 0;
+}
+
+.webgl-arrival.is-revealing .webgl-arrival-inner {
+  transform: translateY(-18px) scale(.94);
+  opacity: 0;
+}
+
+[data-webgl-village][data-arrival="cinematic"] .webgl-village-header,
+[data-webgl-village][data-arrival="cinematic"] .webgl-village-caption,
+[data-webgl-village][data-arrival="cinematic"] .webgl-village-legend,
+[data-webgl-village][data-arrival="cinematic"] .webgl-village-status {
+  animation: atelierArrivalUi 720ms 540ms both cubic-bezier(.2,.72,.18,1);
+}
+
+@keyframes atelierArrivalUi {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 760px) {
+  .webgl-arrival::before { width: min(112vw,560px); }
+  .webgl-arrival-inner img { width: min(58vw,210px); }
+  .webgl-arrival-inner strong { font-size: clamp(1.7rem,8vw,2.7rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-arrival,
+  .webgl-arrival::before,
+  .webgl-arrival::after,
+  .webgl-arrival-inner,
+  [data-webgl-village][data-arrival="cinematic"] .webgl-village-header,
+  [data-webgl-village][data-arrival="cinematic"] .webgl-village-caption,
+  [data-webgl-village][data-arrival="cinematic"] .webgl-village-legend,
+  [data-webgl-village][data-arrival="cinematic"] .webgl-village-status {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}
