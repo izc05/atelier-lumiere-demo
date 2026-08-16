@@ -68,6 +68,7 @@
     '/entrada/webgl/world-signage.js',
     '/entrada/webgl/distant-depth.js',
     '/entrada/webgl/warm-village.js',
+    '/entrada/webgl/material-textures.js',
     '/entrada/webgl/workshop-plaques.js',
     '/entrada/webgl/spatial-navigation.js',
     '/entrada/webgl/arrival-transition.js'
