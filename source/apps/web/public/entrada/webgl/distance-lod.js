@@ -35,6 +35,7 @@
     if (!selected || selected === 'overview') return null;
     const config = webglInteractionPlaces?.[selected] || webglDynamicProviderPlaces?.[selected];
     if (!config) return null;
+    if (Array.isArray(config.point)) return config.point;
     if (Array.isArray(config.point3d)) return config.point3d;
     if (Number.isFinite(config.x) && Number.isFinite(config.z)) return [config.x, 0, config.z];
     return null;
