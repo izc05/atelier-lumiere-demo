@@ -1,0 +1,70 @@
+.u35-lighting {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+}
+.u35-lighting-wash,
+.u35-lighting-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.u35-lighting-wash {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(173,190,197,.10), transparent 34%),
+    radial-gradient(circle at 82% 92%, rgba(103,67,55,.08), transparent 40%),
+    linear-gradient(180deg, rgba(223,229,225,.035), rgba(55,24,28,.045));
+  mix-blend-mode: soft-light;
+}
+.u35-lighting-vignette {
+  box-shadow:
+    inset 0 0 11vw rgba(31,12,15,.10),
+    inset 0 -8vw 16vw rgba(38,14,17,.08);
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(35,15,18,.075) 100%);
+}
+.u35-world-glow {
+  --u35-size: 180px;
+  --u35-opacity: .16;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--u35-size);
+  height: var(--u35-size);
+  margin: calc(var(--u35-size) * -.5) 0 0 calc(var(--u35-size) * -.5);
+  border-radius: 50%;
+  opacity: var(--u35-opacity);
+  transform: translate3d(var(--u35-x, -999px), var(--u35-y, -999px), 0) scale(var(--u35-scale, 1));
+  transform-origin: center;
+  background: radial-gradient(circle, rgba(255,192,105,.52) 0%, rgba(231,149,74,.21) 30%, rgba(125,46,47,.055) 58%, transparent 74%);
+  filter: blur(6px);
+  mix-blend-mode: screen;
+  will-change: transform,opacity;
+}
+.u35-world-glow[data-place="atelier"] {
+  --u35-size: 250px;
+  background: radial-gradient(circle, rgba(255,207,124,.56), rgba(214,145,72,.19) 33%, rgba(100,37,38,.045) 62%, transparent 76%);
+}
+.u35-world-glow.is-selected { --u35-opacity: .25; --u35-scale: 1.08; }
+.u35-world-glow.is-hovered { --u35-opacity: .22; }
+.u35-world-glow[data-dynamic="true"] { --u35-size: 150px; --u35-opacity: .14; }
+[data-webgl-village][data-material-textures="procedural"] [data-webgl-canvas] {
+  filter: saturate(1.035) contrast(1.018) brightness(.995);
+}
+@media (max-width: 1050px) {
+  .u35-world-glow { --u35-size: 150px; filter: blur(5px); }
+  .u35-world-glow[data-place="atelier"] { --u35-size: 205px; }
+  .u35-lighting-vignette { box-shadow: inset 0 0 15vw rgba(31,12,15,.08); }
+}
+@media (max-width: 760px) {
+  .u35-world-glow { --u35-size: 115px; --u35-opacity: .12; filter: blur(4px); }
+  .u35-world-glow[data-place="atelier"] { --u35-size: 150px; }
+  .u35-world-glow.is-selected { --u35-opacity: .18; }
+  .u35-lighting-wash { opacity: .65; }
+  .u35-lighting-vignette { box-shadow: inset 0 0 20vw rgba(31,12,15,.065); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .u35-world-glow { will-change: auto; }
+}
