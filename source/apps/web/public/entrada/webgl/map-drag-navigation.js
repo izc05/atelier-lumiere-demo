@@ -43,9 +43,14 @@
     if (typeof p9CancelCameraJourney === 'function') p9CancelCameraJourney({ keepCurrent: true });
   }
 
+  function stopLegacyDrag() {
+    /* scene.js mantiene esta variable global histórica. U3.17N.1 toma el control al superar el umbral. */
+    if (typeof dragging !== 'undefined') dragging = false;
+    canvas.classList.remove('is-dragging');
+  }
+
   function applyDrag(dx, dy) {
     const distance = Math.max(10, Number(camera.distance || camera.desiredDistance || 24));
-    /* Unidades de mundo por pixel. Se aumenta levemente frente a P8 para que el mapa siga al ratón. */
     const unit = distance * .00325;
     const c = Math.cos(camera.yaw);
     const s = Math.sin(camera.yaw);
@@ -61,7 +66,7 @@
     ];
     clampPanTarget(next);
 
-    /* Movimiento inmediato: mundo y placas usan exactamente la misma cámara en el mismo frame. */
+    /* Movimiento inmediato: mundo y placas comparten exactamente la misma cámara. */
     camera.target = [...next];
     camera.desired = [...next];
     camera.desiredDistance = camera.distance;
@@ -91,12 +96,14 @@
     if (!gesture.dragging) {
       gesture.dragging = true;
       cancelCinema();
+      stopLegacyDrag();
       root.dataset.mapDragging = 'true';
       root.classList.add('is-map-dragging');
       document.documentElement.style.cursor = 'grabbing';
     }
 
     event.preventDefault();
+    event.stopImmediatePropagation();
     const dx = event.clientX - gesture.x;
     const dy = event.clientY - gesture.y;
     gesture.x = event.clientX;
@@ -107,6 +114,7 @@
   function finish(event) {
     if (!gesture || (event?.pointerId !== undefined && gesture.id !== event.pointerId)) return;
     if (gesture.dragging) {
+      stopLegacyDrag();
       suppressClickUntil = performance.now() + 320;
       root.dispatchEvent(new CustomEvent('atelier:village-manual-camera', {
         detail: { type: 'pan', target: [...camera.target] }
@@ -121,10 +129,9 @@
   window.addEventListener('pointerup', finish, { capture: true });
   window.addEventListener('pointercancel', finish, { capture: true });
 
-  /* Si el gesto comenzó en una placa y acabó siendo drag, evita abrir el taller al soltar. */
+  /* Tras un drag cancelamos cualquier click residual sobre placa o canvas. */
   root.addEventListener('click', (event) => {
     if (performance.now() > suppressClickUntil) return;
-    if (!isPlaque(event.target)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   }, { capture: true });
