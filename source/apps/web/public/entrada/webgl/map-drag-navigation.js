@@ -44,7 +44,6 @@
   }
 
   function stopLegacyDrag() {
-    /* scene.js mantiene esta variable global histórica. U3.17N.1 toma el control al superar el umbral. */
     if (typeof dragging !== 'undefined') dragging = false;
     canvas.classList.remove('is-dragging');
   }
@@ -86,6 +85,12 @@
       dragging: false,
       startedOnPlaque: isPlaque(event.target)
     };
+
+    /* scene.js recibe el mismo pointerdown después de esta fase de captura.
+       Lo apagamos al terminar el evento para que U3.17N.1 sea la única autoridad de pan. */
+    queueMicrotask(() => {
+      if (gesture && gesture.id === event.pointerId && !gesture.dragging) stopLegacyDrag();
+    });
   }, { capture: true });
 
   window.addEventListener('pointermove', (event) => {
