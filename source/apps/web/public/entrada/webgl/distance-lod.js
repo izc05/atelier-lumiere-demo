@@ -6,9 +6,9 @@
   const previousDraw = drawObject;
   const thresholds = quality === 'high'
     ? { micro: 18.5, small: 29.0, medium: 45.0 }
-    : quality === 'balanced'
-      ? { micro: 13.5, small: 23.0, medium: 38.0 }
-      : { micro: 8.5, small: 15.5, medium: 29.0 };
+    : quality === 'lite'
+      ? { micro: 8.5, small: 15.5, medium: 29.0 }
+      : { micro: 13.5, small: 23.0, medium: 38.0 }; // balanced + fallback seguro
 
   let frameDrawn = 0;
   let frameSkipped = 0;
