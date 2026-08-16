@@ -1,0 +1,87 @@
+.u36-focus-atmosphere {
+  --u36-x: 50%;
+  --u36-y: 52%;
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 1;
+}
+
+.u36-focus-atmosphere::before,
+.u36-focus-atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  pointer-events: none;
+  transition: opacity .8s ease, background .8s ease;
+}
+
+/* Grading permanente: papel cálido en el centro y horizonte ligeramente más frío. */
+.u36-focus-atmosphere::before {
+  background:
+    linear-gradient(180deg, rgba(214,221,213,.045) 0%, transparent 34%, rgba(121,67,52,.025) 100%),
+    radial-gradient(ellipse at 50% 46%, transparent 26%, rgba(42,20,22,.055) 100%);
+  mix-blend-mode: multiply;
+  opacity: .82;
+}
+
+/* Foco narrativo. La transparencia central deja intacto el taller y vela la periferia. */
+.u36-focus-atmosphere::after {
+  background:
+    radial-gradient(circle at var(--u36-x) var(--u36-y),
+      rgba(255,226,166,.10) 0 5%,
+      rgba(255,215,145,.055) 10%,
+      transparent 21%,
+      rgba(28,15,18,.055) 42%,
+      rgba(20,12,14,.17) 76%,
+      rgba(17,10,12,.24) 100%);
+  opacity: 0;
+}
+
+.u36-focus-atmosphere.is-focused::after { opacity: 1; }
+
+.u36-focus-atmosphere .u36-focus-glow {
+  position: absolute;
+  left: var(--u36-x);
+  top: var(--u36-y);
+  width: min(34vw, 430px);
+  aspect-ratio: 1;
+  transform: translate(-50%,-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(241,196,112,.145) 0%,
+    rgba(212,145,73,.072) 31%,
+    rgba(119,41,54,.028) 52%,
+    transparent 72%);
+  filter: blur(10px);
+  opacity: 0;
+  transition: opacity .65s ease, width .85s ease;
+}
+
+.u36-focus-atmosphere.is-focused .u36-focus-glow { opacity: 1; }
+.u36-focus-atmosphere.is-hovering:not(.is-focused) .u36-focus-glow { opacity: .34; width: min(27vw, 320px); }
+
+[data-webgl-quality="balanced"] .u36-focus-atmosphere::before { opacity: .68; }
+[data-webgl-quality="balanced"] .u36-focus-atmosphere::after { filter: none; }
+[data-webgl-quality="balanced"] .u36-focus-atmosphere .u36-focus-glow { filter: blur(7px); }
+
+[data-webgl-quality="lite"] .u36-focus-atmosphere::before { opacity: .42; }
+[data-webgl-quality="lite"] .u36-focus-atmosphere::after {
+  background: radial-gradient(circle at var(--u36-x) var(--u36-y), transparent 0 24%, rgba(25,14,17,.10) 68%, rgba(20,12,14,.14) 100%);
+}
+[data-webgl-quality="lite"] .u36-focus-atmosphere .u36-focus-glow { display: none; }
+
+@media (max-width: 760px) {
+  .u36-focus-atmosphere::after {
+    background: radial-gradient(circle at var(--u36-x) var(--u36-y),
+      rgba(255,226,166,.08) 0 7%, transparent 25%, rgba(24,14,16,.09) 62%, rgba(18,11,13,.17) 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .u36-focus-atmosphere::before,
+  .u36-focus-atmosphere::after,
+  .u36-focus-atmosphere .u36-focus-glow { transition: none !important; }
+}
