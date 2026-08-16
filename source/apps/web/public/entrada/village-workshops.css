@@ -1,4 +1,4 @@
-/* Pueblo Atelier · E2/E3 · identidad real + transición de entrada */
+/* Pueblo Atelier · E2-E5 · identidad, transición y talleres dinámicos */
 
 .landmark-brand-badge {
   position: absolute;
@@ -150,6 +150,101 @@
   border-color: rgba(167,131,66,.7);
 }
 
+/* E5 · parcelas que se convierten en talleres publicados. */
+.village-houses .house.is-village-parcel-occupied {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.village-landmark--dynamic {
+  z-index: 11;
+}
+.village-landmark--dynamic .landmark-building--dynamic {
+  width: 178px;
+  height: 158px;
+  background: linear-gradient(145deg,#f6ede3,#e8d9ca);
+  box-shadow: 0 14px 30px rgba(49,7,18,.07);
+}
+.village-landmark--dynamic .landmark-building--dynamic .shop-sign {
+  left: 9px;
+  top: 12px;
+  width: 158px;
+  height: 38px;
+  background: linear-gradient(90deg,#5a1021,#763044);
+}
+.village-landmark--dynamic .shop-sign strong {
+  max-width: 60px;
+  overflow: hidden;
+  font-size: .98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.village-landmark--dynamic .shop-sign small {
+  max-width: 82px;
+  overflow: hidden;
+  font-size: .42rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.village-landmark--dynamic .landmark-building--dynamic .awning {
+  left: 9px;
+  top: 50px;
+  width: 158px;
+  height: 23px;
+}
+.village-landmark--dynamic .landmark-building--dynamic .shop-window {
+  left: 16px;
+  bottom: 16px;
+  width: 92px;
+  height: 66px;
+}
+.village-landmark--dynamic .landmark-building--dynamic .shop-door {
+  right: 17px;
+  bottom: 14px;
+  width: 39px;
+  height: 78px;
+  background: linear-gradient(90deg,#866754,#a88670);
+}
+.shop-window--generic {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px;
+}
+.shop-window--generic i {
+  display: block;
+  width: 17px;
+  border-radius: 50% 50% 5px 5px;
+  background: #7a3345;
+}
+.shop-window--generic i:nth-child(1) { height: 25px; }
+.shop-window--generic i:nth-child(2) { height: 38px; background: #b08a49; }
+.shop-window--generic i:nth-child(3) { height: 30px; background: #8b977b; }
+.village-landmark--dynamic .landmark-copy {
+  max-width: 220px;
+}
+.village-landmark--dynamic .landmark-copy strong {
+  max-width: 195px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.village-navigation.has-dynamic-workshops {
+  display: flex;
+  width: min(1080px, calc(100% - 150px));
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+.village-navigation.has-dynamic-workshops button {
+  flex: 0 0 190px;
+  min-width: 0;
+  scroll-snap-align: center;
+}
+
 /* E3 · salida cinematográfica breve hacia Home o taller. */
 .village-landmark.is-village-exit-target {
   z-index: 80;
@@ -228,6 +323,11 @@
     width: 310px;
   }
   .village-workshop-card-media { height: 165px; }
+  .village-navigation.has-dynamic-workshops {
+    left: 18px;
+    right: 78px;
+    width: auto;
+  }
 }
 
 @media (max-width: 760px) {
@@ -283,15 +383,23 @@
     padding-top: 7px;
     font-size: .41rem;
   }
-  .village-workshop-card-foot {
-    margin-top: 8px;
-  }
+  .village-workshop-card-foot { margin-top: 8px; }
   .village-workshop-card-foot > span { display: none; }
   .village-workshop-enter {
     width: 100%;
     min-height: 30px;
     padding: 6px 9px;
     font-size: .42rem;
+  }
+  .village-navigation.has-dynamic-workshops {
+    left: 10px;
+    right: 62px;
+    width: auto;
+  }
+  .village-navigation.has-dynamic-workshops button { flex-basis: 154px; }
+  .village-landmark--dynamic .landmark-building--dynamic {
+    transform: translateX(-50%) scale(.95);
+    transform-origin: 50% 100%;
   }
   .village-exit-mark {
     width: 62px;
