@@ -66,7 +66,7 @@
 
   function facadeOpening(site, side, y, width, lit = true) {
     const s = site.s;
-    const [, , depth] = [0, 0, .76 * s];
+    const depth = .76 * s;
     const [x,z] = localPoint(site, side * s, depth + .026);
     const opening = push(p9Window(x,z,y*s,width*s,site.r,lit ? warm : p9Mix(palette.paperLight,palette.roof,.34)), 'window');
     if (opening) opening.lodAlways = false;
@@ -82,8 +82,8 @@
     if (quality === 'lite') return;
     const s = site.s;
     const [x,z] = localPoint(site,side*s,-.12*s);
-    push(p9Box(x,z,(site.t===2?2.13:1.72)*s,.09*s,.32*s,.09*s,stone,site.r,true),'chimney');
-    push(p9Box(x,z,(site.t===2?2.48:2.07)*s,.12*s,.035*s,.12*s,stoneWarm,site.r,false),'chimney-cap');
+    push(p9Box(x,z,(site.t===2 ? 2.13 : 1.72)*s,.09*s,.32*s,.09*s,stone,site.r,true),'chimney');
+    push(p9Box(x,z,(site.t===2 ? 2.48 : 2.07)*s,.12*s,.035*s,.12*s,stoneWarm,site.r,false),'chimney-cap');
   }
 
   function balcony(site) {
@@ -100,7 +100,7 @@
   function annex(site,index) {
     if (quality === 'lite' || index % 3 === 2) return;
     const s=site.s;
-    const side=index%2?-.90:.90;
+    const side=index%2 ? -.90 : .90;
     const [x,z]=localPoint(site,side*s,-.08*s);
     push(p9Box(x,z,.39*s,.38*s,.39*s,.52*s,stucco[(site.v+2)%stucco.length],site.r,true),'annex');
     push(p9Roof(x,z,.92*s,.44*s,.21*s,.60*s,roofs[(site.v+1)%roofs.length],site.r),'annex-roof');
@@ -109,23 +109,23 @@
   function maison(site,index) {
     const s=site.s;
     const two=site.t===2 && quality!=='lite';
-    const bodyY=two?.89:.64;
-    const bodyH=two?.89:.64;
-    const roofY=two?2.00:1.48;
-    const roofH=two?.38:.32;
+    const bodyY=two ? .89 : .64;
+    const bodyH=two ? .89 : .64;
+    const roofY=two ? 2.00 : 1.48;
+    const roofH=two ? .38 : .32;
     const facade=stucco[site.v%stucco.length];
     const roof=roofs[site.v%roofs.length];
 
     push(p9Box(site.x,site.z,bodyY*s,.90*s,bodyH*s,.73*s,facade,site.r,true),'house');
     push(p9Roof(site.x,site.z,roofY*s,1.02*s,roofH*s,.86*s,roof,site.r),'roof');
-    door(site,index%3===0?-.22:index%3===1?.20:0);
+    door(site,index%3===0 ? -.22 : index%3===1 ? .20 : 0);
     facadeOpening(site,-.40,.82,.14,true);
     facadeOpening(site,.40,.82,.14,index%4!==0);
     if(two){
       facadeOpening(site,-.36,1.46,.13,index%3!==0);
       facadeOpening(site,.36,1.46,.13,true);
     }
-    chimney(site,index%2?.42:-.42);
+    chimney(site,index%2 ? .42 : -.42);
     balcony(site);
     annex(site,index);
   }
@@ -155,7 +155,7 @@
       push(p9Add(p9Meshes.cylinder,.20,2.45,.77,.17,.035,.17,stone,0,false),'fountain-bowl');
     }
 
-    [[-1.75,1.28],[1.95,1.28],[-1.75,3.50],[1.95,3.50]].forEach(([x,z])=>streetLamp(x,z,tablet?.74:.84));
+    [[-1.75,1.28],[1.95,1.28],[-1.75,3.50],[1.95,3.50]].forEach(([x,z])=>streetLamp(x,z,tablet ? .74 : .84));
   }
 
   function streetNetwork() {
