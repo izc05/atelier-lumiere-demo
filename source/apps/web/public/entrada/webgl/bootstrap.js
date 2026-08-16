@@ -42,6 +42,7 @@
   }
 
   const scripts = [
+    '/village-craft-taxonomy.js',
     '/entrada/webgl/scene.js',
     '/entrada/webgl/art-direction.js',
     '/entrada/webgl/interaction.js',
@@ -59,6 +60,7 @@
     '/entrada/webgl/gentle-stitch-studio.js',
     '/entrada/webgl/authored-landscape.js',
     '/entrada/webgl/quality.js',
+    '/entrada/webgl/craft-architecture.js',
     '/entrada/webgl/page-transition.js',
     '/entrada/webgl/cinematic-ui.js',
     '/entrada/webgl/overview-composition.js',
