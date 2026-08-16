@@ -74,6 +74,7 @@
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/workshop-plaques.js',
+    '/entrada/webgl/plaque-polish.js',
     '/entrada/webgl/spatial-navigation.js',
     '/entrada/webgl/arrival-transition.js'
   ];
