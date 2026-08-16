@@ -68,9 +68,9 @@
     const eyebrow = document.querySelector('.webgl-village-heading > span');
     const title = document.querySelector('.webgl-village-heading strong');
     const helper = document.querySelector('.webgl-village-heading small');
-    if (eyebrow) eyebrow.textContent = 'Atelier Lumière';
-    if (title) title.textContent = 'El pueblo de los oficios';
-    if (helper) helper.textContent = 'Recorre · descubre · entra';
+    if (eyebrow && eyebrow.textContent !== 'Atelier Lumière') eyebrow.textContent = 'Atelier Lumière';
+    if (title && title.textContent !== 'El pueblo de los oficios') title.textContent = 'El pueblo de los oficios';
+    if (helper && helper.textContent !== 'Recorre · descubre · entra') helper.textContent = 'Recorre · descubre · entra';
   }
   sanitizeHeading();
   const heading = document.querySelector('.webgl-village-heading');
