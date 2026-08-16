@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(HERE, "..", "apps", "web", "public");
-const ROOT = join(HERE, "..", "..", "..", "tools", "preview-local");
+const ROOT = join(HERE, "..", "..", "tools", "preview-local");
 
 async function text(...parts) {
   return readFile(join(PUBLIC, ...parts), "utf8");
