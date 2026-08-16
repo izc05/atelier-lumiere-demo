@@ -70,6 +70,8 @@ import { createPublicCatalogApiHandler } from "./public-catalog-api.mjs";
 import { createPublicCatalogService } from "./public-catalog-service.mjs";
 import { createRequestFileStorage } from "./request-file-storage.mjs";
 import { createSecuredAdminAccountsService } from "./secured-admin-accounts-service.mjs";
+import { createShowcaseMediaApiHandler } from "./showcase-media-api.mjs";
+import { createShowcaseMediaService } from "./showcase-media-service.mjs";
 import { createTwoFactorService } from "./two-factor-service.mjs";
 import { createWorkshopApplicationsService } from "./workshop-applications-service.mjs";
 
@@ -215,6 +217,7 @@ const basePilotCheckoutService = database.enabled && customerAuthService
 const pilotCheckoutService = withSandboxPayment({ checkoutService: basePilotCheckoutService, paymentSandboxService });
 const adminBlogService = database.enabled ? createAdminBlogService({ database, storage: mediaStorage }) : null;
 const adminProductsService = database.enabled ? createAdminProductsService({ database, storage: mediaStorage }) : null;
+const showcaseMediaService = database.enabled ? createShowcaseMediaService({ database, storage: mediaStorage }) : null;
 const publicBlogService = database.enabled ? createPublicBlogService({ database, storage: mediaStorage }) : null;
 const publicCatalogService = database.enabled ? createPublicCatalogService({ database, storage: mediaStorage }) : null;
 
@@ -298,7 +301,12 @@ const pilotCheckoutHandler = createPilotCheckoutApiHandler({ baseHandler: orderL
 const paymentSandboxHandler = createPaymentSandboxApiHandler({ baseHandler: pilotCheckoutHandler, paymentSandboxService });
 const adminBlogHandler = createAdminBlogApiHandler({ baseHandler: paymentSandboxHandler, adminBlogService, authenticateRequest });
 const adminProductsHandler = createAdminProductsApiHandler({ baseHandler: adminBlogHandler, adminProductsService, authenticateRequest });
-const publicBlogHandler = createPublicBlogApiHandler({ baseHandler: adminProductsHandler, publicBlogService });
+const showcaseMediaHandler = createShowcaseMediaApiHandler({
+  baseHandler: adminProductsHandler,
+  showcaseMediaService,
+  authenticateRequest
+});
+const publicBlogHandler = createPublicBlogApiHandler({ baseHandler: showcaseMediaHandler, publicBlogService });
 const publicCatalogHandler = createPublicCatalogApiHandler({ baseHandler: publicBlogHandler, publicCatalogService });
 const server = createServer(createLegalApiHandler({ baseHandler: publicCatalogHandler, legalService }));
 

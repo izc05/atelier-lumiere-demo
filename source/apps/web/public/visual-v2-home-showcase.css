@@ -1,0 +1,84 @@
+/* Atelier Lumière · Visual V2 · Fase 9.3B
+ * Superposición editorial del Hero cuando existe HOME_HERO_*.
+ * El carrusel de talleres permanece intacto debajo como fallback.
+ */
+
+#hero-visual.has-showcase-hero #hero-main-image,
+#hero-visual.has-showcase-hero #hero-main-placeholder {
+  opacity: 0 !important;
+}
+
+#hero-visual.has-showcase-hero > #hero-workshop-note,
+#hero-visual.has-showcase-hero > .hero-editorial-seal:not(.v2-showcase-seal) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#home-hero .hero-photo-main .v2-showcase-hero-image {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  padding: 0 !important;
+  opacity: 1 !important;
+}
+
+#hero-visual.has-showcase-hero .hero-photo-main::after {
+  z-index: 2;
+}
+
+#hero-visual.has-showcase-hero .hero-photo-caption {
+  z-index: 4;
+}
+
+#hero-visual .v2-showcase-note {
+  z-index: 9 !important;
+}
+
+#hero-visual .v2-showcase-note > span {
+  color: var(--v2-gold-700) !important;
+}
+
+#hero-visual .v2-showcase-note > a {
+  display: inline-block;
+}
+
+#hero-visual .v2-showcase-seal {
+  z-index: 9;
+}
+
+#hero-visual .v2-showcase-seal > span {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  border: 1px solid rgba(178, 141, 75, .5) !important;
+  border-radius: 50%;
+  color: var(--v2-ivory-50) !important;
+  background: var(--v2-wine-800) !important;
+  box-shadow: 0 8px 18px rgba(42, 7, 16, .14) !important;
+  font-family: var(--v2-font-display);
+  font-size: 1.5rem;
+  letter-spacing: -.04em;
+}
+
+@media (max-width: 760px) {
+  #hero-visual .v2-showcase-note {
+    left: 14px !important;
+    right: 14px !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #home-hero .hero-photo-main .v2-showcase-hero-image {
+    transition: none !important;
+    transform: none !important;
+  }
+}

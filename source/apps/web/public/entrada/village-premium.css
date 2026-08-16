@@ -1,0 +1,256 @@
+/* Pueblo Atelier · E7.1 · acabado visual premium
+ * Capa reversible sobre village.css. No cambia navegación ni datos.
+ */
+
+.village-experience {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255,255,255,.72), transparent 34rem),
+    radial-gradient(circle at 82% 18%, rgba(167,131,66,.06), transparent 28rem),
+    linear-gradient(135deg,#fbf7f1,#eee2d4);
+}
+
+.village-experience::before,
+.village-experience::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+.village-experience::before {
+  background:
+    radial-gradient(ellipse at 50% 44%, transparent 36%, rgba(79,16,32,.018) 72%, rgba(49,7,18,.045) 100%),
+    linear-gradient(115deg, rgba(255,255,255,.18), transparent 30%, transparent 72%, rgba(125,48,65,.025));
+  mix-blend-mode: multiply;
+}
+.village-experience::after {
+  inset: auto 8% 10% 8%;
+  height: 18%;
+  border-radius: 50%;
+  background: rgba(84,61,49,.045);
+  filter: blur(42px);
+}
+
+.village-viewport {
+  perspective: 1200px;
+  perspective-origin: 50% 42%;
+}
+
+.village-world {
+  filter: drop-shadow(0 34px 45px rgba(49,7,18,.035));
+}
+
+.village-ground {
+  filter: saturate(.95) contrast(1.01) drop-shadow(0 18px 26px rgba(49,7,18,.035)) !important;
+}
+
+.terrain-washes { opacity: .74 !important; }
+.roads { opacity: .92 !important; }
+.road-lines { opacity: .28 !important; }
+.water { filter: drop-shadow(0 8px 12px rgba(67,105,101,.08)); }
+.plaza-lines { opacity: .52 !important; }
+
+.village-landmark {
+  filter: drop-shadow(0 18px 22px rgba(49,7,18,.09));
+}
+.village-landmark:hover,
+.village-landmark:focus-within {
+  filter: drop-shadow(0 28px 30px rgba(49,7,18,.16));
+}
+
+.landmark-building {
+  filter: drop-shadow(0 22px 13px rgba(49,7,18,.11));
+}
+.landmark-building::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  left: 12%;
+  right: 8%;
+  bottom: -8px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(61,39,31,.12);
+  transform: skewX(-18deg);
+  filter: blur(7px);
+}
+
+.landmark-building .roof,
+.landmark-building--linen .roof--soft {
+  filter: drop-shadow(0 7px 5px rgba(49,7,18,.12));
+}
+
+.landmark-building .facade,
+.landmark-building--workshop {
+  box-shadow:
+    inset -12px -10px 22px rgba(102,67,52,.055),
+    inset 7px 8px 18px rgba(255,255,255,.38),
+    0 1px 0 rgba(255,255,255,.7);
+}
+
+.landmark-building--atelier .door,
+.landmark-building--workshop .shop-door {
+  box-shadow: inset -7px 0 10px rgba(49,7,18,.16), 5px 3px 9px rgba(49,7,18,.09);
+}
+.landmark-building--atelier .window,
+.landmark-building--workshop .shop-window {
+  box-shadow: inset 0 0 18px rgba(255,255,255,.5), 0 3px 7px rgba(49,7,18,.07);
+}
+
+.landmark-copy {
+  border-color: rgba(79,16,32,.14);
+  background: rgba(255,253,249,.94);
+  box-shadow: 0 14px 30px rgba(49,7,18,.085);
+}
+
+.village-landmark--atelier .landmark-copy {
+  padding-inline: 18px;
+  border-color: rgba(167,131,66,.3);
+}
+.village-landmark--atelier .landmark-building::after {
+  width: 230px;
+  height: 40px;
+  bottom: -21px;
+  background: rgba(75,50,38,.105);
+  filter: blur(10px);
+}
+
+.village-houses .house {
+  border-color: rgba(79,16,32,.095);
+  box-shadow:
+    inset -8px -7px 12px rgba(95,62,45,.045),
+    8px 12px 16px rgba(49,7,18,.055);
+}
+.village-houses .house::before {
+  filter: drop-shadow(0 5px 4px rgba(49,7,18,.08));
+}
+.village-houses .house::after {
+  filter: drop-shadow(0 2px 3px rgba(49,7,18,.05));
+}
+
+.village-trees i {
+  box-shadow:
+    inset -9px -8px 14px rgba(72,76,58,.09),
+    8px 12px 13px rgba(49,7,18,.06);
+  filter: saturate(.94);
+}
+.village-trees i::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 7px;
+  width: 11px;
+  height: 15px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.22);
+  transform: rotate(22deg);
+}
+
+.future-quarter {
+  background: rgba(255,253,249,.26);
+  box-shadow: inset 0 0 26px rgba(167,131,66,.035);
+}
+
+.village-navigation,
+.village-help,
+.village-zoom button,
+.village-list-access {
+  border-color: rgba(79,16,32,.16);
+  box-shadow: 0 12px 32px rgba(49,7,18,.075);
+}
+.village-navigation {
+  background: rgba(255,253,249,.9) !important;
+}
+.village-navigation button {
+  transition: background 180ms ease, transform 180ms ease;
+}
+.village-navigation button:hover,
+.village-navigation button:focus-visible {
+  transform: translateY(-1px);
+}
+
+.landmark-brand-badge {
+  box-shadow: 0 15px 34px rgba(49,7,18,.14);
+}
+
+.village-skip-entry {
+  position: absolute;
+  z-index: 64;
+  top: 108px;
+  right: clamp(18px,3vw,42px);
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(79,16,32,.24);
+  color: var(--village-wine);
+  background: rgba(255,253,249,.68);
+  font-size: .5rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  transition: border-color 180ms ease, background 180ms ease;
+}
+.village-skip-entry:hover,
+.village-skip-entry:focus-visible {
+  outline: none;
+  border-color: rgba(167,131,66,.72);
+  background: rgba(255,253,249,.92);
+}
+[data-village-experience][data-village-leaving] .village-skip-entry {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* El modo ligero conserva composición y legibilidad, pero elimina la capa decorativa costosa. */
+[data-village-mode="lite"]::before,
+[data-village-mode="lite"]::after {
+  display: none;
+}
+[data-village-mode="lite"] .village-world,
+[data-village-mode="lite"] .village-ground,
+[data-village-mode="lite"] .water,
+[data-village-mode="lite"] .landmark-building,
+[data-village-mode="lite"] .landmark-building .roof,
+[data-village-mode="lite"] .landmark-building--linen .roof--soft,
+[data-village-mode="lite"] .village-houses .house,
+[data-village-mode="lite"] .village-houses .house::before,
+[data-village-mode="lite"] .village-trees i {
+  filter: none !important;
+  box-shadow: none !important;
+}
+[data-village-mode="lite"] .landmark-building::before,
+[data-village-mode="lite"] .village-trees i::before {
+  display: none;
+}
+[data-village-mode="lite"] .village-skip-entry { backdrop-filter: none; }
+
+@media (max-width: 900px) {
+  .village-world { filter: drop-shadow(0 24px 30px rgba(49,7,18,.025)); }
+  .village-houses .house { box-shadow: 5px 8px 12px rgba(49,7,18,.045); }
+}
+
+@media (max-width: 760px) {
+  .village-experience::after { display: none; }
+  .village-landmark { filter: drop-shadow(0 14px 17px rgba(49,7,18,.08)); }
+  .landmark-building { filter: drop-shadow(0 15px 9px rgba(49,7,18,.09)); }
+  .village-trees i::before { display: none; }
+  .village-skip-entry {
+    top: 82px;
+    right: 10px;
+    min-height: 34px;
+    padding: 7px 9px;
+    font-size: .43rem;
+  }
+}
+
+@media (max-height: 620px) and (min-width: 761px) {
+  .village-skip-entry { top: 78px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .village-navigation button,
+  .village-skip-entry { transition: none !important; }
+}

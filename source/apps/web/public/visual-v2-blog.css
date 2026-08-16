@@ -1,0 +1,492 @@
+/* Atelier Lumière · Visual V2 · Fase 6.1
+ * Historias: portada editorial tipo revista.
+ * Solo presentación; mantiene búsqueda, categorías, etiquetas, rutas y datos actuales.
+ */
+
+body {
+  min-width: 320px;
+  color: var(--v2-ink-950) !important;
+  background: var(--v2-ivory-50) !important;
+}
+
+body > .shell {
+  width: min(100%, 1600px) !important;
+  margin: 0 auto !important;
+  padding: 0 0 72px !important;
+}
+
+/* Cabecera alineada con Home, Tienda y Talleres. */
+body .topbar {
+  position: sticky !important;
+  z-index: 90;
+  top: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(210px, 280px) 1fr !important;
+  align-items: center !important;
+  gap: 30px !important;
+  min-height: 88px !important;
+  padding: 12px var(--v2-gutter) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+  border-radius: 0 !important;
+  background: rgba(255,253,249,.97) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+
+body .topbar .brand {
+  display: block !important;
+  width: clamp(205px,15vw,276px) !important;
+  min-height: 58px !important;
+  color: transparent !important;
+  background: url('/assets/brand/atelier-logo-official-dark.svg') left center / contain no-repeat !important;
+  overflow: hidden;
+}
+
+body .topbar .brand > * {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body .topbar .nav {
+  justify-self: end !important;
+  gap: clamp(18px,2vw,36px) !important;
+}
+
+body .topbar .nav .button {
+  min-height: 42px !important;
+  padding: 6px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-950) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 700 .65rem/1.2 var(--v2-font-ui) !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+  opacity: .76;
+}
+
+body .topbar .nav .button:hover,
+body .topbar .nav .button:focus-visible,
+body .topbar .nav .button[aria-current='page'] {
+  color: var(--v2-wine-800) !important;
+  opacity: 1;
+}
+
+/* Hero de revista: claro, grande y silencioso. */
+body main > .hero {
+  position: relative;
+  min-height: clamp(470px,46vw,650px) !important;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 !important;
+  padding: clamp(76px,8vw,126px) var(--v2-gutter) clamp(68px,7vw,108px) !important;
+  overflow: hidden;
+  color: var(--v2-ink-950) !important;
+  background:
+    radial-gradient(circle at 87% 14%,rgba(198,161,93,.1),transparent 29rem),
+    var(--v2-ivory-100) !important;
+}
+
+body main > .hero::after {
+  content: 'H';
+  position: absolute;
+  right: -.02em;
+  bottom: -.28em;
+  color: rgba(79,16,32,.032);
+  font: 400 clamp(17rem,28vw,31rem)/.78 var(--v2-font-display);
+  pointer-events: none;
+}
+
+body main > .hero .eyebrow {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 18px !important;
+  color: var(--v2-gold-700) !important;
+  font: 800 .63rem/1.35 var(--v2-font-ui) !important;
+  letter-spacing: .2em !important;
+}
+
+body main > .hero h1 {
+  position: relative;
+  z-index: 1;
+  max-width: 10ch;
+  margin: 0 !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(4.4rem,7.7vw,8.6rem)/.88 var(--v2-font-display) !important;
+  letter-spacing: -.05em !important;
+}
+
+body main > .hero .lead {
+  position: relative;
+  z-index: 1;
+  max-width: 690px !important;
+  margin: 28px 0 0 !important;
+  color: var(--v2-ink-600) !important;
+  font: 400 clamp(.98rem,1.15vw,1.08rem)/1.72 var(--v2-font-ui) !important;
+}
+
+/* Filtros discretos, como herramientas editoriales. */
+body main > .toolbar {
+  position: sticky !important;
+  z-index: 15;
+  top: 88px !important;
+  display: grid !important;
+  grid-template-columns: minmax(320px,1fr) minmax(190px,260px) minmax(220px,320px) !important;
+  gap: 12px !important;
+  width: calc(100% - (2 * var(--v2-gutter))) !important;
+  max-width: var(--v2-shell) !important;
+  margin: 0 auto clamp(48px,5vw,76px) !important;
+  padding: 16px 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--v2-line-soft) !important;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+  border-radius: 0 !important;
+  background: rgba(255,253,249,.96) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(16px);
+}
+
+body main > .toolbar input,
+body main > .toolbar select {
+  min-height: 52px !important;
+  padding: 11px 14px !important;
+  border: 1px solid var(--v2-line) !important;
+  border-radius: var(--v2-radius-xs) !important;
+  color: var(--v2-ink-950) !important;
+  background: var(--v2-ivory-50) !important;
+  box-shadow: none !important;
+}
+
+body main > .toolbar input:focus,
+body main > .toolbar select:focus {
+  border-color: var(--v2-gold-600) !important;
+  box-shadow: 0 0 0 3px rgba(178,141,75,.1) !important;
+}
+
+/* Listado: primera historia protagonista, siguientes como piezas editoriales. */
+body #grid.grid {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: clamp(38px,5vw,78px) clamp(22px,3vw,46px) !important;
+  width: calc(100% - (2 * var(--v2-gutter))) !important;
+  max-width: var(--v2-shell) !important;
+  margin: 0 auto !important;
+}
+
+body #grid .card {
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body #grid .card:first-child {
+  grid-column: 1 / -1;
+}
+
+body #grid .card-link {
+  display: grid !important;
+  grid-template-rows: auto auto;
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+body #grid .card:first-child .card-link {
+  grid-template-columns: minmax(0,1.35fr) minmax(360px,.65fr) !important;
+  grid-template-rows: 1fr !important;
+  align-items: stretch;
+  min-height: clamp(500px,48vw,680px);
+  background: var(--v2-ivory-100);
+}
+
+body #grid .cover {
+  width: 100% !important;
+  height: clamp(390px,31vw,520px) !important;
+  aspect-ratio: auto !important;
+  object-fit: cover !important;
+  border-radius: var(--v2-radius-xs) !important;
+  background: var(--v2-ivory-200) !important;
+  filter: saturate(var(--v2-image-saturation)) contrast(1.015);
+  transition: transform var(--v2-duration-slow) var(--v2-ease-emphasis), filter var(--v2-duration-base) ease !important;
+}
+
+body #grid .card:first-child .cover {
+  height: 100% !important;
+  min-height: 500px;
+  border-radius: 0 !important;
+}
+
+body #grid .card-body {
+  padding: 22px 0 0 !important;
+}
+
+body #grid .card:first-child .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(38px,5vw,72px) !important;
+}
+
+body #grid .meta {
+  gap: 7px 13px !important;
+}
+
+body #grid .meta span {
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: var(--v2-gold-700) !important;
+  background: transparent !important;
+  font: 800 .59rem/1.35 var(--v2-font-ui) !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase;
+}
+
+body #grid .meta span + span::before {
+  content: '·';
+  margin-right: 12px;
+  color: var(--v2-wine-500);
+}
+
+body #grid .card h2 {
+  margin: 14px 0 0 !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(2.1rem,3.2vw,3.65rem)/.98 var(--v2-font-display) !important;
+  letter-spacing: -.03em !important;
+}
+
+body #grid .card:first-child h2 {
+  max-width: 10ch;
+  font-size: clamp(3.1rem,4.8vw,5.3rem) !important;
+  line-height: .94 !important;
+}
+
+body #grid .card p {
+  max-width: 50ch;
+  margin: 16px 0 0 !important;
+  color: var(--v2-ink-600) !important;
+  font: 400 .9rem/1.68 var(--v2-font-ui) !important;
+}
+
+body #grid .tags {
+  gap: 5px 11px !important;
+  margin-top: 20px !important;
+  padding-top: 16px;
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+body #grid .tag {
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-500) !important;
+  background: transparent !important;
+  font: 700 .56rem/1.4 var(--v2-font-ui) !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+body #grid .tag + .tag::before {
+  content: '·';
+  margin-right: 10px;
+  color: var(--v2-gold-600);
+}
+
+@media (hover:hover) and (pointer:fine) {
+  body #grid .card:hover .cover {
+    transform: scale(var(--v2-image-hover-scale));
+    filter: saturate(.98) contrast(1.02);
+  }
+
+  body #grid .card:first-child:hover .cover {
+    transform: scale(1.018);
+  }
+}
+
+body .loading,
+body .empty,
+body .error {
+  width: calc(100% - (2 * var(--v2-gutter))) !important;
+  max-width: var(--v2-shell) !important;
+  margin-inline: auto !important;
+  border: 1px solid var(--v2-line) !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-600) !important;
+  background: var(--v2-ivory-100) !important;
+}
+
+/* Portátil */
+@media (min-width:1025px) and (max-width:1365px) {
+  body .topbar {
+    padding-inline: 28px !important;
+  }
+
+  body .topbar .brand {
+    width: 215px !important;
+  }
+
+  body .topbar .nav {
+    gap: 18px !important;
+  }
+
+  body .topbar .nav .button {
+    font-size: .59rem !important;
+  }
+
+  body #grid .card:first-child .card-link {
+    grid-template-columns: minmax(0,1.2fr) minmax(340px,.8fr) !important;
+  }
+}
+
+/* Tablet */
+@media (min-width:761px) and (max-width:1024px) {
+  body .topbar {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+    min-height: 112px !important;
+    padding: 10px 24px 12px !important;
+  }
+
+  body .topbar .brand {
+    width: 220px !important;
+    min-height: 50px !important;
+  }
+
+  body .topbar .nav {
+    justify-self: stretch !important;
+    justify-content: center !important;
+  }
+
+  body main > .hero {
+    min-height: 0 !important;
+    padding-top: 64px !important;
+  }
+
+  body main > .hero h1 {
+    max-width: 9.5ch;
+    font-size: clamp(4.5rem,10vw,6.7rem) !important;
+  }
+
+  body main > .toolbar {
+    top: 112px !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  body main > .toolbar #search {
+    grid-column: 1 / -1;
+  }
+
+  body #grid.grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  body #grid .card:first-child .card-link {
+    grid-template-columns: 1fr !important;
+    min-height: 0;
+  }
+
+  body #grid .card:first-child .cover {
+    height: clamp(430px,65vw,580px) !important;
+    min-height: 430px;
+  }
+
+  body #grid .card:first-child .card-body {
+    padding: 34px 0 0 !important;
+    background: transparent !important;
+  }
+}
+
+/* Móvil */
+@media (max-width:760px) {
+  body > .shell {
+    width: 100% !important;
+  }
+
+  body .topbar {
+    grid-template-columns: minmax(0,1fr) auto !important;
+    min-height: 70px !important;
+    padding: 8px 12px !important;
+  }
+
+  body .topbar .brand {
+    width: min(51vw,186px) !important;
+    min-height: 46px !important;
+  }
+
+  body main > .hero {
+    min-height: 0 !important;
+    padding: 50px 18px 58px !important;
+  }
+
+  body main > .hero h1 {
+    max-width: 8.5ch !important;
+    font-size: clamp(3.65rem,15vw,5.2rem) !important;
+  }
+
+  body main > .toolbar {
+    position: static !important;
+    grid-template-columns: 1fr !important;
+    width: calc(100% - 36px) !important;
+    margin-bottom: 46px !important;
+    padding: 15px 0 !important;
+  }
+
+  body main > .toolbar #search {
+    grid-column: auto;
+  }
+
+  body #grid.grid {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
+    width: calc(100% - 36px) !important;
+  }
+
+  body #grid .card:first-child {
+    grid-column: auto;
+  }
+
+  body #grid .card:first-child .card-link,
+  body #grid .card-link {
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+    background: transparent !important;
+  }
+
+  body #grid .cover,
+  body #grid .card:first-child .cover {
+    height: clamp(320px,95vw,430px) !important;
+    min-height: 320px !important;
+    border-radius: var(--v2-radius-xs) !important;
+  }
+
+  body #grid .card:first-child .card-body,
+  body #grid .card-body {
+    padding: 20px 0 0 !important;
+  }
+
+  body #grid .card:first-child h2,
+  body #grid .card h2 {
+    max-width: 12ch;
+    font-size: clamp(2.25rem,10vw,3.25rem) !important;
+  }
+}
+
+@media (max-height:720px) and (min-width:761px) {
+  body main > .hero {
+    min-height: 410px !important;
+    padding-top: 54px !important;
+    padding-bottom: 54px !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  body #grid .cover {
+    transition: none !important;
+  }
+
+  body #grid .card:hover .cover {
+    transform: none !important;
+  }
+}

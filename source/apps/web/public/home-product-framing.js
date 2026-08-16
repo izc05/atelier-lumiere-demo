@@ -1,3 +1,26 @@
+const HOME_V2_STYLES = Object.freeze([
+  "/visual-v2-home-hero.css",
+  "/visual-v2-home-workshops.css",
+  "/visual-v2-home-featured.css",
+  "/visual-v2-home-commissions.css",
+  "/visual-v2-home-stories.css",
+  "/visual-v2-home-showcase.css",
+  "/visual-v2-home-responsive.css"
+]);
+
+function ensureHomeV2Styles() {
+  const head = document.head;
+  if (!head) return;
+  for (const href of HOME_V2_STYLES) {
+    if (head.querySelector(`link[rel="stylesheet"][href="${href}"]`)) continue;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.dataset.atelierVisualV2 = "home";
+    head.append(link);
+  }
+}
+
 function homeFramingPercent(value, fallback = 50) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
@@ -111,4 +134,8 @@ async function loadHomeProductFraming() {
   observer.observe(container, { childList: true });
 }
 
+ensureHomeV2Styles();
 void loadHomeProductFraming();
+void import("/visual-v2-home-workshops.js");
+void import("/visual-v2-home-showcase.js");
+void import("/visual-v2-page-showcase.js");

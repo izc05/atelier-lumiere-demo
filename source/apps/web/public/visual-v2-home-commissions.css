@@ -1,0 +1,173 @@
+@import url("/visual-v2-home-stories.css");
+
+/* Atelier Lumière · Visual V2 · Fase 3.3
+ * Encargos en HOME: recorrido claro y editorial.
+ * Mantiene contenido, enlaces y funcionamiento existentes.
+ */
+.commission-section {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: minmax(320px,.72fr) minmax(520px,1.28fr) !important;
+  gap: clamp(48px,7vw,112px) !important;
+  padding: var(--v2-section-y) var(--v2-gutter) !important;
+  overflow: hidden;
+  color: var(--v2-ink-950) !important;
+  background: var(--v2-ivory-100) !important;
+}
+.commission-section::before {
+  content: "" !important;
+  position: absolute;
+  inset: 0;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 14%,rgba(198,161,93,.08),transparent 27rem),
+    linear-gradient(90deg,transparent 0 41%,rgba(79,16,32,.04) 41% 41.05%,transparent 41.05%) !important;
+}
+.commission-intro,.commission-journey { position: relative; z-index: 2; transform: none !important; }
+.commission-intro { max-width: 570px !important; }
+.commission-intro .eyebrow {
+  color: var(--v2-gold-700) !important;
+  font: 800 .62rem/1.4 var(--v2-font-ui) !important;
+  letter-spacing: .18em !important;
+}
+.commission-intro h2 {
+  margin: 0 !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(3.2rem,5vw,5.8rem)/.94 var(--v2-font-display) !important;
+  letter-spacing: -.045em !important;
+}
+.commission-lead {
+  max-width: 530px !important;
+  margin: 26px 0 0 !important;
+  color: var(--v2-ink-600) !important;
+  font: 400 1rem/1.72 var(--v2-font-ui) !important;
+}
+/* El ejemplo de encargo se convierte en una hoja de atelier. */
+.commission-brief {
+  margin-top: 42px !important;
+  padding: 26px 28px !important;
+  border: 1px solid var(--v2-line) !important;
+  border-radius: var(--v2-radius-xs) !important;
+  color: var(--v2-ink-950) !important;
+  background: rgba(255,253,249,.9) !important;
+  box-shadow: var(--v2-shadow-xs) !important;
+  backdrop-filter: none !important;
+  transform: none !important;
+}
+.commission-brief::after {
+  top: -6px !important;
+  width: 54px !important;
+  height: 12px !important;
+  background: rgba(198,161,93,.42) !important;
+}
+.commission-brief-head { border-bottom-color: var(--v2-line-soft) !important; }
+.commission-brief-head span,.commission-kicker {
+  color: var(--v2-gold-700) !important;
+  font: 800 .61rem/1.35 var(--v2-font-ui) !important;
+  letter-spacing: .14em !important;
+}
+.commission-brief-head strong {
+  color: var(--v2-wine-900) !important;
+  font: 400 1.16rem/1.2 var(--v2-font-display) !important;
+}
+.commission-brief dl div { border-bottom-color: var(--v2-line-soft) !important; }
+.commission-brief dt {
+  color: var(--v2-ink-500) !important;
+  font: 800 .58rem/1.3 var(--v2-font-ui) !important;
+}
+.commission-brief dd {
+  color: var(--v2-wine-900) !important;
+  font: 400 1.05rem/1.35 var(--v2-font-display) !important;
+}
+.commission-brief > p { color: var(--v2-ink-600) !important; }
+.commission-actions .button-light {
+  border: 1px solid var(--v2-wine-800) !important;
+  border-radius: var(--v2-radius-xs) !important;
+  color: var(--v2-ivory-50) !important;
+  background: var(--v2-wine-800) !important;
+  box-shadow: none !important;
+}
+.commission-actions .button-light:hover,.commission-actions .button-light:focus-visible {
+  color: var(--v2-ivory-50) !important;
+  background: var(--v2-wine-950) !important;
+}
+.commission-text-link {
+  color: var(--v2-wine-700) !important;
+  font: 800 .65rem/1.3 var(--v2-font-ui) !important;
+  letter-spacing: .11em !important;
+}
+.commission-text-link:hover,.commission-text-link:focus-visible { color: var(--v2-gold-700) !important; }
+/* Timeline ligero: el proceso gana protagonismo sin convertirse en una infografía pesada. */
+.commission-journey { padding-top: 2px !important; }
+.commission-route::before {
+  top: 31px !important;
+  bottom: 31px !important;
+  left: 31px !important;
+  background: linear-gradient(var(--v2-gold-600),rgba(178,141,75,.18)) !important;
+}
+.commission-route li {
+  grid-template-columns: 64px minmax(0,1fr) auto !important;
+  gap: 22px !important;
+  min-height: 168px !important;
+  padding: 25px 0 28px !important;
+  border-top-color: var(--v2-line-soft) !important;
+}
+.commission-route li:last-child { border-bottom-color: var(--v2-line-soft) !important; }
+.commission-number {
+  width: 62px !important;
+  height: 62px !important;
+  border-color: rgba(178,141,75,.55) !important;
+  color: var(--v2-gold-700) !important;
+  background: var(--v2-ivory-100) !important;
+  font: 400 1.15rem/1 var(--v2-font-display) !important;
+}
+.commission-step-copy h3 {
+  max-width: 600px;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(1.7rem,2.35vw,2.55rem)/1.02 var(--v2-font-display) !important;
+  letter-spacing: -.025em;
+}
+.commission-step-copy > p:last-child {
+  max-width: 560px;
+  color: var(--v2-ink-600) !important;
+  font: 400 .9rem/1.68 var(--v2-font-ui) !important;
+}
+.commission-signal {
+  border-color: var(--v2-line-soft) !important;
+  color: var(--v2-ink-500) !important;
+  background: rgba(255,253,249,.5);
+  font-size: .56rem !important;
+}
+.commission-note {
+  margin: 30px 0 0 86px !important;
+  border-left-color: var(--v2-gold-600) !important;
+  color: var(--v2-ink-600) !important;
+  background: rgba(255,253,249,.55) !important;
+}
+.commission-note > span {
+  border-color: rgba(178,141,75,.42) !important;
+  color: var(--v2-gold-700) !important;
+  font-family: var(--v2-font-display) !important;
+}
+.commission-note strong { color: var(--v2-wine-900) !important; }
+@media (max-width:1120px) {
+  .commission-section { grid-template-columns: 1fr !important; }
+  .commission-intro { max-width: 760px !important; }
+  .commission-brief { max-width: 680px; }
+}
+@media (max-width:720px) {
+  .commission-section { gap: 54px !important; padding: 68px 18px !important; }
+  .commission-intro h2 { font-size: clamp(3rem,14vw,4.8rem) !important; }
+  .commission-brief { padding: 22px 20px !important; }
+  .commission-route::before { left: 23px !important; }
+  .commission-route li { grid-template-columns: 48px minmax(0,1fr) !important; gap: 16px !important; }
+  .commission-number { width: 46px !important; height: 46px !important; }
+  .commission-signal { grid-column: 2; justify-self: start; }
+  .commission-note { margin-left: 62px !important; }
+}
+@media (max-width:480px) {
+  .commission-brief dl { grid-template-columns: 1fr !important; }
+  .commission-note { margin-left: 0 !important; }
+}

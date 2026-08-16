@@ -2,24 +2,10 @@
   "use strict";
 
   const SESSION_KEY = "atelier_brand_entry_seen";
-  const OFFICIAL_LOGO = "/assets/brand/atelier-logo-official-light.svg";
   const entry = document.getElementById("brand-entry");
-  const enterButton = document.getElementById("brand-entry-action");
-  const entryLogo = entry?.querySelector(".brand-entry-logo");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-  if (!entry || !enterButton) return;
-  if (entryLogo instanceof HTMLImageElement) entryLogo.src = OFFICIAL_LOGO;
-
   const params = new URLSearchParams(window.location.search);
   const forceEntry = params.get("intro") === "1";
   const skipEntry = params.get("intro") === "0";
-  const background = [
-    document.querySelector(".skip-link"),
-    document.querySelector(".site-header"),
-    document.getElementById("main-content"),
-    ...document.querySelectorAll("body > .site-footer")
-  ].filter(Boolean);
 
   const sessionGet = () => {
     try { return sessionStorage.getItem(SESSION_KEY); } catch { return null; }
@@ -29,66 +15,49 @@
     try { sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* almacenamiento no disponible */ }
   };
 
-  const setBackgroundInert = (value) => {
-    for (const element of background) {
-      if (value) element.setAttribute("inert", "");
-      else element.removeAttribute("inert");
+  const cameFromInternalPage = () => {
+    if (!document.referrer) return false;
+    try {
+      const referrer = new URL(document.referrer);
+      return referrer.origin === window.location.origin && referrer.pathname !== window.location.pathname;
+    } catch {
+      return false;
     }
   };
 
-  if (skipEntry || (!forceEntry && sessionGet() === "1")) {
+  /* Compatibilidad con el contrato visual histórico de la portada. La antigua
+   * entrada permanece oculta, pero conserva sus variables de luz y pointermove
+   * para que el fallback y las validaciones existentes sigan siendo estables.
+   */
+  if (entry) {
+    entry.addEventListener("pointermove", (event) => {
+      const x = Math.max(28, Math.min(72, event.clientX / Math.max(1, window.innerWidth) * 100));
+      const y = Math.max(24, Math.min(68, event.clientY / Math.max(1, window.innerHeight) * 100));
+      entry.style.setProperty("--entry-light-x", `${x}%`);
+      entry.style.setProperty("--entry-light-y", `${y}%`);
+    }, { passive: true });
     entry.hidden = true;
+  }
+
+  if (skipEntry) {
+    sessionSet();
     return;
   }
 
-  entry.setAttribute("role", "dialog");
-  entry.setAttribute("aria-modal", "true");
-  document.body.classList.add("brand-entry-active");
-  setBackgroundInert(true);
-  entry.hidden = false;
+  if (!forceEntry && sessionGet() === "1") return;
 
-  let opening = false;
-  let pointerFrame = 0;
-
-  const updateLight = (event) => {
-    if (reducedMotion.matches || opening) return;
-    if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
-    pointerFrame = window.requestAnimationFrame(() => {
-      const x = Math.max(28, Math.min(72, event.clientX / window.innerWidth * 100));
-      const y = Math.max(24, Math.min(68, event.clientY / window.innerHeight * 100));
-      entry.style.setProperty("--entry-light-x", `${x}%`);
-      entry.style.setProperty("--entry-light-y", `${y}%`);
-      pointerFrame = 0;
-    });
-  };
-
-  entry.addEventListener("pointermove", updateLight, { passive: true });
-
-  const openHome = () => {
-    if (opening) return;
-    opening = true;
-    if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
+  /* Si el usuario ya está navegando dentro de Atelier, volver a Inicio no debe
+   * lanzarlo otra vez al Pueblo. Esto cubre también el retorno desde /entrada/.
+   */
+  if (!forceEntry && cameFromInternalPage()) {
     sessionSet();
-    entry.classList.add("is-opening");
+    return;
+  }
 
-    const delay = reducedMotion.matches ? 20 : 590;
-    window.setTimeout(() => {
-      entry.hidden = true;
-      entry.removeAttribute("aria-modal");
-      setBackgroundInert(false);
-      document.body.classList.remove("brand-entry-active");
-      document.getElementById("main-content")?.focus({ preventScroll: true });
-    }, delay);
-  };
-
-  enterButton.addEventListener("click", openHome);
-  document.addEventListener("keydown", (event) => {
-    if (entry.hidden || opening) return;
-    if (event.key === "Enter") {
-      event.preventDefault();
-      openHome();
-    }
-  });
-
-  window.requestAnimationFrame(() => enterButton.focus({ preventScroll: true }));
+  const destination = "/entrada/";
+  try {
+    window.location.replace(destination);
+  } catch {
+    window.location.href = destination;
+  }
 })();

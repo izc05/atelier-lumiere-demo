@@ -1,0 +1,523 @@
+/* Atelier Lumière · Visual V2 · Fase 5.1
+ * Directorio de talleres: cada asociado se presenta como una firma editorial.
+ * Solo presentación. Búsqueda, filtros, datos y enlaces permanecen intactos.
+ */
+
+body {
+  min-width: 320px;
+  color: var(--v2-ink-950) !important;
+  background: var(--v2-ivory-50) !important;
+}
+
+.workshops-shell {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 0 56px !important;
+}
+
+/* Cabecera común V2. */
+.workshops-shell .topbar {
+  position: sticky !important;
+  z-index: 90;
+  top: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(210px,280px) 1fr !important;
+  align-items: center;
+  gap: 30px !important;
+  min-height: 88px !important;
+  padding: 12px var(--v2-gutter) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+  border-radius: 0 !important;
+  background: rgba(255,253,249,.97) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+
+.workshops-shell .atelier-brand-link {
+  width: clamp(205px,15vw,276px) !important;
+  min-height: 58px !important;
+}
+
+.workshops-shell .atelier-header-logo {
+  width: 100% !important;
+  max-height: 62px !important;
+}
+
+.workshops-shell .nav {
+  justify-self: end;
+  gap: clamp(18px,2vw,36px) !important;
+}
+
+.workshops-shell .nav .button {
+  min-height: 42px !important;
+  padding: 6px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-950) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 700 .65rem/1.2 var(--v2-font-ui) !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase;
+  opacity: .76;
+}
+
+.workshops-shell .nav .button:hover,
+.workshops-shell .nav .button:focus-visible,
+.workshops-shell .nav .button[aria-current='page'] {
+  color: var(--v2-wine-800) !important;
+  opacity: 1;
+}
+
+/* Hero claro y amplio. */
+.workshops-hero {
+  display: grid !important;
+  grid-template-columns: minmax(0,1.2fr) minmax(280px,.48fr) !important;
+  align-items: end !important;
+  gap: clamp(42px,7vw,112px) !important;
+  width: 100%;
+  margin: 0 !important;
+  padding: clamp(72px,8vw,126px) var(--v2-gutter) clamp(62px,7vw,104px) !important;
+  color: var(--v2-ink-950) !important;
+  background:
+    radial-gradient(circle at 88% 12%,rgba(198,161,93,.10),transparent 28rem),
+    var(--v2-ivory-100) !important;
+}
+
+.workshops-hero-copy {
+  width: min(100%,900px);
+  max-width: 900px !important;
+}
+
+.workshops-hero .eyebrow {
+  margin-bottom: 18px !important;
+  color: var(--v2-gold-700) !important;
+  font: 800 .63rem/1.35 var(--v2-font-ui) !important;
+  letter-spacing: .2em !important;
+}
+
+.workshops-hero h1 {
+  max-width: 9.5ch !important;
+  margin: 0 !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(4.2rem,6.6vw,7.4rem)/.9 var(--v2-font-display) !important;
+  letter-spacing: -.05em !important;
+}
+
+.workshops-hero .lead {
+  max-width: 650px !important;
+  margin-top: 28px !important;
+  color: var(--v2-ink-600) !important;
+  font: 400 clamp(.98rem,1.15vw,1.08rem)/1.72 var(--v2-font-ui) !important;
+}
+
+.workshops-hero-note {
+  min-height: 0 !important;
+  padding: 26px 28px !important;
+  border: 1px solid var(--v2-line) !important;
+  border-radius: var(--v2-radius-xs) !important;
+  color: var(--v2-ink-950) !important;
+  background: rgba(255,253,249,.9) !important;
+  box-shadow: var(--v2-shadow-xs) !important;
+}
+
+.workshops-hero-mark {
+  width: 58px !important;
+  height: 58px !important;
+  margin-bottom: 36px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  object-fit: contain;
+}
+
+.workshops-hero-note strong {
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(3rem,4.6vw,5rem)/.9 var(--v2-font-display) !important;
+}
+
+.workshops-hero-note p {
+  color: var(--v2-ink-600) !important;
+  font: 400 .84rem/1.62 var(--v2-font-ui) !important;
+}
+
+/* Filtros: funcionales pero visualmente secundarios. */
+.workshops-toolbar {
+  position: sticky !important;
+  z-index: 15;
+  top: 88px !important;
+  grid-template-columns: minmax(300px,1.2fr) minmax(190px,.6fr) minmax(190px,.55fr) auto !important;
+  gap: 12px !important;
+  width: calc(100% - (2 * var(--v2-gutter)));
+  max-width: var(--v2-shell);
+  margin: 0 auto clamp(52px,6vw,82px) !important;
+  padding: 16px 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--v2-line-soft) !important;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+  background: rgba(255,253,249,.96) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(16px);
+}
+
+.workshops-field > span {
+  color: var(--v2-ink-500) !important;
+  font: 800 .59rem/1.3 var(--v2-font-ui) !important;
+  letter-spacing: .13em !important;
+}
+
+.workshops-toolbar input,
+.workshops-toolbar select {
+  min-height: 52px !important;
+  padding: 11px 14px !important;
+  border: 1px solid var(--v2-line) !important;
+  border-radius: var(--v2-radius-xs) !important;
+  color: var(--v2-ink-950) !important;
+  background: var(--v2-ivory-50) !important;
+  box-shadow: none !important;
+}
+
+.workshops-result-count {
+  min-width: 116px !important;
+  min-height: 52px !important;
+  border: 1px solid var(--v2-line) !important;
+  color: var(--v2-wine-800) !important;
+  background: var(--v2-ivory-100) !important;
+}
+
+.workshops-result-count strong {
+  font: 400 1.55rem/1 var(--v2-font-display) !important;
+}
+
+/* Directorio: una fila editorial por taller. */
+.workshops-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: clamp(48px,6vw,86px) !important;
+  width: calc(100% - (2 * var(--v2-gutter)));
+  max-width: var(--v2-shell);
+  margin: 0 auto;
+  padding: 0 0 clamp(82px,9vw,130px) !important;
+}
+
+.workshop-directory-card {
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+.workshop-directory-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.workshop-directory-link {
+  display: grid !important;
+  grid-template-columns: minmax(0,1.14fr) minmax(360px,.86fr) !important;
+  grid-template-rows: 1fr !important;
+  min-height: 520px;
+  color: inherit;
+  background: var(--v2-ivory-100);
+}
+
+.workshop-directory-card:nth-child(even) .workshop-directory-media { order: 2; }
+.workshop-directory-card:nth-child(even) .workshop-directory-body { order: 1; }
+
+.workshop-directory-media {
+  position: relative;
+  min-height: 520px !important;
+  overflow: hidden !important;
+  border-radius: 0 !important;
+  background: var(--v2-ivory-200) !important;
+}
+
+.workshop-directory-media > img:not(.workshop-directory-logo) {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 520px !important;
+  object-fit: cover !important;
+  filter: saturate(var(--v2-image-saturation)) contrast(1.015) !important;
+  transition: transform var(--v2-duration-slow) var(--v2-ease-emphasis), filter var(--v2-duration-base) ease !important;
+}
+
+@media (hover:hover) and (pointer:fine) {
+  .workshop-directory-card:hover .workshop-directory-media > img:not(.workshop-directory-logo) {
+    transform: scale(var(--v2-image-hover-scale)) !important;
+    filter: saturate(.98) contrast(1.02) !important;
+  }
+}
+
+.workshop-directory-shade {
+  height: 34% !important;
+  background: linear-gradient(transparent,rgba(42,7,16,.18)) !important;
+}
+
+/* El logo pasa a ser una pieza principal, no un avatar. */
+.workshop-directory-logo {
+  right: 22px !important;
+  bottom: 22px !important;
+  width: clamp(126px,10vw,158px) !important;
+  height: clamp(92px,8vw,118px) !important;
+  padding: 12px 14px;
+  border: 1px solid rgba(79,16,32,.12) !important;
+  border-radius: var(--v2-radius-xs) !important;
+  object-fit: contain !important;
+  background: rgba(255,253,249,.97) !important;
+  box-shadow: 0 12px 34px rgba(42,7,16,.13) !important;
+}
+
+.workshop-directory-media-meta {
+  left: 22px !important;
+  bottom: 22px !important;
+  padding-right: 190px !important;
+}
+
+.workshop-directory-media-meta span {
+  padding: 7px 9px !important;
+  border: 1px solid rgba(255,253,249,.35) !important;
+  color: var(--v2-ivory-50) !important;
+  background: rgba(42,7,16,.55) !important;
+  font: 800 .57rem/1.2 var(--v2-font-ui) !important;
+  letter-spacing: .1em !important;
+}
+
+.workshop-directory-body {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 520px !important;
+  padding: clamp(38px,5vw,72px) clamp(34px,5vw,76px) !important;
+  background: var(--v2-ivory-100) !important;
+}
+
+.workshop-directory-specialty {
+  margin: 0 0 12px !important;
+  color: var(--v2-gold-700) !important;
+  font: 800 .62rem/1.35 var(--v2-font-ui) !important;
+  letter-spacing: .16em !important;
+}
+
+.workshop-directory-body h2 {
+  margin: 0 !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(3rem,4.5vw,5.2rem)/.92 var(--v2-font-display) !important;
+  letter-spacing: -.04em !important;
+}
+
+.workshop-directory-tagline {
+  max-width: 48ch;
+  margin: 22px 0 0 !important;
+  color: var(--v2-ink-600) !important;
+  font: 400 .96rem/1.72 var(--v2-font-ui) !important;
+  -webkit-line-clamp: 4 !important;
+}
+
+.workshop-directory-tags {
+  gap: 6px 12px !important;
+  margin-top: 24px !important;
+}
+
+.workshop-directory-tags span {
+  padding: 0 !important;
+  border: 0 !important;
+  color: var(--v2-ink-500) !important;
+  background: transparent !important;
+  font: 700 .58rem/1.35 var(--v2-font-ui) !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.workshop-directory-tags span + span::before {
+  content: '·';
+  margin-right: 12px;
+  color: var(--v2-gold-600);
+}
+
+.workshop-directory-action {
+  margin-top: auto !important;
+  padding-top: 24px !important;
+  border-top: 1px solid var(--v2-line-soft) !important;
+  color: var(--v2-wine-800) !important;
+  font: 800 .62rem/1.3 var(--v2-font-ui) !important;
+  letter-spacing: .12em !important;
+}
+
+.workshops-state {
+  width: calc(100% - (2 * var(--v2-gutter)));
+  max-width: var(--v2-shell);
+  margin: 0 auto 48px !important;
+  border-color: var(--v2-line) !important;
+  color: var(--v2-ink-600) !important;
+  background: var(--v2-ivory-100) !important;
+}
+
+/* Una única pausa oscura al cerrar el directorio. */
+.workshops-closing {
+  width: calc(100% - (2 * var(--v2-gutter)));
+  max-width: var(--v2-shell);
+  margin: 0 auto 34px !important;
+  padding: clamp(48px,6vw,78px) !important;
+  background:
+    radial-gradient(circle at 88% 12%,rgba(198,161,93,.20),transparent 24rem),
+    var(--v2-wine-950) !important;
+}
+
+.workshops-closing h2 {
+  color: var(--v2-ivory-50) !important;
+  font: 400 clamp(2.8rem,4.8vw,5.4rem)/.94 var(--v2-font-display) !important;
+  letter-spacing: -.04em;
+}
+
+.workshops-closing .eyebrow { color: var(--v2-gold-300) !important; }
+.workshops-closing .button.primary { color: var(--v2-wine-950) !important; background: var(--v2-ivory-50) !important; }
+
+.workshops-footer {
+  width: calc(100% - (2 * var(--v2-gutter)));
+  max-width: var(--v2-shell);
+  margin: 0 auto;
+  padding: 30px 0 0 !important;
+  border-top-color: var(--v2-line) !important;
+  color: var(--v2-ink-500) !important;
+}
+
+.workshops-footer-logo {
+  width: 220px;
+  height: auto;
+}
+
+/* Portátil */
+@media (min-width:1025px) and (max-width:1365px) {
+  .workshops-shell .topbar { padding-inline: 28px !important; }
+  .workshops-shell .atelier-brand-link { width: 215px !important; }
+  .workshops-shell .nav { gap: 18px !important; }
+  .workshops-shell .nav .button { font-size: .59rem !important; }
+  .workshop-directory-link { grid-template-columns: minmax(0,1.05fr) minmax(340px,.95fr) !important; }
+}
+
+/* Tablet */
+@media (min-width:761px) and (max-width:1024px) {
+  .workshops-shell .topbar {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+    min-height: 112px !important;
+    padding: 10px 24px 12px !important;
+  }
+
+  .workshops-shell .atelier-brand-link { width: 220px !important; min-height: 50px !important; }
+  .workshops-shell .nav { justify-self: stretch; justify-content: center; gap: clamp(18px,3vw,32px) !important; }
+  .workshops-shell .nav .button { font-size: .58rem !important; }
+
+  .workshops-hero {
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+    padding-top: 58px !important;
+  }
+
+  .workshops-hero h1 { max-width: 10ch !important; font-size: clamp(4rem,9vw,6rem) !important; }
+  .workshops-hero-note { max-width: 620px; }
+
+  .workshops-toolbar {
+    position: static !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .workshops-search { grid-column: 1 / -1; }
+  .workshops-result-count { grid-column: 1 / -1; justify-content: flex-start !important; }
+
+  .workshop-directory-link {
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+  }
+
+  .workshop-directory-card:nth-child(even) .workshop-directory-media,
+  .workshop-directory-card:nth-child(even) .workshop-directory-body { order: initial; }
+
+  .workshop-directory-media,
+  .workshop-directory-media > img:not(.workshop-directory-logo) { min-height: 470px !important; }
+  .workshop-directory-body { min-height: 0 !important; padding: 42px 38px 46px !important; }
+}
+
+/* Móvil */
+@media (max-width:760px) {
+  .workshops-shell .topbar {
+    grid-template-columns: minmax(0,1fr) auto !important;
+    min-height: 70px !important;
+    padding: 8px 12px !important;
+  }
+
+  .workshops-shell .atelier-brand-link { width: min(51vw,186px) !important; min-height: 46px !important; }
+  .workshops-shell .public-menu-toggle { justify-self: end; min-width: 58px; min-height: 40px; }
+
+  .workshops-hero {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+    padding: 48px 18px 58px !important;
+  }
+
+  .workshops-hero h1 { max-width: 9ch !important; font-size: clamp(3.35rem,14vw,4.8rem) !important; }
+  .workshops-hero-note { padding: 20px !important; }
+  .workshops-hero-mark { margin-bottom: 24px; }
+
+  .workshops-toolbar {
+    position: static !important;
+    grid-template-columns: 1fr !important;
+    width: calc(100% - 36px);
+    margin-bottom: 46px !important;
+  }
+
+  .workshops-search,
+  .workshops-result-count { grid-column: auto; }
+
+  .workshops-grid {
+    width: calc(100% - 36px);
+    gap: 52px !important;
+  }
+
+  .workshop-directory-link { grid-template-columns: 1fr !important; min-height: 0 !important; }
+  .workshop-directory-card:nth-child(even) .workshop-directory-media,
+  .workshop-directory-card:nth-child(even) .workshop-directory-body { order: initial; }
+
+  .workshop-directory-media,
+  .workshop-directory-media > img:not(.workshop-directory-logo) { min-height: clamp(330px,102vw,460px) !important; }
+
+  .workshop-directory-logo {
+    right: 14px !important;
+    bottom: 14px !important;
+    width: 108px !important;
+    height: 82px !important;
+    padding: 9px 10px;
+  }
+
+  .workshop-directory-media-meta {
+    left: 14px !important;
+    bottom: 14px !important;
+    padding-right: 132px !important;
+  }
+
+  .workshop-directory-body { min-height: 0 !important; padding: 28px 22px 30px !important; }
+  .workshop-directory-body h2 { font-size: clamp(2.7rem,12vw,4rem) !important; }
+  .workshop-directory-action { flex-direction: column; align-items: flex-start; }
+
+  .workshops-closing {
+    grid-template-columns: 1fr !important;
+    width: calc(100% - 36px);
+    padding: 38px 24px !important;
+  }
+
+  .workshops-closing-actions { flex-direction: column !important; }
+  .workshops-closing-actions .button { width: 100%; }
+
+  .workshops-footer {
+    width: calc(100% - 36px);
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .workshop-directory-media img { transition: none !important; }
+  .workshop-directory-card:hover .workshop-directory-media > img:not(.workshop-directory-logo) { transform: none !important; }
+}

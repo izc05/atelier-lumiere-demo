@@ -1,0 +1,177 @@
+/* Atelier Lumière · Visual V2 · Fase 3.4
+ * Historias y cierre de HOME: lenguaje de revista, mucho aire y una sola pausa burdeos.
+ */
+.home-stories-section {
+  padding: var(--v2-section-y) var(--v2-gutter) !important;
+  color: var(--v2-ink-950) !important;
+  background: var(--v2-ivory-50) !important;
+}
+.home-stories-heading {
+  grid-template-columns: minmax(0,1.05fr) minmax(300px,.55fr) !important;
+  gap: clamp(34px,7vw,112px) !important;
+  max-width: var(--v2-shell);
+  margin-inline: auto;
+}
+.home-stories-heading .eyebrow {
+  color: var(--v2-gold-700) !important;
+  font: 800 .62rem/1.4 var(--v2-font-ui) !important;
+  letter-spacing: .18em !important;
+}
+.home-stories-heading h2 {
+  max-width: 10ch !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(3rem,5vw,5.7rem)/.94 var(--v2-font-display) !important;
+  letter-spacing: -.04em !important;
+}
+.home-stories-heading-copy {
+  color: var(--v2-ink-600) !important;
+  font: 400 .98rem/1.72 var(--v2-font-ui) !important;
+}
+.home-stories-heading-copy .text-link {
+  color: var(--v2-wine-800) !important;
+  font-size: .63rem !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase;
+}
+.home-stories-grid {
+  grid-template-columns: minmax(0,1.35fr) minmax(320px,.65fr) !important;
+  gap: clamp(20px,2.4vw,36px) !important;
+  max-width: var(--v2-shell);
+  margin: clamp(48px,6vw,78px) auto 0 !important;
+}
+.home-story-card {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.home-story-card:first-child .home-story-link {
+  grid-template-rows: minmax(500px,1fr) auto !important;
+}
+.home-story-card:not(:first-child) .home-story-link {
+  grid-template-columns: minmax(150px,.78fr) minmax(0,1.22fr) !important;
+  border-top: 1px solid var(--v2-line-soft);
+}
+.home-story-media {
+  min-height: 230px !important;
+  border-radius: var(--v2-radius-xs) !important;
+  background: var(--v2-ivory-200) !important;
+}
+.home-story-card:first-child .home-story-media { min-height: 500px !important; }
+.home-story-media img {
+  filter: saturate(var(--v2-image-saturation)) contrast(1.015) !important;
+  transition: transform var(--v2-duration-slow) var(--v2-ease-emphasis),filter var(--v2-duration-base) ease !important;
+}
+.home-story-media::after { background: linear-gradient(transparent,rgba(42,7,16,.1)) !important; }
+.home-story-number {
+  width: auto !important;
+  height: auto !important;
+  padding: 7px 9px !important;
+  border-radius: 0 !important;
+  color: var(--v2-ivory-50) !important;
+  background: rgba(42,7,16,.5) !important;
+  font: 400 .7rem/1 var(--v2-font-display) !important;
+}
+.home-story-body { padding: 24px 0 0 !important; }
+.home-story-card:not(:first-child) .home-story-body { padding: 22px 0 22px 22px !important; }
+.home-story-meta {
+  color: var(--v2-gold-700) !important;
+  font: 800 .6rem/1.4 var(--v2-font-ui) !important;
+  letter-spacing: .11em !important;
+}
+.home-story-body h3 {
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(1.9rem,2.8vw,3.35rem)/1.02 var(--v2-font-display) !important;
+}
+.home-story-card:not(:first-child) .home-story-body h3 {
+  font-size: clamp(1.45rem,1.8vw,1.95rem) !important;
+}
+.home-story-excerpt {
+  color: var(--v2-ink-600) !important;
+  font: 400 .9rem/1.62 var(--v2-font-ui) !important;
+}
+.home-story-action {
+  color: var(--v2-wine-700) !important;
+  font: 800 .62rem/1.3 var(--v2-font-ui) !important;
+  letter-spacing: .12em !important;
+}
+@media (hover:hover) and (pointer:fine) {
+  .home-story-card:hover .home-story-media img,.home-story-card:focus-within .home-story-media img {
+    transform: scale(var(--v2-image-hover-scale)) !important;
+    filter: saturate(.98) contrast(1.02) !important;
+  }
+}
+/* Una única pausa oscura para conservar el carácter burdeos de Atelier. */
+.story-section.home-story-manifesto {
+  min-height: clamp(360px,42vw,560px) !important;
+  padding: clamp(72px,9vw,132px) var(--v2-gutter) !important;
+  background: var(--v2-wine-900) !important;
+}
+.story-section.home-story-manifesto blockquote {
+  max-width: 1050px !important;
+  margin-inline: auto !important;
+}
+.story-section.home-story-manifesto blockquote p {
+  color: var(--v2-ivory-50) !important;
+  font-family: var(--v2-font-display) !important;
+  font-size: clamp(2.7rem,5vw,5.6rem) !important;
+  font-weight: 400 !important;
+  letter-spacing: -.04em !important;
+  line-height: .98 !important;
+}
+.story-section.home-story-manifesto blockquote footer {
+  color: var(--v2-gold-300) !important;
+  font-family: var(--v2-font-ui) !important;
+  font-size: .63rem !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase;
+}
+.story-section.home-story-manifesto .story-mark { color: rgba(255,253,249,.1) !important; }
+/* Cierre muy limpio: sin otra tarjeta ni gran masa de color. */
+.closing-section {
+  padding: clamp(82px,10vw,150px) var(--v2-gutter) !important;
+  color: var(--v2-ink-950) !important;
+  background: var(--v2-ivory-100) !important;
+}
+.closing-section .eyebrow { color: var(--v2-gold-700) !important; }
+.closing-section h2 {
+  max-width: 11ch !important;
+  margin-inline: auto !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(3rem,5vw,5.5rem)/.95 var(--v2-font-display) !important;
+  letter-spacing: -.04em !important;
+}
+.closing-section .button-primary {
+  border-color: var(--v2-wine-800) !important;
+  color: var(--v2-ivory-50) !important;
+  background: var(--v2-wine-800) !important;
+  box-shadow: none !important;
+}
+.closing-section .button-outline {
+  border-color: var(--v2-line-strong) !important;
+  color: var(--v2-wine-800) !important;
+  background: transparent !important;
+}
+@media (max-width:1080px) {
+  .home-stories-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .home-story-card:first-child { grid-column: 1/-1 !important; }
+  .home-story-card:first-child .home-story-link { grid-template-columns: minmax(0,1.05fr) minmax(300px,.75fr) !important; grid-template-rows: 1fr !important; }
+  .home-story-card:first-child .home-story-body { padding: 28px !important; }
+  .home-story-card:not(:first-child) .home-story-link { grid-template-columns: 1fr !important; }
+  .home-story-card:not(:first-child) .home-story-body { padding-left: 0 !important; }
+}
+@media (max-width:780px) {
+  .home-stories-section { padding: 68px 18px !important; }
+  .home-stories-heading { grid-template-columns: 1fr !important; gap: 22px !important; }
+  .home-stories-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
+  .home-story-card:first-child { grid-column: auto !important; }
+  .home-story-card:first-child .home-story-link { grid-template-columns: 1fr !important; grid-template-rows: auto !important; }
+  .home-story-card:first-child .home-story-body { padding: 22px 0 0 !important; }
+  .home-story-card:first-child .home-story-media { min-height: 360px !important; }
+  .story-section.home-story-manifesto { padding-inline: 18px !important; }
+  .closing-section { padding-inline: 18px !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .home-story-media img { transition: none !important; }
+  .home-story-card:hover .home-story-media img { transform: none !important; }
+}

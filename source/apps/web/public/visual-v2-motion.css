@@ -1,0 +1,72 @@
+/* Atelier Lumière · Visual V2 · Fase 10.1
+ * Movimiento editorial: sutil, breve y sin efectos decorativos invasivos.
+ * La futura entrada Pueblo Atelier sustituirá la apertura provisional antigua.
+ */
+
+/* Eliminar efectos heredados que compiten con la nueva dirección visual. */
+.atelier-opening,
+.atelier-pointer-aura,
+.atelier-progress {
+  display: none !important;
+}
+
+body.atelier-opening-active {
+  overflow: auto !important;
+}
+
+html.atelier-premium :where(.button, .filter-button)::before {
+  display: none !important;
+}
+
+html.atelier-premium :where(.button, .icon-button, .filter-button):hover {
+  transform: translateY(-1px) !important;
+}
+
+/* Un único ritmo de aparición para secciones y elementos editoriales. */
+html.atelier-premium[data-motion="full"] [data-premium-reveal],
+html.js[data-motion="full"] [data-public-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0) !important;
+  transition-property: opacity, transform !important;
+  transition-duration: 560ms !important;
+  transition-timing-function: cubic-bezier(.22,.68,.2,1) !important;
+}
+
+html.atelier-premium[data-motion="full"] [data-premium-reveal] {
+  transition-delay: calc(var(--premium-delay, 0) * 45ms) !important;
+}
+
+html.atelier-premium[data-motion="full"] [data-premium-reveal].is-premium-visible,
+html.js[data-motion="full"] [data-public-reveal].is-visible {
+  opacity: 1;
+  transform: none !important;
+}
+
+/* La fotografía se mueve apenas: sensación de material, no efecto de galería. */
+@media (hover:hover) and (pointer:fine) {
+  html.atelier-premium :where(.product-card, .post-card, .article-card, .provider-card):hover img {
+    transform: scale(1.018) !important;
+    filter: saturate(.99) contrast(1.015) !important;
+  }
+}
+
+@media (max-width:900px) {
+  html.atelier-premium :where(.button, .icon-button, .filter-button):hover {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html.atelier-premium [data-premium-reveal],
+  html.js [data-public-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  html.atelier-premium :where(.button, .icon-button, .filter-button),
+  html.atelier-premium :where(.product-card, .post-card, .article-card, .provider-card) img {
+    transition: none !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,715 @@
+/* Atelier Lumière · Entrada / Pueblo Atelier · E1.1
+ * Laboratorio espacial independiente. No sustituye todavía la Home.
+ */
+
+:root {
+  --village-paper: #f7f0e7;
+  --village-paper-light: #fffdf9;
+  --village-paper-deep: #eadfce;
+  --village-wine: #4f1020;
+  --village-wine-dark: #310712;
+  --village-wine-soft: #7d3041;
+  --village-gold: #a78342;
+  --village-gold-light: #d7c18f;
+  --village-ink: #261b1d;
+  --village-muted: #74686a;
+  --village-green: #adb49a;
+  --village-shadow: 0 24px 60px rgba(49,7,18,.12);
+}
+
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; }
+html { background: var(--village-paper); }
+body {
+  margin: 0;
+  overflow: hidden;
+  color: var(--village-ink);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.78), transparent 34rem),
+    linear-gradient(135deg, #fbf6ef, #eee3d6);
+  font-family: var(--v2-font-ui, Inter, ui-sans-serif, system-ui, sans-serif);
+  user-select: none;
+}
+
+button, a { -webkit-tap-highlight-color: transparent; }
+button { font: inherit; }
+.skip-link {
+  position: fixed;
+  z-index: 999;
+  left: 18px;
+  top: -60px;
+  padding: 11px 16px;
+  color: #fff;
+  background: var(--village-wine);
+  transition: top 180ms ease;
+}
+.skip-link:focus { top: 16px; }
+
+.village-experience {
+  position: relative;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 540px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Marco superior: casi editorial, no barra de aplicación. */
+.village-header {
+  position: absolute;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: minmax(190px, 300px) 1fr auto;
+  align-items: center;
+  gap: 28px;
+  min-height: 92px;
+  padding: 14px clamp(20px, 4vw, 64px);
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(247,240,231,.95), rgba(247,240,231,.73) 72%, transparent);
+}
+.village-brand,
+.village-help { pointer-events: auto; }
+.village-brand {
+  display: inline-flex;
+  width: clamp(210px, 16vw, 284px);
+  min-height: 58px;
+  align-items: center;
+}
+.village-brand img { display: block; width: 100%; height: auto; }
+.village-header-copy {
+  justify-self: center;
+  display: grid;
+  gap: 5px;
+  text-align: center;
+  text-transform: uppercase;
+}
+.village-header-copy > span {
+  color: var(--village-wine);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .19em;
+}
+.village-header-copy small {
+  color: var(--village-muted);
+  font-size: .52rem;
+  letter-spacing: .11em;
+}
+.village-help {
+  min-height: 42px;
+  padding: 9px 15px;
+  border: 1px solid rgba(79,16,32,.17);
+  border-radius: 999px;
+  color: var(--village-wine);
+  background: rgba(255,253,249,.78);
+  font-size: .57rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+.village-help:hover,
+.village-help:focus-visible {
+  border-color: rgba(167,131,66,.54);
+  outline: none;
+}
+
+.village-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  background:
+    linear-gradient(rgba(79,16,32,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,16,32,.012) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.village-viewport.is-dragging { cursor: grabbing; }
+
+.village-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2400px;
+  height: 1500px;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.village-ground {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.village-compass {
+  position: absolute;
+  left: 2230px;
+  top: 128px;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid rgba(79,16,32,.14);
+  border-radius: 50%;
+  color: var(--village-wine);
+  background: rgba(255,253,249,.5);
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: 1rem;
+}
+.village-compass::before,
+.village-compass::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: rgba(167,131,66,.48);
+  transform: translate(-50%,-50%);
+}
+.village-compass::before { width: 1px; height: 90px; }
+.village-compass::after { width: 90px; height: 1px; }
+.village-compass span { z-index: 1; transform: translateY(-22px); }
+
+/* Edificios importantes. */
+.village-landmark {
+  position: absolute;
+  z-index: 12;
+  left: calc(var(--x) * 1px);
+  top: calc(var(--y) * 1px);
+  width: 270px;
+  height: 285px;
+  transform: translate(-50%,-66%) scale(var(--scale,1));
+  transform-origin: 50% 80%;
+  transition: filter 320ms ease, transform 420ms cubic-bezier(.22,.7,.2,1);
+}
+.village-landmark:hover,
+.village-landmark:focus-within {
+  z-index: 22;
+  filter: drop-shadow(0 18px 20px rgba(49,7,18,.14));
+  transform: translate(-50%,-68%) scale(calc(var(--scale,1) * 1.025));
+}
+.landmark-hit {
+  position: absolute;
+  z-index: 10;
+  inset: 8px 24px 48px;
+  border: 0;
+  border-radius: 40% 40% 18px 18px;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+.landmark-hit:focus-visible {
+  outline: 2px solid var(--village-gold);
+  outline-offset: 8px;
+}
+
+.landmark-building {
+  position: absolute;
+  left: 50%;
+  bottom: 52px;
+  width: 186px;
+  height: 164px;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 16px 10px rgba(49,7,18,.08));
+}
+.landmark-building::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -15px;
+  width: 190px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(86,64,54,.09);
+  transform: translateX(-50%);
+  filter: blur(7px);
+}
+
+.landmark-building .roof {
+  position: absolute;
+  z-index: 3;
+  left: 3px;
+  top: 0;
+  width: 180px;
+  height: 58px;
+  clip-path: polygon(50% 0,100% 100%,0 100%);
+  background: linear-gradient(145deg,#6f2837,#4d1020);
+}
+.landmark-building .facade {
+  position: absolute;
+  z-index: 2;
+  left: 17px;
+  top: 52px;
+  display: grid;
+  width: 152px;
+  height: 103px;
+  place-items: center;
+  border: 1px solid rgba(79,16,32,.16);
+  background: linear-gradient(140deg,#fffaf3,#eee1d3);
+}
+.landmark-building--atelier .facade img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+.landmark-building--atelier .facade strong {
+  margin-top: -15px;
+  color: var(--village-wine);
+  font-family: var(--v2-font-display,Georgia,serif);
+  font-size: 1rem;
+  font-weight: 400;
+}
+.landmark-building--atelier .door {
+  position: absolute;
+  z-index: 4;
+  left: 77px;
+  bottom: 9px;
+  width: 32px;
+  height: 55px;
+  background: linear-gradient(90deg,#66172a,#4b0e1d);
+}
+.landmark-building--atelier .window {
+  position: absolute;
+  z-index: 4;
+  bottom: 45px;
+  width: 28px;
+  height: 32px;
+  border: 4px solid #d3b776;
+  background: rgba(210,225,219,.8);
+}
+.landmark-building--atelier .window--left { left: 38px; }
+.landmark-building--atelier .window--right { right: 38px; }
+
+.landmark-building--workshop {
+  width: 196px;
+  height: 174px;
+  border: 1px solid rgba(79,16,32,.14);
+  background: #f2e6d7;
+}
+.landmark-building--workshop .shop-sign {
+  position: absolute;
+  z-index: 4;
+  left: 10px;
+  top: 14px;
+  display: flex;
+  width: 176px;
+  height: 41px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  color: #fff8ef;
+  background: var(--village-wine);
+}
+.shop-sign strong {
+  font-family: var(--v2-font-display,Georgia,serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+}
+.shop-sign small {
+  font-size: .47rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.landmark-building--workshop .awning {
+  position: absolute;
+  z-index: 5;
+  left: 10px;
+  top: 54px;
+  display: flex;
+  width: 176px;
+  height: 25px;
+  overflow: hidden;
+  transform-origin: top;
+  transform: perspective(90px) rotateX(-18deg);
+}
+.landmark-building--workshop .awning i { flex: 1; background: #fff6ea; }
+.landmark-building--workshop .awning i:nth-child(even) { background: #6b1c2e; }
+.landmark-building--workshop .shop-window {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  width: 104px;
+  height: 75px;
+  overflow: hidden;
+  border: 5px solid #b78f5f;
+  background: linear-gradient(140deg,rgba(212,224,218,.94),rgba(255,249,239,.82));
+}
+.landmark-building--workshop .shop-door {
+  position: absolute;
+  right: 20px;
+  bottom: 16px;
+  width: 43px;
+  height: 86px;
+  border: 4px solid #8b684c;
+  background: linear-gradient(90deg,#5f1a2a,#7c2a3d);
+}
+.fan {
+  position: absolute;
+  bottom: 8px;
+  width: 38px;
+  height: 25px;
+  border-radius: 100% 100% 8% 8%;
+  background: conic-gradient(from 225deg,#6a1224,#d9bfa0,#8c3546,#e9d7c2,#6a1224);
+  clip-path: polygon(50% 100%,0 0,100% 0);
+}
+.fan--one { left: 10px; transform: rotate(-8deg); }
+.fan--two { right: 8px; transform: rotate(10deg); }
+
+.landmark-building--linen {
+  background: linear-gradient(135deg,#f8f2e9,#e5dacd);
+}
+.landmark-building--linen .roof--soft {
+  left: -3px;
+  top: -45px;
+  width: 202px;
+  height: 70px;
+  clip-path: polygon(0 100%,17% 18%,50% 0,83% 18%,100% 100%);
+  background: linear-gradient(135deg,#b7a38c,#8f7865);
+}
+.landmark-building--linen .shop-sign { background: #8f6f77; }
+.landmark-building--linen .shop-door { background: #a58e7e; }
+.shop-window--linen { display: flex; gap: 6px; align-items: flex-end; justify-content: center; padding: 9px; }
+.shop-window--linen i {
+  display: block;
+  width: 17px;
+  border-radius: 50% 50% 4px 4px;
+  background: #7c3344;
+}
+.shop-window--linen i:nth-child(1) { height: 29px; }
+.shop-window--linen i:nth-child(2) { height: 43px; background: #b28d4b; }
+.shop-window--linen i:nth-child(3) { height: 34px; background: #788267; }
+
+.landmark-copy {
+  position: absolute;
+  z-index: 11;
+  left: 50%;
+  bottom: 0;
+  display: grid;
+  width: max-content;
+  max-width: 250px;
+  gap: 2px;
+  padding: 9px 14px 10px;
+  border: 1px solid rgba(79,16,32,.12);
+  border-radius: 2px;
+  text-align: center;
+  background: rgba(255,253,249,.91);
+  box-shadow: 0 8px 22px rgba(49,7,18,.06);
+  transform: translateX(-50%);
+  backdrop-filter: blur(9px);
+}
+.landmark-copy small {
+  color: var(--village-gold);
+  font-size: .46rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.landmark-copy strong {
+  color: var(--village-wine-dark);
+  font-family: var(--v2-font-display,Georgia,serif);
+  font-size: .93rem;
+  font-weight: 400;
+}
+.landmark-copy span {
+  color: var(--village-muted);
+  font-size: .48rem;
+}
+
+/* Casas neutras: reservan amplitud y hacen que 2 talleres no parezcan dos iconos sueltos. */
+.village-houses .house {
+  position: absolute;
+  width: 108px;
+  height: 82px;
+  border: 1px solid rgba(79,16,32,.1);
+  background: linear-gradient(145deg,#f7efe5,#e7d8c7);
+  box-shadow: 0 10px 14px rgba(49,7,18,.045);
+}
+.village-houses .house::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: -43px;
+  width: 120px;
+  height: 47px;
+  clip-path: polygon(50% 0,100% 100%,0 100%);
+  background: linear-gradient(140deg,#b89f86,#8e735e);
+}
+.village-houses .house::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  bottom: 20px;
+  width: 20px;
+  height: 23px;
+  border: 3px solid #caa66b;
+  background: rgba(210,224,218,.7);
+  box-shadow: 48px 0 0 -3px rgba(210,224,218,.7), 48px 0 0 0 #caa66b;
+}
+.house--1{left:180px;top:250px;transform:scale(.9) rotate(-2deg)} .house--2{left:360px;top:210px;transform:scale(.72) rotate(3deg)}
+.house--3{left:600px;top:210px;transform:scale(.82)} .house--4{left:830px;top:300px;transform:scale(.7) rotate(-2deg)}
+.house--5{left:1380px;top:210px;transform:scale(.78)} .house--6{left:1570px;top:330px;transform:scale(.68) rotate(3deg)}
+.house--7{left:2010px;top:250px;transform:scale(.87)} .house--8{left:2180px;top:370px;transform:scale(.66) rotate(-3deg)}
+.house--9{left:160px;top:650px;transform:scale(.72)} .house--10{left:360px;top:720px;transform:scale(.83) rotate(2deg)}
+.house--11{left:690px;top:650px;transform:scale(.68)} .house--12{left:880px;top:560px;transform:scale(.76) rotate(-2deg)}
+.house--13{left:1440px;top:620px;transform:scale(.7)} .house--14{left:1640px;top:690px;transform:scale(.81) rotate(2deg)}
+.house--15{left:1950px;top:650px;transform:scale(.68)} .house--16{left:2170px;top:720px;transform:scale(.78) rotate(-2deg)}
+.house--17{left:250px;top:1100px;transform:scale(.8)} .house--18{left:800px;top:1030px;transform:scale(.7) rotate(3deg)}
+.house--19{left:990px;top:1200px;transform:scale(.64)} .house--20{left:1410px;top:1030px;transform:scale(.72)}
+.house--21{left:1600px;top:1160px;transform:scale(.84) rotate(-2deg)} .house--22{left:1880px;top:1080px;transform:scale(.68)}
+.house--23{left:2100px;top:1170px;transform:scale(.8) rotate(2deg)} .house--24{left:560px;top:1280px;transform:scale(.65)}
+
+.village-trees i {
+  position: absolute;
+  left: calc(var(--x) * 1px);
+  top: calc(var(--y) * 1px);
+  width: 42px;
+  height: 62px;
+  border-radius: 50% 50% 46% 46%;
+  background: radial-gradient(circle at 40% 30%,#cbd0b5,#aeb69a 62%,#899278);
+  box-shadow: 0 8px 11px rgba(49,7,18,.05);
+  transform: translate(-50%,-50%) scale(var(--s,1));
+}
+.village-trees i::after {
+  content: "";
+  position: absolute;
+  left: 19px;
+  bottom: -16px;
+  width: 5px;
+  height: 21px;
+  background: #a68163;
+}
+
+.future-quarter {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 230px;
+  height: 70px;
+  border: 1px dashed rgba(79,16,32,.13);
+  border-radius: 50%;
+  color: rgba(79,16,32,.44);
+  font-family: var(--v2-font-display,Georgia,serif);
+  font-size: .8rem;
+  font-style: italic;
+  letter-spacing: .05em;
+  transform: rotate(-3deg);
+}
+.future-quarter--north { left: 850px; top: 170px; }
+.future-quarter--east { left: 1930px; top: 860px; transform: rotate(4deg); }
+
+/* Navegación inferior inspirada en la lógica territorial de la referencia. */
+.village-navigation {
+  position: absolute;
+  z-index: 60;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px,1fr));
+  width: min(920px, calc(100% - 150px));
+  border: 1px solid rgba(79,16,32,.14);
+  border-radius: 3px;
+  background: rgba(255,253,249,.9);
+  box-shadow: 0 18px 50px rgba(49,7,18,.1);
+  transform: translateX(-50%);
+  backdrop-filter: blur(16px) saturate(1.05);
+}
+.village-navigation button {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 1px 10px;
+  min-width: 0;
+  min-height: 64px;
+  align-items: center;
+  padding: 12px 16px;
+  border: 0;
+  border-right: 1px solid rgba(79,16,32,.1);
+  color: var(--village-ink);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.village-navigation button:last-child { border-right: 0; }
+.village-navigation button:hover,
+.village-navigation button:focus-visible,
+.village-navigation button.is-active {
+  outline: none;
+  background: rgba(244,238,230,.76);
+}
+.village-navigation button.is-active::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 2px;
+  background: var(--village-gold);
+}
+.village-navigation button > span {
+  grid-row: 1 / 3;
+  color: var(--village-gold);
+  font-family: var(--v2-font-display,Georgia,serif);
+  font-size: .88rem;
+}
+.village-navigation strong {
+  overflow: hidden;
+  color: var(--village-wine-dark);
+  font-family: var(--v2-font-display,Georgia,serif);
+  font-size: .86rem;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.village-navigation small {
+  overflow: hidden;
+  color: var(--village-muted);
+  font-size: .46rem;
+  letter-spacing: .07em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.village-zoom {
+  position: absolute;
+  z-index: 62;
+  right: clamp(18px,3vw,42px);
+  bottom: max(24px, env(safe-area-inset-bottom));
+  display: grid;
+  gap: 7px;
+}
+.village-zoom button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(79,16,32,.14);
+  border-radius: 50%;
+  color: var(--village-wine);
+  background: rgba(255,253,249,.9);
+  font-family: Georgia,serif;
+  font-size: 1.25rem;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+.village-zoom button:hover,
+.village-zoom button:focus-visible { border-color: rgba(167,131,66,.58); outline: none; }
+
+.village-cursor-hint {
+  position: absolute;
+  z-index: 40;
+  left: 50%;
+  top: 120px;
+  padding: 8px 12px;
+  border: 1px solid rgba(79,16,32,.1);
+  border-radius: 999px;
+  color: var(--village-muted);
+  background: rgba(255,253,249,.72);
+  font-size: .5rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  transition: opacity 420ms ease, transform 420ms ease;
+  backdrop-filter: blur(10px);
+}
+.village-cursor-hint.is-hidden { opacity: 0; transform: translate(-50%,-8px); }
+
+.village-lab-note {
+  position: absolute;
+  z-index: 20;
+  left: clamp(18px,3vw,42px);
+  bottom: max(24px, env(safe-area-inset-bottom));
+  margin: 0;
+  color: rgba(49,7,18,.45);
+  font-size: .48rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1100px) {
+  .village-header { grid-template-columns: minmax(180px,250px) 1fr auto; }
+  .village-header-copy small { display: none; }
+  .village-navigation {
+    left: 18px;
+    right: 78px;
+    width: auto;
+    transform: none;
+  }
+  .village-navigation button { padding-inline: 12px; }
+  .village-lab-note { display: none; }
+}
+
+@media (max-width: 760px) {
+  .village-experience { min-height: 480px; }
+  .village-header {
+    grid-template-columns: minmax(160px,1fr) auto;
+    min-height: 76px;
+    gap: 12px;
+    padding: 9px 14px;
+  }
+  .village-brand { width: min(52vw,196px); min-height: 48px; }
+  .village-header-copy { display: none; }
+  .village-help {
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: .49rem;
+  }
+  .village-cursor-hint { top: 90px; font-size: .45rem; }
+  .village-navigation {
+    left: 10px;
+    right: 62px;
+    bottom: max(10px,env(safe-area-inset-bottom));
+    display: flex;
+    width: auto;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+  }
+  .village-navigation button {
+    flex: 0 0 154px;
+    min-height: 58px;
+    padding: 9px 11px;
+    scroll-snap-align: start;
+  }
+  .village-navigation button > span { font-size: .75rem; }
+  .village-navigation strong { font-size: .75rem; }
+  .village-navigation small { font-size: .42rem; }
+  .village-zoom {
+    right: 10px;
+    bottom: max(10px,env(safe-area-inset-bottom));
+    gap: 5px;
+  }
+  .village-zoom button { width: 40px; height: 40px; }
+  .landmark-copy { padding: 8px 11px; }
+}
+
+@media (max-height: 650px) and (min-width: 761px) {
+  .village-header { min-height: 72px; padding-block: 8px; }
+  .village-brand { min-height: 48px; width: 220px; }
+  .village-navigation { bottom: 10px; }
+  .village-zoom { bottom: 12px; }
+  .village-cursor-hint { top: 84px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .village-landmark:hover,
+  .village-landmark:focus-within {
+    transform: translate(-50%,-66%) scale(var(--scale,1));
+  }
+}

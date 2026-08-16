@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#5a0f1f">
+  <title>Escaparate visual · Atelier Lumière</title>
+  <link rel="stylesheet" href="/admin/articulos/review.css">
+  <link rel="stylesheet" href="/admin/escaparate/showcase.css">
+  <script defer src="/admin/admin-role-navigation.js"></script>
+  <script defer src="/admin/escaparate/showcase.js"></script>
+  <link rel="stylesheet" href="/premium-ui.css">
+  <script src="/premium-ui.js" defer></script>
+</head>
+<body>
+  <main class="shell showcase-shell">
+    <header class="topbar">
+      <a class="brand" href="/admin/proveedores/" aria-label="Volver a Administración">
+        <span class="brand-mark" aria-hidden="true">AL</span>
+        <span><strong>Atelier Lumière</strong><small>Escaparate visual</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="button ghost" href="/admin/proveedores/">Proveedores</a>
+        <a class="button ghost" href="/admin/talleres/">Talleres</a>
+        <button id="refresh-button" class="button secondary" type="button">Actualizar</button>
+        <button id="logout-button" class="button ghost" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section class="page-head showcase-head">
+      <div>
+        <p class="eyebrow">Dirección de arte</p>
+        <h1>Escaparate visual</h1>
+        <p class="lead">Sustituye las imágenes editoriales de las páginas públicas sin modificar código. Cada bloque tiene una versión de escritorio y otra móvil; si un espacio queda vacío, la web conserva automáticamente su imagen actual.</p>
+      </div>
+      <aside class="showcase-note">
+        <strong>Solo PLATFORM_OWNER</strong>
+        <p>JPEG, PNG o WebP · máximo 12 MB. Las imágenes se optimizan y generan variantes automáticamente.</p>
+      </aside>
+    </section>
+
+    <section class="metrics showcase-metrics" aria-label="Resumen del escaparate">
+      <article class="metric"><span>Espacios</span><strong id="metric-total">10</strong><small>5 páginas × 2 formatos</small></article>
+      <article class="metric"><span>Configurados</span><strong id="metric-ready">0</strong><small>Con imagen editorial</small></article>
+      <article class="metric"><span>Con fallback</span><strong id="metric-fallback">10</strong><small>Mantienen la imagen del código</small></article>
+      <article class="metric"><span>Último cambio</span><strong id="metric-updated">—</strong><small>Escaparate global</small></article>
+    </section>
+
+    <section class="showcase-help">
+      <div>
+        <p class="eyebrow">Punto focal</p>
+        <h2>Decide qué parte de la fotografía debe permanecer visible.</h2>
+      </div>
+      <p>Haz clic sobre cualquier vista previa para colocar el foco. Atelier conservará ese punto al adaptar el recorte a ordenador, tablet o móvil.</p>
+    </section>
+
+    <section id="loading-view" class="loading"><p>Abriendo el escaparate…</p></section>
+    <section id="error-view" class="error-card" hidden>
+      <div><h2>No se pudo abrir el escaparate</h2><p id="error-message"></p><button id="retry-button" class="button primary" type="button">Volver a intentar</button></div>
+    </section>
+    <section id="showcase-pages" class="showcase-pages" hidden aria-live="polite"></section>
+  </main>
+</body>
+</html>
