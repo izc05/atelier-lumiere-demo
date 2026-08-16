@@ -1,0 +1,252 @@
+/* Atelier Lumière · U3.15 · dirección artística final */
+
+.webgl-village[data-final-art-direction="u3.15"]::after {
+  background:
+    radial-gradient(ellipse at 51% 46%, transparent 31%, rgba(79,16,32,.010) 65%, rgba(49,7,18,.036) 100%),
+    linear-gradient(90deg, rgba(255,253,248,.035), transparent 20% 80%, rgba(79,16,32,.012)),
+    repeating-linear-gradient(7deg, rgba(91,72,57,.008) 0 1px, transparent 1px 5px);
+  opacity: .78;
+}
+
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-canvas {
+  filter: saturate(.955) contrast(1.008) brightness(1.006);
+}
+
+/* Cabecera casi editorial: marca presente, interfaz en segundo plano. */
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-header {
+  min-height: 70px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  background: linear-gradient(to bottom, rgba(247,241,231,.86), rgba(247,241,231,.24) 72%, transparent);
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-brand {
+  width: clamp(178px,12vw,218px);
+  min-height: 42px;
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-heading {
+  opacity: .58;
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-heading > span {
+  font-size: .39rem;
+  letter-spacing: .19em;
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-heading strong {
+  font-size: .80rem;
+  letter-spacing: .02em;
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-heading small {
+  font-size: .38rem;
+  letter-spacing: .15em;
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"][data-ui-settled="true"] .webgl-village-header {
+  background: linear-gradient(to bottom, rgba(247,241,231,.52), rgba(247,241,231,.10) 70%, transparent);
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"][data-ui-settled="true"] .webgl-village-heading {
+  opacity: .10;
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"][data-ui-settled="true"] .webgl-village-brand {
+  opacity: .84;
+}
+
+/* Firma editorial de overview: pequeña, baja y con mucho aire alrededor del mundo 3D. */
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"] .webgl-village-caption {
+  left: clamp(22px,4.2vw,66px);
+  bottom: 78px;
+  width: min(292px,27vw);
+  gap: 4px;
+  opacity: .70;
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"] .webgl-village-caption p {
+  font-size: .40rem;
+  letter-spacing: .21em;
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"] .webgl-village-caption h1 {
+  max-width: 15ch;
+  font-size: clamp(1.22rem,1.72vw,1.82rem);
+  line-height: .99;
+  letter-spacing: -.038em;
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"] .webgl-village-caption > span {
+  max-width: 31ch;
+  font-size: .47rem;
+  line-height: 1.48;
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"][data-ui-settled="true"] .webgl-village-caption {
+  opacity: .34;
+}
+
+/* En foco vuelve la jerarquía, pero sin tapar el edificio. */
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="focus"] .webgl-village-caption {
+  left: clamp(22px,4.1vw,64px);
+  top: 49%;
+  width: min(330px,27vw);
+  transform: translateY(-44%);
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="focus"] .webgl-village-caption h1 {
+  max-width: 9ch;
+  font-size: clamp(2.1rem,3vw,3.6rem);
+  line-height: .92;
+}
+.webgl-village[data-final-art-direction="u3.15"][data-scene-ui="focus"] .webgl-provider-card {
+  top: 92px;
+  right: clamp(16px,2.6vw,42px);
+  width: min(286px,calc(100vw - 34px));
+  background: rgba(255,253,248,.84);
+  box-shadow: 0 14px 38px rgba(49,7,18,.060);
+}
+
+/* Leyenda: más parecida a nombres de territorio y menos a barra de aplicación. */
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend,
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend.has-dynamic-providers {
+  bottom: max(12px,env(safe-area-inset-bottom));
+  max-width: min(900px,calc(100% - 220px));
+  border-color: rgba(79,16,32,.055);
+  border-radius: 999px;
+  background: rgba(255,253,248,.43);
+  box-shadow: none;
+  backdrop-filter: blur(8px) saturate(.96);
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend button,
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend.has-dynamic-providers button {
+  min-width: 112px;
+  min-height: 37px;
+  padding: 5px 10px;
+  gap: 7px;
+  border-right-color: rgba(79,16,32,.052);
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend b {
+  font-size: .58rem;
+  opacity: .72;
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend span {
+  max-width: 140px;
+  font-size: .61rem;
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend button:hover,
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend button:focus-visible,
+.webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend button.is-active {
+  background: rgba(255,252,246,.74);
+}
+
+/* Controles espaciales: misma funcionalidad, lenguaje Atelier. */
+.webgl-village[data-final-art-direction="u3.15"] .webgl-spatial-controls {
+  gap: 6px;
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-spatial-controls button {
+  width: 36px;
+  height: 36px;
+  border-color: rgba(79,16,32,.10);
+  color: rgba(79,16,32,.80);
+  background: rgba(255,253,248,.58);
+  box-shadow: 0 6px 18px rgba(49,7,18,.045);
+  font-size: .76rem;
+  backdrop-filter: blur(8px) saturate(.96);
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-spatial-controls button:hover,
+.webgl-village[data-final-art-direction="u3.15"] .webgl-spatial-controls button:focus-visible {
+  border-color: rgba(167,131,66,.38);
+  color: var(--webgl-wine-dark);
+  background: rgba(255,252,246,.88);
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-spatial-help {
+  color: rgba(79,16,32,.35);
+  font-size: .41rem;
+}
+.webgl-village[data-final-art-direction="u3.15"] .webgl-spatial-back-hint {
+  border-color: rgba(79,16,32,.09);
+  color: rgba(79,16,32,.70);
+  background: rgba(255,253,248,.68);
+}
+
+@media (max-width: 1050px) and (min-width: 761px) {
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-header {
+    grid-template-columns: 182px 1fr auto;
+    padding-inline: 18px;
+  }
+  .webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"] .webgl-village-caption {
+    left: 20px;
+    bottom: 74px;
+    width: 30vw;
+  }
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend,
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend.has-dynamic-providers {
+    left: 14px;
+    right: 14px;
+    max-width: none;
+    width: auto;
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-header {
+    min-height: 58px;
+    padding: 5px 10px;
+    background: linear-gradient(to bottom, rgba(247,241,231,.84), rgba(247,241,231,.18) 80%, transparent);
+  }
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-brand {
+    width: 150px;
+    min-height: 38px;
+  }
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-fallback {
+    padding: 6px 8px;
+    font-size: .36rem;
+  }
+  .webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"] .webgl-village-caption {
+    left: 12px;
+    bottom: 62px;
+    width: min(218px,63vw);
+    opacity: .62;
+  }
+  .webgl-village[data-final-art-direction="u3.15"][data-scene-ui="overview"] .webgl-village-caption h1 {
+    max-width: 13ch;
+    font-size: 1.16rem;
+  }
+  .webgl-village[data-final-art-direction="u3.15"][data-scene-ui="focus"] .webgl-village-caption {
+    left: 12px;
+    right: 12px;
+    top: 66px;
+    width: auto;
+    transform: none;
+  }
+  .webgl-village[data-final-art-direction="u3.15"][data-scene-ui="focus"] .webgl-village-caption h1 {
+    max-width: 8ch;
+    font-size: clamp(1.9rem,9.5vw,2.85rem);
+  }
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend,
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend.has-dynamic-providers {
+    left: 6px;
+    right: 6px;
+    bottom: max(6px,env(safe-area-inset-bottom));
+    border-radius: 15px;
+    background: rgba(255,253,248,.58);
+  }
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend button,
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-legend.has-dynamic-providers button {
+    flex-basis: 110px;
+    min-width: 110px;
+    min-height: 41px;
+  }
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-spatial-controls {
+    right: 8px;
+    bottom: 66px;
+    gap: 5px;
+  }
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-spatial-controls button {
+    width: 32px;
+    height: 32px;
+    font-size: .70rem;
+  }
+  .webgl-village[data-final-art-direction="u3.15"][data-scene-ui="focus"] .webgl-provider-card {
+    left: 7px;
+    right: 7px;
+    bottom: 56px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-village[data-final-art-direction="u3.15"] .webgl-village-canvas {
+    filter: saturate(.95) contrast(1.005);
+  }
+}
