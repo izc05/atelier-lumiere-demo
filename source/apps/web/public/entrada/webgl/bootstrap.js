@@ -51,6 +51,7 @@
     '/entrada/webgl/transition.js',
     '/entrada/webgl/provider-reservations.js',
     '/entrada/webgl/providers.js',
+    '/entrada/webgl/parcel-highlights.js',
     '/entrada/webgl/cinematic-camera.js',
     '/entrada/webgl/quality.js',
     '/entrada/webgl/page-transition.js',
