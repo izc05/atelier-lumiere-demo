@@ -3,6 +3,12 @@ const VILLAGE_PROVIDER_MATCHERS = Object.freeze({
   stitch: (provider) => normalizeVillageName(provider.displayName).includes("gentle stitch") || normalizeVillageName(provider.slug).includes("gentle-stitch")
 });
 
+const VILLAGE_REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
+let villageProvidersPromise = null;
+let villageProviderByPlace = new Map();
+let villageLeaving = false;
+let villageWorkshopPanel = null;
+
 function ensureVillageWorkshopStyles() {
   if (document.head.querySelector('link[href="/entrada/village-workshops.css"]')) return;
   const link = document.createElement("link");
@@ -40,9 +46,25 @@ function matchVillageProviders(providers) {
   return result;
 }
 
+async function requestVillageProviders() {
+  if (villageProvidersPromise) return villageProvidersPromise;
+  villageProvidersPromise = fetch("/internal/catalog/providers", {
+    headers: { Accept: "application/json" }
+  })
+    .then(async (response) => {
+      if (!response.ok) return [];
+      const payload = await response.json().catch(() => ({}));
+      return Array.isArray(payload.providers) ? payload.providers : [];
+    })
+    .catch(() => []);
+  return villageProvidersPromise;
+}
+
 function addBrandBadge(place, provider) {
   const landmark = document.querySelector(`[data-place="${place}"]`);
-  if (!landmark || !provider?.logo?.path || landmark.querySelector(".landmark-brand-badge")) return;
+  if (!landmark) return;
+  landmark.dataset.providerSlug = provider?.slug || "";
+  if (!provider?.logo?.path || landmark.querySelector(".landmark-brand-badge")) return;
   const source = villageMediaUrl(provider.logo.path, 320);
   if (!source) return;
   const badge = document.createElement("span");
@@ -54,7 +76,6 @@ function addBrandBadge(place, provider) {
   image.decoding = "async";
   badge.append(image);
   landmark.append(badge);
-  landmark.dataset.providerSlug = provider.slug || "";
 }
 
 function makeProviderPanel() {
@@ -72,8 +93,15 @@ function makeProviderPanel() {
       <h2></h2>
       <p class="village-workshop-card-copy"></p>
       <div class="village-workshop-card-signals"></div>
-      <div class="village-workshop-card-foot"><span>Identidad pública del taller</span><strong>Acceso en E3</strong></div>
+      <div class="village-workshop-card-foot">
+        <span>Identidad pública del taller</span>
+        <button type="button" class="village-workshop-enter" data-village-workshop-enter>Entrar al taller</button>
+      </div>
     </div>`;
+  panel.querySelector("[data-village-workshop-enter]")?.addEventListener("click", () => {
+    const place = panel.dataset.place || "";
+    if (place) void enterVillagePlace(place);
+  });
   document.querySelector("[data-village-experience]")?.append(panel);
   return panel;
 }
@@ -85,7 +113,7 @@ function panelSignal(container, text) {
   container.append(span);
 }
 
-function renderProviderPanel(panel, provider) {
+function renderProviderPanel(panel, provider, place) {
   const media = preferredVillageMedia(provider);
   const cover = panel.querySelector(".village-workshop-card-cover");
   const coverSource = villageMediaUrl(media?.path, 640);
@@ -122,6 +150,7 @@ function renderProviderPanel(panel, provider) {
   const material = Array.isArray(provider.materials) ? provider.materials.find(Boolean) : null;
   if (material) panelSignal(signals, material);
 
+  panel.dataset.place = place;
   panel.hidden = false;
   panel.classList.add("is-entering");
   requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.remove("is-entering")));
@@ -129,34 +158,105 @@ function renderProviderPanel(panel, provider) {
 
 function hideProviderPanel(panel) {
   panel.hidden = true;
+  delete panel.dataset.place;
+}
+
+function ensureVillageExitLayer() {
+  let layer = document.querySelector("[data-village-exit-layer]");
+  if (layer) return layer;
+  layer = document.createElement("div");
+  layer.className = "village-exit-layer";
+  layer.hidden = true;
+  layer.dataset.villageExitLayer = "true";
+  layer.setAttribute("aria-live", "polite");
+  layer.innerHTML = `
+    <span class="village-exit-mark" aria-hidden="true">AL</span>
+    <p>Entrando en</p>
+    <strong></strong>`;
+  document.querySelector("[data-village-experience]")?.append(layer);
+  return layer;
+}
+
+function destinationLabel(place, provider) {
+  if (place === "atelier") return "Atelier Lumière";
+  return provider?.displayName || "el taller";
+}
+
+async function destinationForPlace(place) {
+  if (place === "atelier") {
+    return { href: "/", label: "Atelier Lumière" };
+  }
+  let provider = villageProviderByPlace.get(place);
+  if (!provider) {
+    const providers = await requestVillageProviders();
+    villageProviderByPlace = matchVillageProviders(providers);
+    provider = villageProviderByPlace.get(place);
+  }
+  if (!provider?.slug) return null;
+  return {
+    href: `/taller/?slug=${encodeURIComponent(provider.slug)}`,
+    label: destinationLabel(place, provider)
+  };
+}
+
+async function enterVillagePlace(place) {
+  if (villageLeaving || !["atelier", "izc", "stitch"].includes(place)) return;
+  const destination = await destinationForPlace(place);
+  if (!destination) return;
+
+  villageLeaving = true;
+  const experience = document.querySelector("[data-village-experience]");
+  const landmark = document.querySelector(`[data-place="${place}"]`);
+  const layer = ensureVillageExitLayer();
+  const label = layer.querySelector("strong");
+  if (label) label.textContent = destination.label;
+
+  experience?.setAttribute("aria-busy", "true");
+  experience?.setAttribute("data-village-leaving", place);
+  landmark?.classList.add("is-village-exit-target");
+  if (villageWorkshopPanel) hideProviderPanel(villageWorkshopPanel);
+  layer.hidden = false;
+
+  requestAnimationFrame(() => requestAnimationFrame(() => layer.classList.add("is-visible")));
+
+  const delay = VILLAGE_REDUCED_MOTION.matches ? 60 : 880;
+  window.setTimeout(() => window.location.assign(destination.href), delay);
+}
+
+function wireVillageEntryInteractions() {
+  for (const hit of document.querySelectorAll(".landmark-hit[data-focus-place]")) {
+    hit.addEventListener("click", () => {
+      const place = hit.dataset.focusPlace;
+      if (place && place !== "overview") void enterVillagePlace(place);
+    });
+  }
 }
 
 async function loadVillageWorkshopIdentity() {
   ensureVillageWorkshopStyles();
-  const response = await fetch("/internal/catalog/providers", {
-    headers: { Accept: "application/json" }
-  }).catch(() => null);
-  if (!response?.ok) return;
-  const payload = await response.json().catch(() => ({}));
-  const providers = Array.isArray(payload.providers) ? payload.providers : [];
-  const providerByPlace = matchVillageProviders(providers);
-  if (providerByPlace.size === 0) return;
+  wireVillageEntryInteractions();
+  const note = document.querySelector(".village-lab-note");
+  if (note) note.textContent = "Laboratorio E3 · transición y acceso real · Home intacta";
 
-  for (const [place, provider] of providerByPlace) addBrandBadge(place, provider);
+  const providers = await requestVillageProviders();
+  villageProviderByPlace = matchVillageProviders(providers);
 
-  const panel = makeProviderPanel();
+  for (const [place, provider] of villageProviderByPlace) addBrandBadge(place, provider);
+  if (villageProviderByPlace.size === 0) return;
+
+  villageWorkshopPanel = makeProviderPanel();
   const showPlace = (place) => {
-    const provider = providerByPlace.get(place);
-    if (provider) renderProviderPanel(panel, provider);
-    else hideProviderPanel(panel);
+    const provider = villageProviderByPlace.get(place);
+    if (provider) renderProviderPanel(villageWorkshopPanel, provider, place);
+    else hideProviderPanel(villageWorkshopPanel);
   };
 
   for (const button of document.querySelectorAll("[data-focus-place]")) {
     button.addEventListener("click", () => showPlace(button.dataset.focusPlace));
   }
-  document.querySelector("[data-village-overview]")?.addEventListener("click", () => hideProviderPanel(panel));
+  document.querySelector("[data-village-overview]")?.addEventListener("click", () => hideProviderPanel(villageWorkshopPanel));
   document.querySelector("[data-village-viewport]")?.addEventListener("pointerdown", (event) => {
-    if (!event.target.closest("button")) hideProviderPanel(panel);
+    if (!event.target.closest("button")) hideProviderPanel(villageWorkshopPanel);
   });
 }
 
