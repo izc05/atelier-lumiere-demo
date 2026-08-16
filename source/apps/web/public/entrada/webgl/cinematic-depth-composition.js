@@ -3,6 +3,15 @@
   if (!root || root.dataset.cinematicDepthComposition === 'u3.25') return;
   if (typeof camera === 'undefined' || typeof places === 'undefined' || typeof p9CameraProfile !== 'function') return;
 
+  const styleHref = '/entrada/webgl/cinematic-depth-composition.css';
+  if (!document.querySelector(`link[href="${styleHref}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = styleHref;
+    link.dataset.u325CinematicDepth = '';
+    document.head.append(link);
+  }
+
   const quality = typeof webglQualityMode === 'string' ? webglQualityMode : 'balanced';
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const mobileMq = window.matchMedia('(max-width:760px)');
@@ -12,7 +21,6 @@
   const originalTargets = new Map();
   const heroStates = new Map();
   let overlayRaf = 0;
-  let overlayFrame = 0;
 
   function viewportMode() {
     if (mobileMq.matches) return 'mobile';
@@ -229,7 +237,6 @@
     } else {
       layer.classList.remove('is-focused');
     }
-    overlayFrame += 1;
     if (selectedPlace() !== 'overview') overlayRaf = requestAnimationFrame(syncOverlay);
   }
 
@@ -243,6 +250,15 @@
     if (overlayRaf) cancelAnimationFrame(overlayRaf);
     overlayRaf = 0;
     layer.classList.remove('is-focused');
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && overlayRaf) {
+      cancelAnimationFrame(overlayRaf);
+      overlayRaf = 0;
+    } else if (!document.hidden && selectedPlace() !== 'overview') {
+      startOverlay();
+    }
   });
 
   let resizeTimer = 0;
