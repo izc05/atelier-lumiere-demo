@@ -47,6 +47,7 @@
     '/entrada/webgl/art-direction.js',
     '/entrada/webgl/interaction.js',
     '/entrada/webgl/cinematic-modeling.js',
+    '/entrada/webgl/mesh-integrity.js',
     '/entrada/webgl/architectural-families.js',
     '/entrada/webgl/illustration-render.js',
     '/entrada/webgl/transition.js',
@@ -84,6 +85,7 @@
     '/entrada/webgl/distance-lod.js',
     '/entrada/webgl/workshop-plaques.js',
     '/entrada/webgl/plaque-polish.js',
+    '/entrada/webgl/plaque-stability.js',
     '/entrada/webgl/spatial-navigation.js',
     '/entrada/webgl/navigation-stability.js',
     '/entrada/webgl/final-art-direction.js',
@@ -111,6 +113,7 @@
         root.dataset.graphicsCheckpoint = 'u3.16';
         root.dataset.referenceArtCheckpoint = 'u3.18';
         root.dataset.navigationCheckpoint = 'u3.17n.4';
+        root.dataset.stabilityCheckpoint = 'u3.19';
       }
     } catch (error) {
       console.error(error);
