@@ -8,24 +8,21 @@ const viewport = document.querySelector("[data-village-viewport]");
 const world = document.querySelector("[data-village-world]");
 const hint = document.querySelector("[data-village-hint]");
 const overviewButton = document.querySelector("[data-village-overview]");
-const focusButtons = [...document.querySelectorAll("[data-focus-place]")];
 const zoomButtons = [...document.querySelectorAll("[data-village-zoom]")];
 
-/* E1.2 · Los talleres se separan de la plaza para que el pueblo se recorra,
- * en lugar de percibirse como tres iconos alrededor de un único centro.
- */
-const places = Object.freeze({
+const basePlaces = Object.freeze({
   atelier: { x: 1200, y: 735, desktopScale: .98, mobileScale: .82 },
   izc: { x: 430, y: 1190, desktopScale: 1.14, mobileScale: .84 },
   stitch: { x: 2010, y: 285, desktopScale: 1.12, mobileScale: .84 }
 });
+const dynamicPlaces = new Map();
 
-const placeLabels = Object.freeze({
+const placeLabels = {
   overview: "Vista general del Pueblo Atelier",
   atelier: "Atelier Lumière, plaza central",
   izc: "IZC, abanicos artesanales en Jaén",
   stitch: "The Gentle Stitch, bordado textil"
-});
+};
 
 let state = {
   x: 0,
@@ -47,30 +44,52 @@ const mobile = window.matchMedia(MOBILE_QUERY);
 document.documentElement.classList.remove("no-js");
 document.documentElement.classList.add("js");
 
+function allFocusButtons() {
+  return [...document.querySelectorAll("[data-focus-place]")];
+}
+
+function getPlace(name) {
+  return basePlaces[name] || dynamicPlaces.get(name) || null;
+}
+
+function registerPlace(name, config = {}, label = "Taller asociado") {
+  if (!name || basePlaces[name]) return false;
+  const x = Number(config.x);
+  const y = Number(config.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+  dynamicPlaces.set(name, {
+    x,
+    y,
+    desktopScale: Number.isFinite(config.desktopScale) ? config.desktopScale : 1.08,
+    mobileScale: Number.isFinite(config.mobileScale) ? config.mobileScale : .82
+  });
+  placeLabels[name] = label;
+  return true;
+}
+
 function applyPhaseE12Layout() {
   const atelier = document.querySelector('[data-place="atelier"]');
   const izc = document.querySelector('[data-place="izc"]');
   const stitch = document.querySelector('[data-place="stitch"]');
   if (atelier) {
-    atelier.style.setProperty("--x", String(places.atelier.x));
-    atelier.style.setProperty("--y", String(places.atelier.y));
+    atelier.style.setProperty("--x", String(basePlaces.atelier.x));
+    atelier.style.setProperty("--y", String(basePlaces.atelier.y));
     atelier.style.setProperty("--scale", "1.02");
   }
   if (izc) {
-    izc.style.setProperty("--x", String(places.izc.x));
-    izc.style.setProperty("--y", String(places.izc.y));
+    izc.style.setProperty("--x", String(basePlaces.izc.x));
+    izc.style.setProperty("--y", String(basePlaces.izc.y));
     izc.style.setProperty("--scale", ".92");
   }
   if (stitch) {
-    stitch.style.setProperty("--x", String(places.stitch.x));
-    stitch.style.setProperty("--y", String(places.stitch.y));
+    stitch.style.setProperty("--x", String(basePlaces.stitch.x));
+    stitch.style.setProperty("--y", String(basePlaces.stitch.y));
     stitch.style.setProperty("--scale", ".9");
   }
 
   const style = document.createElement("style");
   style.dataset.villagePhase = "e12";
   style.textContent = `
-    /* E1.2: más territorio aparente, menos densidad y más profundidad. */
     .village-ground { filter: saturate(.92) contrast(.99); }
     .village-houses { opacity: .82; }
     .village-houses .house { transform-origin: 50% 100%; }
@@ -83,7 +102,7 @@ function applyPhaseE12Layout() {
     .village-navigation { background: rgba(255,253,249,.84); }
     .village-lab-note { font-size: 0; }
     .village-lab-note::after {
-      content: "Laboratorio E4 · navegación y accesibilidad · Home intacta";
+      content: "Laboratorio E5 · talleres dinámicos y parcelas · Home intacta";
       font-size: .48rem;
     }
     @media (min-width: 761px) {
@@ -140,6 +159,10 @@ function ensureAccessibilitySupport() {
     if (landmarkLabels[place]) hit.setAttribute("aria-label", landmarkLabels[place]);
   }
 
+  refreshNavigationAccessibility();
+}
+
+function refreshNavigationAccessibility() {
   for (const button of document.querySelectorAll(".village-navigation [data-focus-place]")) {
     const place = button.dataset.focusPlace;
     button.setAttribute("aria-label", `Enfocar ${placeLabels[place] || "destino"} en el mapa`);
@@ -226,7 +249,7 @@ function render({ animate = false } = {}) {
 
 function setSelected(place) {
   state.selected = place;
-  for (const button of focusButtons) {
+  for (const button of allFocusButtons()) {
     const active = button.dataset.focusPlace === place;
     button.classList.toggle("is-active", active);
     if (active) {
@@ -243,6 +266,7 @@ function setSelected(place) {
     }
   }
   if (placeLabels[place]) announce(`${placeLabels[place]} enfocado.`);
+  window.dispatchEvent(new CustomEvent("atelier:village-selection", { detail: { place } }));
 }
 
 function updateHint() {
@@ -288,7 +312,7 @@ function focusPlace(name, { animate = true } = {}) {
     focusOverview({ animate });
     return;
   }
-  const place = places[name];
+  const place = getPlace(name);
   if (!place) return;
   const { width, height } = viewportSize();
   const bounds = scaleBounds();
@@ -306,7 +330,7 @@ function focusPlace(name, { animate = true } = {}) {
 function clearSelectedForFreeExplore() {
   if (state.selected === "custom") return;
   state.selected = "custom";
-  for (const button of focusButtons) {
+  for (const button of allFocusButtons()) {
     button.classList.remove("is-active");
     button.removeAttribute("aria-current");
   }
@@ -405,12 +429,12 @@ function onResize() {
   resizeTimer = window.setTimeout(() => {
     updateHint();
     if (state.selected === "overview") focusOverview({ animate: false });
-    else if (places[state.selected]) focusPlace(state.selected, { animate: false });
+    else if (getPlace(state.selected)) focusPlace(state.selected, { animate: false });
     else render();
   }, 80);
 }
 
-for (const button of focusButtons) {
+for (const button of allFocusButtons()) {
   button.addEventListener("click", () => focusPlace(button.dataset.focusPlace));
 }
 overviewButton?.addEventListener("click", () => focusOverview());
@@ -430,6 +454,14 @@ window.addEventListener("resize", onResize, { passive: true });
 mobile.addEventListener?.("change", () => onResize());
 reducedMotion.addEventListener?.("change", () => render());
 
+window.AtelierVillage = {
+  registerPlace,
+  focusPlace,
+  focusOverview,
+  refreshNavigationAccessibility,
+  announce
+};
+
 applyPhaseE12Layout();
 ensureAccessibilitySupport();
 updateHint();
@@ -439,6 +471,6 @@ window.setTimeout(hideHint, 6500);
 
 if (experience) {
   experience.dataset.villageReady = "true";
-  experience.dataset.villagePhase = "e4";
-  window.dispatchEvent(new CustomEvent("atelier:village-ready", { detail: { phase: "e4" } }));
+  experience.dataset.villagePhase = "e5";
+  window.dispatchEvent(new CustomEvent("atelier:village-ready", { detail: { phase: "e5" } }));
 }
