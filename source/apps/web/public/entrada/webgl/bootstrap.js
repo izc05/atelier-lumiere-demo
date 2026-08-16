@@ -69,6 +69,7 @@
     '/entrada/webgl/distant-depth.js',
     '/entrada/webgl/warm-village.js',
     '/entrada/webgl/material-textures.js',
+    '/entrada/webgl/reflective-materials.js',
     '/entrada/webgl/craft-details.js',
     '/entrada/webgl/facade-details.js',
     '/entrada/webgl/roof-patina.js',
@@ -97,7 +98,7 @@
       for (const src of scripts) await loadScript(src);
       if (root) {
         root.dataset.webglBootstrapped = 'true';
-        root.dataset.graphicsCheckpoint = 'u3.9';
+        root.dataset.graphicsCheckpoint = 'u3.10';
       }
     } catch (error) {
       console.error(error);
