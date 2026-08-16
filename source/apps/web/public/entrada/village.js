@@ -35,11 +35,14 @@ let state = {
   lastY: 0
 };
 
+const activePointers = new Map();
+let pinchState = null;
 let transitionTimer = null;
 let resizeTimer = null;
 let liveStatus = null;
 const reducedMotion = window.matchMedia(REDUCED_MOTION);
 const mobile = window.matchMedia(MOBILE_QUERY);
+const networkConnection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
 
 document.documentElement.classList.remove("no-js");
 document.documentElement.classList.add("js");
@@ -102,7 +105,7 @@ function applyPhaseE12Layout() {
     .village-navigation { background: rgba(255,253,249,.84); }
     .village-lab-note { font-size: 0; }
     .village-lab-note::after {
-      content: "Laboratorio E5 · talleres dinámicos y parcelas · Home intacta";
+      content: "Laboratorio E6 · móvil, rendimiento y fallback · Home intacta";
       font-size: .48rem;
     }
     @media (min-width: 761px) {
@@ -133,7 +136,7 @@ function ensureAccessibilitySupport() {
 
   const instructions = visuallyHidden(document.createElement("p"));
   instructions.id = "village-keyboard-help";
-  instructions.textContent = "Pueblo interactivo. Usa la barra de destinos para enfocar lugares. Pulsa un edificio para entrar. Con teclado: flechas para recorrer, más y menos para zoom, Escape, Inicio o cero para volver a la vista general.";
+  instructions.textContent = "Pueblo interactivo. Usa la barra de destinos para enfocar lugares. Pulsa un edificio para entrar. En pantalla táctil puedes arrastrar y usar dos dedos para acercar o alejar. Con teclado: flechas para recorrer, más y menos para zoom, Escape, Inicio o cero para volver a la vista general.";
 
   liveStatus = visuallyHidden(document.createElement("p"));
   liveStatus.id = "village-live-status";
@@ -175,6 +178,83 @@ function announce(text) {
   window.setTimeout(() => {
     if (liveStatus) liveStatus.textContent = text;
   }, 20);
+}
+
+function shouldUseLiteMode() {
+  const memory = Number(navigator.deviceMemory);
+  const cores = Number(navigator.hardwareConcurrency);
+  const saveData = Boolean(networkConnection?.saveData);
+  const lowMemory = Number.isFinite(memory) && memory > 0 && memory <= 2;
+  const lowCpuMobile = mobile.matches && Number.isFinite(cores) && cores > 0 && cores <= 2;
+  return saveData || lowMemory || lowCpuMobile;
+}
+
+function ensurePerformanceStyles() {
+  if (document.querySelector("style[data-village-performance]")) return;
+  const style = document.createElement("style");
+  style.dataset.villagePerformance = "true";
+  style.textContent = `
+    .village-list-access {
+      position: absolute;
+      z-index: 62;
+      left: clamp(18px,3vw,42px);
+      top: 108px;
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      padding: 8px 12px;
+      border: 1px solid rgba(79,16,32,.13);
+      border-radius: 999px;
+      color: var(--village-wine);
+      background: rgba(255,253,249,.8);
+      font-size: .5rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-decoration: none;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+      transition: opacity 220ms ease, border-color 180ms ease;
+    }
+    .village-list-access:hover,
+    .village-list-access:focus-visible { outline: none; border-color: rgba(167,131,66,.58); }
+    [data-village-experience][data-village-leaving] .village-list-access { opacity: 0; pointer-events: none; }
+    [data-village-mode="lite"] .terrain-washes,
+    [data-village-mode="lite"] .road-lines,
+    [data-village-mode="lite"] .village-compass { display: none; }
+    [data-village-mode="lite"] .village-trees i:nth-child(even),
+    [data-village-mode="lite"] .village-houses .house:nth-child(3n) { display: none; }
+    [data-village-mode="lite"] .village-header,
+    [data-village-mode="lite"] .village-navigation,
+    [data-village-mode="lite"] .village-workshop-card,
+    [data-village-mode="lite"] .village-list-access { backdrop-filter: none !important; }
+    [data-village-mode="lite"] .landmark-building,
+    [data-village-mode="lite"] .village-houses .house,
+    [data-village-mode="lite"] .village-trees i { filter: none !important; box-shadow: none !important; }
+    @media (max-width:760px) {
+      .village-list-access { left: 10px; top: 82px; min-height: 34px; padding: 7px 10px; font-size: .44rem; }
+    }
+    @media (max-height:620px) and (min-width:761px) {
+      .village-list-access { top: 78px; }
+    }
+  `;
+  document.head.append(style);
+}
+
+function ensureListFallback() {
+  if (!experience || experience.querySelector(".village-list-access")) return;
+  const link = document.createElement("a");
+  link.className = "village-list-access";
+  link.href = "/talleres/";
+  link.textContent = "Ver talleres en lista";
+  link.setAttribute("aria-label", "Ver todos los talleres en formato de lista");
+  experience.append(link);
+}
+
+function applyPerformanceMode() {
+  if (!experience) return;
+  const lite = shouldUseLiteMode();
+  experience.dataset.villageMode = lite ? "lite" : "full";
+  if (lite) announce("Modo ligero activado para optimizar el Pueblo Atelier en este dispositivo.");
 }
 
 function viewportSize() {
@@ -273,7 +353,7 @@ function updateHint() {
   const label = hint?.querySelector("span");
   if (!label) return;
   label.textContent = mobile.matches
-    ? "Barra: enfocar · edificio: entrar · arrastra para recorrer"
+    ? "Arrastra · dos dedos para zoom · edificio para entrar"
     : "Arrastra para recorrer · rueda para zoom · edificio para entrar";
 }
 
@@ -358,19 +438,77 @@ function zoomFromCenter(factor) {
   zoomAt(width / 2, height / 2, factor, { animate: true });
 }
 
+function pointerPair() {
+  return [...activePointers.entries()].slice(0, 2);
+}
+
+function pairMetrics(pair) {
+  const first = pair[0]?.[1];
+  const second = pair[1]?.[1];
+  if (!first || !second) return null;
+  const dx = second.x - first.x;
+  const dy = second.y - first.y;
+  return {
+    distance: Math.max(1, Math.hypot(dx, dy)),
+    x: (first.x + second.x) / 2,
+    y: (first.y + second.y) / 2
+  };
+}
+
+function startPinch() {
+  const metrics = pairMetrics(pointerPair());
+  if (!metrics) return;
+  pinchState = {
+    distance: metrics.distance,
+    scale: state.scale,
+    worldX: (metrics.x - state.x) / state.scale,
+    worldY: (metrics.y - state.y) / state.scale
+  };
+  state.dragging = false;
+  state.pointerId = null;
+  viewport?.classList.remove("is-dragging");
+  viewport?.classList.add("is-pinching");
+  setTransition(false);
+  hideHint();
+}
+
 function beginDrag(event) {
   if (!viewport || event.button !== 0 || event.target.closest("button, a")) return;
+  activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  viewport.setPointerCapture?.(event.pointerId);
+
+  if (activePointers.size >= 2) {
+    startPinch();
+    return;
+  }
+
   state.dragging = true;
   state.pointerId = event.pointerId;
   state.lastX = event.clientX;
   state.lastY = event.clientY;
   viewport.classList.add("is-dragging");
-  viewport.setPointerCapture?.(event.pointerId);
   setTransition(false);
   hideHint();
 }
 
 function moveDrag(event) {
+  if (!activePointers.has(event.pointerId)) return;
+  activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+  if (activePointers.size >= 2 && pinchState) {
+    const metrics = pairMetrics(pointerPair());
+    if (!metrics) return;
+    const bounds = scaleBounds();
+    const ratio = metrics.distance / pinchState.distance;
+    const next = Math.min(bounds.max, Math.max(bounds.min, pinchState.scale * ratio));
+    state.scale = next;
+    state.x = metrics.x - pinchState.worldX * next;
+    state.y = metrics.y - pinchState.worldY * next;
+    clearSelectedForFreeExplore();
+    render();
+    return;
+  }
+
   if (!state.dragging || event.pointerId !== state.pointerId) return;
   const dx = event.clientX - state.lastX;
   const dy = event.clientY - state.lastY;
@@ -383,11 +521,30 @@ function moveDrag(event) {
 }
 
 function endDrag(event) {
-  if (!state.dragging || (event?.pointerId !== undefined && event.pointerId !== state.pointerId)) return;
+  if (!activePointers.has(event.pointerId)) return;
+  activePointers.delete(event.pointerId);
+  viewport?.releasePointerCapture?.(event.pointerId);
+
+  if (activePointers.size >= 2) {
+    startPinch();
+    return;
+  }
+
+  pinchState = null;
+  viewport?.classList.remove("is-pinching");
+  if (activePointers.size === 1) {
+    const [pointerId, pointer] = [...activePointers.entries()][0];
+    state.dragging = true;
+    state.pointerId = pointerId;
+    state.lastX = pointer.x;
+    state.lastY = pointer.y;
+    viewport?.classList.add("is-dragging");
+    return;
+  }
+
   state.dragging = false;
   state.pointerId = null;
   viewport?.classList.remove("is-dragging");
-  if (event?.pointerId !== undefined) viewport?.releasePointerCapture?.(event.pointerId);
 }
 
 function onWheel(event) {
@@ -428,6 +585,7 @@ function onResize() {
   window.clearTimeout(resizeTimer);
   resizeTimer = window.setTimeout(() => {
     updateHint();
+    applyPerformanceMode();
     if (state.selected === "overview") focusOverview({ animate: false });
     else if (getPlace(state.selected)) focusPlace(state.selected, { animate: false });
     else render();
@@ -453,6 +611,7 @@ window.addEventListener("keydown", onKeydown);
 window.addEventListener("resize", onResize, { passive: true });
 mobile.addEventListener?.("change", () => onResize());
 reducedMotion.addEventListener?.("change", () => render());
+networkConnection?.addEventListener?.("change", applyPerformanceMode);
 
 window.AtelierVillage = {
   registerPlace,
@@ -463,7 +622,10 @@ window.AtelierVillage = {
 };
 
 applyPhaseE12Layout();
+ensurePerformanceStyles();
 ensureAccessibilitySupport();
+ensureListFallback();
+applyPerformanceMode();
 updateHint();
 if (mobile.matches) focusPlace("atelier", { animate: false });
 else focusOverview({ animate: false });
@@ -471,6 +633,6 @@ window.setTimeout(hideHint, 6500);
 
 if (experience) {
   experience.dataset.villageReady = "true";
-  experience.dataset.villagePhase = "e5";
-  window.dispatchEvent(new CustomEvent("atelier:village-ready", { detail: { phase: "e5" } }));
+  experience.dataset.villagePhase = "e6";
+  window.dispatchEvent(new CustomEvent("atelier:village-ready", { detail: { phase: "e6", mode: experience.dataset.villageMode } }));
 }
