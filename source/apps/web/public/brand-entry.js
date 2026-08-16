@@ -5,6 +5,11 @@
   const ARRIVAL_KEY = "atelier_arrival_from_entry";
   const OFFICIAL_LOGO = "/assets/brand/atelier-logo-official-light.svg";
   const VILLAGE_URL = "/entrada/webgl/";
+  const ENTRY_MEDIA_QUERY = "(max-width: 760px)";
+  const ENTRY_MEDIA_SLOTS = Object.freeze({
+    desktop: "ENTRY_HERO_DESKTOP",
+    mobile: "ENTRY_HERO_MOBILE"
+  });
   const entry = document.getElementById("brand-entry");
   const enterButton = document.getElementById("brand-entry-action");
   const entryLogo = entry?.querySelector(".brand-entry-logo");
@@ -16,7 +21,8 @@
   const ensureCinematicStyles = () => {
     const sheets = [
       ["unified-entry", "/visual-unified-entry.css"],
-      ["unified-entry-responsive", "/visual-unified-entry-responsive.css"]
+      ["unified-entry-responsive", "/visual-unified-entry-responsive.css"],
+      ["unified-entry-media", "/visual-unified-entry-media.css"]
     ];
     for (const [key, href] of sheets) {
       if (document.querySelector(`link[data-${key}]`)) continue;
@@ -75,6 +81,82 @@
 
     const hint = entry.querySelector(".brand-entry-hint");
     if (hint) hint.textContent = "Entra y explora el pueblo de los talleres";
+  };
+
+  const entryMediaMap = (items) => new Map(
+    (Array.isArray(items) ? items : []).map((item) => [item.slotKey, item])
+  );
+
+  const entryMediaForViewport = (items, mobile) => {
+    if (mobile) return items.get(ENTRY_MEDIA_SLOTS.mobile) || items.get(ENTRY_MEDIA_SLOTS.desktop) || null;
+    return items.get(ENTRY_MEDIA_SLOTS.desktop) || null;
+  };
+
+  const removeEntryMedia = () => {
+    entry.classList.remove("brand-entry--has-media");
+    entry.removeAttribute("data-entry-media-slot");
+    entry.querySelector(".brand-entry-media")?.remove();
+  };
+
+  const configureEntryMedia = (media, mobile) => {
+    if (!media?.previewPath) {
+      removeEntryMedia();
+      return;
+    }
+
+    let figure = entry.querySelector(".brand-entry-media");
+    if (!figure) {
+      figure = document.createElement("figure");
+      figure.className = "brand-entry-media";
+      const image = document.createElement("img");
+      image.decoding = "async";
+      image.loading = "eager";
+      image.fetchPriority = "high";
+      figure.append(image);
+      entry.prepend(figure);
+    }
+
+    const image = figure.querySelector("img");
+    const alt = media.altText || "";
+    let configured = false;
+    if (window.AtelierImages?.configure) {
+      configured = window.AtelierImages.configure(image, {
+        path: media.previewPath,
+        alt,
+        width: media.width,
+        height: media.height,
+        sizes: "100vw",
+        loading: "eager",
+        priority: "high",
+        defaultWidth: mobile ? 640 : 960
+      }) === true;
+    }
+
+    if (!configured) {
+      image.src = media.previewPath;
+      image.alt = alt;
+      if (Number(media.width) > 0) image.width = Number(media.width);
+      if (Number(media.height) > 0) image.height = Number(media.height);
+    }
+
+    image.style.objectPosition = `${Number(media.focalX) || 50}% ${Number(media.focalY) || 50}%`;
+    entry.dataset.entryMediaSlot = media.slotKey;
+    entry.classList.add("brand-entry--has-media");
+  };
+
+  const loadEntryShowcase = async () => {
+    const response = await fetch("/internal/showcase", {
+      headers: { Accept: "application/json" }
+    }).catch(() => null);
+    if (!response?.ok) return;
+    const payload = await response.json().catch(() => ({}));
+    const items = entryMediaMap(payload.slots);
+    if (items.size === 0) return;
+
+    const mediaQuery = window.matchMedia(ENTRY_MEDIA_QUERY);
+    const render = () => configureEntryMedia(entryMediaForViewport(items, mediaQuery.matches), mediaQuery.matches);
+    render();
+    mediaQuery.addEventListener?.("change", render);
   };
 
   ensureCinematicStyles();
@@ -148,6 +230,7 @@
   document.body.classList.add("brand-entry-active");
   setBackgroundInert(true);
   entry.hidden = false;
+  void loadEntryShowcase();
 
   let opening = false;
   let pointerFrame = 0;
