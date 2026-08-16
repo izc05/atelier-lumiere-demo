@@ -53,6 +53,7 @@
     '/entrada/webgl/providers.js',
     '/entrada/webgl/parcel-highlights.js',
     '/entrada/webgl/cinematic-camera.js',
+    '/entrada/webgl/atelier-maison.js',
     '/entrada/webgl/quality.js',
     '/entrada/webgl/page-transition.js',
     '/entrada/webgl/cinematic-ui.js'
