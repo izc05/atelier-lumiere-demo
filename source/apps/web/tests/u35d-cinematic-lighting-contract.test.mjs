@@ -21,7 +21,7 @@ test('U3.5D proyecta halos desde coordenadas 3D reales', async () => {
   assert.match(source, /webglInteractionPlaces\?\.atelier\?\.point/);
   assert.match(source, /webglInteractionPlaces\?\.izc\?\.point/);
   assert.match(source, /webglInteractionPlaces\?\.stitch\?\.point/);
-  assert.match(source, /webglDynamicProviderPlaces\?\[webglSelectedPlace\]/);
+  assert.ok(source.includes('webglDynamicProviderPlaces?.[webglSelectedPlace]'));
 });
 
 test('U3.5D mantiene calidad adaptativa y capa no interactiva', async () => {
