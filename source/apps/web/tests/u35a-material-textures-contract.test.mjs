@@ -29,18 +29,34 @@ test('U3.5A mantiene ocho familias de material y fallback dinámico', async () =
   assert.match(source, /palette\.road/);
 });
 
-test('U3.5A usa detalle adaptativo y texturas procedurales sin bitmaps externos', async () => {
+test('U3.5A usa detalle adaptativo y fórmulas procedurales reales sin bitmaps externos', async () => {
   const source = await text('entrada/webgl/material-textures.js');
   assert.match(source, /quality === 'high' \? 1\.0/);
   assert.match(source, /quality === 'balanced' \? 0\.72 : 0\.44/);
   assert.match(source, /float fbm\(vec2 p\)/);
   assert.match(source, /uniform int uMaterial/);
   assert.match(source, /uniform float uDetail/);
-  assert.match(source, /Estuco \/ cal/);
-  assert.match(source, /Teja:/);
-  assert.match(source, /Piedra:/);
-  assert.match(source, /Madera:/);
-  assert.match(source, /Cristal \/ luz/);
+
+  // Estuco: poro y lavado mineral.
+  assert.match(source, /float pore = hash21\(floor\(uv \* \(31\.0 \+ 27\.0 \* uDetail\)\)\)/);
+  assert.match(source, /float wash = fbm\(uv \* 1\.7 \+ 4\.3\)/);
+  // Teja: ritmo de filas y crestas.
+  assert.match(source, /float rows = abs\(sin\(/);
+  assert.match(source, /float ridges = pow\(abs\(sin\(/);
+  // Piedra: junta y variación por bloque.
+  assert.match(source, /float joints = mortarGrid\(/);
+  assert.match(source, /float block = hash21\(floor\(stoneUv/);
+  // Madera: veta gruesa/fina y nudos.
+  assert.match(source, /float grain = sin\(/);
+  assert.match(source, /float fine = sin\(/);
+  assert.match(source, /float knot = smoothstep\(/);
+  // Cristal: fresnel y variación de paño.
+  assert.match(source, /float fresnel = pow\(1\.0 - max\(dot\(normal, viewDir\), 0\.0\), 3\.0\)/);
+  assert.match(source, /float pane = 0\.5 \+ 0\.5 \* sin\(/);
+  // Metal: brillo cepillado y selector GLSL compatible.
+  assert.match(source, /float brushed = sin\(/);
+  assert.match(source, /float metalTint = uMaterial == 6 \? 1\.0 : 0\.0/);
+
   assert.doesNotMatch(source, /https?:\/\//, 'el shader no debe depender de texturas remotas');
 });
 
