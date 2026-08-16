@@ -79,6 +79,7 @@
     '/entrada/webgl/stone-boundaries.js',
     '/entrada/webgl/proximity-life.js',
     '/entrada/webgl/urban-density.js',
+    '/entrada/webgl/night-life-lighting.js',
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/focus-atmosphere.js',
@@ -116,6 +117,7 @@
         root.dataset.navigationCheckpoint = 'u3.17n.4';
         root.dataset.stabilityCheckpoint = 'u3.19';
         root.dataset.urbanCheckpoint = 'u3.20';
+        root.dataset.lightingCheckpoint = 'u3.21';
       }
     } catch (error) {
       console.error(error);
