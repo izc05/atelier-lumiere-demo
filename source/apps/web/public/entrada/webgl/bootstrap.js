@@ -49,6 +49,7 @@
     '/entrada/webgl/illustration-render.js',
     '/entrada/webgl/transition.js',
     '/entrada/webgl/providers.js',
+    '/entrada/webgl/cinematic-camera.js',
     '/entrada/webgl/quality.js'
   ];
 
