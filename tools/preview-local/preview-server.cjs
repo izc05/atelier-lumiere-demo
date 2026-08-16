@@ -1,0 +1,201 @@
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+
+const HOST = '127.0.0.1';
+const PORT = Number(process.env.ATELIER_PREVIEW_PORT || 4177);
+const ROOT = path.resolve(__dirname, 'site');
+
+const providers = [
+  {
+    slug: 'izc',
+    displayName: 'IZC',
+    locationLabel: 'Jaén · España',
+    specialty: 'Abanicos y piezas para celebrar',
+    tagline: 'Piezas con gesto, color y oficio para momentos que merecen quedarse.',
+    craftDescription: 'Diseño artesanal de abanicos y detalles para celebraciones.',
+    acceptsCustomRequests: true,
+    publishedProductCount: 3,
+    materials: ['Madera', 'Textil'],
+    logo: { path: '/api/preview/izc-logo', altText: 'IZC', width: 640, height: 420 },
+    cover: { path: '/api/preview/izc-workshop', altText: 'Taller IZC', width: 1400, height: 980, focalX: 54, focalY: 46 },
+    gallery: []
+  },
+  {
+    slug: 'the-gentle-stitch',
+    displayName: 'The Gentle Stitch',
+    locationLabel: 'Granada · España',
+    specialty: 'Bordado y textil',
+    tagline: 'Bordados delicados y piezas textiles creadas despacio, puntada a puntada.',
+    craftDescription: 'Pequeñas series textiles y encargos personalizados.',
+    acceptsCustomRequests: true,
+    publishedProductCount: 3,
+    materials: ['Algodón', 'Hilo'],
+    logo: { path: '/api/preview/stitch-logo', altText: 'The Gentle Stitch', width: 640, height: 420 },
+    cover: { path: '/api/preview/stitch-workshop', altText: 'Estudio textil The Gentle Stitch', width: 1400, height: 980, focalX: 48, focalY: 52 },
+    gallery: []
+  }
+];
+
+const productSeed = [
+  ['abanico-buganvilla','Abanico Buganvilla','Abanicos',5900,'boda','izc','izc-product-1'],
+  ['abanico-marfil','Abanico Marfil','Abanicos',6200,'comunion','izc','izc-product-2'],
+  ['detalle-rosa','Detalle Rosa Atelier','Detalles',3800,'aniversario','izc','izc-product-3'],
+  ['bastidor-iniciales','Bastidor Iniciales','Bordado',4900,'boda','the-gentle-stitch','stitch-product-1'],
+  ['panuelito-recuerdo','Pañuelito Recuerdo','Textil',4200,'comunion','the-gentle-stitch','stitch-product-2'],
+  ['bordado-nacimiento','Bordado Nacimiento','Bordado',5400,'nacimiento','the-gentle-stitch','stitch-product-3']
+];
+
+const providerBySlug = new Map(providers.map((item) => [item.slug, item]));
+const products = productSeed.map(([slug,name,category,priceCents,event,providerSlug,image], index) => ({
+  slug,
+  name,
+  category,
+  priceCents,
+  currency: 'EUR',
+  shortDescription: index % 2 === 0 ? 'Una pieza artesanal pensada para acompañar celebraciones especiales.' : 'Hecha en pequeña serie y revisada por Atelier Lumière.',
+  events: [event],
+  provider: providerBySlug.get(providerSlug),
+  cover: { path: `/api/preview/${image}`, altText: name, width: 1200, height: 1500, focalX: 50, focalY: 48 }
+}));
+
+function json(res, value, status = 200) {
+  const body = Buffer.from(JSON.stringify(value));
+  res.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Content-Length': body.length,
+    'Cache-Control': 'no-store'
+  });
+  res.end(body);
+}
+
+function previewSvg(label, variant = 0, landscape = false) {
+  const palettes = [
+    ['#f5eadf','#4f1020','#b38a52'],
+    ['#eee3d3','#6e3140','#9b8067'],
+    ['#f7f1e9','#3d2b2f','#c7a876'],
+    ['#eadfd4','#551425','#b99f82']
+  ];
+  const [paper,wine,gold] = palettes[variant % palettes.length];
+  const width = landscape ? 1400 : 1000;
+  const height = landscape ? 900 : 1250;
+  const escaped = String(label).replace(/[&<>\"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+  return `<?xml version="1.0" encoding="UTF-8"?>
+  <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    <defs>
+      <radialGradient id="g" cx="30%" cy="18%" r="90%"><stop offset="0" stop-color="#fff" stop-opacity=".86"/><stop offset="1" stop-color="${paper}"/></radialGradient>
+      <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .035 0"/></filter>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#g)"/>
+    <path d="M${width*.08} ${height*.72} C${width*.28} ${height*.52},${width*.42} ${height*.82},${width*.62} ${height*.58} S${width*.88} ${height*.46},${width*.98} ${height*.68}" fill="none" stroke="${gold}" stroke-width="${Math.max(6,width*.006)}" opacity=".42"/>
+    <circle cx="${width*.77}" cy="${height*.27}" r="${Math.min(width,height)*.17}" fill="${wine}" opacity=".08"/>
+    <rect x="${width*.09}" y="${height*.12}" width="${width*.82}" height="${height*.76}" rx="${width*.012}" fill="none" stroke="${wine}" stroke-opacity=".13" stroke-width="2"/>
+    <text x="${width*.12}" y="${height*.76}" fill="${wine}" font-family="Georgia,serif" font-size="${Math.max(34,width*.045)}">${escaped}</text>
+    <text x="${width*.12}" y="${height*.81}" fill="${gold}" font-family="Arial,sans-serif" font-size="${Math.max(16,width*.018)}" letter-spacing="5">ATELIER LUMIÈRE · PREVIEW</text>
+    <rect width="100%" height="100%" filter="url(#grain)" opacity=".35"/>
+  </svg>`;
+}
+
+function sendPreviewImage(reqPath, res) {
+  const key = decodeURIComponent(reqPath.split('/').pop() || 'atelier');
+  const landscape = key.includes('workshop') || key.includes('logo');
+  const variant = [...key].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 4;
+  const labels = {
+    'izc-logo': 'IZC',
+    'stitch-logo': 'THE GENTLE STITCH',
+    'izc-workshop': 'Taller IZC',
+    'stitch-workshop': 'The Gentle Stitch'
+  };
+  const svg = Buffer.from(previewSvg(labels[key] || key.replaceAll('-', ' '), variant, landscape));
+  res.writeHead(200, { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Content-Length': svg.length, 'Cache-Control': 'no-store' });
+  res.end(svg);
+}
+
+function handleMock(url, res) {
+  if (url.pathname === '/internal/catalog/providers') {
+    json(res, { providers });
+    return true;
+  }
+  if (url.pathname === '/internal/catalog/products') {
+    const q = (url.searchParams.get('q') || '').toLocaleLowerCase('es');
+    const category = url.searchParams.get('category') || '';
+    const event = url.searchParams.get('event') || '';
+    const filtered = products.filter((item) => {
+      const text = `${item.name} ${item.category} ${item.provider.displayName}`.toLocaleLowerCase('es');
+      return (!q || text.includes(q)) && (!category || item.category === category) && (!event || item.events.includes(event));
+    });
+    json(res, { products: filtered });
+    return true;
+  }
+  if (url.pathname.startsWith('/internal/preview/') || url.pathname.startsWith('/api/preview/')) {
+    sendPreviewImage(url.pathname, res);
+    return true;
+  }
+  if (url.pathname.includes('/catalog/posts') || url.pathname.includes('/catalog/stories') || url.pathname.includes('/blog/posts')) {
+    json(res, { posts: [], stories: [] });
+    return true;
+  }
+  return false;
+}
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
+  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
+  '.json': 'application/json; charset=utf-8', '.ico': 'image/x-icon', '.woff2': 'font/woff2'
+};
+
+function safeFilePath(pathname) {
+  const clean = decodeURIComponent(pathname).replace(/\\/g, '/');
+  const relative = path.posix.normalize(clean).replace(/^\/+/, '');
+  if (relative.startsWith('..')) return null;
+  return path.join(ROOT, relative);
+}
+
+function serveStatic(url, res) {
+  let file = safeFilePath(url.pathname);
+  if (!file) return json(res, { message: 'Ruta no válida' }, 400);
+  try {
+    const stat = fs.existsSync(file) ? fs.statSync(file) : null;
+    if (stat?.isDirectory()) file = path.join(file, 'index.html');
+    if (!stat && !path.extname(file)) file = path.join(file, 'index.html');
+    if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('No encontrado en la preview local');
+      return;
+    }
+    const data = fs.readFileSync(file);
+    res.writeHead(200, {
+      'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
+      'Content-Length': data.length,
+      'Cache-Control': 'no-store'
+    });
+    res.end(data);
+  } catch (error) {
+    res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end(`Error de preview: ${error.message}`);
+  }
+}
+
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url || '/', `http://${HOST}:${PORT}`);
+  if (handleMock(url, res)) return;
+  serveStatic(url, res);
+});
+
+server.listen(PORT, HOST, () => {
+  const startUrl = `http://${HOST}:${PORT}/entrada/webgl/`;
+  console.log('');
+  console.log('============================================================');
+  console.log(' ATELIER LUMIÈRE · PREVIEW COMPLETA V2 + PUEBLO P9.8');
+  console.log('============================================================');
+  console.log(` Abierto en: ${startUrl}`);
+  console.log(' Pulsa Ctrl+C para cerrar la preview.');
+  console.log('');
+  if (process.platform === 'win32') exec(`start "" "${startUrl}"`);
+});
+
+server.on('error', (error) => {
+  console.error(`No se pudo iniciar la preview: ${error.message}`);
+  process.exitCode = 1;
+});
