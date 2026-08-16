@@ -6,24 +6,34 @@ import { dirname, join } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(HERE, "..", "apps", "web", "public");
+const ROOT = join(HERE, "..", "..", "..", "tools", "preview-local");
 
 async function text(...parts) {
   return readFile(join(PUBLIC, ...parts), "utf8");
 }
 
+async function previewText(file) {
+  return readFile(join(ROOT, file), "utf8");
+}
+
 test("la Home contiene una entrada cinematográfica que conduce al Pueblo WebGL", async () => {
   const script = await text("brand-entry.js");
   const css = await text("visual-unified-entry.css");
+  const responsive = await text("visual-unified-entry-responsive.css");
 
   assert.match(script, /const VILLAGE_URL = "\/entrada\/webgl\/"/);
   assert.match(script, /window\.location\.assign\(VILLAGE_URL\)/);
   assert.match(script, /brand-entry--cinematic/);
+  assert.match(script, /visual-unified-entry-responsive\.css/);
   assert.match(script, /Artesanía para momentos que permanecen/);
   assert.match(script, /Ir directamente a la web/);
   assert.match(css, /brand-entry--cinematic/);
   assert.match(css, /max-width:\s*980px/);
   assert.match(css, /max-width:\s*640px/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(responsive, /max-height:\s*720px/);
+  assert.match(responsive, /max-height:\s*680px/);
+  assert.match(responsive, /safe-area-inset/);
+  assert.match(responsive, /prefers-reduced-motion:\s*reduce/);
 });
 
 test("la entrada conserva sesión, forzado, retorno interno y marca de llegada", async () => {
@@ -74,4 +84,15 @@ test("el WebGL conserva fallback, capas cinematográficas y llegada desde la ent
   assert.match(arrival, /atelier_arrival_from_entry/);
   assert.match(arrival, /data.*arrival|dataset\.arrival/);
   assert.match(arrivalCss, /prefers-reduced-motion:\s*reduce/);
+});
+
+test("la preview completa arranca desde la entrada cinematográfica", async () => {
+  const server = await previewText("preview-server.cjs");
+  const readme = await previewText("LEEME_PRIMERO.txt");
+
+  assert.match(server, /\?intro=1/);
+  assert.match(server, /Entrada cinematográfica → Pueblo WebGL → Visual V2/);
+  assert.match(readme, /ENTRADA CINEMATOGRÁFICA/);
+  assert.match(readme, /\?intro=1/);
+  assert.match(readme, /390 px/);
 });
