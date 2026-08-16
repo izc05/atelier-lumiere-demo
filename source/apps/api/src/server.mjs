@@ -155,7 +155,7 @@ const workshopApplicationsService = database.enabled
       mailService
     })
   : null;
-const onboardingService = withOnboardingEmailDelivery({ onboardingService: baseOnboardingService });
+const onboardingService = withOnboardingEmailDelivery({ onboardingService: baseOnboardingService, mailService });
 const emailVerificationService = baseEmailVerificationService
   ? withVerificationEmailDelivery({
       emailVerificationService: baseEmailVerificationService,
