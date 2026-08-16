@@ -1,5 +1,12 @@
 /* Pueblo Atelier · P9.5 · diversidad de siluetas en edificios secundarios */
 
+const p95Memory = Number(navigator.deviceMemory);
+const p95Narrow = window.matchMedia('(max-width: 760px)').matches;
+const p95Tablet = !p95Narrow && window.matchMedia('(max-width: 1050px)').matches;
+const p95LowMemory = Number.isFinite(p95Memory) && p95Memory > 0 && p95Memory <= 4;
+const p95DetailLite = p95Narrow || p95LowMemory;
+const p95HouseBudget = p95DetailLite ? 6 : p95Tablet ? 9 : 12;
+
 const p95Accents = [
   p9V4(palette.roof),
   p9Mix(palette.roof, palette.wine, .22),
@@ -9,6 +16,11 @@ const p95Accents = [
 
 function p95Detail(object, priority = 1) {
   if (!object) return object;
+  /* En móvil/memoria baja, un detalle de prioridad 2 se retira antes de entrar al render loop. */
+  if (p95DetailLite && priority >= 2 && objects[objects.length - 1] === object) {
+    objects.pop();
+    return null;
+  }
   object.p9Detail = true;
   object.p9DetailPriority = priority;
   return object;
@@ -66,8 +78,9 @@ const p95Families = [
 
 /* Solo edificios con buena lectura desde la cámara general. El fondo conserva geometría simple. */
 const p95FeaturedHouseIndices = [1, 4, 7, 9, 11, 12, 14, 16, 18, 20, 21, 23];
-for (let order = 0; order < p95FeaturedHouseIndices.length; order++) {
-  const houseIndex = p95FeaturedHouseIndices[order];
+const p95ActiveHouseIndices = p95FeaturedHouseIndices.slice(0, p95HouseBudget);
+for (let order = 0; order < p95ActiveHouseIndices.length; order++) {
+  const houseIndex = p95ActiveHouseIndices[order];
   const house = houses[houseIndex];
   if (!house) continue;
   const [x, z, s] = house;
@@ -77,15 +90,18 @@ for (let order = 0; order < p95FeaturedHouseIndices.length; order++) {
 /* Dos microplazas rompen la lectura de retícula sin añadir nuevos edificios. */
 p95Detail(p9Box(-6.2, -.4, .065, 1.25, .014, .75, p9Mix(palette.paperDeep, palette.gold, .08), .08, false));
 p95Detail(p9Add(p9Meshes.cylinder, -6.2, -.4, .13, .18, .06, .18, p9StoneDark, 0, true), 2);
-p95Detail(p9Box(7.0, 5.05, .065, 1.15, .014, .70, p9Mix(palette.paperDeep, palette.gold, .08), -.06, false));
-p95Detail(p9Add(p9Meshes.cylinder, 7.0, 5.05, .13, .16, .055, .16, p9StoneDark, 0, true), 2);
+if (!p95DetailLite) {
+  p95Detail(p9Box(7.0, 5.05, .065, 1.15, .014, .70, p9Mix(palette.paperDeep, palette.gold, .08), -.06, false));
+  p95Detail(p9Add(p9Meshes.cylinder, 7.0, 5.05, .13, .16, .055, .16, p9StoneDark, 0, true), 2);
+}
 
 window.setTimeout(() => {
   if (root) {
     root.dataset.webglPhase = 'p9.5';
     root.dataset.architecturalFamilies = 'true';
+    root.dataset.architecturalBudget = String(p95HouseBudget);
   }
   const label = document.querySelector('.webgl-village-heading > span');
   if (label) label.textContent = 'Laboratorio P9.5 · familias arquitectónicas';
-  if (status && !root?.dataset.webglError) status.textContent = 'P9.5 · siluetas y talleres secundarios diversificados';
+  if (status && !root?.dataset.webglError) status.textContent = `P9.5 · ${p95HouseBudget} edificios secundarios enriquecidos`;
 }, 220);
