@@ -46,6 +46,7 @@
     '/entrada/webgl/art-direction.js',
     '/entrada/webgl/interaction.js',
     '/entrada/webgl/cinematic-modeling.js',
+    '/entrada/webgl/architectural-families.js',
     '/entrada/webgl/illustration-render.js',
     '/entrada/webgl/transition.js',
     '/entrada/webgl/providers.js',
