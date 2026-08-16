@@ -91,7 +91,10 @@
   (async () => {
     try {
       for (const src of scripts) await loadScript(src);
-      if (root) root.dataset.webglBootstrapped = 'true';
+      if (root) {
+        root.dataset.webglBootstrapped = 'true';
+        root.dataset.graphicsCheckpoint = 'u3.5';
+      }
     } catch (error) {
       console.error(error);
       failToFallback('No se pudo iniciar la escena 3D');
