@@ -1,0 +1,319 @@
+/* Atelier Lumière · Visual V2 · Fase 6.2
+ * Historia individual: lectura editorial, taller autor, galería y piezas relacionadas.
+ * Solo presentación; detail.js y la carga de datos permanecen intactos.
+ */
+
+body #article {
+  padding-bottom: clamp(80px,9vw,132px);
+}
+
+body #article .article-head {
+  max-width: 1120px !important;
+  margin: 0 auto !important;
+  padding: clamp(74px,9vw,132px) var(--v2-gutter) clamp(50px,6vw,82px) !important;
+  text-align: left !important;
+}
+
+body #article .article-head .eyebrow {
+  margin: 0 0 18px !important;
+  color: var(--v2-gold-700) !important;
+  font: 800 .63rem/1.35 var(--v2-font-ui) !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase;
+}
+
+body #article .article-head h1 {
+  max-width: 11ch;
+  margin: 0 !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(4rem,7vw,7.8rem)/.89 var(--v2-font-display) !important;
+  letter-spacing: -.05em !important;
+}
+
+body #article .article-head .lead {
+  max-width: 760px !important;
+  margin: 28px 0 0 !important;
+  color: var(--v2-ink-600) !important;
+  font: 400 clamp(1rem,1.25vw,1.13rem)/1.76 var(--v2-font-ui) !important;
+}
+
+body #article .article-head .tags {
+  gap: 6px 12px !important;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+body #article .article-head .tag {
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-500) !important;
+  background: transparent !important;
+  font: 700 .57rem/1.4 var(--v2-font-ui) !important;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+body #article .article-head .tag + .tag::before {
+  content: '·';
+  margin-right: 11px;
+  color: var(--v2-gold-600);
+}
+
+body #article .article-cover {
+  display: block;
+  width: calc(100% - (2 * var(--v2-gutter))) !important;
+  max-width: var(--v2-shell) !important;
+  height: clamp(520px,58vw,820px) !important;
+  max-height: none !important;
+  margin: 0 auto clamp(64px,7vw,104px) !important;
+  object-fit: cover !important;
+  border-radius: var(--v2-radius-xs) !important;
+  background: var(--v2-ivory-200);
+  filter: saturate(var(--v2-image-saturation)) contrast(1.015);
+}
+
+body #article .article-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0,760px) minmax(260px,330px) !important;
+  gap: clamp(52px,8vw,122px) !important;
+  max-width: 1180px;
+  margin: 0 auto !important;
+  padding: 0 var(--v2-gutter);
+  align-items: start !important;
+}
+
+body #article .prose {
+  color: var(--v2-ink-950) !important;
+  font-family: var(--v2-font-display) !important;
+  font-size: clamp(1.13rem,1.35vw,1.28rem) !important;
+  line-height: 1.85 !important;
+}
+
+body #article .prose > p:first-child::first-letter {
+  float: left;
+  margin: .08em .12em 0 0;
+  color: var(--v2-wine-800);
+  font: 400 4.2em/.72 var(--v2-font-display);
+}
+
+body #article .prose p {
+  margin: 0 0 1.35em !important;
+}
+
+body #article .prose h2 {
+  margin: 2em 0 .7em !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(2.1rem,3.2vw,3.35rem)/1 var(--v2-font-display) !important;
+  letter-spacing: -.025em;
+}
+
+body #article .prose h3 {
+  margin: 1.8em 0 .65em !important;
+  color: var(--v2-wine-800) !important;
+  font: 400 clamp(1.55rem,2.2vw,2.15rem)/1.05 var(--v2-font-display) !important;
+}
+
+body #article .prose a {
+  color: var(--v2-wine-700);
+  text-decoration-color: var(--v2-gold-600);
+  text-underline-offset: 4px;
+}
+
+body #article .prose ul {
+  margin: 1.2em 0 1.6em;
+  padding-left: 1.2em;
+}
+
+/* Ficha del taller autor: limpia y reconocible. */
+body #article .aside {
+  position: sticky !important;
+  top: 116px !important;
+  padding: 28px 0 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--v2-line) !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-950) !important;
+  background: transparent !important;
+}
+
+body #article .aside > .eyebrow,
+body #article #related-wrap > .eyebrow {
+  margin: 0 0 10px !important;
+  color: var(--v2-gold-700) !important;
+  font: 800 .59rem/1.35 var(--v2-font-ui) !important;
+  letter-spacing: .16em !important;
+}
+
+body #article .aside h2 {
+  margin: 0 !important;
+  color: var(--v2-wine-900) !important;
+  font: 400 clamp(2.1rem,2.7vw,2.85rem)/1 var(--v2-font-display) !important;
+  letter-spacing: -.025em;
+}
+
+body #article .aside .lead {
+  margin: 10px 0 0 !important;
+  color: var(--v2-ink-600) !important;
+  font: 400 .82rem/1.6 var(--v2-font-ui) !important;
+}
+
+body #article #related-wrap {
+  margin-top: 34px;
+  padding-top: 28px;
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+body #article .products {
+  gap: 14px !important;
+  margin-top: 15px !important;
+}
+
+body #article .product {
+  display: grid !important;
+  grid-template-columns: 88px 1fr !important;
+  gap: 14px !important;
+  align-items: center !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: inherit;
+  background: transparent !important;
+}
+
+body #article .product + .product {
+  padding-top: 14px !important;
+  border-top: 1px solid var(--v2-line-soft) !important;
+}
+
+body #article .product img {
+  width: 88px !important;
+  height: 105px !important;
+  object-fit: cover !important;
+  border-radius: var(--v2-radius-xs) !important;
+  background: var(--v2-ivory-200);
+}
+
+body #article .product strong {
+  color: var(--v2-wine-900);
+  font: 400 1.05rem/1.15 var(--v2-font-display);
+}
+
+body #article .product small {
+  margin-top: 6px !important;
+  color: var(--v2-ink-500) !important;
+  font: 400 .72rem/1.45 var(--v2-font-ui) !important;
+}
+
+/* Galería dentro de la narración. */
+body #article .gallery {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: 12px !important;
+  margin-top: clamp(42px,5vw,68px) !important;
+}
+
+body #article .gallery img {
+  width: 100% !important;
+  height: clamp(280px,28vw,420px) !important;
+  object-fit: cover !important;
+  border-radius: var(--v2-radius-xs) !important;
+  filter: saturate(var(--v2-image-saturation)) contrast(1.015);
+}
+
+body #article .gallery img:first-child:nth-last-child(odd) {
+  grid-column: 1 / -1;
+  height: clamp(360px,42vw,580px) !important;
+}
+
+/* Tablet */
+@media (min-width:761px) and (max-width:1024px) {
+  body #article .article-head {
+    padding-top: 66px !important;
+  }
+
+  body #article .article-head h1 {
+    font-size: clamp(4rem,10vw,6.2rem) !important;
+  }
+
+  body #article .article-cover {
+    height: clamp(470px,70vw,650px) !important;
+  }
+
+  body #article .article-layout {
+    grid-template-columns: minmax(0,1fr) 250px !important;
+    gap: 48px !important;
+  }
+
+  body #article .aside {
+    top: 132px !important;
+  }
+}
+
+/* Móvil */
+@media (max-width:760px) {
+  body #article {
+    padding-bottom: 72px;
+  }
+
+  body #article .article-head {
+    padding: 52px 18px 38px !important;
+  }
+
+  body #article .article-head h1 {
+    max-width: 12ch;
+    font-size: clamp(3.25rem,14vw,4.8rem) !important;
+  }
+
+  body #article .article-head .lead {
+    font-size: .96rem !important;
+  }
+
+  body #article .article-cover {
+    width: calc(100% - 36px) !important;
+    height: clamp(330px,105vw,470px) !important;
+    margin-bottom: 54px !important;
+  }
+
+  body #article .article-layout {
+    grid-template-columns: 1fr !important;
+    gap: 54px !important;
+    padding: 0 18px !important;
+  }
+
+  body #article .prose {
+    font-size: 1.08rem !important;
+    line-height: 1.8 !important;
+  }
+
+  body #article .aside {
+    position: static !important;
+    padding-top: 24px !important;
+  }
+
+  body #article .gallery {
+    grid-template-columns: 1fr !important;
+  }
+
+  body #article .gallery img,
+  body #article .gallery img:first-child:nth-last-child(odd) {
+    grid-column: auto;
+    height: clamp(280px,90vw,390px) !important;
+  }
+
+  body #article .product {
+    grid-template-columns: 80px 1fr !important;
+  }
+
+  body #article .product img {
+    width: 80px !important;
+    height: 96px !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  body #article .article-cover,
+  body #article .gallery img {
+    transition: none !important;
+  }
+}
