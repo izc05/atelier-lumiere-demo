@@ -4,6 +4,7 @@ const HOME_V2_STYLES = Object.freeze([
   "/visual-v2-home-featured.css",
   "/visual-v2-home-commissions.css",
   "/visual-v2-home-stories.css",
+  "/visual-v2-home-showcase.css",
   "/visual-v2-home-responsive.css"
 ]);
 
@@ -136,3 +137,4 @@ async function loadHomeProductFraming() {
 ensureHomeV2Styles();
 void loadHomeProductFraming();
 void import("/visual-v2-home-workshops.js");
+void import("/visual-v2-home-showcase.js");
