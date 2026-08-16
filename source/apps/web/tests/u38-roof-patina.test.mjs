@@ -11,7 +11,7 @@ const landscapeIndex = bootstrap.indexOf('/entrada/webgl/landscape-details.js');
 
 assert.ok(facadeIndex >= 0 && roofIndex > facadeIndex, 'U3.8 debe cargar después del detalle de fachada');
 assert.ok(landscapeIndex > roofIndex, 'U3.8 debe cargar antes del paisaje detallado');
-assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.8'"));
+assert.ok(bootstrap.includes('/entrada/webgl/roof-patina.js'));
 
 for (const token of ['roofPatina','u3.8','ridge','irregularTiles','chimney','stonePlinth','mineralPatina']) {
   assert.ok(roof.includes(token), `U3.8 debe conservar ${token}`);
