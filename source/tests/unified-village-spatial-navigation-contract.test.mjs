@@ -34,11 +34,12 @@ test("U3.3A conserva historial, vuelta por terreno y cámara multieje", async ()
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
 
-test("U3.3A extiende el gesto táctil con giro y vuelta desde terreno", async () => {
+test("U3.3A extiende el gesto táctil con zoom, giro, inclinación y vuelta", async () => {
   const quality = await read("apps", "web", "public", "entrada", "webgl", "quality.js");
   assert.match(quality, /function webglTouchAngle/);
   assert.match(quality, /webglTouchAngleDelta/);
   assert.match(quality, /camera\.yaw -= rotation/);
+  assert.match(quality, /camera\.pitch = clamp\(camera\.pitch \+ centerDy/);
   assert.match(quality, /AtelierVillageNavigation\?\.back/);
   assert.match(quality, /camera\.desiredDistance = clamp\(camera\.desiredDistance \* factor, 8\.5, 52\)/);
 });
