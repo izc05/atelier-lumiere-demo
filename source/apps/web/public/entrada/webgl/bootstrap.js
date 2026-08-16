@@ -80,6 +80,7 @@
     '/entrada/webgl/proximity-life.js',
     '/entrada/webgl/urban-density.js',
     '/entrada/webgl/night-life-lighting.js',
+    '/entrada/webgl/urban-fine-composition.js',
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/focus-atmosphere.js',
@@ -118,6 +119,7 @@
         root.dataset.stabilityCheckpoint = 'u3.19';
         root.dataset.urbanCheckpoint = 'u3.20';
         root.dataset.lightingCheckpoint = 'u3.21';
+        root.dataset.urbanFineCheckpoint = 'u3.22';
       }
     } catch (error) {
       console.error(error);
