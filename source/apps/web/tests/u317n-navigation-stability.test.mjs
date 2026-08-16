@@ -23,7 +23,7 @@ for (const token of [
   'manualSinceFocus',
   'atelier:village-focus',
   'atelier:village-back',
-  'data-spatial-action =',
+  'dataset.spatialAction',
   "home.textContent = '⌂'",
   'webglNearestPlaceStable',
   'webglFocusPlaceStable',
@@ -38,7 +38,7 @@ for (const threshold of ['? 42', '? 48', ': 54']) {
 }
 
 assert.ok(navigation.includes("selected !== 'overview'"));
-assert.ok(navigation.includes('!focusSettled && !manualSinceFocus') || navigation.includes('focusSettled || manualSinceFocus'));
+assert.ok(navigation.includes('focusSettled || manualSinceFocus'));
 assert.ok(navigation.includes("event.key !== 'Home'"));
 assert.equal(/https?:\/\//.test(navigation), false, 'U3.17N no debe depender de recursos remotos');
 
