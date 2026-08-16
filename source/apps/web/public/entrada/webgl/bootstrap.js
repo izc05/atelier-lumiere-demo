@@ -73,6 +73,7 @@
     '/entrada/webgl/facade-details.js',
     '/entrada/webgl/roof-patina.js',
     '/entrada/webgl/landscape-details.js',
+    '/entrada/webgl/premium-vegetation.js',
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/focus-atmosphere.js',
@@ -96,7 +97,7 @@
       for (const src of scripts) await loadScript(src);
       if (root) {
         root.dataset.webglBootstrapped = 'true';
-        root.dataset.graphicsCheckpoint = 'u3.8';
+        root.dataset.graphicsCheckpoint = 'u3.9';
       }
     } catch (error) {
       console.error(error);
