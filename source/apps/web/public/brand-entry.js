@@ -91,6 +91,16 @@
     try { sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* almacenamiento no disponible */ }
   };
 
+  const cameFromInternalPage = () => {
+    if (!document.referrer) return false;
+    try {
+      const referrer = new URL(document.referrer);
+      return referrer.origin === window.location.origin && referrer.pathname !== window.location.pathname;
+    } catch {
+      return false;
+    }
+  };
+
   const setBackgroundInert = (value) => {
     for (const element of background) {
       if (value) element.setAttribute("inert", "");
@@ -105,7 +115,19 @@
     document.body.classList.remove("brand-entry-active");
   };
 
-  if (skipEntry || (!forceEntry && sessionGet() === "1")) {
+  if (skipEntry) {
+    sessionSet();
+    entry.hidden = true;
+    return;
+  }
+
+  if (!forceEntry && sessionGet() === "1") {
+    entry.hidden = true;
+    return;
+  }
+
+  if (!forceEntry && cameFromInternalPage()) {
+    sessionSet();
     entry.hidden = true;
     return;
   }
@@ -123,8 +145,8 @@
     if (reducedMotion.matches || opening) return;
     if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
     pointerFrame = window.requestAnimationFrame(() => {
-      const x = Math.max(24, Math.min(76, event.clientX / window.innerWidth * 100));
-      const y = Math.max(20, Math.min(72, event.clientY / window.innerHeight * 100));
+      const x = Math.max(24, Math.min(76, event.clientX / Math.max(1, window.innerWidth) * 100));
+      const y = Math.max(20, Math.min(72, event.clientY / Math.max(1, window.innerHeight) * 100));
       entry.style.setProperty("--entry-light-x", `${x}%`);
       entry.style.setProperty("--entry-light-y", `${y}%`);
       pointerFrame = 0;
