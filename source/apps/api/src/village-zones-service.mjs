@@ -91,10 +91,9 @@ export function createVillageZonesService({ database } = {}) {
     },
 
     async listPublic() {
+      /* El estado HIDDEN también se publica para que el WebGL sepa qué parcela debe omitir. */
       const rows = await database.withContext(PUBLIC_CONTEXT, async (transaction) => {
-        const result = await transaction.query(
-          "SELECT * FROM site_village_zones WHERE status <> 'HIDDEN' ORDER BY zone_key"
-        );
+        const result = await transaction.query("SELECT * FROM site_village_zones ORDER BY zone_key");
         return result.rows;
       });
       return rows.map((row) => serialize(row));
