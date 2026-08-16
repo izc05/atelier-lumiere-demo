@@ -20,6 +20,13 @@ const places = Object.freeze({
   stitch: { x: 2010, y: 285, desktopScale: 1.12, mobileScale: .84 }
 });
 
+const placeLabels = Object.freeze({
+  overview: "Vista general del Pueblo Atelier",
+  atelier: "Atelier Lumière, plaza central",
+  izc: "IZC, abanicos artesanales en Jaén",
+  stitch: "The Gentle Stitch, bordado textil"
+});
+
 let state = {
   x: 0,
   y: 0,
@@ -33,6 +40,7 @@ let state = {
 
 let transitionTimer = null;
 let resizeTimer = null;
+let liveStatus = null;
 const reducedMotion = window.matchMedia(REDUCED_MOTION);
 const mobile = window.matchMedia(MOBILE_QUERY);
 
@@ -75,7 +83,7 @@ function applyPhaseE12Layout() {
     .village-navigation { background: rgba(255,253,249,.84); }
     .village-lab-note { font-size: 0; }
     .village-lab-note::after {
-      content: "Laboratorio E1.2 · escala y cámara · sin conexión todavía con la Home";
+      content: "Laboratorio E4 · navegación y accesibilidad · Home intacta";
       font-size: .48rem;
     }
     @media (min-width: 761px) {
@@ -84,6 +92,66 @@ function applyPhaseE12Layout() {
     }
   `;
   document.head.append(style);
+}
+
+function visuallyHidden(node) {
+  Object.assign(node.style, {
+    position: "absolute",
+    width: "1px",
+    height: "1px",
+    padding: "0",
+    margin: "-1px",
+    overflow: "hidden",
+    clip: "rect(0,0,0,0)",
+    whiteSpace: "nowrap",
+    border: "0"
+  });
+  return node;
+}
+
+function ensureAccessibilitySupport() {
+  if (!experience || !viewport) return;
+
+  const instructions = visuallyHidden(document.createElement("p"));
+  instructions.id = "village-keyboard-help";
+  instructions.textContent = "Pueblo interactivo. Usa la barra de destinos para enfocar lugares. Pulsa un edificio para entrar. Con teclado: flechas para recorrer, más y menos para zoom, Escape, Inicio o cero para volver a la vista general.";
+
+  liveStatus = visuallyHidden(document.createElement("p"));
+  liveStatus.id = "village-live-status";
+  liveStatus.setAttribute("role", "status");
+  liveStatus.setAttribute("aria-live", "polite");
+  liveStatus.setAttribute("aria-atomic", "true");
+
+  experience.append(instructions, liveStatus);
+  viewport.setAttribute("tabindex", "0");
+  viewport.setAttribute("aria-describedby", instructions.id);
+
+  overviewButton?.setAttribute("aria-keyshortcuts", "Escape Home 0");
+  zoomButtons.find((button) => button.dataset.villageZoom === "in")?.setAttribute("aria-keyshortcuts", "+");
+  zoomButtons.find((button) => button.dataset.villageZoom === "out")?.setAttribute("aria-keyshortcuts", "-");
+
+  const landmarkLabels = {
+    atelier: "Entrar en Atelier Lumière",
+    izc: "Entrar en el taller IZC",
+    stitch: "Entrar en el taller The Gentle Stitch"
+  };
+  for (const hit of document.querySelectorAll(".landmark-hit[data-focus-place]")) {
+    const place = hit.dataset.focusPlace;
+    if (landmarkLabels[place]) hit.setAttribute("aria-label", landmarkLabels[place]);
+  }
+
+  for (const button of document.querySelectorAll(".village-navigation [data-focus-place]")) {
+    const place = button.dataset.focusPlace;
+    button.setAttribute("aria-label", `Enfocar ${placeLabels[place] || "destino"} en el mapa`);
+  }
+}
+
+function announce(text) {
+  if (!liveStatus || !text) return;
+  liveStatus.textContent = "";
+  window.setTimeout(() => {
+    if (liveStatus) liveStatus.textContent = text;
+  }, 20);
 }
 
 function viewportSize() {
@@ -163,7 +231,7 @@ function setSelected(place) {
     button.classList.toggle("is-active", active);
     if (active) {
       button.setAttribute("aria-current", "true");
-      if (mobile.matches) {
+      if (mobile.matches && button.closest(".village-navigation")) {
         button.scrollIntoView({
           behavior: reducedMotion.matches ? "auto" : "smooth",
           block: "nearest",
@@ -174,14 +242,15 @@ function setSelected(place) {
       button.removeAttribute("aria-current");
     }
   }
+  if (placeLabels[place]) announce(`${placeLabels[place]} enfocado.`);
 }
 
 function updateHint() {
   const label = hint?.querySelector("span");
   if (!label) return;
   label.textContent = mobile.matches
-    ? "Toca un destino o arrastra el pueblo"
-    : "Arrastra para recorrer el pueblo · usa la rueda para acercarte";
+    ? "Barra: enfocar · edificio: entrar · arrastra para recorrer"
+    : "Arrastra para recorrer · rueda para zoom · edificio para entrar";
 }
 
 function hideHint() {
@@ -234,6 +303,16 @@ function focusPlace(name, { animate = true } = {}) {
   render({ animate });
 }
 
+function clearSelectedForFreeExplore() {
+  if (state.selected === "custom") return;
+  state.selected = "custom";
+  for (const button of focusButtons) {
+    button.classList.remove("is-active");
+    button.removeAttribute("aria-current");
+  }
+  announce("Exploración libre del Pueblo Atelier.");
+}
+
 function zoomAt(screenX, screenY, factor, { animate = false } = {}) {
   const bounds = scaleBounds();
   const previous = state.scale;
@@ -245,11 +324,7 @@ function zoomAt(screenX, screenY, factor, { animate = false } = {}) {
   state.scale = next;
   state.x = screenX - worldX * next;
   state.y = screenY - worldY * next;
-  state.selected = "custom";
-  for (const button of focusButtons) {
-    button.classList.remove("is-active");
-    button.removeAttribute("aria-current");
-  }
+  clearSelectedForFreeExplore();
   hideHint();
   render({ animate });
 }
@@ -279,11 +354,7 @@ function moveDrag(event) {
   state.lastY = event.clientY;
   state.x += dx;
   state.y += dy;
-  state.selected = "custom";
-  for (const button of focusButtons) {
-    button.classList.remove("is-active");
-    button.removeAttribute("aria-current");
-  }
+  clearSelectedForFreeExplore();
   render();
 }
 
@@ -314,7 +385,7 @@ function onKeydown(event) {
   } else if (event.key === "-") {
     event.preventDefault();
     zoomFromCenter(1 / 1.14);
-  } else if (event.key === "Home" || event.key === "0") {
+  } else if (event.key === "Escape" || event.key === "Home" || event.key === "0") {
     event.preventDefault();
     focusOverview();
   } else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
@@ -323,7 +394,7 @@ function onKeydown(event) {
     if (event.key === "ArrowRight") state.x -= step;
     if (event.key === "ArrowUp") state.y += step;
     if (event.key === "ArrowDown") state.y -= step;
-    state.selected = "custom";
+    clearSelectedForFreeExplore();
     render({ animate: true });
     hideHint();
   }
@@ -360,6 +431,7 @@ mobile.addEventListener?.("change", () => onResize());
 reducedMotion.addEventListener?.("change", () => render());
 
 applyPhaseE12Layout();
+ensureAccessibilitySupport();
 updateHint();
 if (mobile.matches) focusPlace("atelier", { animate: false });
 else focusOverview({ animate: false });
@@ -367,6 +439,6 @@ window.setTimeout(hideHint, 6500);
 
 if (experience) {
   experience.dataset.villageReady = "true";
-  experience.dataset.villagePhase = "e1.2";
-  window.dispatchEvent(new CustomEvent("atelier:village-ready", { detail: { phase: "e1.2" } }));
+  experience.dataset.villagePhase = "e4";
+  window.dispatchEvent(new CustomEvent("atelier:village-ready", { detail: { phase: "e4" } }));
 }
