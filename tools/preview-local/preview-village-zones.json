@@ -1,0 +1,65 @@
+{
+  "ZONE_01": {
+    "workshopType": "Abanicos",
+    "displayLabel": "IZC",
+    "providerSlug": "izc",
+    "status": "ACTIVE",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  },
+  "ZONE_02": {
+    "workshopType": "Bordado",
+    "displayLabel": "The Gentle Stitch",
+    "providerSlug": "the-gentle-stitch",
+    "status": "ACTIVE",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  },
+  "ZONE_05": {
+    "workshopType": "Cerámica",
+    "displayLabel": "Casa de la Arcilla",
+    "providerSlug": null,
+    "status": "RESERVED",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  },
+  "ZONE_12": {
+    "workshopType": "Joyería",
+    "displayLabel": "Atelier del Metal",
+    "providerSlug": null,
+    "status": "RESERVED",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  },
+  "ZONE_15": {
+    "workshopType": "Velas",
+    "displayLabel": "Casa de la Luz",
+    "providerSlug": null,
+    "status": "RESERVED",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  },
+  "ZONE_20": {
+    "workshopType": "Madera",
+    "displayLabel": "Taller del Roble",
+    "providerSlug": null,
+    "status": "RESERVED",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  },
+  "ZONE_23": {
+    "workshopType": "Floristería",
+    "displayLabel": "Casa Botánica",
+    "providerSlug": null,
+    "status": "RESERVED",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  },
+  "ZONE_24": {
+    "workshopType": "Papelería",
+    "displayLabel": "Estudio de Papel",
+    "providerSlug": null,
+    "status": "RESERVED",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  },
+  "ZONE_26": {
+    "workshopType": "Vidrio",
+    "displayLabel": "Estudio de Cristal",
+    "providerSlug": null,
+    "status": "RESERVED",
+    "updatedAt": "2026-08-16T17:40:00.000Z"
+  }
+}
