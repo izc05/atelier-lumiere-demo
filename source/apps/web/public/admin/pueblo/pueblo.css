@@ -53,6 +53,41 @@
 }
 .village-zone-fields input:focus,
 .village-zone-fields select:focus { outline: 2px solid rgba(157,123,63,.28); outline-offset: 1px; border-color: #9d7b3f; }
+.village-zone-architecture {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  column-gap: 12px;
+  row-gap: 3px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid rgba(157,123,63,.18);
+  background: linear-gradient(90deg, rgba(178,141,75,.08), rgba(255,253,249,.7));
+}
+.village-zone-architecture::before {
+  content: '';
+  grid-row: 1 / 4;
+  width: 9px;
+  height: 38px;
+  border-left: 2px solid #9d7b3f;
+  border-right: 1px solid rgba(79,16,32,.18);
+}
+.village-zone-architecture small {
+  color: #9d7b3f;
+  font-size: .54rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.village-zone-architecture strong {
+  color: #4f1020;
+  font-family: Georgia,serif;
+  font-size: 1.02rem;
+  font-weight: 400;
+}
+.village-zone-architecture span { color: #776b67; font-size: .64rem; line-height: 1.45; }
+.village-zone-architecture[data-architecture="CERAMICS"]::before { border-left-width: 5px; }
+.village-zone-architecture[data-architecture="TEXTILE"]::before { border-right-width: 3px; }
+.village-zone-architecture[data-architecture="FLORAL"]::before { border-style: double; }
 .village-zone-summary { display: flex; flex-wrap: wrap; gap: 8px; min-height: 26px; }
 .village-zone-summary span { padding: 6px 9px; background: #f4eee6; color: #6f6466; font-size: .62rem; }
 .village-zone-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
