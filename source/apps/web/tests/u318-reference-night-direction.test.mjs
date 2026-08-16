@@ -13,7 +13,8 @@ const arrivalIndex = bootstrap.indexOf('/entrada/webgl/arrival-transition.js');
 
 assert.ok(tuningIndex >= 0 && nightIndex > tuningIndex, 'U3.18 debe refinar el ajuste U3.16');
 assert.ok(arrivalIndex > nightIndex, 'U3.18 debe fijar tono y cámara antes de la transición de llegada');
-assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.18'"));
+assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.16'"), 'U3.18 no debe invalidar el checkpoint gráfico técnico U3.16');
+assert.ok(bootstrap.includes("referenceArtCheckpoint = 'u3.18'"), 'U3.18 debe registrar su checkpoint de dirección visual');
 assert.ok(index.includes('/entrada/webgl/reference-night-direction.css'));
 
 for (const token of [
