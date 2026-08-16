@@ -1,4 +1,4 @@
-/* Atelier Lumière · U3.2 · placas de talleres proyectadas desde el mundo 3D */
+/* Atelier Lumière · U3.2/U3.3B · placas proyectadas desde zonas 3D */
 (() => {
   const styleHref = '/entrada/webgl/workshop-plaques.css';
   if (!document.querySelector(`link[href="${styleHref}"]`)) {
@@ -12,7 +12,7 @@
 
   const container = document.createElement('div');
   container.className = 'webgl-workshop-plaques';
-  container.setAttribute('aria-label', 'Talleres visibles en el Pueblo Atelier');
+  container.setAttribute('aria-label', 'Talleres y zonas visibles en el Pueblo Atelier');
   root.append(container);
 
   const home = document.createElement('a');
@@ -28,7 +28,7 @@
 
   const qualityLimit = () => {
     const quality = typeof webglQualityMode === 'string' ? webglQualityMode : 'balanced';
-    return quality === 'high' ? 12 : quality === 'balanced' ? 6 : 3;
+    return quality === 'high' ? 18 : quality === 'balanced' ? 8 : 4;
   };
 
   function initials(value) {
@@ -42,9 +42,18 @@
     return webglProviderMediaUrl(provider.logo.path, 220);
   }
 
+  function signatureVisible(zoneKey) {
+    const config = window.AtelierVillageZones?.configuration?.(zoneKey);
+    return config?.status !== 'HIDDEN';
+  }
+
   function workshopEntries() {
-    const base = ['izc', 'stitch']
-      .map((name) => [name, webglInteractionPlaces[name]])
+    const base = [
+      ['izc', 'ZONE_01'],
+      ['stitch', 'ZONE_02']
+    ]
+      .filter(([, zoneKey]) => signatureVisible(zoneKey))
+      .map(([name]) => [name, webglInteractionPlaces[name]])
       .filter(([, config]) => Boolean(config));
     const dynamic = Object.entries(webglDynamicProviderPlaces || {});
     return [...base, ...dynamic].slice(0, qualityLimit());
@@ -52,14 +61,16 @@
 
   function createPlaque(name, config, index) {
     const provider = webglProviderByPlace.get(name) || config.provider || null;
-    const title = provider?.displayName || config.title || 'Taller invitado';
-    const specialty = provider?.specialty || provider?.locationLabel || config.kicker || 'Taller asociado';
+    const title = config.title || provider?.displayName || 'Taller invitado';
+    const specialty = config.workshopType || provider?.specialty || provider?.locationLabel || config.kicker || 'Taller asociado';
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'webgl-workshop-plaque';
     button.dataset.plaquePlace = name;
     button.dataset.plaqueIndex = String(index);
-    button.setAttribute('aria-label', `Acercarse al taller ${title}`);
+    if (config.zoneKey) button.dataset.zoneKey = config.zoneKey;
+    button.classList.toggle('is-reserved', !provider);
+    button.setAttribute('aria-label', provider ? `Acercarse al taller ${title}` : `Acercarse a la zona ${title}`);
 
     const logo = document.createElement('span');
     logo.className = 'webgl-workshop-plaque-logo';
@@ -72,7 +83,7 @@
       logo.append(image);
     } else {
       const fallback = document.createElement('span');
-      fallback.textContent = initials(title);
+      fallback.textContent = initials(config.workshopType || title);
       logo.append(fallback);
     }
 
@@ -136,9 +147,14 @@
   }
 
   const providerObserver = new MutationObserver((records) => {
-    if (records.some((record) => record.attributeName === 'data-webgl-providers')) rebuildPlaques();
+    if (records.some((record) => ['data-webgl-providers', 'data-webgl-reserved-zones', 'data-village-zone-config'].includes(record.attributeName))) {
+      rebuildPlaques();
+    }
   });
-  providerObserver.observe(root, { attributes: true, attributeFilter: ['data-webgl-providers'] });
+  providerObserver.observe(root, {
+    attributes: true,
+    attributeFilter: ['data-webgl-providers', 'data-webgl-reserved-zones', 'data-village-zone-config']
+  });
 
   window.addEventListener('resize', rebuildPlaques, { passive: true });
   rebuildPlaques();
