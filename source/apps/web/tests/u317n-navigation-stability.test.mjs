@@ -14,7 +14,7 @@ assert.ok(spatialIndex >= 0 && stableIndex > spatialIndex, 'U3.17N debe estabili
 assert.ok(artIndex > stableIndex, 'U3.17N debe quedar antes de dirección artística');
 assert.ok(arrivalIndex > stableIndex, 'U3.17N debe quedar antes de la llegada cinematográfica');
 assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.16'"), 'U3.17N no debe alterar el checkpoint gráfico');
-assert.ok(bootstrap.includes("navigationCheckpoint = 'u3.17n'"));
+assert.ok(bootstrap.includes("navigationCheckpoint = 'u3.17n"), 'U3.17N debe mantenerse en el checkpoint de navegación o una microversión posterior');
 
 for (const token of [
   'canonicalState',
