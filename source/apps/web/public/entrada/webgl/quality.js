@@ -1,4 +1,4 @@
-/* Pueblo Atelier · P8.2E · calidad adaptativa + gestos táctiles */
+/* Pueblo Atelier · P8.2E/U3.3A · calidad adaptativa + gestos táctiles multieje */
 
 const webglConnection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
 const webglMemory = Number(navigator.deviceMemory);
@@ -74,6 +74,18 @@ function webglTouchDistance(points) {
   return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
 }
 
+function webglTouchAngle(points) {
+  if (points.length < 2) return 0;
+  return Math.atan2(points[1].y - points[0].y, points[1].x - points[0].x);
+}
+
+function webglTouchAngleDelta(from, to) {
+  let delta = (to - from) % (Math.PI * 2);
+  if (delta > Math.PI) delta -= Math.PI * 2;
+  if (delta < -Math.PI) delta += Math.PI * 2;
+  return delta;
+}
+
 function webglTouchCenter(points) {
   if (points.length === 0) return { x: 0, y: 0 };
   const total = points.reduce((acc, point) => ({ x: acc.x + point.x, y: acc.y + point.y }), { x: 0, y: 0 });
@@ -107,10 +119,12 @@ function webglOnTouchDown(event) {
       place: webglNearestPlace(event.clientX, event.clientY)?.name || null
     };
   } else if (points.length >= 2) {
-    const center = webglTouchCenter(points.slice(0, 2));
+    const pair = points.slice(0, 2);
+    const center = webglTouchCenter(pair);
     webglTouchGesture = {
       mode: 'pinch',
-      distance: webglTouchDistance(points.slice(0, 2)),
+      distance: webglTouchDistance(pair),
+      angle: webglTouchAngle(pair),
       centerX: center.x,
       centerY: center.y
     };
@@ -128,13 +142,16 @@ function webglOnTouchMove(event) {
   if (points.length >= 2) {
     const pair = points.slice(0, 2);
     const distance = Math.max(1, webglTouchDistance(pair));
+    const angle = webglTouchAngle(pair);
     const center = webglTouchCenter(pair);
     if (webglTouchGesture?.mode === 'pinch') {
       const factor = webglTouchGesture.distance / distance;
-      camera.desiredDistance = clamp(camera.desiredDistance * factor, 10, 48);
+      camera.desiredDistance = clamp(camera.desiredDistance * factor, 8.5, 52);
       webglPanFromTouch(center.x - webglTouchGesture.centerX, center.y - webglTouchGesture.centerY);
+      const rotation = webglTouchAngleDelta(webglTouchGesture.angle, angle);
+      camera.yaw -= rotation * .88;
     }
-    webglTouchGesture = { mode: 'pinch', distance, centerX: center.x, centerY: center.y };
+    webglTouchGesture = { mode: 'pinch', distance, angle, centerX: center.x, centerY: center.y };
     webglSetHover(null, 0, 0);
     return;
   }
@@ -167,9 +184,13 @@ function webglOnTouchEnd(event) {
 
   if (webglTouchPointers.size === 0) {
     canvas.classList.remove('is-dragging');
-    if (gesture?.mode === 'single' && gesture.travel <= 7 && gesture.place && ended) {
+    if (gesture?.mode === 'single' && gesture.travel <= 7 && ended) {
       const hit = webglNearestPlace(ended.x, ended.y);
-      if (hit?.name === gesture.place) webglFocusPlace(hit.name);
+      if (gesture.place && hit?.name === gesture.place) {
+        webglFocusPlace(hit.name);
+      } else if (!gesture.place && !hit && typeof window.AtelierVillageNavigation?.back === 'function') {
+        window.AtelierVillageNavigation.back();
+      }
     }
     webglTouchGesture = null;
     return;
