@@ -1,0 +1,464 @@
+/* Atelier Lumière · Visual V2 · Fase 3.5
+ * Ajustes responsive por dispositivo para la HOME V2.
+ * Desktop amplio, portátil, tablet y móvil.
+ */
+
+/* Escritorio amplio: conserva aire y evita que el contenido se estire demasiado. */
+@media (min-width: 1440px) {
+  #home-hero.hero-editorial,
+  #talleres.manifesto-section,
+  .featured-section,
+  .commission-section,
+  .home-stories-section,
+  .closing-section {
+    padding-left: max(var(--v2-gutter), calc((100vw - 1500px) / 2)) !important;
+    padding-right: max(var(--v2-gutter), calc((100vw - 1500px) / 2)) !important;
+  }
+
+  #home-hero .hero-copy h1 {
+    font-size: clamp(5.8rem, 6.25vw, 7.7rem) !important;
+  }
+
+  #home-hero .hero-editorial-visual {
+    min-height: 650px !important;
+  }
+}
+
+/* Portátil: misma composición, pero con menos separación y tipografía más contenida. */
+@media (min-width: 1025px) and (max-width: 1365px) {
+  .site-header {
+    padding-inline: 28px !important;
+  }
+
+  .site-header .atelier-brand-link {
+    width: clamp(190px, 14vw, 225px) !important;
+  }
+
+  .site-header .main-nav {
+    gap: clamp(14px, 1.55vw, 24px) !important;
+  }
+
+  .site-header .main-nav a,
+  .site-header .bag-link {
+    font-size: .61rem !important;
+    letter-spacing: .12em !important;
+  }
+
+  #home-hero.hero-editorial {
+    grid-template-columns: minmax(300px, .86fr) minmax(460px, 1.14fr) !important;
+    gap: clamp(30px, 4vw, 58px) !important;
+    min-height: 690px !important;
+  }
+
+  #home-hero .hero-copy h1 {
+    font-size: clamp(4.25rem, 6.2vw, 6.2rem) !important;
+  }
+
+  #home-hero .hero-editorial-visual {
+    min-height: 560px !important;
+  }
+
+  #talleres .atelier-grid-live {
+    gap: 28px !important;
+  }
+
+  .commission-section {
+    grid-template-columns: minmax(300px, .8fr) minmax(470px, 1.2fr) !important;
+    gap: clamp(38px, 5vw, 72px) !important;
+  }
+}
+
+/* Tablet horizontal/vertical: cabecera en dos filas para no comprimir la navegación. */
+@media (min-width: 761px) and (max-width: 1024px) {
+  .site-header {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "brand actions"
+      "nav nav";
+    row-gap: 8px !important;
+    min-height: 112px !important;
+    padding: 9px 24px 12px !important;
+  }
+
+  .site-header .atelier-brand-link {
+    grid-area: brand;
+    width: clamp(188px, 27vw, 230px) !important;
+    min-height: 50px !important;
+  }
+
+  .site-header .main-nav {
+    grid-area: nav;
+    width: 100%;
+    justify-content: center;
+    gap: clamp(18px, 3.2vw, 34px) !important;
+  }
+
+  .site-header .header-actions {
+    grid-area: actions;
+    justify-self: end;
+  }
+
+  .site-header .main-nav a,
+  .site-header .bag-link {
+    font-size: .59rem !important;
+    letter-spacing: .11em !important;
+  }
+
+  #home-hero.hero-editorial {
+    grid-template-columns: 1fr !important;
+    gap: 38px !important;
+    min-height: 0 !important;
+    padding-top: 56px !important;
+  }
+
+  #home-hero .hero-copy {
+    max-width: 760px !important;
+    padding-block: 0 !important;
+  }
+
+  #home-hero .hero-copy h1 {
+    max-width: 9ch !important;
+    font-size: clamp(4.3rem, 9vw, 6.2rem) !important;
+  }
+
+  #home-hero .hero-editorial-visual {
+    min-height: clamp(500px, 61vw, 650px) !important;
+  }
+
+  #home-hero .hero-workshop-note {
+    top: 22px !important;
+    left: 22px !important;
+    width: 250px !important;
+  }
+
+  #talleres .split-heading,
+  .featured-section > .section-heading,
+  .home-stories-heading {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    align-items: start !important;
+  }
+
+  #talleres .split-heading > *,
+  .featured-section > .section-heading > *,
+  .home-stories-heading > * {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  #talleres .atelier-grid-live,
+  #talleres .atelier-grid-live:has(> .workshop-card:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 26px !important;
+  }
+
+  #talleres .workshop-card-media {
+    height: clamp(330px, 44vw, 440px) !important;
+    min-height: 330px !important;
+  }
+
+  .featured-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .featured-grid .product-card,
+  .featured-grid .product-card:first-child,
+  .featured-grid .product-card:nth-child(n+2) {
+    grid-template-rows: minmax(350px, 48vw) auto auto auto !important;
+  }
+
+  .commission-section {
+    grid-template-columns: 1fr !important;
+    gap: 58px !important;
+  }
+
+  .commission-intro {
+    max-width: 720px !important;
+  }
+
+  .commission-brief {
+    max-width: 680px;
+  }
+
+  .home-stories-grid {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto !important;
+  }
+
+  .home-story-card:first-child {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+  }
+
+  .home-story-card:first-child .home-story-link {
+    grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr) !important;
+    grid-template-rows: 1fr !important;
+  }
+
+  .story-section.home-story-manifesto blockquote p {
+    font-size: clamp(2.7rem, 6vw, 4.4rem) !important;
+  }
+}
+
+/* Móvil: una sola columna, controles cómodos y fotografías con proporción estable. */
+@media (max-width: 760px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .site-header {
+    min-height: 70px !important;
+    padding: 8px 12px !important;
+  }
+
+  .site-header .atelier-brand-link,
+  .site-header.is-scrolled .atelier-brand-link {
+    width: min(51vw, 186px) !important;
+    min-height: 46px !important;
+  }
+
+  .site-header .public-menu-toggle {
+    min-width: 58px !important;
+    min-height: 42px !important;
+  }
+
+  #home-hero.hero-editorial {
+    gap: 30px !important;
+    padding: 40px 18px 58px !important;
+  }
+
+  #home-hero .hero-copy h1 {
+    max-width: 8.4ch !important;
+    font-size: clamp(3.25rem, 14.5vw, 4.8rem) !important;
+    line-height: .91 !important;
+  }
+
+  #home-hero .hero-lead {
+    max-width: 38rem !important;
+    font-size: .95rem !important;
+  }
+
+  #home-hero .hero-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100%;
+  }
+
+  #home-hero .hero-actions .button-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #home-hero .hero-actions .button-quiet {
+    justify-self: start;
+  }
+
+  #home-hero .hero-facts {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  #home-hero .hero-facts div {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 12px;
+    align-items: baseline;
+  }
+
+  #home-hero .hero-editorial-visual {
+    min-height: clamp(430px, 123vw, 560px) !important;
+  }
+
+  #home-hero .hero-workshop-note {
+    top: auto !important;
+    right: 14px !important;
+    bottom: 14px !important;
+    left: 14px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 18px !important;
+  }
+
+  #home-hero .hero-editorial-seal,
+  #home-hero .hero-photo-caption {
+    display: none !important;
+  }
+
+  #talleres.manifesto-section,
+  .featured-section,
+  .commission-section,
+  .home-stories-section,
+  .closing-section {
+    padding: 66px 18px !important;
+  }
+
+  #talleres .section-heading h2,
+  .featured-section > .section-heading h2,
+  .home-stories-heading h2,
+  .closing-section h2 {
+    font-size: clamp(2.8rem, 12.5vw, 4.3rem) !important;
+  }
+
+  #talleres .atelier-grid-live,
+  #talleres .atelier-grid-live:has(> .workshop-card:nth-child(2):last-child),
+  #talleres .atelier-grid-live:has(> .workshop-card:first-child:last-child),
+  .featured-grid,
+  .home-stories-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  #talleres .atelier-grid-live {
+    gap: 44px !important;
+  }
+
+  #talleres .workshop-card-media {
+    height: clamp(310px, 104vw, 470px) !important;
+  }
+
+  #talleres .workshop-brand-mark {
+    width: 96px !important;
+    height: 74px !important;
+  }
+
+  .featured-grid {
+    gap: 40px !important;
+  }
+
+  .featured-grid .product-card,
+  .featured-grid .product-card:first-child,
+  .featured-grid .product-card:nth-child(n+2) {
+    grid-template-rows: minmax(320px, 102vw) auto auto auto !important;
+  }
+
+  .featured-grid .product-meta {
+    align-items: center !important;
+  }
+
+  .commission-section {
+    gap: 50px !important;
+  }
+
+  .commission-intro h2 {
+    font-size: clamp(2.9rem, 13vw, 4.5rem) !important;
+  }
+
+  .commission-brief dl {
+    grid-template-columns: 1fr !important;
+  }
+
+  .commission-route li {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    gap: 15px !important;
+    min-height: 0 !important;
+  }
+
+  .commission-number {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: .95rem !important;
+  }
+
+  .commission-route::before {
+    left: 21px !important;
+  }
+
+  .commission-signal {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .commission-note {
+    margin-left: 0 !important;
+  }
+
+  .home-story-card:first-child,
+  .home-story-card:not(:first-child) {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  .home-story-card:first-child .home-story-link,
+  .home-story-card:not(:first-child) .home-story-link {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+  }
+
+  .home-story-card:first-child .home-story-media,
+  .home-story-card:not(:first-child) .home-story-media {
+    min-height: clamp(280px, 88vw, 390px) !important;
+  }
+
+  .story-section.home-story-manifesto {
+    min-height: 0 !important;
+    padding: 78px 20px !important;
+  }
+
+  .story-section.home-story-manifesto blockquote p {
+    font-size: clamp(2.25rem, 10vw, 3.5rem) !important;
+    line-height: 1.03 !important;
+  }
+
+  .closing-section .hero-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100%;
+    max-width: 420px;
+    margin-inline: auto;
+  }
+
+  .closing-section .hero-actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .site-footer {
+    grid-template-columns: 1fr !important;
+    gap: 22px !important;
+    padding: 34px 18px !important;
+  }
+}
+
+/* Teléfonos muy estrechos: evita líneas y controles forzados. */
+@media (max-width: 390px) {
+  #home-hero .hero-copy h1 {
+    font-size: clamp(3rem, 15vw, 4rem) !important;
+  }
+
+  #home-hero .hero-facts div {
+    grid-template-columns: 82px 1fr;
+  }
+
+  #talleres .workshop-card h3,
+  .featured-grid .product-card h3 {
+    font-size: 1.85rem !important;
+  }
+
+  .commission-step-copy h3 {
+    font-size: 1.7rem !important;
+  }
+}
+
+/* Altura corta (portátil/tablet apaisada): evita un hero innecesariamente alto. */
+@media (min-width: 761px) and (max-height: 760px) {
+  #home-hero.hero-editorial {
+    min-height: 0 !important;
+    padding-top: 46px !important;
+    padding-bottom: 60px !important;
+  }
+
+  #home-hero .hero-editorial-visual {
+    min-height: 500px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #home-hero *,
+  #talleres *,
+  .featured-section *,
+  .commission-section *,
+  .home-stories-section * {
+    scroll-behavior: auto !important;
+  }
+}
