@@ -73,6 +73,8 @@ import { createSecuredAdminAccountsService } from "./secured-admin-accounts-serv
 import { createShowcaseMediaApiHandler } from "./showcase-media-api.mjs";
 import { createShowcaseMediaService } from "./showcase-media-service.mjs";
 import { createTwoFactorService } from "./two-factor-service.mjs";
+import { createVillageZonesApiHandler } from "./village-zones-api.mjs";
+import { createVillageZonesService } from "./village-zones-service.mjs";
 import { createWorkshopApplicationsService } from "./workshop-applications-service.mjs";
 
 const host = process.env.API_HOST ?? "0.0.0.0";
@@ -153,7 +155,7 @@ const workshopApplicationsService = database.enabled
       mailService
     })
   : null;
-const onboardingService = withOnboardingEmailDelivery({ onboardingService: baseOnboardingService, mailService });
+const onboardingService = withOnboardingEmailDelivery({ onboardingService: baseOnboardingService });
 const emailVerificationService = baseEmailVerificationService
   ? withVerificationEmailDelivery({
       emailVerificationService: baseEmailVerificationService,
@@ -218,6 +220,7 @@ const pilotCheckoutService = withSandboxPayment({ checkoutService: basePilotChec
 const adminBlogService = database.enabled ? createAdminBlogService({ database, storage: mediaStorage }) : null;
 const adminProductsService = database.enabled ? createAdminProductsService({ database, storage: mediaStorage }) : null;
 const showcaseMediaService = database.enabled ? createShowcaseMediaService({ database, storage: mediaStorage }) : null;
+const villageZonesService = database.enabled ? createVillageZonesService({ database }) : null;
 const publicBlogService = database.enabled ? createPublicBlogService({ database, storage: mediaStorage }) : null;
 const publicCatalogService = database.enabled ? createPublicCatalogService({ database, storage: mediaStorage }) : null;
 
@@ -306,7 +309,12 @@ const showcaseMediaHandler = createShowcaseMediaApiHandler({
   showcaseMediaService,
   authenticateRequest
 });
-const publicBlogHandler = createPublicBlogApiHandler({ baseHandler: showcaseMediaHandler, publicBlogService });
+const villageZonesHandler = createVillageZonesApiHandler({
+  baseHandler: showcaseMediaHandler,
+  villageZonesService,
+  authenticateRequest
+});
+const publicBlogHandler = createPublicBlogApiHandler({ baseHandler: villageZonesHandler, publicBlogService });
 const publicCatalogHandler = createPublicCatalogApiHandler({ baseHandler: publicBlogHandler, publicCatalogService });
 const server = createServer(createLegalApiHandler({ baseHandler: publicCatalogHandler, legalService }));
 
