@@ -1,0 +1,125 @@
+/* Pueblo Atelier · P9.4 · salida de papel/acuarela hacia la página real */
+
+.webgl-place-enter {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+  padding: 9px 15px;
+  border: 1px solid rgba(79,16,32,.18);
+  border-radius: 999px;
+  color: #fffdf8;
+  background: var(--webgl-wine);
+  font-size: .48rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-decoration: none;
+  text-transform: uppercase;
+  pointer-events: auto;
+  transition: opacity 220ms ease, transform 320ms cubic-bezier(.22,.7,.2,1), background 180ms ease;
+}
+.webgl-place-enter[hidden] { display: none !important; }
+.webgl-place-enter:hover,
+.webgl-place-enter:focus-visible {
+  outline: none;
+  background: var(--webgl-wine-dark);
+  transform: translateY(-1px);
+}
+
+.webgl-village[data-cinematic-camera="true"] .webgl-place-enter,
+.webgl-village[data-cinematic-camera="true"] .webgl-provider-enter {
+  opacity: .42;
+  pointer-events: none;
+}
+
+.webgl-page-exit-layer {
+  position: absolute;
+  z-index: 70;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+.webgl-page-exit-layer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at var(--exit-x,50%) var(--exit-y,50%), rgba(126,53,68,.12) 0 6%, rgba(183,145,73,.10) 12%, rgba(255,252,246,.92) 32%, #f7f0e5 64%);
+  clip-path: circle(0 at var(--exit-x,50%) var(--exit-y,50%));
+  transition: clip-path 820ms cubic-bezier(.22,.72,.16,1);
+}
+.webgl-page-exit-bloom {
+  position: absolute;
+  left: var(--exit-x,50%);
+  top: var(--exit-y,50%);
+  width: min(42vw,520px);
+  aspect-ratio: 1;
+  border-radius: 43% 57% 61% 39% / 52% 42% 58% 48%;
+  background:
+    radial-gradient(circle at 38% 42%, rgba(79,16,32,.22), transparent 48%),
+    radial-gradient(circle at 64% 58%, rgba(167,131,66,.20), transparent 53%),
+    rgba(255,253,248,.28);
+  filter: blur(10px);
+  opacity: 0;
+  transform: translate(-50%,-50%) scale(.14) rotate(-8deg);
+  transition: opacity 280ms ease, transform 760ms cubic-bezier(.18,.7,.18,1);
+  mix-blend-mode: multiply;
+}
+.webgl-page-exit-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='190' viewBox='0 0 190 190'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.58'/%3E%3C/svg%3E");
+  transition: opacity 600ms ease 140ms;
+  mix-blend-mode: multiply;
+}
+
+.webgl-village[data-page-exit="true"] .webgl-page-exit-layer { visibility: visible; }
+.webgl-village[data-page-exit="true"] .webgl-page-exit-layer::before {
+  clip-path: circle(145vmax at var(--exit-x,50%) var(--exit-y,50%));
+}
+.webgl-village[data-page-exit="true"] .webgl-page-exit-bloom {
+  opacity: .72;
+  transform: translate(-50%,-50%) scale(3.35) rotate(13deg);
+}
+.webgl-village[data-page-exit="true"] .webgl-page-exit-grain { opacity: .045; }
+
+.webgl-village .webgl-village-header,
+.webgl-village .webgl-village-caption,
+.webgl-village .webgl-village-legend,
+.webgl-village .webgl-provider-card,
+.webgl-village .webgl-village-status {
+  transition-property: opacity, transform;
+}
+.webgl-village[data-page-exit="true"] .webgl-village-header,
+.webgl-village[data-page-exit="true"] .webgl-village-caption,
+.webgl-village[data-page-exit="true"] .webgl-village-legend,
+.webgl-village[data-page-exit="true"] .webgl-provider-card,
+.webgl-village[data-page-exit="true"] .webgl-village-status {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.webgl-village[data-page-exit="true"] .webgl-village-canvas {
+  transform: scale(1.035);
+  transition: transform 860ms cubic-bezier(.22,.72,.16,1), filter 500ms ease;
+}
+
+@media (max-width: 760px) {
+  .webgl-place-enter { min-height: 34px; padding: 7px 12px; font-size: .43rem; }
+  .webgl-page-exit-layer::before { transition-duration: 620ms; }
+  .webgl-page-exit-bloom { width: 70vw; transition-duration: 560ms; }
+  .webgl-village[data-page-exit="true"] .webgl-village-canvas { transition-duration: 650ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-place-enter,
+  .webgl-page-exit-layer::before,
+  .webgl-page-exit-bloom,
+  .webgl-page-exit-grain,
+  .webgl-village .webgl-village-canvas {
+    transition: none !important;
+  }
+}
