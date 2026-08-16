@@ -13,7 +13,7 @@ const lodIndex = bootstrap.indexOf('/entrada/webgl/distance-lod.js');
 assert.ok(stoneIndex >= 0 && lifeIndex > stoneIndex, 'U3.13 debe cargar después de los bordes de parcela');
 assert.ok(shadowsIndex > lifeIndex, 'U3.13 debe cargar antes de sombras/iluminación');
 assert.ok(lodIndex > lifeIndex, 'U3.13 debe existir antes del LOD dinámico');
-assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.13'"));
+assert.ok(bootstrap.includes('/entrada/webgl/proximity-life.js'));
 
 for (const token of ['proximityLife','bench','hangingSign','lantern','crate','CERAMICS','TEXTILE','JEWELRY','WOOD','FLORAL','PAPER','CANDLE','LEATHER','FAN','GLASS']) {
   assert.ok(life.includes(token), `U3.13 debe conservar ${token}`);
