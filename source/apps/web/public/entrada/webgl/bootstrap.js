@@ -97,6 +97,7 @@
     '/entrada/webgl/capture-tuning.js',
     '/entrada/webgl/reference-night-direction.js',
     '/entrada/webgl/ambient-village-life.js',
+    '/entrada/webgl/cinematic-depth-composition.js',
     '/entrada/webgl/arrival-transition.js',
     '/entrada/webgl/map-drag-navigation.js',
     '/entrada/webgl/renderer-watchdog.js'
@@ -126,6 +127,7 @@
         root.dataset.workshopFrontageCheckpoint = 'u3.23';
         root.dataset.workshopFrontageAlignmentCheckpoint = 'u3.23';
         root.dataset.ambientLifeCheckpoint = 'u3.24';
+        root.dataset.cinematicDepthCheckpoint = 'u3.25';
       }
     } catch (error) {
       console.error(error);
