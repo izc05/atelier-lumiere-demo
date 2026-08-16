@@ -36,7 +36,7 @@
   function occupied(zone) {
     const cfg = zones.configuration(zone.zoneKey);
     if (cfg?.status === 'HIDDEN') return false;
-    if (zone.existingPlace) return false; // los edificios firma ya tienen modelado propio.
+    if (zone.existingPlace) return false;
     if (cfg?.workshopType || cfg?.displayLabel || cfg?.providerSlug || cfg?.status === 'ACTIVE') return true;
     const suffix = String(zone.zoneKey).slice(-2);
     return Boolean(webglDynamicProviderPlaces?.[`zone-${suffix}`]);
@@ -50,7 +50,6 @@
     const windowX = x - Math.sign(doorX-x || 1) * .38*s;
     const shutter = variant % 2 === 0 ? woodWarm : woodDark;
 
-    /* Hueco de puerta con dintel, hoja retrasada y pequeño tirador. */
     box(doorX,front+.012*s,.48*s,.22*s,.48*s,.025*s,woodDark,0,MATERIAL.WOOD,true);
     box(doorX,front+.040*s,1.02*s,.27*s,.055*s,.035*s,frame,0,MATERIAL.STONE,false);
     if (quality !== 'lite') {
@@ -59,7 +58,6 @@
       cylinder(doorX+.07*s,front+.070*s,.50*s,.018*s,.022*s,.018*s,brass,MATERIAL.METAL,false);
     }
 
-    /* Ventana principal con marco y contraventanas. */
     box(windowX,front+.026*s,.68*s,.23*s,.25*s,.022*s,glassWarm,0,MATERIAL.GLASS,false);
     box(windowX,front+.047*s,.68*s,.28*s,.030*s,.032*s,frame,0,MATERIAL.STONE,false);
     box(windowX,front+.047*s,.43*s,.28*s,.030*s,.032*s,frame,0,MATERIAL.STONE,false);
@@ -68,7 +66,6 @@
       box(windowX+.30*s,front+.035*s,.68*s,.055*s,.27*s,.022*s,shutter,.035,MATERIAL.WOOD,false);
     }
 
-    /* Balcón/estante, toldo o jardinera: determinista por parcela. */
     if (micro && variant === 0) {
       box(x,front+.14*s,1.16*s,.44*s,.035*s,.16*s,woodDark,0,MATERIAL.WOOD,true);
       [-.35,0,.35].forEach((dx)=>box(x+dx*s,front+.24*s,1.38*s,.018*s,.20*s,.018*s,brass,0,MATERIAL.METAL,false));
@@ -78,7 +75,6 @@
       box(windowX,front+.10*s,.34*s,.28*s,.055*s,.12*s,p9Mix(palette.green,palette.paperLight,.12),0,MATERIAL.VEGETATION,false);
     }
 
-    /* Variación de cubierta visible al acercarse: dormer, remate o chimenea corta. */
     if (quality === 'high') {
       if (variant === 3) {
         box(x-.30*s,z-.06*s,1.78*s,.22*s,.23*s,.18*s,frame,0,MATERIAL.STUCCO,true);
@@ -89,7 +85,6 @@
       }
     }
 
-    /* Placa física mínima junto a la puerta; no sustituye la placa UI proyectada. */
     if (quality === 'high' && order < 12) {
       box(doorX + (doorX>x ? -.30 : .30)*s,front+.074*s,.82*s,.12*s,.075*s,.018*s,p9Mix(palette.wine,palette.paperLight,.06),0,MATERIAL.WOOD,false);
       box(doorX + (doorX>x ? -.30 : .30)*s,front+.083*s,.82*s,.025*s,.018*s,.021*s,brass,0,MATERIAL.METAL,false);
