@@ -106,7 +106,6 @@ void main() {
   float worldGrain = fbm(uv * (2.3 + 2.5 * uDetail));
 
   if (uMaterial == 1) {
-    /* Estuco / cal: poro fino, manchas suaves y fibra mineral. */
     float pore = hash21(floor(uv * (31.0 + 27.0 * uDetail)));
     float wash = fbm(uv * 1.7 + 4.3);
     color *= 0.955 + worldGrain * 0.075;
@@ -114,7 +113,6 @@ void main() {
     color += (wash - 0.5) * 0.018 * uDetail;
     roughness = 0.92;
   } else if (uMaterial == 2) {
-    /* Teja: bandas, juntas y variación terracota sin bitmap. */
     float rows = abs(sin((uv.y + worldGrain * 0.045) * 11.4));
     float ridges = pow(abs(sin(uv.x * 17.0 + floor(uv.y * 3.6) * 0.72)), 12.0);
     float grout = smoothstep(0.90, 0.995, rows);
@@ -124,7 +122,6 @@ void main() {
     color += ridges * vec3(0.055, 0.032, 0.016) * uDetail;
     roughness = 0.76;
   } else if (uMaterial == 3) {
-    /* Piedra: bloques irregulares y junta muy discreta. */
     vec2 stoneUv = uv + vec2(floor(uv.y * 1.7) * 0.18, 0.0);
     float joints = mortarGrid(stoneUv, 1.55 + 0.35 * uDetail);
     float block = hash21(floor(stoneUv * (1.55 + 0.35 * uDetail)));
@@ -133,7 +130,6 @@ void main() {
     color += (worldGrain - 0.5) * 0.026;
     roughness = 0.96;
   } else if (uMaterial == 4) {
-    /* Madera: veta longitudinal con pequeños cambios de tono. */
     float warp = noise2(vec2(uv.y * 0.75, uv.x * 0.21)) * 0.9;
     float grain = sin((uv.y + warp * 0.095) * 29.0) * 0.5 + 0.5;
     float fine = sin((uv.y + warp * 0.04) * 71.0) * 0.5 + 0.5;
@@ -143,7 +139,6 @@ void main() {
     roughness = 0.70;
     specularStrength = 0.035;
   } else if (uMaterial == 5) {
-    /* Cristal / luz: reflejo de borde, profundidad y brillo cálido controlado. */
     float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
     float pane = 0.5 + 0.5 * sin((uv.x + uv.y) * 8.0 + worldGrain * 2.0);
     color = mix(color, uPaperColor, 0.055);
@@ -152,20 +147,17 @@ void main() {
     roughness = 0.20;
     specularStrength = 0.32;
   } else if (uMaterial == 6) {
-    /* Latón / metal pintado: brillo cepillado, nunca cromado. */
     float brushed = sin(uv.y * 96.0 + worldGrain * 4.0) * 0.5 + 0.5;
     color *= 0.91 + brushed * 0.09;
     roughness = 0.38;
     specularStrength = 0.36;
   } else if (uMaterial == 7) {
-    /* Camino / tierra: grano mineral y variación de compactación. */
     float pebble = hash21(floor(uv * (17.0 + 15.0 * uDetail)));
     float compact = fbm(uv * 1.55 + 19.0);
     color *= 0.91 + compact * 0.13;
     color += (pebble - 0.5) * 0.028 * uDetail;
     roughness = 1.0;
   } else if (uMaterial == 8) {
-    /* Vegetación: moteado orgánico para romper superficies planas. */
     float leaves = noise2(uv * (5.0 + 3.0 * uDetail));
     float fleck = hash21(floor(uv * 23.0));
     color *= 0.84 + leaves * 0.22;
@@ -173,18 +165,15 @@ void main() {
     roughness = 0.94;
   }
 
-  /* Brillo físicamente sugerido, muy controlado para conservar el acabado editorial. */
   float shininess = mix(7.0, 42.0, 1.0 - roughness);
   float specular = pow(max(dot(normal, halfDir), 0.0), shininess) * specularStrength;
   float metalTint = uMaterial == 6 ? 1.0 : 0.0;
   color += specular * mix(vec3(1.0), vec3(0.96, 0.78, 0.48), metalTint) * (0.55 + 0.45 * uDetail);
 
-  /* Fibra de papel común a todos los materiales: une la escena visualmente. */
   float fibre = sin(gl_FragCoord.x * 0.31 + gl_FragCoord.y * 0.083 + worldGrain * 7.0) * 0.5 + 0.5;
   color += (screenGrain - 0.5) * 0.008 * uDetail;
   color += (fibre - 0.5) * 0.0045 * uDetail;
 
-  /* Perspectiva atmosférica: el detalle se funde antes de llegar al horizonte. */
   float fog = smoothstep(27.0, 62.0, vDistance);
   color = mix(color, uFogColor, fog * 0.74);
   color = mix(color, uPaperColor, fog * 0.082);
@@ -280,7 +269,6 @@ void main() {
 
     if (!object.edges || object.mesh.lineCount <= 0) return;
 
-    /* Conservamos el trazo ilustrado P9.2 encima del material. */
     gl.useProgram(p9IllustrationLineProgram);
     gl.bindBuffer(gl.ARRAY_BUFFER, object.mesh.lines);
     gl.enableVertexAttribArray(p9IllustrationLineLocations.position);
