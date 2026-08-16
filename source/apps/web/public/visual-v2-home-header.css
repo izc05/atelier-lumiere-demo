@@ -1,0 +1,181 @@
+/* Atelier Lumière · Visual V2 · Fase 1.2 / 2.1
+ * Primer cambio visible: cabecera pública de la HOME.
+ * Alcance deliberadamente limitado a la portada.
+ */
+
+/* La V2 abandona la cabecera flotante sobre el hero y recupera aire editorial. */
+.site-header {
+  position: sticky !important;
+  z-index: 90;
+  top: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  min-height: 88px !important;
+  padding: 13px var(--v2-gutter) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-950) !important;
+  background: rgba(255, 253, 249, .96) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) saturate(1.08);
+  transition:
+    min-height var(--v2-duration-base) var(--v2-ease-standard),
+    background-color var(--v2-duration-base) ease,
+    border-color var(--v2-duration-base) ease,
+    box-shadow var(--v2-duration-base) var(--v2-ease-standard) !important;
+}
+
+.site-header.is-scrolled {
+  min-height: 74px !important;
+  border-bottom-color: var(--v2-line) !important;
+  background: rgba(255, 253, 249, .985) !important;
+  box-shadow: var(--v2-shadow-xs) !important;
+}
+
+/* Logo oficial más protagonista, pero sin robar espacio al contenido. */
+.site-header .atelier-brand-link {
+  width: clamp(205px, 15vw, 276px) !important;
+  min-height: 58px !important;
+  background-image: url("/assets/brand/atelier-logo-official-dark.svg") !important;
+  background-position: left center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  filter: none !important;
+  transition: width var(--v2-duration-base) var(--v2-ease-standard);
+}
+
+.site-header.is-scrolled .atelier-brand-link {
+  width: clamp(190px, 13.5vw, 248px) !important;
+}
+
+.site-header .atelier-header-logo {
+  width: 100% !important;
+  max-height: 62px !important;
+  opacity: 0 !important;
+}
+
+/* Navegación: tipografía pequeña, respirada y sin cajas. */
+.site-header .main-nav {
+  gap: clamp(22px, 2.35vw, 42px) !important;
+}
+
+.site-header .main-nav a,
+.site-header .header-link,
+.site-header .bag-link,
+.site-header .public-menu-toggle {
+  color: var(--v2-ink-950) !important;
+  font-family: var(--v2-font-ui) !important;
+  font-size: .67rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .15em !important;
+  text-transform: uppercase;
+}
+
+.site-header .main-nav a {
+  opacity: .76 !important;
+}
+
+.site-header .main-nav a:hover,
+.site-header .main-nav a:focus-visible,
+.site-header .main-nav a[aria-current="page"] {
+  opacity: 1 !important;
+}
+
+.site-header .main-nav a::after {
+  bottom: -9px !important;
+  height: 1px !important;
+  background: var(--v2-wine-700) !important;
+}
+
+/* El carrito deja de parecer un botón aislado. */
+.site-header .bag-link {
+  min-height: 44px;
+  gap: 8px !important;
+  padding: 5px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.site-header .bag-link strong {
+  min-width: 21px !important;
+  height: 21px !important;
+  padding-inline: 5px !important;
+  border: 1px solid var(--v2-wine-700) !important;
+  color: var(--v2-ivory-50) !important;
+  background: var(--v2-wine-800) !important;
+  font-size: .62rem !important;
+  font-weight: 700 !important;
+}
+
+/* Al dejar de superponer la cabecera, el hero recupera una entrada natural. */
+@media (min-width: 1100px) {
+  #home-hero.hero-editorial {
+    padding-top: clamp(72px, 6vw, 108px) !important;
+  }
+
+  #home-hero .hero-editorial-visual {
+    top: clamp(38px, 4vw, 72px) !important;
+  }
+}
+
+@media (max-width: 1099px) and (min-width: 781px) {
+  #home-hero.hero-editorial {
+    padding-top: 68px !important;
+  }
+}
+
+@media (max-width: 780px) {
+  .site-header {
+    position: sticky !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    min-height: 72px !important;
+    padding: 8px 14px !important;
+    gap: 8px !important;
+  }
+
+  .site-header.is-scrolled {
+    min-height: 66px !important;
+  }
+
+  .site-header .atelier-brand-link,
+  .site-header.is-scrolled .atelier-brand-link {
+    width: min(52vw, 194px) !important;
+    min-height: 48px !important;
+  }
+
+  .site-header .header-actions {
+    gap: 7px !important;
+  }
+
+  .site-header .bag-link {
+    min-height: 40px !important;
+    padding-inline: 4px !important;
+  }
+
+  .site-header .bag-link span {
+    display: none;
+  }
+
+  .site-header .public-menu-toggle {
+    min-width: 52px !important;
+    min-height: 40px !important;
+    padding: 7px 9px !important;
+    border: 1px solid var(--v2-line) !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+  }
+
+  #home-hero.hero-editorial {
+    padding-top: 54px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .site-header .atelier-brand-link {
+    transition: none !important;
+  }
+}
