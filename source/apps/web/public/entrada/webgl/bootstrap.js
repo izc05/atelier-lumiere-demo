@@ -108,7 +108,8 @@
       for (const src of scripts) await loadScript(src);
       if (root) {
         root.dataset.webglBootstrapped = 'true';
-        root.dataset.graphicsCheckpoint = 'u3.18';
+        root.dataset.graphicsCheckpoint = 'u3.16';
+        root.dataset.referenceArtCheckpoint = 'u3.18';
         root.dataset.navigationCheckpoint = 'u3.17n.4';
       }
     } catch (error) {
