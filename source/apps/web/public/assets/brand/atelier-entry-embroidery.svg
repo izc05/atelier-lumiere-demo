@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-labelledby="title desc">
+  <title id="title">Motivo bordado Atelier Lumière</title>
+  <desc id="desc">Ilustración lineal de hilo, aguja y flores para la entrada cinematográfica.</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#8f6a30"/>
+      <stop offset=".45" stop-color="#d8bd79"/>
+      <stop offset="1" stop-color="#9f793f"/>
+    </linearGradient>
+    <radialGradient id="wash" cx="52%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#6b2030" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#1b090d" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+  <rect width="900" height="900" fill="url(#wash)"/>
+  <g fill="none" stroke="url(#gold)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" opacity=".82">
+    <path d="M132 720c154-220 287-352 462-436 56-27 115-49 176-65"/>
+    <path d="M188 660c50 24 102 33 156 29 64-5 126-29 186-72" opacity=".55"/>
+    <path d="M266 548c-17-74 12-133 83-177 39-24 77-31 115-20"/>
+    <path d="M341 367c-27-39-20-81 20-126 35 31 45 68 31 112"/>
+    <path d="M380 380c16-47 55-79 117-95 10 45-12 85-66 120"/>
+    <path d="M305 456c-53-14-99 2-138 49 40 27 82 28 126 4"/>
+    <path d="M440 514c48-34 96-41 146-20-19 44-57 69-116 74"/>
+    <path d="M505 430c5-48 30-83 75-105 21 40 14 81-22 121"/>
+    <path d="M246 611c-52-8-90 11-116 55 40 18 79 12 117-19"/>
+    <path d="M558 336c50-33 96-37 139-12-27 40-65 61-114 64"/>
+    <path d="M618 268c18-44 52-67 104-71 5 41-17 73-67 95"/>
+    <path d="M140 731c31 16 60 42 87 80" stroke-dasharray="3 7" opacity=".6"/>
+  </g>
+  <g fill="none" stroke="#ead69c" stroke-width="1.4" opacity=".6">
+    <circle cx="350" cy="370" r="42"/>
+    <circle cx="462" cy="519" r="35"/>
+    <circle cx="570" cy="335" r="32"/>
+    <circle cx="245" cy="610" r="26"/>
+  </g>
+  <g fill="none" stroke="#f3e4b7" stroke-width="2" opacity=".9">
+    <path d="M680 160l92-74"/>
+    <path d="M678 162l106-28" opacity=".38"/>
+    <path d="M772 86l18-6-9 16z" fill="#d4b66d" stroke="none"/>
+  </g>
+  <g filter="url(#soft)" opacity=".28">
+    <circle cx="359" cy="371" r="72" fill="#6e1f32"/>
+    <circle cx="570" cy="335" r="54" fill="#8a3949"/>
+  </g>
+</svg>
