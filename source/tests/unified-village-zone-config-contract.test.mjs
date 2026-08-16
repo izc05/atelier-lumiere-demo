@@ -8,13 +8,14 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SOURCE = join(HERE, "..");
 const read = (...parts) => readFile(join(SOURCE, ...parts), "utf8");
 
-test("U3.3B define catorce zonas estables y persistentes", async () => {
+test("U3.3B define veintiséis zonas estables y persistentes", async () => {
   const registry = await read("apps", "api", "src", "village-zones.mjs");
   const migration = await read("packages", "database", "migrations", "0057_site_village_zones.sql");
-  for (let index = 1; index <= 14; index++) {
+  for (let index = 1; index <= 26; index++) {
     const key = `ZONE_${String(index).padStart(2, "0")}`;
     assert.ok(registry.includes(key), `falta ${key} en el registro`);
   }
+  assert.match(migration, /2\[0-6\]/);
   assert.match(migration, /workshop_type text NOT NULL/);
   assert.match(migration, /provider_slug text NULL/);
   assert.match(migration, /ACTIVE','RESERVED','HIDDEN/);
@@ -49,6 +50,7 @@ test("U3.3B desacopla talleres del orden y respeta reservas manuales", async () 
   const plaques = await read("apps", "web", "public", "entrada", "webgl", "workshop-plaques.js");
 
   assert.ok(bootstrap.indexOf("/entrada/webgl/village-zones.js") < bootstrap.indexOf("/entrada/webgl/providers.js"));
+  assert.match(zones, /ZONE_26/);
   assert.match(zones, /assignProviders/);
   assert.match(zones, /reservedZones/);
   assert.match(zones, /if \(configured\(zone\.zoneKey\)\) return false/);
@@ -63,6 +65,7 @@ test("U3.3B ofrece un editor owner-only con oficio libre, taller y estado", asyn
   const html = await read("apps", "web", "public", "admin", "pueblo", "index.html");
   const js = await read("apps", "web", "public", "admin", "pueblo", "pueblo.js");
   const showcase = await read("apps", "web", "public", "admin", "escaparate", "index.html");
+  const navigation = await read("apps", "web", "public", "admin", "admin-role-navigation.js");
 
   assert.match(html, /Configura qué vive en cada zona/);
   assert.match(html, /Cerámica, Bordado, Joyería/);
@@ -75,4 +78,5 @@ test("U3.3B ofrece un editor owner-only con oficio libre, taller y estado", asyn
   assert.match(js, /method: 'PATCH'/);
   assert.match(js, /method: 'DELETE'/);
   assert.match(showcase, /href="\/admin\/pueblo\/"/);
+  assert.match(navigation, /ensureOwnerLink\(actions, "\/admin\/pueblo\/", "Pueblo"\)/);
 });
