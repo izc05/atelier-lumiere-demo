@@ -112,3 +112,4 @@ async function loadHomeProductFraming() {
 }
 
 void loadHomeProductFraming();
+void import("/visual-v2-home-workshops.js");
