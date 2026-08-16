@@ -14,12 +14,18 @@
   if (entryLogo instanceof HTMLImageElement) entryLogo.src = OFFICIAL_LOGO;
 
   const ensureCinematicStyles = () => {
-    if (document.querySelector('link[data-unified-entry]')) return;
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "/visual-unified-entry.css";
-    link.dataset.unifiedEntry = "true";
-    document.head.append(link);
+    const sheets = [
+      ["unified-entry", "/visual-unified-entry.css"],
+      ["unified-entry-responsive", "/visual-unified-entry-responsive.css"]
+    ];
+    for (const [key, href] of sheets) {
+      if (document.querySelector(`link[data-${key}]`)) continue;
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = href;
+      link.setAttribute(`data-${key}`, "true");
+      document.head.append(link);
+    }
   };
 
   const enhanceEntryMarkup = () => {
