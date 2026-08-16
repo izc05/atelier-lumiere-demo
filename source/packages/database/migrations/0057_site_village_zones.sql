@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE TABLE site_village_zones (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  zone_key text NOT NULL UNIQUE CHECK (zone_key ~ '^ZONE_(0[1-9]|1[0-4])$'),
+  zone_key text NOT NULL UNIQUE CHECK (zone_key ~ '^ZONE_(0[1-9]|1[0-9]|2[0-6])$'),
   workshop_type text NOT NULL DEFAULT '' CHECK (char_length(workshop_type) <= 80),
   display_label text NOT NULL DEFAULT '' CHECK (char_length(display_label) <= 120),
   provider_slug text NULL CHECK (
