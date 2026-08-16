@@ -86,6 +86,7 @@
     '/entrada/webgl/plaque-polish.js',
     '/entrada/webgl/spatial-navigation.js',
     '/entrada/webgl/navigation-stability.js',
+    '/entrada/webgl/map-drag-navigation.js',
     '/entrada/webgl/final-art-direction.js',
     '/entrada/webgl/capture-tuning.js',
     '/entrada/webgl/arrival-transition.js'
@@ -106,7 +107,7 @@
       if (root) {
         root.dataset.webglBootstrapped = 'true';
         root.dataset.graphicsCheckpoint = 'u3.16';
-        root.dataset.navigationCheckpoint = 'u3.17n';
+        root.dataset.navigationCheckpoint = 'u3.17n.1';
       }
     } catch (error) {
       console.error(error);
