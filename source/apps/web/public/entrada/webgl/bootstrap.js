@@ -61,7 +61,8 @@
     '/entrada/webgl/page-transition.js',
     '/entrada/webgl/cinematic-ui.js',
     '/entrada/webgl/overview-composition.js',
-    '/entrada/webgl/ambient-atmosphere.js'
+    '/entrada/webgl/ambient-atmosphere.js',
+    '/entrada/webgl/world-signage.js'
   ];
 
   const loadScript = (src) => new Promise((resolve, reject) => {
