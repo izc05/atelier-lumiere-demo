@@ -176,7 +176,8 @@ void main() {
   /* Brillo físicamente sugerido, muy controlado para conservar el acabado editorial. */
   float shininess = mix(7.0, 42.0, 1.0 - roughness);
   float specular = pow(max(dot(normal, halfDir), 0.0), shininess) * specularStrength;
-  color += specular * mix(vec3(1.0), vec3(0.96, 0.78, 0.48), float(uMaterial == 6)) * (0.55 + 0.45 * uDetail);
+  float metalTint = uMaterial == 6 ? 1.0 : 0.0;
+  color += specular * mix(vec3(1.0), vec3(0.96, 0.78, 0.48), metalTint) * (0.55 + 0.45 * uDetail);
 
   /* Fibra de papel común a todos los materiales: une la escena visualmente. */
   float fibre = sin(gl_FragCoord.x * 0.31 + gl_FragCoord.y * 0.083 + worldGrain * 7.0) * 0.5 + 0.5;
