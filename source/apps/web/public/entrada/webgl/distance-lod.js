@@ -1,4 +1,4 @@
-/* Atelier Lumière · U3.12 · LOD dinámico por distancia y foco */
+/* Atelier Lumière · U3.12/U3.14 · LOD dinámico por distancia, foco y rendimiento */
 (() => {
   if (!root || typeof drawObject !== 'function') return;
 
@@ -8,7 +8,7 @@
     ? { micro: 18.5, small: 29.0, medium: 45.0 }
     : quality === 'lite'
       ? { micro: 8.5, small: 15.5, medium: 29.0 }
-      : { micro: 13.5, small: 23.0, medium: 38.0 }; // balanced + fallback seguro
+      : { micro: 13.5, small: 23.0, medium: 38.0 };
 
   let frameDrawn = 0;
   let frameSkipped = 0;
@@ -20,6 +20,11 @@
       (a?.[1] || 0) - (b?.[1] || 0),
       (a?.[2] || 0) - (b?.[2] || 0)
     );
+  }
+
+  function runtimeScale() {
+    const value = Number(window.AtelierVillageDynamicDetailScale);
+    return Number.isFinite(value) ? Math.max(.55, Math.min(1.20, value)) : 1;
   }
 
   function objectSize(object) {
@@ -43,7 +48,6 @@
 
   function isProtected(object, size) {
     if (object?.lodAlways === true || object?.existingPlace) return true;
-    /* Terreno, caminos, edificios, cubiertas y piezas de gran silueta nunca se podan. */
     if (size.max >= .72) return true;
     if (size.max >= .42 && size.min >= .08) return true;
     return false;
@@ -56,11 +60,10 @@
   }
 
   function allowedDistance(object, size) {
-    const base = thresholds[tier(size)];
+    const base = thresholds[tier(size)] * runtimeScale();
     const focus = focusPoint();
     if (!focus) return base;
     const objectToFocus = distance3(object?.position, focus);
-    /* El taller enfocado recibe un círculo de detalle más generoso sin inflar todo el pueblo. */
     if (objectToFocus <= 4.6) return base * 1.48;
     if (objectToFocus <= 8.0) return base * 1.18;
     return base * .92;
@@ -78,6 +81,7 @@
     root.dataset.lodDrawn = String(frameDrawn);
     root.dataset.lodSkipped = String(frameSkipped);
     root.dataset.lodQuality = quality;
+    root.dataset.lodRuntimeScale = runtimeScale().toFixed(2);
     frameDrawn = 0;
     frameSkipped = 0;
     lastReport = now;
@@ -98,6 +102,6 @@
   root.dataset.distanceLodMicro = String(thresholds.micro);
   root.dataset.distanceLodSmall = String(thresholds.small);
   root.dataset.distanceLodMedium = String(thresholds.medium);
-  root.dataset.webglPhase = 'u3.12';
-  if (status && !root.dataset.webglError) status.textContent = `U3.12 · detalle adaptativo por distancia · ${quality}`;
+  root.dataset.webglPhase = 'u3.14';
+  if (status && !root.dataset.webglError) status.textContent = `U3.14 · detalle adaptativo por distancia y rendimiento · ${quality}`;
 })();
