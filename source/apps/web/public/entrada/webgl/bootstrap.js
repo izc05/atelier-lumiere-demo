@@ -82,6 +82,7 @@
     '/entrada/webgl/night-life-lighting.js',
     '/entrada/webgl/urban-fine-composition.js',
     '/entrada/webgl/workshop-frontages.js',
+    '/entrada/webgl/workshop-frontage-alignment.js',
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/focus-atmosphere.js',
@@ -122,6 +123,7 @@
         root.dataset.lightingCheckpoint = 'u3.21';
         root.dataset.urbanFineCheckpoint = 'u3.22';
         root.dataset.workshopFrontageCheckpoint = 'u3.23';
+        root.dataset.workshopFrontageAlignmentCheckpoint = 'u3.23';
       }
     } catch (error) {
       console.error(error);
