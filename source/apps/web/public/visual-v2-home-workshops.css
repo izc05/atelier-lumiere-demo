@@ -1,0 +1,315 @@
+/* Atelier Lumière · Visual V2 · Fase 3.1
+ * Talleres seleccionados en HOME: fotografía + identidad del taller.
+ * Solo presentación; los enlaces y datos siguen procediendo del catálogo actual.
+ */
+
+#talleres.manifesto-section {
+  position: relative;
+  padding: var(--v2-section-y) var(--v2-gutter) !important;
+  color: var(--v2-ink-950);
+  background: var(--v2-ivory-100) !important;
+}
+
+#talleres .section-heading {
+  width: min(100%, var(--v2-shell));
+  margin-inline: auto;
+}
+
+#talleres .split-heading {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.18fr) minmax(280px, .62fr) !important;
+  align-items: end;
+  gap: clamp(32px, 7vw, 120px) !important;
+}
+
+#talleres .section-heading .eyebrow {
+  margin-bottom: 18px !important;
+  color: var(--v2-gold-700) !important;
+  font-size: .62rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .2em !important;
+  text-transform: uppercase;
+}
+
+#talleres .section-heading h2 {
+  max-width: 12ch;
+  margin: 0 !important;
+  color: var(--v2-wine-900) !important;
+  font-family: var(--v2-font-display) !important;
+  font-size: var(--v2-display-md) !important;
+  font-weight: 400 !important;
+  line-height: .95 !important;
+  letter-spacing: -.035em !important;
+}
+
+#talleres .section-heading > p,
+#talleres .split-heading > p {
+  max-width: 470px;
+  margin: 0 0 4px !important;
+  color: var(--v2-ink-600) !important;
+  font-size: .96rem !important;
+  line-height: 1.72 !important;
+}
+
+#talleres .atelier-status,
+#talleres .atelier-empty {
+  width: min(100%, var(--v2-shell));
+  margin: 54px auto 0 !important;
+  color: var(--v2-ink-600) !important;
+  border-color: var(--v2-line-soft) !important;
+}
+
+#talleres .atelier-grid-live {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: clamp(24px, 2.6vw, 42px) !important;
+  width: min(100%, var(--v2-shell));
+  margin: clamp(52px, 6vw, 86px) auto 0 !important;
+  align-items: start !important;
+}
+
+#talleres .atelier-grid-live:has(> .workshop-card:nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+#talleres .atelier-grid-live:has(> .workshop-card:first-child:last-child) {
+  grid-template-columns: minmax(0, 720px) !important;
+}
+
+#talleres .workshop-card,
+#talleres .atelier-grid-live .workshop-card:last-child {
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#talleres .workshop-card:hover {
+  box-shadow: none !important;
+  transform: translateY(-2px);
+}
+
+#talleres .workshop-card-link,
+#talleres .atelier-grid-live .workshop-card:last-child .workshop-card-link {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: auto auto !important;
+  min-height: 0 !important;
+  color: inherit;
+  text-decoration: none;
+}
+
+#talleres .workshop-card-media {
+  position: relative;
+  height: clamp(360px, 35vw, 540px) !important;
+  min-height: 360px !important;
+  overflow: hidden !important;
+  border-radius: var(--v2-radius-xs) !important;
+  background: var(--v2-ivory-200) !important;
+}
+
+#talleres .workshop-card-media > img:not(.workshop-brand-logo) {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  object-fit: cover !important;
+  object-position: center;
+  filter: saturate(.93) contrast(1.015) !important;
+  transition: transform 850ms var(--v2-ease-emphasis), filter 420ms ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #talleres .workshop-card:hover .workshop-card-media > img:not(.workshop-brand-logo) {
+    transform: scale(1.025) !important;
+    filter: saturate(.98) contrast(1.02) !important;
+  }
+}
+
+#talleres .workshop-card-veil {
+  height: 30% !important;
+  background: linear-gradient(transparent, rgba(42, 7, 16, .13)) !important;
+}
+
+/* Logo real del taller: se coloca desde visual-v2-home-workshops.js. */
+#talleres .workshop-brand-mark {
+  position: absolute;
+  z-index: 5;
+  right: 18px;
+  bottom: 18px;
+  display: grid;
+  width: clamp(92px, 8vw, 126px);
+  height: clamp(74px, 6.5vw, 98px);
+  place-items: center;
+  padding: 11px 13px;
+  border: 1px solid rgba(79, 16, 32, .12);
+  border-radius: var(--v2-radius-xs);
+  background: rgba(255, 253, 249, .96);
+  box-shadow: 0 10px 30px rgba(42, 7, 16, .1);
+  backdrop-filter: blur(10px);
+}
+
+#talleres .workshop-brand-logo {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-width: 100%;
+  object-fit: contain !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+#talleres .workshop-brand-fallback {
+  color: var(--v2-wine-800);
+  font-family: var(--v2-font-display);
+  font-size: clamp(1.7rem, 2.3vw, 2.4rem);
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+
+#talleres .workshop-card-content {
+  display: flex !important;
+  flex-direction: column;
+  min-height: 0 !important;
+  padding: 24px 0 0 !important;
+  background: transparent !important;
+}
+
+#talleres .workshop-card-topline {
+  margin: 0 0 18px !important;
+  padding: 0 0 13px !important;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+}
+
+#talleres .workshop-card .card-number {
+  color: var(--v2-gold-700) !important;
+  font-family: var(--v2-font-display) !important;
+  font-size: .98rem !important;
+}
+
+#talleres .workshop-location {
+  color: var(--v2-ink-500) !important;
+  font-size: .58rem !important;
+  font-weight: 750 !important;
+  letter-spacing: .13em !important;
+}
+
+#talleres .workshop-card .eyebrow {
+  margin: 0 0 8px !important;
+  color: var(--v2-gold-700) !important;
+  font-size: .58rem !important;
+  letter-spacing: .16em !important;
+}
+
+#talleres .workshop-card h3 {
+  margin: 0 !important;
+  color: var(--v2-wine-900) !important;
+  font-family: var(--v2-font-display) !important;
+  font-size: clamp(2rem, 2.65vw, 3rem) !important;
+  font-weight: 400 !important;
+  line-height: .98 !important;
+}
+
+#talleres .workshop-card-copy {
+  max-width: 48ch;
+  margin: 14px 0 0 !important;
+  color: var(--v2-ink-600) !important;
+  font-size: .9rem !important;
+  line-height: 1.65 !important;
+}
+
+#talleres .workshop-card-signals {
+  gap: 7px 13px !important;
+  margin-top: 18px !important;
+  color: var(--v2-ink-500) !important;
+  font-size: .56rem !important;
+  letter-spacing: .11em !important;
+}
+
+#talleres .workshop-card-signals span + span::before {
+  color: var(--v2-gold-600) !important;
+}
+
+#talleres .workshop-card-action {
+  align-self: flex-start;
+  margin-top: 22px !important;
+  padding: 0 0 6px !important;
+  border-bottom: 1px solid var(--v2-line-strong);
+  color: var(--v2-wine-800) !important;
+  font-size: .59rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .13em !important;
+}
+
+#talleres .section-action {
+  width: min(100%, var(--v2-shell));
+  margin: clamp(42px, 5vw, 70px) auto 0 !important;
+  padding-top: 20px;
+  border-top: 1px solid var(--v2-line-soft);
+}
+
+#talleres .section-action .text-link {
+  color: var(--v2-wine-800) !important;
+  font-size: .63rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .13em !important;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1080px) {
+  #talleres .atelier-grid-live,
+  #talleres .atelier-grid-live:has(> .workshop-card:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  #talleres.manifesto-section {
+    padding: 72px 18px !important;
+  }
+
+  #talleres .split-heading {
+    grid-template-columns: 1fr !important;
+    align-items: start;
+    gap: 22px !important;
+  }
+
+  #talleres .section-heading h2 {
+    max-width: 11ch;
+    font-size: clamp(2.85rem, 12vw, 4.2rem) !important;
+  }
+
+  #talleres .atelier-grid-live,
+  #talleres .atelier-grid-live:has(> .workshop-card:nth-child(2):last-child),
+  #talleres .atelier-grid-live:has(> .workshop-card:first-child:last-child) {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
+    margin-top: 42px !important;
+  }
+
+  #talleres .workshop-card-media {
+    height: clamp(320px, 102vw, 460px) !important;
+    min-height: 320px !important;
+  }
+
+  #talleres .workshop-brand-mark {
+    right: 14px;
+    bottom: 14px;
+    width: 102px;
+    height: 78px;
+  }
+
+  #talleres .workshop-card-content {
+    padding-top: 20px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #talleres .workshop-card,
+  #talleres .workshop-card-media img {
+    transition: none !important;
+  }
+}
