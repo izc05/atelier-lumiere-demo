@@ -53,7 +53,8 @@
     '/entrada/webgl/providers.js',
     '/entrada/webgl/cinematic-camera.js',
     '/entrada/webgl/quality.js',
-    '/entrada/webgl/page-transition.js'
+    '/entrada/webgl/page-transition.js',
+    '/entrada/webgl/cinematic-ui.js'
   ];
 
   const loadScript = (src) => new Promise((resolve, reject) => {
