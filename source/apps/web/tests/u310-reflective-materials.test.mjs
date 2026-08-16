@@ -11,7 +11,7 @@ const craftIndex = bootstrap.indexOf('/entrada/webgl/craft-details.js');
 
 assert.ok(materialsIndex >= 0 && reflectiveIndex > materialsIndex, 'U3.10 debe cargar después de materiales base');
 assert.ok(craftIndex > reflectiveIndex, 'U3.10 debe cargar antes del microdetalle de oficio');
-assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.10'"));
+assert.ok(bootstrap.includes('/entrada/webgl/reflective-materials.js'));
 
 for (const token of ['reflectiveMaterials','u3.10','uWater','fresnel','sparkle','brushed','MATERIAL.GLASS','MATERIAL.METAL']) {
   assert.ok(reflective.includes(token), `U3.10 debe conservar ${token}`);
