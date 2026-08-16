@@ -29,20 +29,24 @@ jobs:
           test -f "$PUBLIC_DIR/entrada/webgl/index.html"
           test -f "$PUBLIC_DIR/village-craft-taxonomy.js"
           test -f "$TOOL_DIR/preview-server.cjs"
+          test -f "$TOOL_DIR/preview-launcher.cjs"
           test -f "$TOOL_DIR/ABRIR_ATELIER_V2.bat"
           test -f "$TOOL_DIR/preview-village-zones.json"
 
           mkdir -p preview/site
           cp -a "$PUBLIC_DIR/." preview/site/
           cp "$TOOL_DIR/preview-server.cjs" preview/
+          cp "$TOOL_DIR/preview-launcher.cjs" preview/
           cp "$TOOL_DIR/ABRIR_ATELIER_V2.bat" preview/
           cp "$TOOL_DIR/LEEME_PRIMERO.txt" preview/
           cp "$TOOL_DIR/preview-village-zones.json" preview/
           printf '%s\n' "${GITHUB_SHA}" > preview/PREVIEW_COMMIT.txt
 
           node --check preview/preview-server.cjs
+          node --check preview/preview-launcher.cjs
           node --check preview/site/village-craft-taxonomy.js
           node --check preview/site/entrada/webgl/craft-architecture.js
+          node --check preview/site/entrada/webgl/map-drag-navigation.js
 
       - name: Guardar preview completa V2
         uses: actions/upload-artifact@v7
