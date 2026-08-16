@@ -31,7 +31,7 @@ for (const token of [
   'suppressClickUntil',
   'nearestPlaceAt',
   'AtelierVillageNavigation?.back',
-  'data-local-navigation-debug',
+  'dataset.localNavigationDebug',
   "mapDragNavigation = 'u3.17n.2'",
   "navigationCheckpoint = 'u3.17n.2'"
 ]) {
