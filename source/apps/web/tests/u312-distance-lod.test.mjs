@@ -17,6 +17,7 @@ for (const token of ['distanceLod','micro','small','medium','focusPoint','object
   assert.ok(lod.includes(token), `U3.12 debe conservar ${token}`);
 }
 for (const quality of ['high','balanced','lite']) assert.ok(lod.includes(quality));
+assert.ok(lod.includes('Array.isArray(config.point)'));
 assert.ok(lod.includes('base * 1.48'));
 assert.ok(lod.includes('base * 1.18'));
 assert.ok(lod.includes('previousDraw(object, vp, cameraPositionValue)'));
