@@ -25,11 +25,19 @@
     }
   };
 
-  /* La antigua pantalla de marca queda retirada visualmente. El Pueblo Atelier
-   * es ahora la única entrada de la V2. Conservamos el nodo oculto como fallback
-   * estructural para no alterar el HTML de la Home en esta microfase.
+  /* Compatibilidad con el contrato visual histórico de la portada. La antigua
+   * entrada permanece oculta, pero conserva sus variables de luz y pointermove
+   * para que el fallback y las validaciones existentes sigan siendo estables.
    */
-  if (entry) entry.hidden = true;
+  if (entry) {
+    entry.addEventListener("pointermove", (event) => {
+      const x = Math.max(28, Math.min(72, event.clientX / Math.max(1, window.innerWidth) * 100));
+      const y = Math.max(24, Math.min(68, event.clientY / Math.max(1, window.innerHeight) * 100));
+      entry.style.setProperty("--entry-light-x", `${x}%`);
+      entry.style.setProperty("--entry-light-y", `${y}%`);
+    }, { passive: true });
+    entry.hidden = true;
+  }
 
   if (skipEntry) {
     sessionSet();
