@@ -1,0 +1,150 @@
+/* Pueblo Atelier · P8.2D · identidad real y talleres dinámicos WebGL */
+
+.webgl-provider-card {
+  position: absolute;
+  z-index: 25;
+  top: 118px;
+  right: clamp(18px,3vw,42px);
+  display: grid;
+  width: min(330px, calc(100vw - 36px));
+  overflow: hidden;
+  border: 1px solid rgba(79,16,32,.14);
+  border-radius: 3px;
+  color: #24191b;
+  background: rgba(255,253,248,.94);
+  box-shadow: 0 20px 58px rgba(49,7,18,.12);
+  backdrop-filter: blur(15px) saturate(1.04);
+  transition: opacity 240ms ease, transform 340ms cubic-bezier(.22,.7,.2,1);
+}
+.webgl-provider-card[hidden] { display: none !important; }
+.webgl-provider-card.is-entering { opacity: 0; transform: translateY(9px); }
+.webgl-provider-media {
+  position: relative;
+  height: 155px;
+  overflow: hidden;
+  background: #eadfce;
+}
+.webgl-provider-media > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(.9) contrast(1.01);
+}
+.webgl-provider-logo {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  display: grid;
+  width: 78px;
+  height: 62px;
+  place-items: center;
+  padding: 7px;
+  border: 1px solid rgba(79,16,32,.12);
+  background: rgba(255,253,248,.96);
+  box-shadow: 0 8px 20px rgba(49,7,18,.1);
+}
+.webgl-provider-logo[hidden] { display: none !important; }
+.webgl-provider-logo img { width: 100%; height: 100%; object-fit: contain; }
+.webgl-provider-body { padding: 16px 18px 18px; }
+.webgl-provider-kicker {
+  margin: 0 0 6px;
+  color: var(--webgl-gold);
+  font-size: .46rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.webgl-provider-card h2 {
+  margin: 0;
+  color: var(--webgl-wine-dark);
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: .96;
+}
+.webgl-provider-copy {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 9px 0 0;
+  color: var(--webgl-muted);
+  font-size: .65rem;
+  line-height: 1.52;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.webgl-provider-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(79,16,32,.1);
+  color: var(--webgl-wine);
+  font-size: .43rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.webgl-provider-signals span + span::before { content: "·"; margin-right: 12px; color: var(--webgl-gold); }
+.webgl-provider-enter {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 13px;
+  padding: 8px 11px;
+  border: 1px solid rgba(79,16,32,.16);
+  border-radius: 999px;
+  color: #fffdf8;
+  background: var(--webgl-wine);
+  font-size: .45rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.webgl-provider-enter:hover,
+.webgl-provider-enter:focus-visible { outline: none; background: var(--webgl-wine-dark); border-color: rgba(167,131,66,.64); }
+
+.webgl-village-legend.has-dynamic-providers {
+  display: flex;
+  width: min(1020px, calc(100% - 150px));
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+.webgl-village-legend.has-dynamic-providers button {
+  flex: 0 0 172px;
+  scroll-snap-align: center;
+}
+
+@media (max-width: 980px) and (min-width: 761px) {
+  .webgl-provider-card { top: 104px; right: 18px; width: 292px; }
+  .webgl-provider-media { height: 135px; }
+  .webgl-village-legend.has-dynamic-providers { left: 18px; right: 80px; width: auto; }
+}
+@media (max-width: 760px) {
+  .webgl-provider-card {
+    top: auto;
+    left: 10px;
+    right: 10px;
+    bottom: 72px;
+    width: auto;
+    grid-template-columns: 100px minmax(0,1fr);
+    max-height: 154px;
+  }
+  .webgl-provider-media { height: 100%; min-height: 152px; }
+  .webgl-provider-logo { left: 7px; right: auto; bottom: 7px; width: 66px; height: 50px; padding: 5px; }
+  .webgl-provider-body { min-width: 0; padding: 12px 13px; }
+  .webgl-provider-card h2 { overflow: hidden; font-size: 1.25rem; text-overflow: ellipsis; white-space: nowrap; }
+  .webgl-provider-copy { margin-top: 5px; font-size: .56rem; -webkit-line-clamp: 2; }
+  .webgl-provider-signals { margin-top: 7px; padding-top: 7px; font-size: .39rem; }
+  .webgl-provider-enter { width: 100%; min-height: 28px; margin-top: 7px; padding: 5px 8px; font-size: .4rem; }
+  .webgl-village-legend.has-dynamic-providers { left: 10px; right: 10px; width: auto; }
+  .webgl-village-legend.has-dynamic-providers button { flex-basis: 148px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .webgl-provider-card { transition: none !important; }
+}
