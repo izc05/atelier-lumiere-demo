@@ -1,0 +1,214 @@
+/* Atelier Lumière · U3.2 · placas de talleres ancladas al mundo 3D */
+.webgl-workshop-plaques {
+  position: absolute;
+  z-index: 12;
+  inset: 0;
+  pointer-events: none;
+}
+
+.webgl-workshop-plaque {
+  --plaque-scale: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  min-width: 142px;
+  max-width: 190px;
+  justify-items: center;
+  padding-top: 27px;
+  border: 0;
+  color: #f8ead6;
+  background: transparent;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: .92;
+  transform: translate(-50%, -100%) scale(var(--plaque-scale));
+  transform-origin: 50% 100%;
+  transition: opacity 220ms ease, filter 220ms ease;
+}
+
+.webgl-workshop-plaque-logo {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 50%;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(218,177,105,.72);
+  border-radius: 50%;
+  color: #f2d18e;
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255,255,255,.09), transparent 42%),
+    #4b1421;
+  box-shadow: 0 7px 24px rgba(0,0,0,.34), 0 0 0 4px rgba(52,22,19,.56);
+  transform: translateX(-50%);
+}
+
+.webgl-workshop-plaque-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 7px;
+  background: rgba(250,241,225,.96);
+}
+
+.webgl-workshop-plaque-logo span {
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: .82rem;
+  letter-spacing: .04em;
+}
+
+.webgl-workshop-plaque-copy {
+  position: relative;
+  display: grid;
+  width: 100%;
+  gap: 3px;
+  padding: 21px 14px 11px;
+  border: 1px solid rgba(218,177,105,.38);
+  border-radius: 2px;
+  background:
+    linear-gradient(145deg, rgba(88,24,38,.96), rgba(48,14,22,.94));
+  box-shadow: 0 14px 34px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter: blur(10px);
+}
+
+.webgl-workshop-plaque strong {
+  overflow: hidden;
+  color: #fff1de;
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: .86rem;
+  font-weight: 400;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.webgl-workshop-plaque small {
+  overflow: hidden;
+  color: rgba(244,217,180,.72);
+  font-size: .48rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.webgl-workshop-plaque::after {
+  content: "";
+  width: 1px;
+  height: 21px;
+  background: linear-gradient(to bottom, rgba(218,177,105,.74), transparent);
+}
+
+.webgl-workshop-plaque:hover,
+.webgl-workshop-plaque:focus-visible,
+.webgl-workshop-plaque.is-selected {
+  z-index: 4;
+  outline: none;
+  opacity: 1;
+  filter: brightness(1.08);
+  --plaque-scale: 1.06;
+}
+
+.webgl-workshop-plaque.is-muted {
+  opacity: .28;
+  filter: saturate(.72);
+}
+
+.webgl-enter-atelier {
+  position: absolute;
+  z-index: 24;
+  top: 112px;
+  right: clamp(20px,4vw,64px);
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 10px;
+  min-width: 150px;
+  align-items: center;
+  padding: 10px 13px;
+  border: 1px solid rgba(216,174,104,.26);
+  border-radius: 2px;
+  color: #f3dfbf;
+  background: rgba(41,23,19,.65);
+  box-shadow: 0 14px 40px rgba(0,0,0,.20);
+  text-decoration: none;
+  backdrop-filter: blur(14px);
+}
+
+.webgl-enter-atelier-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(216,174,104,.5);
+  border-radius: 50%;
+  color: #d9b66f;
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: .72rem;
+}
+
+.webgl-enter-atelier strong {
+  display: block;
+  font-size: .53rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.webgl-enter-atelier small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(237,217,190,.60);
+  font-size: .45rem;
+}
+
+.webgl-enter-atelier:hover,
+.webgl-enter-atelier:focus-visible {
+  outline: none;
+  border-color: rgba(224,188,119,.58);
+  background: rgba(78,26,34,.82);
+}
+
+@media (max-width: 980px) {
+  .webgl-workshop-plaque {
+    min-width: 126px;
+    max-width: 158px;
+  }
+  .webgl-workshop-plaque-logo { width: 46px; height: 46px; }
+  .webgl-workshop-plaque-copy { padding: 18px 10px 9px; }
+  .webgl-enter-atelier { top: 90px; right: 22px; }
+}
+
+@media (max-width: 760px) {
+  .webgl-workshop-plaque {
+    min-width: 104px;
+    max-width: 120px;
+    padding-top: 20px;
+  }
+  .webgl-workshop-plaque-logo { width: 38px; height: 38px; }
+  .webgl-workshop-plaque-logo img { padding: 5px; }
+  .webgl-workshop-plaque-copy { padding: 15px 8px 7px; }
+  .webgl-workshop-plaque strong { font-size: .66rem; }
+  .webgl-workshop-plaque small { font-size: .40rem; }
+  .webgl-workshop-plaque::after { height: 13px; }
+  .webgl-enter-atelier {
+    top: 78px;
+    right: 10px;
+    grid-template-columns: 28px 1fr;
+    min-width: 0;
+    padding: 7px 9px;
+  }
+  .webgl-enter-atelier-mark { width: 27px; height: 27px; }
+  .webgl-enter-atelier small { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-workshop-plaque,
+  .webgl-enter-atelier { transition: none !important; }
+}
