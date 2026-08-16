@@ -1,0 +1,49 @@
+name: Empaquetar preview completa V2
+
+on:
+  pull_request:
+    paths:
+      - "source/apps/web/public/**"
+      - "tools/preview-local/**"
+      - ".github/workflows/package-full-v2-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-full-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v7
+
+      - name: Preparar preview completa local
+        shell: bash
+        run: |
+          set -euo pipefail
+          PUBLIC_DIR="source/apps/web/public"
+          TOOL_DIR="tools/preview-local"
+
+          test -f "$PUBLIC_DIR/index.html"
+          test -f "$PUBLIC_DIR/entrada/webgl/index.html"
+          test -f "$TOOL_DIR/preview-server.cjs"
+          test -f "$TOOL_DIR/ABRIR_ATELIER_V2.bat"
+
+          mkdir -p preview/site
+          cp -a "$PUBLIC_DIR/." preview/site/
+          cp "$TOOL_DIR/preview-server.cjs" preview/
+          cp "$TOOL_DIR/ABRIR_ATELIER_V2.bat" preview/
+          cp "$TOOL_DIR/LEEME_PRIMERO.txt" preview/
+          printf '%s\n' "${GITHUB_SHA}" > preview/PREVIEW_COMMIT.txt
+
+          node --check preview/preview-server.cjs
+
+      - name: Guardar preview completa V2
+        uses: actions/upload-artifact@v7
+        with:
+          name: atelier-v2-completo-${{ github.sha }}
+          path: preview
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 9
