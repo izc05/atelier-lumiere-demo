@@ -86,6 +86,7 @@
     '/entrada/webgl/plaque-polish.js',
     '/entrada/webgl/spatial-navigation.js',
     '/entrada/webgl/final-art-direction.js',
+    '/entrada/webgl/capture-tuning.js',
     '/entrada/webgl/arrival-transition.js'
   ];
 
@@ -103,7 +104,7 @@
       for (const src of scripts) await loadScript(src);
       if (root) {
         root.dataset.webglBootstrapped = 'true';
-        root.dataset.graphicsCheckpoint = 'u3.15';
+        root.dataset.graphicsCheckpoint = 'u3.16';
       }
     } catch (error) {
       console.error(error);
