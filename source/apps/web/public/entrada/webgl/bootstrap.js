@@ -79,6 +79,7 @@
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/focus-atmosphere.js',
+    '/entrada/webgl/distance-lod.js',
     '/entrada/webgl/workshop-plaques.js',
     '/entrada/webgl/plaque-polish.js',
     '/entrada/webgl/spatial-navigation.js',
@@ -99,7 +100,7 @@
       for (const src of scripts) await loadScript(src);
       if (root) {
         root.dataset.webglBootstrapped = 'true';
-        root.dataset.graphicsCheckpoint = 'u3.11';
+        root.dataset.graphicsCheckpoint = 'u3.12';
       }
     } catch (error) {
       console.error(error);
