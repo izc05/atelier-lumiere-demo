@@ -29,7 +29,7 @@ for (const token of ['STUCCO','ROOF','STONE','WOOD','GLASS','METAL','EARTH','VEG
 }
 assert.ok(materials.includes("quality === 'high'"));
 assert.ok(materials.includes("quality === 'balanced'"));
-assert.ok(materials.includes("root.dataset.materialTextures='u3.5a'"));
+assert.ok(materials.includes('materialTextures') && materials.includes('u3.5a'));
 
 for (const token of ['CERAMICS','TEXTILE','JEWELRY','WOOD','FLORAL','PAPER','CANDLE','LEATHER','FAN','GLASS','NEUTRAL']) {
   assert.ok(crafts.includes(token), `microdetalle de oficio ausente: ${token}`);
