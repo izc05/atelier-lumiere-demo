@@ -2,6 +2,7 @@
   "use strict";
 
   const SESSION_KEY = "atelier_brand_entry_seen";
+  const ARRIVAL_KEY = "atelier_arrival_from_entry";
   const OFFICIAL_LOGO = "/assets/brand/atelier-logo-official-light.svg";
   const VILLAGE_URL = "/entrada/webgl/";
   const entry = document.getElementById("brand-entry");
@@ -91,6 +92,10 @@
     try { sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* almacenamiento no disponible */ }
   };
 
+  const markArrival = () => {
+    try { sessionStorage.setItem(ARRIVAL_KEY, "1"); } catch { /* almacenamiento no disponible */ }
+  };
+
   const cameFromInternalPage = () => {
     if (!document.referrer) return false;
     try {
@@ -160,6 +165,7 @@
     opening = true;
     if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
     sessionSet();
+    markArrival();
     entry.classList.add("is-opening");
     entry.setAttribute("aria-busy", "true");
 
