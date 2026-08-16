@@ -1,0 +1,326 @@
+/* Atelier Lumière · U3.18 · noche cálida de referencia */
+
+.webgl-village[data-reference-night-direction="u3.18"] {
+  --u318-night: #171113;
+  --u318-night-soft: #241718;
+  --u318-gold: #d1a65c;
+  --u318-wine: #581527;
+  background:
+    radial-gradient(ellipse at 52% 43%, rgba(143,83,49,.13), transparent 31rem),
+    radial-gradient(circle at 78% 18%, rgba(115,64,43,.09), transparent 26rem),
+    linear-gradient(155deg,#1b1214 0%,#100b0d 62%,#080708 100%);
+}
+
+.webgl-village[data-reference-night-direction="u3.18"]::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 52%, rgba(248,175,82,.055), transparent 24%),
+    radial-gradient(circle at 38% 47%, rgba(219,132,63,.038), transparent 17%),
+    radial-gradient(circle at 69% 60%, rgba(226,146,68,.034), transparent 18%);
+  mix-blend-mode: screen;
+  opacity: .88;
+}
+
+.webgl-village[data-reference-night-direction="u3.18"]::after {
+  background:
+    radial-gradient(ellipse at 50% 47%, transparent 30%, rgba(7,5,6,.08) 60%, rgba(5,4,5,.42) 100%),
+    linear-gradient(180deg, rgba(3,3,4,.20), transparent 18% 71%, rgba(5,4,5,.27)),
+    repeating-linear-gradient(7deg, rgba(255,222,173,.008) 0 1px, transparent 1px 6px);
+  mix-blend-mode: multiply;
+  opacity: 1;
+}
+
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-canvas {
+  filter: saturate(1.18) contrast(1.13) brightness(1.015) sepia(.045);
+}
+
+.webgl-village[data-reference-night-direction="u3.18"] .u35-lighting-wash {
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,176,81,.12), transparent 31%),
+    radial-gradient(circle at 18% 10%, rgba(101,93,92,.055), transparent 30%),
+    radial-gradient(circle at 82% 86%, rgba(120,57,39,.08), transparent 35%),
+    linear-gradient(180deg, rgba(55,38,36,.04), rgba(20,8,10,.10));
+  mix-blend-mode: screen;
+  opacity: .82;
+}
+.webgl-village[data-reference-night-direction="u3.18"] .u35-lighting-vignette {
+  background: radial-gradient(ellipse at 50% 49%, transparent 44%, rgba(7,4,5,.16) 74%, rgba(4,3,4,.39) 100%);
+  box-shadow: inset 0 0 13vw rgba(5,3,4,.18), inset 0 -9vw 18vw rgba(5,3,4,.20);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .u35-world-glow {
+  --u35-opacity: .20;
+  filter: blur(7px) saturate(1.10);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .u35-world-glow[data-place="atelier"] {
+  --u35-size: 285px;
+  --u35-opacity: .23;
+}
+.webgl-village[data-reference-night-direction="u3.18"] .u35-world-glow.is-selected { --u35-opacity: .30; }
+
+/* Cabecera de museo: solo marca y acciones; la escena ocupa el protagonismo. */
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-header {
+  display: flex;
+  min-height: 82px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px clamp(22px,3.2vw,52px) 10px;
+  background: linear-gradient(to bottom, rgba(8,6,7,.56), rgba(8,6,7,.16) 68%, transparent);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-brand {
+  width: clamp(205px,13vw,252px);
+  min-height: 46px;
+  opacity: .97;
+  filter: drop-shadow(0 5px 22px rgba(0,0,0,.24));
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-heading { display: none !important; }
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-fallback {
+  margin-top: 1px;
+  padding: 8px 11px;
+  border-color: rgba(216,174,104,.15);
+  color: rgba(240,215,174,.48);
+  background: rgba(28,15,16,.28);
+  font-size: .44rem;
+  backdrop-filter: blur(10px);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-fallback:hover,
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-fallback:focus-visible {
+  color: rgba(250,227,187,.88);
+  border-color: rgba(216,174,104,.36);
+  background: rgba(63,25,31,.56);
+}
+
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-enter-atelier {
+  top: 44px;
+  right: clamp(22px,3.2vw,52px);
+  min-width: 178px;
+  padding: 11px 14px;
+  border-color: rgba(216,174,104,.36);
+  color: #f0dbb7;
+  background: linear-gradient(145deg, rgba(80,27,36,.82), rgba(31,16,17,.86));
+  box-shadow: 0 14px 34px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,230,184,.025);
+  backdrop-filter: blur(15px) saturate(1.05);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-enter-atelier-mark {
+  border-color: rgba(222,178,96,.60);
+  color: #e0b969;
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-enter-atelier small { color: rgba(237,217,190,.56); }
+
+/* Tras unos segundos queda una vista casi puramente cartográfica. */
+.webgl-village[data-reference-night-direction="u3.18"][data-scene-ui="overview"] .webgl-village-caption {
+  left: clamp(24px,3.6vw,58px);
+  bottom: 86px;
+  width: min(270px,22vw);
+  opacity: .58;
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+.webgl-village[data-reference-night-direction="u3.18"][data-scene-ui="overview"] .webgl-village-caption p {
+  color: rgba(218,170,92,.72);
+  font-size: .38rem;
+  letter-spacing: .23em;
+}
+.webgl-village[data-reference-night-direction="u3.18"][data-scene-ui="overview"] .webgl-village-caption h1 {
+  max-width: 14ch;
+  color: rgba(255,239,213,.78);
+  font-size: clamp(1.18rem,1.65vw,1.72rem);
+  line-height: .98;
+  text-shadow: 0 2px 20px rgba(0,0,0,.26);
+}
+.webgl-village[data-reference-night-direction="u3.18"][data-scene-ui="overview"] .webgl-village-caption > span {
+  color: rgba(241,220,190,.46);
+  font-size: .43rem;
+}
+.webgl-village[data-reference-night-direction="u3.18"][data-scene-ui="overview"][data-ui-settled="true"] .webgl-village-caption {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* Placas más cercanas a la maqueta de referencia. */
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-workshop-plaque {
+  min-width: 124px;
+  max-width: 166px;
+  padding-top: 24px;
+  opacity: .94;
+  filter: drop-shadow(0 12px 19px rgba(0,0,0,.20));
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-workshop-plaque-logo {
+  width: 47px;
+  height: 47px;
+  border-color: rgba(228,190,116,.72);
+  background: linear-gradient(145deg, rgba(89,25,39,.96), rgba(41,13,20,.98));
+  box-shadow: 0 7px 18px rgba(0,0,0,.35), 0 0 0 3px rgba(52,22,19,.48), inset 0 0 0 1px rgba(255,230,184,.06);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-workshop-plaque-copy {
+  padding: 19px 12px 9px;
+  border-color: rgba(219,177,101,.38);
+  background: linear-gradient(145deg, rgba(91,23,39,.97), rgba(45,12,21,.95));
+  box-shadow: 0 10px 25px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,231,190,.025);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-workshop-plaque strong {
+  color: #f2ddbd;
+  font-size: .75rem;
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-workshop-plaque.is-muted { opacity: .055; }
+
+/* La navegación inferior funciona como una única pieza de mobiliario. */
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend,
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend.has-dynamic-providers {
+  bottom: max(18px,env(safe-area-inset-bottom));
+  width: min(760px,calc(100% - 260px));
+  max-width: none;
+  min-height: 48px;
+  border: 1px solid rgba(215,174,102,.26);
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(47,20,23,.91), rgba(28,15,16,.91));
+  box-shadow: 0 18px 40px rgba(0,0,0,.24), inset 0 0 0 1px rgba(255,229,180,.025);
+  backdrop-filter: blur(15px) saturate(1.02);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend button,
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend.has-dynamic-providers button {
+  min-width: 118px;
+  min-height: 47px;
+  padding: 7px 14px;
+  color: rgba(245,225,194,.87);
+  border-right-color: rgba(219,181,114,.13);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend b { color: #d7aa60; font-size: .64rem; }
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend span { font-size: .68rem; }
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend button:hover,
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend button:focus-visible,
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend button.is-active {
+  background: linear-gradient(90deg, rgba(99,28,44,.88), rgba(72,22,32,.82));
+}
+
+/* Control vertical compacto, próximo al rail de la referencia. */
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls {
+  right: clamp(12px,1.55vw,24px);
+  top: 50%;
+  bottom: auto;
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 7px 5px;
+  border: 1px solid rgba(215,174,102,.23);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(43,20,21,.87), rgba(24,13,14,.91));
+  box-shadow: 0 14px 36px rgba(0,0,0,.24), inset 0 0 0 1px rgba(255,229,180,.02);
+  opacity: .86;
+  transform: translateY(-50%);
+  backdrop-filter: blur(13px) saturate(.96);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls button {
+  width: 35px;
+  height: 37px;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(220,185,122,.12);
+  border-radius: 0;
+  color: rgba(239,212,165,.86);
+  background: transparent;
+  box-shadow: none;
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls button:last-child { border-bottom: 0; }
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls button:hover,
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls button:focus-visible {
+  transform: none;
+  color: #f5dfb8;
+  background: rgba(103,34,45,.48);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls button[data-spatial-action="back"] {
+  margin: 0 0 3px;
+  border-bottom-color: rgba(220,185,122,.18);
+}
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-help,
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-quality-badge,
+.webgl-village[data-reference-night-direction="u3.18"] .webgl-village-status {
+  display: none !important;
+}
+
+@media (max-width: 1050px) {
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-canvas {
+    filter: saturate(1.13) contrast(1.10) brightness(1.02) sepia(.035);
+  }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-enter-atelier { top: 38px; right: 18px; }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend,
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend.has-dynamic-providers {
+    left: 16px;
+    right: 76px;
+    width: auto;
+    max-width: none;
+    transform: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-header {
+    min-height: 60px;
+    padding: 10px 12px 6px;
+  }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-brand { width: 150px; }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-fallback { display: none; }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-enter-atelier {
+    top: 12px;
+    right: 10px;
+    min-width: 0;
+    grid-template-columns: 30px;
+    padding: 7px;
+  }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-enter-atelier > span:last-child { display: none; }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-enter-atelier-mark { width: 30px; height: 30px; }
+  .webgl-village[data-reference-night-direction="u3.18"][data-scene-ui="overview"] .webgl-village-caption {
+    left: 11px;
+    bottom: 64px;
+    width: min(190px,54vw);
+    opacity: .45;
+  }
+  .webgl-village[data-reference-night-direction="u3.18"][data-scene-ui="overview"] .webgl-village-caption h1 { font-size: 1.06rem; }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-workshop-plaque {
+    min-width: 94px;
+    max-width: 112px;
+    padding-top: 19px;
+  }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-workshop-plaque-logo { width: 36px; height: 36px; }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-workshop-plaque strong { font-size: .61rem; }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend,
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend.has-dynamic-providers {
+    left: 6px;
+    right: 6px;
+    bottom: max(6px,env(safe-area-inset-bottom));
+    min-height: 43px;
+    border-radius: 10px;
+  }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend button,
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-legend.has-dynamic-providers button {
+    flex-basis: 108px;
+    min-width: 108px;
+    min-height: 42px;
+    padding: 6px 9px;
+  }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls {
+    top: auto;
+    right: 8px;
+    bottom: 58px;
+    grid-template-columns: repeat(4,32px);
+    gap: 2px;
+    padding: 4px;
+    border-radius: 14px;
+    transform: none;
+  }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls button {
+    width: 32px;
+    height: 32px;
+    border-right: 1px solid rgba(220,185,122,.10);
+    border-bottom: 0;
+  }
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-spatial-controls button[data-spatial-action="back"] {
+    grid-column: auto;
+    margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-village[data-reference-night-direction="u3.18"] .webgl-village-caption { transition: none !important; }
+}
