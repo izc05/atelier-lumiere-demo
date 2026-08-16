@@ -1,4 +1,4 @@
-/* Atelier Lumière · U3.2/U3.3B · placas proyectadas desde zonas 3D */
+/* Atelier Lumière · U3.2/U3.3B · placas proyectadas y adaptativas */
 (() => {
   const styleHref = '/entrada/webgl/workshop-plaques.css';
   if (!document.querySelector(`link[href="${styleHref}"]`)) {
@@ -28,7 +28,7 @@
 
   const qualityLimit = () => {
     const quality = typeof webglQualityMode === 'string' ? webglQualityMode : 'balanced';
-    return quality === 'high' ? 18 : quality === 'balanced' ? 8 : 4;
+    return quality === 'high' ? 18 : quality === 'balanced' ? 10 : 5;
   };
 
   function initials(value) {
@@ -56,7 +56,7 @@
       .map(([name]) => [name, webglInteractionPlaces[name]])
       .filter(([, config]) => Boolean(config));
     const dynamic = Object.entries(webglDynamicProviderPlaces || {});
-    return [...base, ...dynamic].slice(0, qualityLimit());
+    return [...base, ...dynamic];
   }
 
   function createPlaque(name, config, index) {
@@ -127,18 +127,39 @@
     const selected = typeof webglSelectedPlace === 'string' ? webglSelectedPlace : 'overview';
     const focused = selected && selected !== 'overview';
     const distanceScale = clamp(1.16 - (camera.distance - 12) * .012, .76, 1.05);
+    const centerX = rootRect.width / 2;
+    const centerY = rootRect.height / 2;
+    const projected = [];
 
     for (const [name, config] of visiblePlaces) {
+      const screen = webglProjectPoint(config.point);
+      const localX = screen?.x - rootRect.left;
+      const localY = screen?.y - rootRect.top;
+      const inside = screen?.visible
+        && localX > -120 && localX < rootRect.width + 120
+        && localY > 60 && localY < rootRect.height - 40;
+      if (!inside) continue;
+      const priority = name === selected
+        ? -1e6
+        : Math.hypot(localX - centerX, localY - centerY);
+      projected.push({ name, config, screen, localX, localY, priority });
+    }
+
+    projected.sort((left, right) => left.priority - right.priority);
+    const allowed = new Set(projected.slice(0, qualityLimit()).map((item) => item.name));
+    const byName = new Map(projected.map((item) => [item.name, item]));
+
+    for (const [name] of visiblePlaces) {
       const plaque = plaqueByPlace.get(name);
       if (!plaque) continue;
-      const screen = webglProjectPoint(config.point);
-      if (!screen?.visible) {
+      const item = byName.get(name);
+      if (!item || !allowed.has(name)) {
         plaque.hidden = true;
         continue;
       }
       plaque.hidden = false;
-      plaque.style.left = `${screen.x - rootRect.left}px`;
-      plaque.style.top = `${screen.y - rootRect.top - 12}px`;
+      plaque.style.left = `${item.localX}px`;
+      plaque.style.top = `${item.localY - 12}px`;
       plaque.style.setProperty('--plaque-scale', String(name === selected ? Math.min(1.12, distanceScale + .13) : distanceScale));
       plaque.classList.toggle('is-selected', name === selected);
       plaque.classList.toggle('is-muted', focused && name !== selected);
