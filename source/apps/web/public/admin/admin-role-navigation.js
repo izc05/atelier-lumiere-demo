@@ -2,9 +2,24 @@ const currentPath = window.location.pathname;
 const isEditorialSection = currentPath.startsWith("/admin/articulos/")
   || currentPath.startsWith("/admin/publicaciones/")
   || currentPath.startsWith("/admin/talleres/");
+const isPlatformOwnerSection = currentPath.startsWith("/admin/escaparate/");
 
 function hideLinks(path) {
   for (const link of document.querySelectorAll(`a[href="${path}"]`)) link.hidden = true;
+}
+
+function ensureShowcaseLink() {
+  for (const actions of document.querySelectorAll(".top-actions")) {
+    if (actions.querySelector('a[href="/admin/escaparate/"]')) continue;
+    const link = document.createElement("a");
+    link.href = "/admin/escaparate/";
+    link.textContent = "Escaparate";
+    link.className = currentPath.startsWith("/admin/escaparate/") ? "button secondary" : "button ghost";
+    if (currentPath.startsWith("/admin/escaparate/")) link.setAttribute("aria-current", "page");
+    const logout = [...actions.querySelectorAll("button")]
+      .find((button) => button.textContent.trim().toLocaleLowerCase("es").includes("cerrar sesión"));
+    actions.insertBefore(link, logout || null);
+  }
 }
 
 function targetForRole(role) {
@@ -28,7 +43,14 @@ async function applyAdminRoleNavigation() {
     const role = payload.account?.role;
     document.body.dataset.adminRole = role || "UNKNOWN";
 
-    if (role === "PLATFORM_OWNER") return;
+    if (role === "PLATFORM_OWNER") {
+      ensureShowcaseLink();
+      return;
+    }
+    if (isPlatformOwnerSection) {
+      window.location.replace(targetForRole(role));
+      return;
+    }
     if (role === "EDITORIAL_REVIEWER") {
       hideLinks("/admin/proveedores/");
       return;
