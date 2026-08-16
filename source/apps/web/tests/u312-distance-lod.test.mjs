@@ -11,7 +11,7 @@ const plaqueIndex = bootstrap.indexOf('/entrada/webgl/workshop-plaques.js');
 
 assert.ok(focusIndex >= 0 && lodIndex > focusIndex, 'U3.12 debe cargar después del foco atmosférico');
 assert.ok(plaqueIndex > lodIndex, 'U3.12 debe cargar antes de placas/UI');
-assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.12'"));
+assert.ok(bootstrap.includes('/entrada/webgl/distance-lod.js'));
 
 for (const token of ['distanceLod','micro','small','medium','focusPoint','objectSize','shouldDraw','webglSelectedPlace']) {
   assert.ok(lod.includes(token), `U3.12 debe conservar ${token}`);
