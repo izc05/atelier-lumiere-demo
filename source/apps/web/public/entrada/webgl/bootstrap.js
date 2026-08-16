@@ -1,4 +1,4 @@
-/* Pueblo Atelier · P8.2E.1 · bootstrap seguro WebGL/fallback */
+/* Pueblo Atelier · bootstrap seguro WebGL/fallback */
 
 (() => {
   const root = document.querySelector('[data-webgl-village]');
@@ -59,7 +59,8 @@
     '/entrada/webgl/authored-landscape.js',
     '/entrada/webgl/quality.js',
     '/entrada/webgl/page-transition.js',
-    '/entrada/webgl/cinematic-ui.js'
+    '/entrada/webgl/cinematic-ui.js',
+    '/entrada/webgl/overview-composition.js'
   ];
 
   const loadScript = (src) => new Promise((resolve, reject) => {
