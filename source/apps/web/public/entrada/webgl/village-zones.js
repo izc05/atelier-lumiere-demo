@@ -87,13 +87,13 @@
       usedZones.add(zone.zoneKey);
     }
 
-    /* 2. Compatibilidad con los dos talleres de laboratorio mientras no se configuren. */
+    /* 2. Compatibilidad de laboratorio solo para zonas todavía sin configurar. */
     for (const provider of availableProviders) {
       const slug = providerSlug(provider);
       if (usedProviders.has(slug)) continue;
       const signatureKey = legacySignature(provider);
       if (!signatureKey || usedZones.has(signatureKey) || isHidden(signatureKey)) continue;
-      if (explicitProvider(signatureKey)) continue;
+      if (configured(signatureKey)) continue;
       const zone = registryByKey.get(signatureKey);
       if (!zone) continue;
       result.push(assignment(zone, provider, 'legacy-signature'));
@@ -101,10 +101,10 @@
       usedZones.add(signatureKey);
     }
 
-    /* 3. El resto ocupa únicamente zonas libres; el orden deja de ser identidad permanente. */
+    /* 3. Solo las zonas nunca configuradas aceptan relleno automático. */
     const freeZones = registry.filter((zone) => {
       if (usedZones.has(zone.zoneKey) || isHidden(zone.zoneKey)) return false;
-      if (explicitProvider(zone.zoneKey)) return false;
+      if (configured(zone.zoneKey)) return false;
       return !zone.existingPlace;
     });
     let freeIndex = 0;
