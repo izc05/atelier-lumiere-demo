@@ -49,6 +49,7 @@
     '/entrada/webgl/architectural-families.js',
     '/entrada/webgl/illustration-render.js',
     '/entrada/webgl/transition.js',
+    '/entrada/webgl/village-zones.js',
     '/entrada/webgl/provider-reservations.js',
     '/entrada/webgl/providers.js',
     '/entrada/webgl/parcel-highlights.js',
