@@ -63,7 +63,8 @@
     '/entrada/webgl/overview-composition.js',
     '/entrada/webgl/ambient-atmosphere.js',
     '/entrada/webgl/world-signage.js',
-    '/entrada/webgl/distant-depth.js'
+    '/entrada/webgl/distant-depth.js',
+    '/entrada/webgl/arrival-transition.js'
   ];
 
   const loadScript = (src) => new Promise((resolve, reject) => {
