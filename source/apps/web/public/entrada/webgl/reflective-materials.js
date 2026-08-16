@@ -51,7 +51,7 @@ float hash21(vec2 p){
 }
 float noise2(vec2 p){
   vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
-  float a=hash21(i),b=hash21(i+vec2(1,0)),c=hash21(i+vec2(0,1)),d=hash21(i+vec2(1,1));
+  float a=hash21(i),b=hash21(i+vec2(1.0,0.0)),c=hash21(i+vec2(0.0,1.0)),d=hash21(i+vec2(1.0,1.0));
   return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);
 }
 
@@ -70,7 +70,6 @@ void main(){
     float waveB=sin(vWorld.z*3.0-vWorld.x*.55-uTime*.31);
     float ripple=(waveA+waveB)*.5;
     float sparkle=pow(max(dot(n,halfDir),0.0),42.0);
-    float sky=max(0.0,.55+n.y*.45);
     vec3 reflection=mix(uPaperColor,vec3(.77,.84,.82),.35+.22*fresnel);
 
     if(uWater>.5){
