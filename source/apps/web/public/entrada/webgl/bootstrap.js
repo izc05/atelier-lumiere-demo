@@ -71,6 +71,7 @@
     '/entrada/webgl/material-textures.js',
     '/entrada/webgl/craft-details.js',
     '/entrada/webgl/landscape-details.js',
+    '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/workshop-plaques.js',
     '/entrada/webgl/spatial-navigation.js',
