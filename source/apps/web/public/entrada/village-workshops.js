@@ -3,7 +3,23 @@ const VILLAGE_PROVIDER_MATCHERS = Object.freeze({
   stitch: (provider) => normalizeVillageName(provider.displayName).includes("gentle stitch") || normalizeVillageName(provider.slug).includes("gentle-stitch")
 });
 
+const VILLAGE_DYNAMIC_PARCELS = Object.freeze([
+  { x: 884, y: 420, house: ".house--4" },
+  { x: 1624, y: 450, house: ".house--6" },
+  { x: 2234, y: 500, house: ".house--8" },
+  { x: 744, y: 785, house: ".house--11" },
+  { x: 1494, y: 755, house: ".house--13" },
+  { x: 2004, y: 785, house: ".house--15" },
+  { x: 854, y: 1150, house: ".house--18" },
+  { x: 1464, y: 1150, house: ".house--20" },
+  { x: 1934, y: 1200, house: ".house--22" },
+  { x: 2154, y: 1290, house: ".house--23" },
+  { x: 234, y: 380, house: ".house--1" },
+  { x: 1434, y: 340, house: ".house--5" }
+]);
+
 const VILLAGE_REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
+const wiredEntryHits = new WeakSet();
 let villageProvidersPromise = null;
 let villageProviderByPlace = new Map();
 let villageLeaving = false;
@@ -25,6 +41,21 @@ function normalizeVillageName(value) {
     .trim();
 }
 
+function villagePlaceSlug(value) {
+  const normalized = normalizeVillageName(value)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+  return normalized ? `provider-${normalized}` : "";
+}
+
+function villageInitials(value) {
+  const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "AL";
+  if (parts.length === 1) return parts[0].slice(0, 3).toLocaleUpperCase("es");
+  return `${parts[0][0]}${parts.at(-1)[0]}`.toLocaleUpperCase("es");
+}
+
 function villageMediaUrl(path, width = 640) {
   if (typeof path !== "string" || !path.startsWith("/api/")) return null;
   const internal = path.replace(/^\/api\//, "/internal/");
@@ -37,12 +68,26 @@ function preferredVillageMedia(provider) {
   return provider?.cover || provider?.gallery?.[0] || provider?.logo || null;
 }
 
-function matchVillageProviders(providers) {
+function fixedVillageProviders(providers) {
   const result = new Map();
   for (const [place, matcher] of Object.entries(VILLAGE_PROVIDER_MATCHERS)) {
     const provider = providers.find((item) => matcher(item));
     if (provider) result.set(place, provider);
   }
+  return result;
+}
+
+function assignVillageProviders(providers) {
+  const result = fixedVillageProviders(providers);
+  const usedSlugs = new Set([...result.values()].map((provider) => provider.slug).filter(Boolean));
+  const remaining = providers
+    .filter((provider) => provider?.slug && !usedSlugs.has(provider.slug))
+    .sort((left, right) => String(left.slug).localeCompare(String(right.slug), "es"));
+
+  remaining.slice(0, VILLAGE_DYNAMIC_PARCELS.length).forEach((provider, index) => {
+    const place = villagePlaceSlug(provider.slug);
+    if (place) result.set(place, provider);
+  });
   return result;
 }
 
@@ -183,13 +228,11 @@ function destinationLabel(place, provider) {
 }
 
 async function destinationForPlace(place) {
-  if (place === "atelier") {
-    return { href: "/", label: "Atelier Lumière" };
-  }
+  if (place === "atelier") return { href: "/", label: "Atelier Lumière" };
   let provider = villageProviderByPlace.get(place);
   if (!provider) {
     const providers = await requestVillageProviders();
-    villageProviderByPlace = matchVillageProviders(providers);
+    villageProviderByPlace = assignVillageProviders(providers);
     provider = villageProviderByPlace.get(place);
   }
   if (!provider?.slug) return null;
@@ -200,7 +243,7 @@ async function destinationForPlace(place) {
 }
 
 async function enterVillagePlace(place) {
-  if (villageLeaving || !["atelier", "izc", "stitch"].includes(place)) return;
+  if (villageLeaving || !place || place === "overview") return;
   const destination = await destinationForPlace(place);
   if (!destination) return;
 
@@ -218,13 +261,14 @@ async function enterVillagePlace(place) {
   layer.hidden = false;
 
   requestAnimationFrame(() => requestAnimationFrame(() => layer.classList.add("is-visible")));
-
   const delay = VILLAGE_REDUCED_MOTION.matches ? 60 : 880;
   window.setTimeout(() => window.location.assign(destination.href), delay);
 }
 
 function wireVillageEntryInteractions() {
   for (const hit of document.querySelectorAll(".landmark-hit[data-focus-place]")) {
+    if (wiredEntryHits.has(hit)) continue;
+    wiredEntryHits.add(hit);
     hit.addEventListener("click", () => {
       const place = hit.dataset.focusPlace;
       if (place && place !== "overview") void enterVillagePlace(place);
@@ -232,15 +276,90 @@ function wireVillageEntryInteractions() {
   }
 }
 
+function dynamicParcelForIndex(index) {
+  return VILLAGE_DYNAMIC_PARCELS[index] || null;
+}
+
+function createDynamicLandmark(place, provider, index) {
+  const parcel = dynamicParcelForIndex(index);
+  const world = document.querySelector("[data-village-world]");
+  if (!parcel || !world || document.querySelector(`[data-place="${place}"]`)) return;
+
+  const displayName = provider.displayName || "Taller invitado";
+  const specialty = provider.specialty || "Oficio artesanal";
+  const location = provider.locationLabel || "Taller asociado";
+  const landmark = document.createElement("section");
+  landmark.className = "village-landmark village-landmark--dynamic";
+  landmark.dataset.place = place;
+  landmark.dataset.providerSlug = provider.slug || "";
+  landmark.style.setProperty("--x", String(parcel.x));
+  landmark.style.setProperty("--y", String(parcel.y));
+  landmark.style.setProperty("--scale", ".82");
+  landmark.innerHTML = `
+    <button class="landmark-hit" type="button" data-focus-place="${place}" aria-label="Entrar en el taller ${displayName}"></button>
+    <div class="landmark-building landmark-building--workshop landmark-building--dynamic">
+      <span class="awning"><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="shop-sign"><strong>${villageInitials(displayName)}</strong><small></small></span>
+      <span class="shop-window shop-window--generic"><i></i><i></i><i></i></span>
+      <span class="shop-door"></span>
+    </div>
+    <div class="landmark-copy">
+      <small></small>
+      <strong></strong>
+      <span>Taller asociado</span>
+    </div>`;
+  landmark.querySelector(".shop-sign small").textContent = specialty;
+  landmark.querySelector(".landmark-copy small").textContent = [location, specialty].filter(Boolean).join(" · ");
+  landmark.querySelector(".landmark-copy strong").textContent = displayName;
+  world.append(landmark);
+
+  document.querySelector(parcel.house)?.classList.add("is-village-parcel-occupied");
+  window.AtelierVillage?.registerPlace(place, {
+    x: parcel.x,
+    y: parcel.y,
+    desktopScale: 1.08,
+    mobileScale: .82
+  }, `${displayName}, ${specialty}`);
+  landmark.querySelector(".landmark-hit")?.addEventListener("click", () => window.AtelierVillage?.focusPlace(place));
+  addBrandBadge(place, provider);
+}
+
+function createDynamicNavigation(place, provider, index) {
+  const navigation = document.querySelector(".village-navigation");
+  if (!navigation || navigation.querySelector(`[data-focus-place="${place}"]`)) return;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.dataset.focusPlace = place;
+  button.innerHTML = `<span></span><strong></strong><small></small>`;
+  button.querySelector("span").textContent = String(index + 4).padStart(2, "0");
+  button.querySelector("strong").textContent = provider.displayName || "Taller";
+  button.querySelector("small").textContent = provider.specialty || provider.locationLabel || "Taller asociado";
+  button.addEventListener("click", () => window.AtelierVillage?.focusPlace(place));
+  navigation.append(button);
+  navigation.classList.add("has-dynamic-workshops");
+}
+
+function createDynamicVillageWorkshops() {
+  const fixedPlaces = new Set(["izc", "stitch"]);
+  const dynamicEntries = [...villageProviderByPlace.entries()].filter(([place]) => !fixedPlaces.has(place));
+  dynamicEntries.forEach(([place, provider], index) => {
+    createDynamicLandmark(place, provider, index);
+    createDynamicNavigation(place, provider, index);
+  });
+  wireVillageEntryInteractions();
+  window.AtelierVillage?.refreshNavigationAccessibility();
+}
+
 async function loadVillageWorkshopIdentity() {
   ensureVillageWorkshopStyles();
   wireVillageEntryInteractions();
   const note = document.querySelector(".village-lab-note");
-  if (note) note.textContent = "Laboratorio E3 · transición y acceso real · Home intacta";
+  if (note) note.textContent = "Laboratorio E5 · talleres dinámicos y parcelas · Home intacta";
 
   const providers = await requestVillageProviders();
-  villageProviderByPlace = matchVillageProviders(providers);
+  villageProviderByPlace = assignVillageProviders(providers);
 
+  createDynamicVillageWorkshops();
   for (const [place, provider] of villageProviderByPlace) addBrandBadge(place, provider);
   if (villageProviderByPlace.size === 0) return;
 
@@ -251,9 +370,7 @@ async function loadVillageWorkshopIdentity() {
     else hideProviderPanel(villageWorkshopPanel);
   };
 
-  for (const button of document.querySelectorAll("[data-focus-place]")) {
-    button.addEventListener("click", () => showPlace(button.dataset.focusPlace));
-  }
+  window.addEventListener("atelier:village-selection", (event) => showPlace(event.detail?.place));
   document.querySelector("[data-village-overview]")?.addEventListener("click", () => hideProviderPanel(villageWorkshopPanel));
   document.querySelector("[data-village-viewport]")?.addEventListener("pointerdown", (event) => {
     if (!event.target.closest("button")) hideProviderPanel(villageWorkshopPanel);
