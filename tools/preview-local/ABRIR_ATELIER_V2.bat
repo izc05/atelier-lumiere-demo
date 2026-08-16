@@ -15,8 +15,9 @@ if errorlevel 1 (
 
 echo.
 echo Iniciando Atelier Lumiere V2 + Pueblo WebGL - candidato actual...
-echo Se abrira en el navegador. Para cerrar la prueba, vuelve aqui y pulsa Ctrl+C.
+echo El lanzador elegira un puerto libre para evitar reutilizar una preview antigua.
+echo Para cerrar esta prueba, vuelve aqui y pulsa Ctrl+C.
 echo.
-node preview-server.cjs
+node preview-launcher.cjs
 
 pause
