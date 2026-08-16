@@ -138,3 +138,4 @@ ensureHomeV2Styles();
 void loadHomeProductFraming();
 void import("/visual-v2-home-workshops.js");
 void import("/visual-v2-home-showcase.js");
+void import("/visual-v2-page-showcase.js");
