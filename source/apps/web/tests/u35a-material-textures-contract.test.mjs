@@ -37,23 +37,18 @@ test('U3.5A usa detalle adaptativo y fórmulas procedurales reales sin bitmaps e
   assert.match(source, /uniform int uMaterial/);
   assert.match(source, /uniform float uDetail/);
 
-  // Estuco: poro y lavado mineral.
+  // Contrato gráfico: protege las fórmulas que definen la lectura material.
   assert.match(source, /float pore = hash21\(floor\(uv \* \(31\.0 \+ 27\.0 \* uDetail\)\)\)/);
   assert.match(source, /float wash = fbm\(uv \* 1\.7 \+ 4\.3\)/);
-  // Teja: ritmo de filas y crestas.
   assert.match(source, /float rows = abs\(sin\(/);
   assert.match(source, /float ridges = pow\(abs\(sin\(/);
-  // Piedra: junta y variación por bloque.
   assert.match(source, /float joints = mortarGrid\(/);
   assert.match(source, /float block = hash21\(floor\(stoneUv/);
-  // Madera: veta gruesa/fina y nudos.
   assert.match(source, /float grain = sin\(/);
   assert.match(source, /float fine = sin\(/);
   assert.match(source, /float knot = smoothstep\(/);
-  // Cristal: fresnel y variación de paño.
   assert.match(source, /float fresnel = pow\(1\.0 - max\(dot\(normal, viewDir\), 0\.0\), 3\.0\)/);
   assert.match(source, /float pane = 0\.5 \+ 0\.5 \* sin\(/);
-  // Metal: brillo cepillado y selector GLSL compatible.
   assert.match(source, /float brushed = sin\(/);
   assert.match(source, /float metalTint = uMaterial == 6 \? 1\.0 : 0\.0/);
 
