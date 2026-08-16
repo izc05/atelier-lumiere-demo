@@ -146,8 +146,12 @@ function webglOnTouchMove(event) {
     const center = webglTouchCenter(pair);
     if (webglTouchGesture?.mode === 'pinch') {
       const factor = webglTouchGesture.distance / distance;
+      const centerDx = center.x - webglTouchGesture.centerX;
+      const centerDy = center.y - webglTouchGesture.centerY;
       camera.desiredDistance = clamp(camera.desiredDistance * factor, 8.5, 52);
-      webglPanFromTouch(center.x - webglTouchGesture.centerX, center.y - webglTouchGesture.centerY);
+      /* Horizontal con dos dedos desplaza; vertical inclina la cámara. */
+      webglPanFromTouch(centerDx, 0);
+      camera.pitch = clamp(camera.pitch + centerDy * .0031, .38, 1.18);
       const rotation = webglTouchAngleDelta(webglTouchGesture.angle, angle);
       camera.yaw -= rotation * .88;
     }
