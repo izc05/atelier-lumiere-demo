@@ -1,0 +1,136 @@
+/* Atelier Lumière · Visual V2 · Fase 9.4
+ * Imágenes editoriales administrables de Tienda, Talleres, Historias y Encargos.
+ * Solo se activan cuando existe un slot; sin slot, el diseño previo permanece intacto.
+ */
+
+.v2-page-showcase-media {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--v2-radius-xs, 2px);
+  background: var(--v2-ivory-200, #f5eee5);
+}
+
+.v2-page-showcase-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(var(--v2-image-saturation, .94)) contrast(1.015);
+  transition: transform 850ms cubic-bezier(.22,.7,.2,1);
+}
+
+@media (hover:hover) and (pointer:fine) {
+  .v2-page-showcase-media:hover img { transform: scale(1.018); }
+}
+
+/* Tienda */
+.storefront-hero.has-page-showcase {
+  grid-template-columns: minmax(0,.92fr) minmax(430px,1.08fr) !important;
+  gap: clamp(42px,6vw,92px) !important;
+}
+.storefront-hero.has-page-showcase > .hero-note { display: none !important; }
+.storefront-hero .v2-page-showcase-media {
+  align-self: stretch;
+  min-height: clamp(430px,42vw,610px);
+}
+
+/* Directorio de talleres */
+.workshops-hero.has-page-showcase {
+  grid-template-columns: minmax(0,.88fr) minmax(430px,1.12fr) !important;
+  align-items: stretch !important;
+  gap: clamp(44px,6vw,96px) !important;
+}
+.workshops-hero.has-page-showcase > .workshops-hero-note { display: none !important; }
+.workshops-hero .v2-page-showcase-media {
+  min-height: clamp(450px,43vw,640px);
+}
+
+/* Historias */
+body main > .hero.has-page-showcase {
+  display: grid !important;
+  grid-template-columns: minmax(0,.82fr) minmax(430px,1.18fr) !important;
+  grid-template-rows: auto auto auto !important;
+  align-content: center;
+  align-items: center;
+  gap: 0 clamp(44px,6vw,96px) !important;
+}
+body main > .hero.has-page-showcase > .eyebrow,
+body main > .hero.has-page-showcase > h1,
+body main > .hero.has-page-showcase > .lead {
+  grid-column: 1;
+}
+body main > .hero.has-page-showcase > .eyebrow { grid-row: 1; align-self: end; }
+body main > .hero.has-page-showcase > h1 { grid-row: 2; }
+body main > .hero.has-page-showcase > .lead { grid-row: 3; align-self: start; }
+body main > .hero.has-page-showcase > .v2-page-showcase-media {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  min-height: clamp(430px,42vw,600px);
+  z-index: 1;
+}
+body main > .hero.has-page-showcase::after { opacity: .45; }
+
+/* Encargos dentro de la Home. */
+#como-funciona .v2-commission-showcase-media {
+  width: 100%;
+  min-height: clamp(260px,28vw,390px);
+  margin: clamp(28px,4vw,44px) 0 0;
+}
+#como-funciona .v2-commission-showcase-media + .commission-brief {
+  margin-top: clamp(28px,4vw,44px) !important;
+}
+
+@media (min-width:761px) and (max-width:1024px) {
+  .storefront-hero.has-page-showcase,
+  .workshops-hero.has-page-showcase,
+  body main > .hero.has-page-showcase {
+    grid-template-columns: 1fr !important;
+  }
+
+  .storefront-hero .v2-page-showcase-media,
+  .workshops-hero .v2-page-showcase-media,
+  body main > .hero.has-page-showcase > .v2-page-showcase-media {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    min-height: clamp(430px,64vw,610px);
+  }
+
+  body main > .hero.has-page-showcase > .eyebrow,
+  body main > .hero.has-page-showcase > h1,
+  body main > .hero.has-page-showcase > .lead {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width:760px) {
+  .storefront-hero.has-page-showcase,
+  .workshops-hero.has-page-showcase,
+  body main > .hero.has-page-showcase {
+    grid-template-columns: 1fr !important;
+  }
+
+  .storefront-hero .v2-page-showcase-media,
+  .workshops-hero .v2-page-showcase-media,
+  body main > .hero.has-page-showcase > .v2-page-showcase-media {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    min-height: clamp(330px,105vw,470px);
+  }
+
+  body main > .hero.has-page-showcase > .eyebrow,
+  body main > .hero.has-page-showcase > h1,
+  body main > .hero.has-page-showcase > .lead {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  #como-funciona .v2-commission-showcase-media {
+    min-height: clamp(280px,92vw,410px);
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .v2-page-showcase-media img { transition: none !important; transform: none !important; }
+}
