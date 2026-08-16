@@ -26,14 +26,15 @@ test("la Home contiene una entrada cinematográfica que conduce al Pueblo WebGL"
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
 
-test("la entrada conserva los contratos de sesión, forzado y retorno interno", async () => {
+test("la entrada conserva sesión, forzado, retorno interno y marca de llegada", async () => {
   const script = await text("brand-entry.js");
 
   assert.match(script, /atelier_brand_entry_seen/);
+  assert.match(script, /atelier_arrival_from_entry/);
   assert.match(script, /params\.get\("intro"\) === "1"/);
   assert.match(script, /params\.get\("intro"\) === "0"/);
   assert.match(script, /cameFromInternalPage/);
-  assert.match(script, /sessionSet\(\)/);
+  assert.match(script, /markArrival\(\)/);
   assert.match(script, /referrer\.origin === window\.location\.origin/);
 });
 
@@ -56,14 +57,21 @@ test("el Pueblo ligero mantiene salida explícita, talleres dinámicos y modo re
   assert.match(premiumCss, /data-village-mode="lite"/);
 });
 
-test("el laboratorio WebGL conserva fallback y capas cinematográficas aisladas", async () => {
+test("el WebGL conserva fallback, capas cinematográficas y llegada desde la entrada", async () => {
   const html = await text("entrada", "webgl", "index.html");
   const bootstrap = await text("entrada", "webgl", "bootstrap.js");
+  const arrival = await text("entrada", "webgl", "arrival-transition.js");
+  const arrivalCss = await text("entrada", "webgl", "arrival-transition.css");
 
   assert.match(html, /premium-ui\.css/);
+  assert.match(html, /arrival-transition\.css/);
+  assert.match(html, /Atelier Lumière · Pueblo interactivo/);
   assert.match(bootstrap, /WebGL2|webgl2/i);
   assert.match(bootstrap, /scene\.js/);
-  assert.match(bootstrap, /cinematic/i);
   assert.match(bootstrap, /distant-depth\.js/);
   assert.match(bootstrap, /world-signage\.js/);
+  assert.match(bootstrap, /arrival-transition\.js/);
+  assert.match(arrival, /atelier_arrival_from_entry/);
+  assert.match(arrival, /data.*arrival|dataset\.arrival/);
+  assert.match(arrivalCss, /prefers-reduced-motion:\s*reduce/);
 });
