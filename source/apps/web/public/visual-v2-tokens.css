@@ -1,4 +1,5 @@
 @import url("/visual-v2-home-workshops.css");
+@import url("/visual-v2-motion.css");
 
 /* Atelier Lumière · Visual V2 · Fase 1.1
  * Fundación visual compartida. Esta capa define el lenguaje V2 sin sustituir todavía
@@ -67,7 +68,7 @@
   --v2-duration-slow: 700ms;
 
   /* Image behaviour */
-  --v2-image-hover-scale: 1.025;
+  --v2-image-hover-scale: 1.018;
   --v2-image-saturation: .94;
 
   /* Compatibility aliases. They will replace the old visual system gradually. */
