@@ -13,7 +13,7 @@ const arrivalIndex = bootstrap.indexOf('/entrada/webgl/arrival-transition.js');
 
 assert.ok(spatialIndex >= 0 && artIndex > spatialIndex, 'U3.15 debe cargar después de navegación espacial');
 assert.ok(arrivalIndex > artIndex, 'U3.15 debe fijar composición antes de la llegada cinematográfica');
-assert.ok(bootstrap.includes("graphicsCheckpoint = 'u3.15'"));
+assert.ok(/graphicsCheckpoint = 'u3\.(1[5-9]|[2-9]\d)'/.test(bootstrap), 'U3.15 debe mantenerse en un checkpoint igual o posterior');
 assert.ok(index.includes('/entrada/webgl/final-art-direction.css'));
 
 for (const token of ['finalArtDirection','AtelierVillageArtDirection','atelierDistance','landmarkDistance','p9CameraProfile','selectedPlace']) {
