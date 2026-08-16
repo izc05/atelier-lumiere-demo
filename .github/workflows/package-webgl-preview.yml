@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "source/apps/web/public/entrada/webgl/**"
+      - "source/apps/web/public/village-craft-taxonomy.js"
       - "source/apps/web/public/premium-ui.css"
       - "source/apps/web/public/premium-ui.js"
       - "source/apps/web/public/visual-v2-tokens.css"
@@ -28,14 +29,20 @@ jobs:
           PUBLIC_DIR="source/apps/web/public"
           test -f "$PUBLIC_DIR/entrada/webgl/index.html"
           test -f "$PUBLIC_DIR/entrada/webgl/scene.js"
+          test -f "$PUBLIC_DIR/entrada/webgl/craft-architecture.js"
+          test -f "$PUBLIC_DIR/village-craft-taxonomy.js"
 
           mkdir -p preview/entrada preview/assets
           cp -a "$PUBLIC_DIR/entrada/webgl" preview/entrada/
+          cp "$PUBLIC_DIR/village-craft-taxonomy.js" preview/
           cp "$PUBLIC_DIR/premium-ui.css" preview/
           cp "$PUBLIC_DIR/premium-ui.js" preview/
           cp "$PUBLIC_DIR/visual-v2-tokens.css" preview/
           cp -a "$PUBLIC_DIR/assets/brand" preview/assets/
           printf '%s\n' "${GITHUB_SHA}" > preview/PREVIEW_COMMIT.txt
+
+          node --check preview/village-craft-taxonomy.js
+          node --check preview/entrada/webgl/craft-architecture.js
 
       - name: Guardar artefacto de preview
         uses: actions/upload-artifact@v7
