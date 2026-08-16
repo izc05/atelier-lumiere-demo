@@ -173,6 +173,37 @@
   box-shadow: 0 15px 34px rgba(49,7,18,.14);
 }
 
+.village-skip-entry {
+  position: absolute;
+  z-index: 64;
+  top: 108px;
+  right: clamp(18px,3vw,42px);
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(79,16,32,.24);
+  color: var(--village-wine);
+  background: rgba(255,253,249,.68);
+  font-size: .5rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  transition: border-color 180ms ease, background 180ms ease;
+}
+.village-skip-entry:hover,
+.village-skip-entry:focus-visible {
+  outline: none;
+  border-color: rgba(167,131,66,.72);
+  background: rgba(255,253,249,.92);
+}
+[data-village-experience][data-village-leaving] .village-skip-entry {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* El modo ligero conserva composición y legibilidad, pero elimina la capa decorativa costosa. */
 [data-village-mode="lite"]::before,
 [data-village-mode="lite"]::after {
@@ -194,6 +225,7 @@
 [data-village-mode="lite"] .village-trees i::before {
   display: none;
 }
+[data-village-mode="lite"] .village-skip-entry { backdrop-filter: none; }
 
 @media (max-width: 900px) {
   .village-world { filter: drop-shadow(0 24px 30px rgba(49,7,18,.025)); }
@@ -205,8 +237,20 @@
   .village-landmark { filter: drop-shadow(0 14px 17px rgba(49,7,18,.08)); }
   .landmark-building { filter: drop-shadow(0 15px 9px rgba(49,7,18,.09)); }
   .village-trees i::before { display: none; }
+  .village-skip-entry {
+    top: 82px;
+    right: 10px;
+    min-height: 34px;
+    padding: 7px 9px;
+    font-size: .43rem;
+  }
+}
+
+@media (max-height: 620px) and (min-width: 761px) {
+  .village-skip-entry { top: 78px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .village-navigation button { transition: none !important; }
+  .village-navigation button,
+  .village-skip-entry { transition: none !important; }
 }
