@@ -148,11 +148,31 @@ function card(product) {
   return article;
 }
 
+function activeFilters() {
+  return Boolean(
+    byId("search-input").value.trim()
+    || byId("category-filter").value
+    || byId("event-filter").value
+  );
+}
+
 function render() {
   const view = byId("products-view");
+  const empty = byId("empty-view");
+  const clear = byId("clear-filters-button");
   view.replaceChildren(...products.map(card));
   view.hidden = products.length === 0;
-  byId("empty-view").hidden = products.length !== 0;
+  empty.hidden = products.length !== 0;
+
+  if (products.length !== 0) return;
+  const filtered = activeFilters();
+  byId("empty-title").textContent = filtered
+    ? "No hay piezas que coincidan con tu búsqueda"
+    : "El catálogo todavía está vacío";
+  byId("empty-message").textContent = filtered
+    ? "Prueba con otros términos o limpia los filtros para volver a ver toda la selección."
+    : "Los artículos aparecerán aquí cuando sean aprobados y publicados.";
+  clear.hidden = !filtered;
 }
 
 function updateCategories(items) {
@@ -204,6 +224,12 @@ byId("search-input").addEventListener("input", () => {
 byId("category-filter").addEventListener("change", () => void load());
 byId("event-filter").addEventListener("change", () => void load());
 byId("retry-button").addEventListener("click", () => void load());
+byId("clear-filters-button").addEventListener("click", () => {
+  byId("search-input").value = "";
+  byId("category-filter").value = "";
+  byId("event-filter").value = "";
+  void load({ refreshCategories: true });
+});
 window.AtelierCart.wireCount(byId("cart-count"));
 
 void load({ refreshCategories: true });
