@@ -1,0 +1,142 @@
+/* Atelier Lumière · U3.27B · continuidad visual Pueblo → taller */
+:root{
+  --u327-accent:#65162a;
+  --u327-warm:#cba867;
+  --u327-night:#1b1114;
+}
+
+.u327-workshop-arrival{
+  position:fixed;
+  z-index:9999;
+  inset:0;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  pointer-events:none;
+  color:#fff7e8;
+  background:
+    radial-gradient(circle at 50% 56%,color-mix(in srgb,var(--u327-accent) 58%,transparent) 0 14%,transparent 42%),
+    linear-gradient(145deg,var(--u327-night),color-mix(in srgb,var(--u327-accent) 42%,var(--u327-night)) 58%,#120c0e);
+  opacity:1;
+  transition:opacity .82s cubic-bezier(.22,.72,.16,1),filter .82s ease;
+}
+.u327-workshop-arrival::before{
+  content:"";
+  position:absolute;
+  inset:-12%;
+  background:
+    radial-gradient(circle at 50% 48%,transparent 0 18%,rgba(10,6,8,.18) 62%,rgba(8,5,7,.48) 100%),
+    linear-gradient(90deg,transparent,rgba(255,226,174,.035),transparent);
+  mix-blend-mode:screen;
+}
+.u327-workshop-arrival__glow{
+  position:absolute;
+  left:50%;
+  top:54%;
+  width:min(56vw,720px);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--u327-warm) 28%,transparent),transparent 68%);
+  filter:blur(24px);
+  transform:translate(-50%,-50%) scale(.72);
+  transition:transform .92s cubic-bezier(.2,.75,.18,1),opacity .7s ease;
+}
+.u327-workshop-arrival__copy{
+  position:relative;
+  z-index:1;
+  display:grid;
+  max-width:min(82vw,760px);
+  justify-items:center;
+  text-align:center;
+  transform:translateY(0);
+  transition:transform .75s ease,opacity .62s ease;
+}
+.u327-workshop-arrival__mark{
+  display:grid;
+  width:76px;
+  aspect-ratio:1;
+  place-items:center;
+  margin-bottom:22px;
+  border:1px solid color-mix(in srgb,var(--u327-warm) 72%,white 8%);
+  border-radius:50%;
+  color:#f5d99a;
+  background:rgba(39,16,20,.62);
+  box-shadow:0 18px 48px rgba(0,0,0,.32),0 0 38px color-mix(in srgb,var(--u327-warm) 13%,transparent);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:1.15rem;
+  letter-spacing:.04em;
+}
+.u327-workshop-arrival small{
+  color:color-mix(in srgb,var(--u327-warm) 72%,#fff 16%);
+  font-size:.64rem;
+  font-style:normal;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.u327-workshop-arrival strong{
+  margin-top:.6rem;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(2.8rem,7vw,6.5rem);
+  font-weight:400;
+  line-height:.9;
+  letter-spacing:-.055em;
+  text-wrap:balance;
+}
+.u327-workshop-arrival em{
+  margin-top:.9rem;
+  color:rgba(255,247,232,.66);
+  font-size:.82rem;
+  font-style:normal;
+  letter-spacing:.08em;
+}
+.u327-workshop-arrival.is-revealing{
+  opacity:0;
+  filter:blur(4px);
+}
+.u327-workshop-arrival.is-revealing .u327-workshop-arrival__glow{
+  opacity:.18;
+  transform:translate(-50%,-50%) scale(1.28);
+}
+.u327-workshop-arrival.is-revealing .u327-workshop-arrival__copy{
+  opacity:.18;
+  transform:translateY(-12px) scale(.985);
+}
+
+html[data-workshop-arrival="village"] .provider-hero{
+  border-color:color-mix(in srgb,var(--u327-warm) 24%,rgba(255,255,255,.10));
+  background:
+    radial-gradient(circle at 78% 18%,color-mix(in srgb,var(--u327-warm) 18%,transparent),transparent 29%),
+    linear-gradient(132deg,var(--u327-night) 0%,var(--u327-accent) 54%,color-mix(in srgb,var(--u327-accent) 72%,#9f655d) 100%);
+  box-shadow:0 38px 104px color-mix(in srgb,var(--u327-night) 38%,transparent),inset 0 1px rgba(255,255,255,.08);
+}
+html[data-workshop-arrival="village"] .provider-hero.has-provider-cover::before{
+  background:linear-gradient(90deg,rgba(15,8,10,.48),rgba(20,9,13,.20) 54%,rgba(15,8,10,.12));
+}
+html[data-workshop-arrival="village"] .provider-kicker,
+html[data-workshop-arrival="village"] .provider-edition-mark{
+  color:color-mix(in srgb,var(--u327-warm) 72%,white 14%);
+}
+html[data-workshop-arrival="village"] .provider-primary-action{
+  box-shadow:0 14px 38px rgba(8,4,5,.30),0 0 0 1px color-mix(in srgb,var(--u327-warm) 22%,transparent)!important;
+}
+html[data-workshop-arrival="village"] .provider-monogram{
+  color:var(--u327-accent);
+  box-shadow:0 24px 68px rgba(8,4,5,.34),0 0 42px color-mix(in srgb,var(--u327-warm) 10%,transparent);
+}
+html[data-workshop-arrival="village"] .provider-cover{
+  image-rendering:auto;
+  filter:saturate(1.02) contrast(1.035) brightness(.93);
+}
+
+@media(max-width:700px){
+  .u327-workshop-arrival__mark{width:62px;margin-bottom:16px}
+  .u327-workshop-arrival strong{font-size:clamp(2.4rem,14vw,4.4rem)}
+  .u327-workshop-arrival em{max-width:80vw;font-size:.7rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .u327-workshop-arrival,
+  .u327-workshop-arrival__glow,
+  .u327-workshop-arrival__copy{transition:none!important}
+}
