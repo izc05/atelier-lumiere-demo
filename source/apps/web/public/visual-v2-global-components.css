@@ -1,0 +1,295 @@
+@import url("/visual-v2-tokens.css");
+
+/* Atelier Lumière · WEB V2 · FASE A2
+ * Tipografía funcional, acciones principales y footer compartido.
+ * Las composiciones editoriales y tarjetas siguen siendo responsabilidad de cada página.
+ */
+
+html[data-atelier-public-shell="v2"] body {
+  color: var(--v2-text);
+  font-family: var(--v2-font-ui);
+}
+
+html[data-atelier-public-shell="v2"] main :where(h1, h2, h3) {
+  color: var(--v2-wine-950);
+  font-family: var(--v2-font-display);
+  font-weight: 400;
+}
+
+html[data-atelier-public-shell="v2"] main :where(.eyebrow, .kicker, .section-label) {
+  color: var(--v2-gold-700);
+  font-family: var(--v2-font-ui);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+/* Acciones: tres gestos repetibles, sin convertir toda tarjeta en un bloque de botones. */
+html[data-atelier-public-shell="v2"] .atelier-action {
+  display: inline-flex !important;
+  min-height: 48px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  border-radius: var(--v2-radius-xs) !important;
+  font-family: var(--v2-font-ui) !important;
+  font-size: .66rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .13em !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  cursor: pointer;
+  transition:
+    transform var(--v2-duration-fast) var(--v2-ease-standard),
+    color var(--v2-duration-fast) ease,
+    border-color var(--v2-duration-fast) ease,
+    background-color var(--v2-duration-fast) ease !important;
+}
+
+html[data-atelier-public-shell="v2"] .atelier-action-primary {
+  padding: 0 25px !important;
+  border: 1px solid var(--v2-wine-800) !important;
+  color: var(--v2-ivory-50) !important;
+  background: var(--v2-wine-800) !important;
+  box-shadow: none !important;
+}
+
+html[data-atelier-public-shell="v2"] .atelier-action-primary:hover,
+html[data-atelier-public-shell="v2"] .atelier-action-primary:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--v2-wine-950) !important;
+  background: var(--v2-wine-950) !important;
+}
+
+html[data-atelier-public-shell="v2"] .atelier-action-secondary {
+  padding: 0 24px !important;
+  border: 1px solid var(--v2-line-strong) !important;
+  color: var(--v2-wine-900) !important;
+  background: rgba(255, 253, 249, .5) !important;
+  box-shadow: none !important;
+}
+
+html[data-atelier-public-shell="v2"] .atelier-action-secondary:hover,
+html[data-atelier-public-shell="v2"] .atelier-action-secondary:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--v2-gold-700) !important;
+  background: var(--v2-ivory-50) !important;
+}
+
+html[data-atelier-public-shell="v2"] .atelier-action-link {
+  min-height: 42px !important;
+  justify-content: flex-start !important;
+  padding: 7px 0 6px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--v2-line-strong) !important;
+  border-radius: 0 !important;
+  color: var(--v2-wine-800) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-atelier-public-shell="v2"] .atelier-action-link:hover,
+html[data-atelier-public-shell="v2"] .atelier-action-link:focus-visible {
+  transform: translateY(-1px);
+  border-bottom-color: var(--v2-gold-700) !important;
+  color: var(--v2-wine-950) !important;
+}
+
+html[data-atelier-public-shell="v2"] :where(.atelier-action[disabled], .atelier-action[aria-disabled="true"]) {
+  transform: none !important;
+  opacity: .52 !important;
+  cursor: not-allowed !important;
+}
+
+/* Inversión para CTA sobre superficies vino/oscuras. */
+html[data-atelier-public-shell="v2"] :where(.workshops-closing, .atelier-dark-action-zone) .atelier-action-primary {
+  border-color: var(--v2-ivory-50) !important;
+  color: var(--v2-wine-950) !important;
+  background: var(--v2-ivory-50) !important;
+}
+
+html[data-atelier-public-shell="v2"] :where(.workshops-closing, .atelier-dark-action-zone) .atelier-action-secondary,
+html[data-atelier-public-shell="v2"] :where(.workshops-closing, .atelier-dark-action-zone) .atelier-action-link {
+  border-color: rgba(255, 253, 249, .38) !important;
+  color: var(--v2-ivory-50) !important;
+  background: transparent !important;
+}
+
+/* Firma global del sitio. Siempre fuera del main y a ancho completo. */
+.atelier-global-footer {
+  position: relative;
+  isolation: isolate;
+  display: grid !important;
+  grid-template-columns: minmax(220px, 1fr) minmax(320px, auto) minmax(220px, 1fr) !important;
+  align-items: end !important;
+  gap: clamp(28px, 4vw, 66px) !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: var(--v2-section-y) 0 0 !important;
+  padding: clamp(46px, 5.5vw, 82px) var(--v2-gutter) clamp(38px, 4.5vw, 66px) !important;
+  overflow: hidden;
+  border: 0 !important;
+  color: rgba(255, 253, 249, .68) !important;
+  background:
+    radial-gradient(circle at 13% 0%, rgba(198, 161, 93, .12), transparent 28rem),
+    linear-gradient(145deg, var(--v2-wine-950), #3b0a17 62%, #4f1020) !important;
+  box-shadow: none !important;
+  font-family: var(--v2-font-ui) !important;
+}
+
+.atelier-global-footer::after {
+  position: absolute;
+  z-index: -1;
+  content: "AL";
+  right: -3vw;
+  bottom: -7vw;
+  color: rgba(255, 253, 249, .035);
+  font-family: var(--v2-font-display);
+  font-size: clamp(12rem, 29vw, 31rem);
+  line-height: .7;
+  letter-spacing: -.13em;
+  pointer-events: none;
+}
+
+.atelier-global-footer-brand {
+  display: grid;
+  gap: 12px;
+  align-content: end;
+}
+
+.atelier-global-footer-logo {
+  display: block;
+  width: min(238px, 100%);
+  height: auto;
+  max-height: 66px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.atelier-global-footer-brand p {
+  max-width: 31ch;
+  margin: 0;
+  color: rgba(255, 253, 249, .62);
+  font-size: .82rem;
+  line-height: 1.65;
+}
+
+.atelier-global-footer nav {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center !important;
+  gap: 11px clamp(16px, 2vw, 28px) !important;
+  margin: 0 !important;
+}
+
+.atelier-global-footer nav a {
+  color: rgba(255, 253, 249, .78) !important;
+  font-size: .67rem;
+  font-weight: 760;
+  letter-spacing: .11em;
+  line-height: 1.4;
+  text-decoration: none !important;
+  text-transform: uppercase;
+}
+
+.atelier-global-footer nav a:hover,
+.atelier-global-footer nav a:focus-visible {
+  color: var(--v2-gold-300) !important;
+}
+
+.atelier-global-footer-meta {
+  display: grid;
+  gap: 7px;
+  justify-self: end;
+  max-width: 34ch;
+  text-align: right;
+}
+
+.atelier-global-footer-meta p {
+  margin: 0;
+  color: rgba(255, 253, 249, .5);
+  font-size: .72rem;
+  line-height: 1.55;
+}
+
+.atelier-global-footer-meta a {
+  justify-self: end;
+  color: rgba(255, 253, 249, .72) !important;
+  font-size: .72rem;
+  text-underline-offset: 3px;
+}
+
+.atelier-global-footer a:focus-visible {
+  outline: 3px solid rgba(222, 201, 156, .55) !important;
+  outline-offset: 4px;
+}
+
+@media (max-width: 1024px) {
+  .atelier-global-footer {
+    grid-template-columns: 1fr 1fr !important;
+    align-items: start !important;
+  }
+
+  .atelier-global-footer nav {
+    justify-content: flex-end !important;
+  }
+
+  .atelier-global-footer-meta {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    max-width: none;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255, 253, 249, .12);
+    text-align: left;
+  }
+
+  .atelier-global-footer-meta a {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 700px) {
+  .atelier-global-footer {
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+    margin-top: 76px !important;
+    padding: 44px 18px 38px !important;
+  }
+
+  .atelier-global-footer-logo {
+    width: min(210px, 66vw);
+  }
+
+  .atelier-global-footer nav {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    justify-content: stretch !important;
+    gap: 12px 24px !important;
+  }
+
+  .atelier-global-footer nav a {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 253, 249, .1);
+  }
+
+  .atelier-global-footer-meta {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atelier-action {
+    transition: none !important;
+  }
+
+  .atelier-action:hover,
+  .atelier-action:focus-visible {
+    transform: none !important;
+  }
+}
