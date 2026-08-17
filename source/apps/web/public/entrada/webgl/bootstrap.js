@@ -87,6 +87,7 @@
     '/entrada/webgl/workshop-frontages.js',
     '/entrada/webgl/workshop-frontage-alignment.js',
     '/entrada/webgl/village-pathways.js',
+    '/entrada/webgl/path-surface-fidelity.js',
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/focus-atmosphere.js',
@@ -152,6 +153,7 @@
         root.dataset.vegetationVarietyCheckpoint = 'u3.30';
         root.dataset.closeRangeFidelityCheckpoint = 'u3.31';
         root.dataset.plazaWaterCheckpoint = 'u3.32';
+        root.dataset.pathSurfaceCheckpoint = 'u3.33';
       }
       if (boot?.complete) await boot.complete();
     } catch (error) {
