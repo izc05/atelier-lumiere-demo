@@ -9,9 +9,24 @@ if (!document.querySelector('link[data-atelier-editorial-desktop]')) {
   document.head.append(editorialStyles);
 }
 
+if (!document.querySelector('link[data-atelier-global-shell]')) {
+  const globalShellStyles = document.createElement("link");
+  globalShellStyles.rel = "stylesheet";
+  globalShellStyles.href = "/visual-v2-global-shell.css";
+  globalShellStyles.dataset.atelierGlobalShell = "";
+  document.head.append(globalShellStyles);
+}
+
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 const FINE_POINTER = "(pointer: fine)";
 const INTRO_KEY = "atelier-lumiere-opening-seen";
+const PRIMARY_PUBLIC_NAVIGATION = Object.freeze([
+  ["/tienda/", "Tienda"],
+  ["/talleres/", "Talleres"],
+  ["/blog/", "Historias"],
+  ["/unete/", "Únete como taller"],
+  ["/proveedor/acceso/", "Acceso talleres"]
+]);
 
 function pageType(pathname) {
   const path = String(pathname || "/");
@@ -38,6 +53,82 @@ function createElement(tag, className, text = null) {
 
 function motionIsReduced() {
   return window.matchMedia(REDUCED_MOTION).matches;
+}
+
+function isPrimaryPublicExperience() {
+  const path = String(window.location.pathname || "/");
+  const page = atelierRoot.dataset.atelierPage;
+  if (["home", "commerce", "editorial"].includes(page)) return true;
+  return path.startsWith("/talleres/") || path.startsWith("/unete/");
+}
+
+function navigationIsCurrent(href) {
+  const path = String(window.location.pathname || "/");
+  if (href === "/tienda/") return path.startsWith("/tienda/");
+  if (href === "/talleres/") return path.startsWith("/talleres/") || path.startsWith("/taller/");
+  if (href === "/blog/") return path.startsWith("/blog/");
+  if (href === "/unete/") return path.startsWith("/unete/");
+  return false;
+}
+
+function initializePublicIdentity() {
+  if (!isPrimaryPublicExperience()) return;
+
+  const header = document.querySelector("[data-public-header]");
+  const navigation = header?.querySelector("[data-public-navigation]");
+  const toggle = header?.querySelector("[data-public-menu-toggle]");
+  const brand = header?.querySelector('a[href="/"]');
+  if (!header || !navigation || !brand) return;
+
+  atelierRoot.dataset.atelierPublicShell = "v2";
+  header.classList.add("atelier-global-header");
+  navigation.classList.add("atelier-global-nav");
+
+  brand.classList.add("atelier-global-brand");
+  brand.dataset.atelierBrandTone = "dark";
+  brand.setAttribute("aria-label", "Atelier Lumière, inicio");
+  const logo = createElement("img", "atelier-global-logo");
+  logo.src = "/assets/brand/atelier-logo-official-dark.svg";
+  logo.alt = "Atelier Lumière";
+  logo.decoding = "async";
+  logo.setAttribute("fetchpriority", "high");
+  brand.replaceChildren(logo);
+
+  const existingCart = header.querySelector('a[href="/carrito/"]');
+  let count = existingCart?.querySelector("#cart-count") || null;
+  if (!count) {
+    count = createElement("span", "cart-count", "0");
+    count.id = "cart-count";
+  }
+
+  const links = PRIMARY_PUBLIC_NAVIGATION.map(([href, label]) => {
+    const link = createElement("a", "atelier-global-nav-link", label);
+    link.href = href;
+    if (navigationIsCurrent(href)) link.setAttribute("aria-current", "page");
+    return link;
+  });
+  navigation.replaceChildren(...links);
+
+  const cart = existingCart || createElement("a", "", null);
+  cart.href = "/carrito/";
+  cart.setAttribute("aria-label", "Abrir carrito");
+  cart.className = "atelier-global-cart";
+  const cartLabel = createElement("span", "atelier-global-cart-label", "Carrito");
+  cart.replaceChildren(cartLabel, count);
+  if (String(window.location.pathname || "").startsWith("/carrito/")) cart.setAttribute("aria-current", "page");
+  else cart.removeAttribute("aria-current");
+
+  let actions = header.querySelector(".header-actions, .atelier-global-actions");
+  if (!actions) {
+    actions = createElement("div", "atelier-global-actions");
+    header.append(actions);
+  } else {
+    actions.classList.add("atelier-global-actions");
+  }
+
+  actions.replaceChildren(cart);
+  if (toggle) actions.append(toggle);
+  if (navigation.nextElementSibling !== actions) header.insertBefore(navigation, actions);
 }
 
 function initializeOpening() {
@@ -240,6 +331,7 @@ function initializeHeroDepth() {
 }
 
 function initialize() {
+  initializePublicIdentity();
   initializeOpening();
   initializeHeader();
   initializeProgress();
