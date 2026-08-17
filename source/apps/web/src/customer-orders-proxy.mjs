@@ -13,6 +13,9 @@ const PROTECTED_PAGES = new Set([
   "/mis-pedidos/encargo/"
 ]);
 const MAX_BODY_BYTES = 128 * 1024;
+const RECOVERY_WINDOW_MS = 10 * 60 * 1000;
+const RECOVERY_MAX_REQUESTS = 6;
+const RECOVERY_MESSAGE = "Si los datos corresponden a un pedido, enviaremos un nuevo enlace privado al correo de compra.";
 
 function parseCookies(header) {
   const cookies = new Map();
@@ -113,18 +116,45 @@ async function pipe(upstream, response, { clear = false, secure = false } = {}) 
   if (!upstream.body) return response.end();
   await pipeline(Readable.fromWeb(upstream.body), response);
 }
+function clientAddress(request) {
+  const cloudflare = String(request.headers?.["cf-connecting-ip"] ?? "").trim();
+  if (cloudflare) return cloudflare.slice(0, 120);
+  const forwarded = String(request.headers?.["x-forwarded-for"] ?? "").split(",")[0]?.trim();
+  if (forwarded) return forwarded.slice(0, 120);
+  return String(request.socket?.remoteAddress ?? "unknown").slice(0, 120);
+}
+function createRecoveryLimiter({ now = () => Date.now() } = {}) {
+  const attempts = new Map();
+  return function limited(key) {
+    const currentTime = now();
+    const entry = attempts.get(key);
+    if (!entry || currentTime - entry.startedAt >= RECOVERY_WINDOW_MS) {
+      attempts.set(key, { startedAt: currentTime, count: 1 });
+      return false;
+    }
+    entry.count += 1;
+    if (attempts.size > 5000) {
+      for (const [address, value] of attempts) {
+        if (currentTime - value.startedAt >= RECOVERY_WINDOW_MS) attempts.delete(address);
+      }
+    }
+    return entry.count > RECOVERY_MAX_REQUESTS;
+  };
+}
 
 export function createCustomerOrdersWebHandler({
   baseHandler,
   apiInternalUrl = process.env.API_INTERNAL_URL ?? "http://localhost:4000",
   customerCookieSecure = process.env.CUSTOMER_COOKIE_SECURE === "true",
   fetchImpl = fetch,
+  now,
   logger = console
 } = {}) {
   if (typeof baseHandler !== "function") {
     throw new TypeError("createCustomerOrdersWebHandler necesita un handler base.");
   }
   const apiBase = new URL(apiInternalUrl);
+  const recoveryLimited = createRecoveryLimiter({ now });
 
   async function authenticate(request, tokenValue) {
     try {
@@ -147,6 +177,48 @@ export function createCustomerOrdersWebHandler({
 
   return async function customerOrdersWebHandler(request, response) {
     const url = new URL(request.url ?? "/", "http://localhost");
+
+    if (url.pathname === "/internal/customer/access/request") {
+      if (request.method !== "POST") {
+        sendJson(response, 405, { error: "METHOD_NOT_ALLOWED", message: "Método no permitido." }, { Allow: "POST" });
+        return;
+      }
+      try {
+        const body = await readJson(request);
+        if (recoveryLimited(clientAddress(request))) {
+          sendJson(response, 202, { accepted: true, message: RECOVERY_MESSAGE });
+          return;
+        }
+        const upstream = await fetchImpl(new URL("/api/pilot-checkout/access-recovery", apiBase), {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": String(request.headers["user-agent"] ?? "").slice(0, 500)
+          },
+          body: JSON.stringify({ email: body.email, orderNumber: body.orderNumber }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!upstream.ok) {
+          const payload = await upstream.json().catch(() => ({}));
+          sendJson(response, upstream.status >= 500 ? 503 : upstream.status, {
+            error: payload.error ?? "CUSTOMER_ACCESS_RECOVERY_UNAVAILABLE",
+            message: "No se ha podido solicitar un nuevo acceso. Inténtalo de nuevo más tarde."
+          });
+          return;
+        }
+        sendJson(response, 202, { accepted: true, message: RECOVERY_MESSAGE });
+      } catch (error) {
+        const statusCode = Number.isInteger(error?.statusCode) ? error.statusCode : 503;
+        sendJson(response, statusCode, {
+          error: statusCode === 503 ? "API_UNAVAILABLE" : error.message,
+          message: statusCode === 503
+            ? "No se ha podido solicitar un nuevo acceso. Inténtalo de nuevo más tarde."
+            : "La solicitud de recuperación no es válida."
+        });
+      }
+      return;
+    }
 
     if (url.pathname === "/internal/customer/access") {
       if (request.method !== "POST") {
