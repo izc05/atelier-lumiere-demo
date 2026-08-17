@@ -14,6 +14,7 @@ async function text(...parts) {
 test("FASE A1 comparte cabecera y navegación en la WEB V2 sin entrar en áreas privadas", async () => {
   const premium = await text("premium-ui.js");
   const globalShell = await text("visual-v2-global-shell.css");
+  const publicShell = await text("public-shell.css");
 
   assert.match(premium, /visual-v2-global-shell\.css/);
   assert.match(premium, /PRIMARY_PUBLIC_NAVIGATION/);
@@ -41,9 +42,14 @@ test("FASE A1 comparte cabecera y navegación en la WEB V2 sin entrar en áreas 
   assert.match(globalShell, /\.atelier-global-header/);
   assert.match(globalShell, /\.atelier-global-nav/);
   assert.match(globalShell, /\.atelier-global-cart/);
+  assert.match(globalShell, /topbar\.atelier-global-header/);
   assert.match(globalShell, /@media \(min-width: 761px\) and \(max-width: 1024px\)/);
   assert.match(globalShell, /@media \(max-width: 760px\)/);
-  assert.match(globalShell, /\.atelier-global-header \.atelier-global-nav\s*\{[\s\S]*?display:\s*none\s*!important;/);
-  assert.match(globalShell, /body\.public-menu-open > \[data-public-navigation\]\.atelier-global-nav[\s\S]*?display:\s*flex\s*!important;/);
+  assert.match(globalShell, /\.atelier-global-cart \.atelier-global-cart-label\s*\{[\s\S]*?display:\s*inline\s*!important;/);
   assert.match(globalShell, /prefers-reduced-motion:\s*reduce/);
+
+  // La lógica móvil probada sigue siendo la fuente autoritativa: hidden al cerrar y overlay fijo al abrir.
+  assert.match(publicShell, /\.js \[data-public-navigation\]\s*\{[\s\S]*?position:\s*fixed\s*!important;[\s\S]*?display:\s*flex\s*!important;/);
+  assert.match(publicShell, /\.js \[data-public-navigation\]\[hidden\]\s*\{[\s\S]*?display:\s*none\s*!important;/);
+  assert.match(publicShell, /\.js body\.public-menu-open \[data-public-navigation\]/);
 });
