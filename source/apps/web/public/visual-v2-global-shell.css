@@ -205,11 +205,39 @@
   outline-offset: 4px !important;
 }
 
+/* Las páginas heredadas con .topbar imponían una cuadrícula de dos columnas.
+ * En escritorio la WEB V2 recupera las tres zonas: marca / navegación / carrito. */
+@media (min-width: 1025px) {
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header {
+    grid-template-columns: minmax(184px, 244px) minmax(0, 1fr) auto !important;
+    grid-template-rows: auto !important;
+    column-gap: clamp(18px, 2vw, 30px) !important;
+    row-gap: 0 !important;
+  }
+
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header .atelier-global-brand {
+    display: inline-flex !important;
+  }
+
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header .atelier-global-nav {
+    display: flex !important;
+  }
+
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header .atelier-global-actions {
+    display: flex !important;
+  }
+}
+
 /* Portátil: se conserva una sola línea, reduciendo ritmo antes que legibilidad. */
 @media (min-width: 1025px) and (max-width: 1240px) {
   .atelier-global-header {
     grid-template-columns: minmax(170px, auto) minmax(0, 1fr) auto !important;
     padding-inline: 26px !important;
+  }
+
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header {
+    grid-template-columns: minmax(170px, 210px) minmax(0, 1fr) auto !important;
+    column-gap: 18px !important;
   }
 
   .atelier-global-brand {
@@ -266,7 +294,7 @@
   }
 }
 
-/* Móvil: el shell común abre la navegación como overlay; la cabecera solo conserva marca, carrito y menú. */
+/* Móvil: el shell común abre la navegación como overlay; la cabecera conserva marca, carrito y menú. */
 @media (max-width: 760px) {
   .atelier-global-header {
     grid-template-columns: minmax(0, 1fr) auto !important;
@@ -280,7 +308,7 @@
   }
 
   .atelier-global-brand {
-    width: min(49vw, 184px) !important;
+    width: min(43vw, 166px) !important;
     min-height: 44px !important;
   }
 
@@ -294,10 +322,13 @@
 
   .atelier-global-cart {
     min-height: 40px !important;
+    gap: 5px !important;
+    font-size: .56rem !important;
+    letter-spacing: .08em !important;
   }
 
   .atelier-global-cart .atelier-global-cart-label {
-    display: none !important;
+    display: inline !important;
   }
 
   .atelier-global-header .public-menu-toggle {
