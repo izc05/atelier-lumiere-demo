@@ -131,7 +131,7 @@ function productCard(product) {
   body.append(node("p", "", product.shortDescription || "Pieza revisada por Atelier Lumière."));
   const tags = node("div", "tags");
   for (const event of (product.events ?? []).slice(0, 3)) {
-    tags.append(node("span", "tag", event.replaceAll("-", " "));
+    tags.append(node("span", "tag", event.replaceAll("-", " ")));
   }
   if (product.customizable) tags.append(node("span", "tag", "personalizable"));
   body.append(tags);
