@@ -85,6 +85,7 @@
     '/entrada/webgl/urban-fine-composition.js',
     '/entrada/webgl/workshop-frontages.js',
     '/entrada/webgl/workshop-frontage-alignment.js',
+    '/entrada/webgl/village-pathways.js',
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/focus-atmosphere.js',
@@ -100,6 +101,7 @@
     '/entrada/webgl/capture-tuning.js',
     '/entrada/webgl/reference-night-direction.js',
     '/entrada/webgl/ambient-village-life.js',
+    '/entrada/webgl/material-depth.js',
     '/entrada/webgl/cinematic-depth-composition.js',
     '/entrada/webgl/narrative-entry-transition.js',
     '/entrada/webgl/workshop-page-bridge.js',
@@ -141,6 +143,8 @@
         root.dataset.graphicsFidelityCheckpoint = 'u3.27';
         root.dataset.workshopContinuityCheckpoint = 'u3.27';
         root.dataset.bootCheckpoint = 'u3.28';
+        root.dataset.pathwaysCheckpoint = 'u3.29';
+        root.dataset.materialDepthCheckpoint = 'u3.29';
       }
       if (boot?.complete) await boot.complete();
     } catch (error) {
