@@ -104,6 +104,7 @@
     '/entrada/webgl/ambient-village-life.js',
     '/entrada/webgl/material-depth.js',
     '/entrada/webgl/close-range-fidelity.js',
+    '/entrada/webgl/plaza-water-reflections.js',
     '/entrada/webgl/cinematic-depth-composition.js',
     '/entrada/webgl/narrative-entry-transition.js',
     '/entrada/webgl/workshop-page-bridge.js',
@@ -150,6 +151,7 @@
         root.dataset.horizonCheckpoint = 'u3.30';
         root.dataset.vegetationVarietyCheckpoint = 'u3.30';
         root.dataset.closeRangeFidelityCheckpoint = 'u3.31';
+        root.dataset.plazaWaterCheckpoint = 'u3.32';
       }
       if (boot?.complete) await boot.complete();
     } catch (error) {
