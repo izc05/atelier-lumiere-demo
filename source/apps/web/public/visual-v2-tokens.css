@@ -68,7 +68,7 @@
   --v2-duration-slow: 700ms;
 
   /* Image behaviour */
-  --v2-image-hover-scale: 1.025;
+  --v2-image-hover-scale: 1.018;
   --v2-image-saturation: .94;
 
   /* Compatibility aliases. They will replace the old visual system gradually. */
