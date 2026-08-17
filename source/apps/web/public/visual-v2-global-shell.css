@@ -294,7 +294,7 @@
   }
 }
 
-/* Móvil: el shell común abre la navegación como overlay; la cabecera conserva marca, carrito y menú. */
+/* Móvil: public-shell mantiene el contrato hidden → overlay. V2 solo decide el aspecto. */
 @media (max-width: 760px) {
   .atelier-global-header {
     grid-template-columns: minmax(0, 1fr) auto !important;
@@ -310,10 +310,6 @@
   .atelier-global-brand {
     width: min(43vw, 166px) !important;
     min-height: 44px !important;
-  }
-
-  .atelier-global-header .atelier-global-nav {
-    display: none !important;
   }
 
   .atelier-global-actions {
@@ -336,8 +332,7 @@
   }
 }
 
-/* Al abrirse, public-shell mueve la navegación directamente a body. Esta regla
- * garantiza el overlay incluso aunque la hoja V2 cargue después de public-shell.css. */
+/* Compatibilidad defensiva si otra capa mueve el panel móvil a body. */
 body.public-menu-open > [data-public-navigation].atelier-global-nav {
   display: flex !important;
   --atelier-global-overlay-ready: 1;
