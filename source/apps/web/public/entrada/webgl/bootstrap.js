@@ -82,6 +82,7 @@
     '/entrada/webgl/stone-boundaries.js',
     '/entrada/webgl/proximity-life.js',
     '/entrada/webgl/urban-density.js',
+    '/entrada/webgl/silhouette-reconstruction.js',
     '/entrada/webgl/night-life-lighting.js',
     '/entrada/webgl/urban-fine-composition.js',
     '/entrada/webgl/workshop-frontages.js',
@@ -143,6 +144,7 @@
         root.dataset.navigationCheckpoint = 'u3.17n.4';
         root.dataset.stabilityCheckpoint = 'u3.19';
         root.dataset.urbanCheckpoint = 'u3.20';
+        root.dataset.silhouetteReconstructionCheckpoint = 'u3.40';
         root.dataset.lightingCheckpoint = 'u3.21';
         root.dataset.urbanFineCheckpoint = 'u3.22';
         root.dataset.workshopFrontageCheckpoint = 'u3.23';
