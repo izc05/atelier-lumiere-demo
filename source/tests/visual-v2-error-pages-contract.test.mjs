@@ -17,7 +17,8 @@ test("404 y 500 comparten la capa Visual V2 sin perder salidas seguras", async (
   const visual = await text("visual-v2-errors.css");
 
   for (const html of [notFound, serverError]) {
-    assert.match(html, /visual-v2-tokens\.css/);
+    assert.doesNotMatch(html, /visual-v2-tokens\.css/);
+    assert.doesNotMatch(html, /postgres|database|stack|exception|bearer|token|\/srv\//i);
     assert.match(html, /visual-v2-errors\.css/);
     assert.match(html, /public-shell\.js/);
     assert.match(html, /href="\/"/);
@@ -32,6 +33,7 @@ test("404 y 500 comparten la capa Visual V2 sin perder salidas seguras", async (
   assert.match(serverError, />500</);
   assert.match(serverError, /Algo no ha salido bien/);
 
+  assert.match(visual, /@import url\("\/visual-v2-tokens\.css"\);/);
   assert.match(visual, /--v2-wine-950/);
   assert.match(visual, /@media \(max-width: 860px\)/);
   assert.match(visual, /@media \(max-width: 620px\)/);
