@@ -152,10 +152,16 @@ html[data-atelier-public-shell="v2"] #talleres.manifesto-section {
 
 @media (max-width: 760px) {
   html[data-atelier-public-shell="v2"] #home-hero.hero-editorial {
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 32px !important;
     min-height: 0 !important;
     padding-top: 42px !important;
     padding-bottom: 58px !important;
+  }
+
+  html[data-atelier-public-shell="v2"] #home-hero .hero-copy {
+    min-width: 0 !important;
+    max-width: none !important;
   }
 
   html[data-atelier-public-shell="v2"] #home-hero .hero-copy h1 {
@@ -189,7 +195,11 @@ html[data-atelier-public-shell="v2"] #talleres.manifesto-section {
   }
 
   html[data-atelier-public-shell="v2"] #home-hero .hero-editorial-visual {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
     min-height: clamp(445px, 123vw, 570px) !important;
+    justify-self: stretch !important;
   }
 
   html[data-atelier-public-shell="v2"] #home-hero .hero-workshop-note {
