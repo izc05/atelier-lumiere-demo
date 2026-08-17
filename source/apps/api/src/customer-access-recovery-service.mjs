@@ -118,14 +118,15 @@ export function createCustomerAccessRecoveryService({
 
       const currentTime = now();
       const lookup = await database.withContext(systemContext, async (transaction) => {
+        const target = await findTarget(transaction, email, orderNumber);
+        if (!target) return null;
         const allowed = await acquireCooldown(
           transaction,
           throttleKey(email, orderNumber, loginPepper),
           currentTime,
           cooldownSeconds
         );
-        if (!allowed) return null;
-        return findTarget(transaction, email, orderNumber);
+        return allowed ? target : null;
       });
 
       if (lookup && mailService.enabled) {
