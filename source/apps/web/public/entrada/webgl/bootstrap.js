@@ -109,6 +109,7 @@
     '/entrada/webgl/material-depth.js',
     '/entrada/webgl/close-range-fidelity.js',
     '/entrada/webgl/plaza-water-reflections.js',
+    '/entrada/webgl/dynamic-local-lighting.js',
     '/entrada/webgl/cinematic-depth-composition.js',
     '/entrada/webgl/narrative-entry-transition.js',
     '/entrada/webgl/workshop-page-bridge.js',
@@ -162,6 +163,7 @@
         root.dataset.referenceShapeCleanupCheckpoint = 'u3.35';
         root.dataset.gameGradeInteractionCheckpoint = 'u3.36';
         root.dataset.heroHouseFidelityCheckpoint = 'u3.37';
+        root.dataset.dynamicLocalLightingCheckpoint = 'u3.38';
       }
       if (boot?.complete) await boot.complete();
     } catch (error) {
