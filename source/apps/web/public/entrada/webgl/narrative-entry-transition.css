@@ -1,0 +1,139 @@
+/* Atelier Lumière · U3.26 · continuidad placa → fachada → entrada */
+.u326-narrative-entry {
+  --u326-x: 50%;
+  --u326-y: 52%;
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.u326-narrative-aperture {
+  position: absolute;
+  left: var(--u326-x);
+  top: var(--u326-y);
+  width: min(42vw, 520px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle,
+      rgba(255,216,143,.12) 0 8%,
+      rgba(180,111,62,.055) 25%,
+      rgba(79,16,32,.025) 47%,
+      transparent 70%);
+  filter: blur(9px);
+  opacity: 0;
+  transform: translate(-50%,-50%) scale(.72);
+  transition: opacity .42s ease, transform .92s cubic-bezier(.2,.72,.18,1);
+}
+.u326-narrative-entry[data-visible="true"] .u326-narrative-aperture { opacity: .72; transform: translate(-50%,-50%) scale(1.08); }
+
+.webgl-village .webgl-village-header,
+.webgl-village .webgl-village-caption,
+.webgl-village .webgl-village-legend,
+.webgl-village .webgl-spatial-controls,
+.webgl-village .webgl-spatial-help,
+.webgl-village .webgl-spatial-back-hint,
+.webgl-village .webgl-enter-atelier,
+.webgl-village .webgl-provider-card,
+.webgl-village .webgl-workshop-plaque {
+  transition-property: opacity, transform, filter;
+  transition-duration: 360ms;
+  transition-timing-function: cubic-bezier(.22,.72,.18,1);
+}
+
+/* Primer acto: la placa seleccionada sirve de ancla; el resto del interfaz se retira. */
+.webgl-village[data-narrative-stage="travel"] .webgl-village-header,
+.webgl-village[data-narrative-stage="travel"] .webgl-village-caption,
+.webgl-village[data-narrative-stage="travel"] .webgl-village-legend,
+.webgl-village[data-narrative-stage="travel"] .webgl-spatial-controls,
+.webgl-village[data-narrative-stage="travel"] .webgl-spatial-help,
+.webgl-village[data-narrative-stage="travel"] .webgl-spatial-back-hint,
+.webgl-village[data-narrative-stage="travel"] .webgl-enter-atelier {
+  opacity: .08 !important;
+  pointer-events: none !important;
+}
+.webgl-village[data-narrative-stage="travel"] .webgl-provider-card {
+  opacity: 0 !important;
+  transform: translateY(12px) scale(.975) !important;
+  pointer-events: none !important;
+}
+.webgl-village[data-narrative-stage="travel"] .webgl-workshop-plaque:not(.is-selected) { opacity: 0 !important; pointer-events: none !important; }
+.webgl-village[data-narrative-stage="travel"] .webgl-workshop-plaque.is-selected { opacity: .80 !important; filter: brightness(1.07); }
+
+/* Segundo acto: la fachada sustituye visualmente a la placa. */
+.webgl-village[data-narrative-stage="approach"] .webgl-village-header,
+.webgl-village[data-narrative-stage="approach"] .webgl-village-caption,
+.webgl-village[data-narrative-stage="approach"] .webgl-village-legend,
+.webgl-village[data-narrative-stage="approach"] .webgl-spatial-controls,
+.webgl-village[data-narrative-stage="approach"] .webgl-spatial-help,
+.webgl-village[data-narrative-stage="approach"] .webgl-spatial-back-hint,
+.webgl-village[data-narrative-stage="approach"] .webgl-enter-atelier {
+  opacity: .035 !important;
+  pointer-events: none !important;
+}
+.webgl-village[data-narrative-stage="approach"] .webgl-provider-card {
+  opacity: 0 !important;
+  transform: translateY(10px) scale(.98) !important;
+  pointer-events: none !important;
+}
+.webgl-village[data-narrative-stage="approach"] .webgl-workshop-plaque { opacity: .06 !important; pointer-events: none !important; }
+
+/* Tercer acto: el viaje terminó. El taller y su CTA son los protagonistas. */
+.webgl-village[data-narrative-stage="ready"] .webgl-village-header { opacity: .20 !important; }
+.webgl-village[data-narrative-stage="ready"] .webgl-village-legend { opacity: .16 !important; }
+.webgl-village[data-narrative-stage="ready"] .webgl-spatial-controls { opacity: .62 !important; }
+.webgl-village[data-narrative-stage="ready"] .webgl-spatial-help,
+.webgl-village[data-narrative-stage="ready"] .webgl-spatial-back-hint { opacity: .28 !important; }
+.webgl-village[data-narrative-stage="ready"] .webgl-enter-atelier { opacity: .26 !important; }
+.webgl-village[data-narrative-stage="ready"] .webgl-workshop-plaque { opacity: .08 !important; }
+.webgl-village[data-narrative-stage="ready"] .webgl-provider-card {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  pointer-events: auto !important;
+  box-shadow: 0 28px 72px rgba(8,3,5,.34), 0 0 0 1px rgba(215,177,105,.12);
+}
+
+/* Atelier no tiene tarjeta de proveedor: su caption + CTA ocupan ese papel. */
+.webgl-village[data-narrative-stage="ready"][data-narrative-kind="atelier"] .webgl-village-caption {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+.webgl-village[data-narrative-stage="ready"][data-narrative-kind="provider"] .webgl-village-caption { opacity: .10 !important; pointer-events: none !important; }
+.webgl-village[data-narrative-stage="ready"][data-narrative-kind="reserved"] .webgl-village-caption { opacity: .72 !important; }
+
+.webgl-village[data-narrative-stage="ready"] .webgl-provider-enter,
+.webgl-village[data-narrative-stage="ready"] .webgl-place-enter {
+  box-shadow: 0 10px 28px rgba(79,16,32,.18), inset 0 0 0 1px rgba(223,188,121,.18);
+}
+
+/* Si el usuario toma control manual, se devuelve la interfaz completa sin cambiar la selección. */
+.webgl-village[data-narrative-stage="manual"] .u326-narrative-entry { opacity: 0; }
+
+.webgl-village[data-narrative-stage="exit"] .u326-narrative-entry,
+.webgl-village[data-narrative-stage="exit"] .webgl-workshop-plaques,
+.webgl-village[data-narrative-stage="exit"] .webgl-spatial-controls,
+.webgl-village[data-narrative-stage="exit"] .webgl-enter-atelier { opacity: 0 !important; pointer-events: none !important; }
+
+@media (max-width: 760px) {
+  .u326-narrative-aperture { width: min(78vw, 430px); filter: blur(7px); }
+  .webgl-village[data-narrative-stage="ready"] .webgl-village-header { opacity: .14 !important; }
+  .webgl-village[data-narrative-stage="ready"] .webgl-spatial-controls { opacity: .48 !important; }
+  .webgl-village[data-narrative-stage="ready"] .webgl-village-legend { opacity: .08 !important; pointer-events: none !important; }
+}
+
+[data-webgl-quality="lite"] .u326-narrative-entry { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .u326-narrative-aperture,
+  .webgl-village .webgl-village-header,
+  .webgl-village .webgl-village-caption,
+  .webgl-village .webgl-village-legend,
+  .webgl-village .webgl-spatial-controls,
+  .webgl-village .webgl-provider-card,
+  .webgl-village .webgl-workshop-plaque {
+    transition: none !important;
+  }
+}
