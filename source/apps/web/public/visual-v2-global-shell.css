@@ -284,7 +284,7 @@
     min-height: 44px !important;
   }
 
-  .atelier-global-nav {
+  .atelier-global-header .atelier-global-nav {
     display: none !important;
   }
 
@@ -305,8 +305,10 @@
   }
 }
 
-/* Cuando public-shell.js abre el menú móvil, sus estilos de overlay siguen siendo autoritativos. */
-body.public-menu-open [data-public-navigation] {
+/* Al abrirse, public-shell mueve la navegación directamente a body. Esta regla
+ * garantiza el overlay incluso aunque la hoja V2 cargue después de public-shell.css. */
+body.public-menu-open > [data-public-navigation].atelier-global-nav {
+  display: flex !important;
   --atelier-global-overlay-ready: 1;
 }
 
