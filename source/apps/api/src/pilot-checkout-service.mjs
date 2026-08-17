@@ -1,3 +1,4 @@
+import { createCustomerAccessRecoveryService } from "./customer-access-recovery-service.mjs";
 import { createPilotCheckoutService as createCorePilotCheckoutService } from "./pilot-checkout-service-core.mjs";
 
 const PUBLISHED_PRODUCTS_QUERY = `SELECT inventory.id,
@@ -88,8 +89,33 @@ export function createPilotCheckoutService(options = {}) {
   if (!options.database || typeof options.database.withContext !== "function") {
     return createCorePilotCheckoutService(options);
   }
-  return createCorePilotCheckoutService({
+
+  const checkoutService = createCorePilotCheckoutService({
     ...options,
     database: publishedCheckoutDatabase(options.database)
+  });
+
+  if (!options.customerAuthService || !options.mailService || !options.systemContext) {
+    return checkoutService;
+  }
+
+  const recoveryService = createCustomerAccessRecoveryService({
+    database: options.database,
+    systemContext: {
+      role: "AUTH_SERVICE",
+      userId: options.systemContext.userId,
+      providerId: null
+    },
+    customerAuthService: options.customerAuthService,
+    mailService: options.mailService,
+    loginPepper: options.loginPepper ?? process.env.AUTH_LOGIN_PEPPER,
+    logger: options.logger
+  });
+
+  return Object.freeze({
+    ...checkoutService,
+    requestCustomerAccessRecovery(input) {
+      return recoveryService.requestAccess(input);
+    }
   });
 }
