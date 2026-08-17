@@ -98,7 +98,7 @@ export function createPilotCheckoutService(options = {}) {
 
   if (
     !options.customerAuthService
-    || !options.mailService
+    || !options.mailService?.enabled
     || !options.systemContext
     || typeof recoveryPepper !== "string"
     || recoveryPepper.length < 32
