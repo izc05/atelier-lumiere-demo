@@ -15,12 +15,29 @@
 <body>
   <main class="access-shell">
     <section class="access-card">
-      <div>
+      <div class="access-card-content">
         <span class="brand-mark" aria-hidden="true">AL</span>
         <p class="eyebrow">Acceso privado</p>
         <h1>Tus pedidos</h1>
         <p id="access-message" class="lead">Estamos comprobando tu enlace seguro…</p>
         <span id="access-spinner" class="status pending">Verificando</span>
+
+        <form id="access-recovery-form" class="access-recovery" hidden>
+          <div class="access-recovery-heading">
+            <h2>Solicitar un nuevo acceso</h2>
+            <p>Introduce el correo utilizado en la compra y el número de uno de tus pedidos.</p>
+          </div>
+          <label class="field">Correo de compra
+            <input id="recovery-email" type="email" maxlength="254" autocomplete="email" required placeholder="tu@correo.es">
+          </label>
+          <label class="field">Número de pedido
+            <input id="recovery-order" type="text" minlength="5" maxlength="80" autocomplete="off" required placeholder="AL-2026…">
+          </label>
+          <button id="recovery-button" class="button primary" type="submit">Enviar nuevo acceso</button>
+          <p class="access-recovery-help">Por seguridad, la respuesta será la misma aunque los datos no correspondan a un pedido.</p>
+          <p id="recovery-result" class="message" role="status" aria-live="polite"></p>
+        </form>
+
         <a id="access-home" class="button secondary" href="/" hidden>Volver a Atelier Lumière</a>
       </div>
     </section>
