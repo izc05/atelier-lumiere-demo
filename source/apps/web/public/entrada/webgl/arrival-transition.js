@@ -1,4 +1,4 @@
-/* Atelier Lumière · U2.2 · transición de llegada desde la entrada general */
+/* Atelier Lumière · U3.28 · llegada coordinada con el boot gate inicial */
 (() => {
   const ARRIVAL_KEY = 'atelier_arrival_from_entry';
   const root = document.querySelector('[data-webgl-village]');
@@ -20,17 +20,6 @@
 
   root.dataset.arrival = 'cinematic';
 
-  const overlay = document.createElement('div');
-  overlay.className = 'webgl-arrival';
-  overlay.setAttribute('aria-hidden', 'true');
-  overlay.innerHTML = `
-    <div class="webgl-arrival-inner">
-      <img src="/assets/brand/atelier-logo-official-light.svg" alt="">
-      <span>Atelier Lumière</span>
-      <strong>El pueblo de los oficios</strong>
-    </div>`;
-  document.body.append(overlay);
-
   if (!reducedMotion.matches) {
     try {
       if (typeof camera !== 'undefined') {
@@ -39,21 +28,17 @@
         camera.desiredDistance = finalDistance;
       }
     } catch {
-      /* La llegada visual sigue funcionando aunque la cámara no esté disponible. */
+      /* El boot gate sigue protegiendo el primer frame aunque la cámara no esté disponible. */
     }
   }
 
-  const reveal = () => {
-    overlay.classList.add('is-revealing');
-    window.setTimeout(() => {
-      overlay.remove();
-      root.dataset.arrival = 'complete';
-    }, reducedMotion.matches ? 30 : 820);
+  const completeArrival = () => {
+    root.dataset.arrival = 'complete';
   };
 
-  if (reducedMotion.matches) {
-    window.setTimeout(reveal, 20);
+  if (root.dataset.bootState === 'complete') {
+    completeArrival();
   } else {
-    window.setTimeout(reveal, 420);
+    window.addEventListener('atelier:village-boot-complete', completeArrival, { once: true });
   }
 })();
