@@ -131,7 +131,7 @@ function productCard(product) {
   body.append(node("p", "", product.shortDescription || "Pieza revisada por Atelier Lumière."));
   const tags = node("div", "tags");
   for (const event of (product.events ?? []).slice(0, 3)) {
-    tags.append(node("span", "tag", event.replaceAll("-", " ")));
+    tags.append(node("span", "tag", event.replaceAll("-", " "));
   }
   if (product.customizable) tags.append(node("span", "tag", "personalizable"));
   body.append(tags);
@@ -211,7 +211,7 @@ function hydrateProviderVisuals(provider, displayName) {
     sizes: "(max-width: 1200px) 100vw, 1180px",
     loading: "eager",
     priority: "high",
-    defaultWidth: 960
+    defaultWidth: 1600
   })) {
     cover.hidden = false;
     byId("provider-hero").classList.add("has-provider-cover");
@@ -241,7 +241,7 @@ function hydrateProviderVisuals(provider, displayName) {
         sizes: index === 0
           ? "(max-width: 700px) calc(100vw - 40px), 62vw"
           : "(max-width: 700px) calc(100vw - 40px), 31vw",
-        defaultWidth: index === 0 ? 960 : 640
+        defaultWidth: index === 0 ? 1280 : 900
       });
       figure.append(image);
       return figure;
