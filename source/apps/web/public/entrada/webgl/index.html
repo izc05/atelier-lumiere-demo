@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="theme-color" content="#f4eddf">
+  <meta name="theme-color" content="#160b0d">
   <title>Pueblo Atelier · Atelier Lumière</title>
   <link rel="stylesheet" href="/premium-ui.css">
   <script defer src="/premium-ui.js"></script>
   <link rel="stylesheet" href="/visual-v2-tokens.css">
+  <link rel="stylesheet" href="/entrada/webgl/boot-gate.css">
   <link rel="stylesheet" href="/entrada/webgl/scene.css">
   <link rel="stylesheet" href="/entrada/webgl/interaction.css">
   <link rel="stylesheet" href="/entrada/webgl/transition.css">
@@ -21,10 +22,22 @@
   <link rel="stylesheet" href="/entrada/webgl/final-art-direction.css">
   <link rel="stylesheet" href="/entrada/webgl/capture-tuning.css">
   <link rel="stylesheet" href="/entrada/webgl/reference-night-direction.css">
+  <script defer src="/entrada/webgl/boot-gate.js"></script>
   <script defer src="/entrada/webgl/bootstrap.js"></script>
 </head>
 <body>
-  <main class="webgl-village" data-webgl-village>
+  <main class="webgl-village" data-webgl-village data-boot-state="loading">
+    <div class="webgl-boot" data-webgl-boot role="status" aria-live="polite" aria-label="Cargando la experiencia del Pueblo Atelier">
+      <div class="webgl-boot-inner">
+        <img class="webgl-boot-logo" src="/assets/brand/atelier-logo-official-light.svg" alt="Atelier Lumière">
+        <span class="webgl-boot-kicker">Atelier Lumière</span>
+        <h1 class="webgl-boot-title">El pueblo de los oficios</h1>
+        <p class="webgl-boot-copy">Cargando la experiencia del pueblo…</p>
+        <span class="webgl-boot-progress" aria-hidden="true"><i data-webgl-boot-progress></i></span>
+        <p class="webgl-boot-stage" data-webgl-boot-stage>Preparando el terreno…</p>
+      </div>
+    </div>
+
     <canvas class="webgl-village-canvas" data-webgl-canvas aria-label="Vista aérea tridimensional e interactiva del Pueblo Atelier"></canvas>
 
     <header class="webgl-village-header">
