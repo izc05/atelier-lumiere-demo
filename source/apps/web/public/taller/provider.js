@@ -23,6 +23,13 @@ async function requestCatalog(rawProviderSlug) {
   if (!response.ok) throw new Error(payload.message || "No se pudo abrir el catálogo.");
   return Array.isArray(payload.products) ? payload.products : [];
 }
+async function requestProvider(rawProviderSlug) {
+  const response = await fetch("/internal/catalog/providers", { headers: { Accept: "application/json" } });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.message || "No se pudo abrir el taller.");
+  const providers = Array.isArray(payload.providers) ? payload.providers : [];
+  return providers.find((provider) => provider?.slug === rawProviderSlug) ?? null;
+}
 function initials(value) {
   const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "AL";
@@ -156,10 +163,12 @@ function renderProducts() {
   view.replaceChildren(...visible.map(productCard));
   if (visible.length === 0) view.append(node("p", "provider-empty", "No hay piezas que coincidan con esta búsqueda."));
 }
-function revealProviderSections() {
-  for (const id of ["provider-hero", "provider-editorial", "collection", "provider-bespoke", "provider-footer-note"]) {
+function revealProviderSections({ hasProducts }) {
+  for (const id of ["provider-hero", "provider-editorial", "provider-footer-note"]) {
     byId(id).hidden = false;
   }
+  byId("collection").hidden = !hasProducts;
+  byId("provider-bespoke").hidden = !hasProducts;
 }
 function operationalText(value) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -255,6 +264,7 @@ function hydrateProvider(provider) {
   const lead = provider.tagline || specialty;
   const categories = new Set(providerProducts.map((product) => product.category).filter(Boolean));
   const customizable = providerProducts.filter((product) => product.customizable).length;
+  const hasProducts = providerProducts.length > 0;
 
   document.title = `${displayName} · Atelier Lumière`;
   byId("provider-name").textContent = displayName;
@@ -262,9 +272,15 @@ function hydrateProvider(provider) {
   byId("provider-identity-name").textContent = displayName;
   byId("provider-monogram").textContent = initials(displayName);
   byId("provider-piece-count").textContent = String(providerProducts.length);
-  byId("provider-category-count").textContent = String(categories.size || 1);
+  byId("provider-category-count").textContent = String(categories.size);
   byId("customizable-count").textContent = String(customizable);
   byId("collection-note").textContent = `${providerProducts.length} ${providerProducts.length === 1 ? "pieza publicada" : "piezas publicadas"} en esta edición del taller.`;
+
+  const primaryAction = document.querySelector(".provider-primary-action");
+  if (primaryAction && !hasProducts) {
+    primaryAction.href = "#provider-editorial";
+    primaryAction.textContent = "Conocer el taller";
+  }
 
   if (provider.locationLabel) {
     byId("provider-location-signal").textContent = provider.locationLabel;
@@ -281,7 +297,7 @@ function hydrateProvider(provider) {
     byId("provider-techniques-title").textContent = "Técnicas y oficio";
     byId("provider-techniques-copy").textContent = provider.techniques.join(" · ");
   }
-  if (provider.acceptsCustomRequests) {
+  if (provider.acceptsCustomRequests && hasProducts) {
     byId("provider-bespoke-copy").textContent = "Este taller está abierto a encargos personalizados. Explora la colección y entra en la pieza más cercana a tu idea para consultar opciones y tiempos.";
   }
   if (provider.locationLabel) {
@@ -299,16 +315,25 @@ async function load() {
     return;
   }
   try {
-    const products = await requestCatalog(slug);
-    if (products.length === 0) {
-      byId("empty-view").hidden = false;
+    const [listedProvider, products] = await Promise.all([
+      requestProvider(slug),
+      requestCatalog(slug)
+    ]);
+    const provider = listedProvider ?? products[0]?.provider ?? null;
+    if (!provider) {
+      byId("error-message").textContent = "Este taller no está disponible en la selección pública.";
+      byId("error-view").hidden = false;
       return;
     }
-    const provider = products[0].provider;
+
     providerProducts = featuredFirst(products, provider.featuredProductIds);
     hydrateProvider(provider);
-    revealProviderSections();
-    renderProducts();
+    revealProviderSections({ hasProducts: providerProducts.length > 0 });
+    if (providerProducts.length > 0) {
+      renderProducts();
+    } else {
+      byId("empty-view").hidden = false;
+    }
   } catch (error) {
     byId("error-message").textContent = error.message;
     byId("error-view").hidden = false;
