@@ -1,0 +1,81 @@
+/* Atelier Lumière · U3.32 · reflejos cálidos de plaza */
+.u332-plaza-reflections {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+.u332-plaza-reflection {
+  --u332-x: 50%;
+  --u332-y: 50%;
+  --u332-angle: 0deg;
+  position: absolute;
+  left: var(--u332-x);
+  top: var(--u332-y);
+  width: 118px;
+  height: 34px;
+  border-radius: 50%;
+  opacity: .24;
+  transform: translate(-50%, -50%) rotate(var(--u332-angle));
+  transform-origin: center;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(255,183,86,.24) 0%, rgba(217,130,54,.12) 31%, rgba(78,24,24,.025) 58%, transparent 74%);
+  filter: blur(5px) saturate(1.08);
+  mix-blend-mode: screen;
+}
+
+.u332-plaza-reflection[data-primary="true"] {
+  width: 158px;
+  height: 46px;
+  opacity: .30;
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(242,193,111,.22) 0%, rgba(110,151,137,.075) 30%, rgba(188,99,48,.07) 52%, transparent 76%);
+  filter: blur(6px) saturate(1.04);
+}
+
+.webgl-village[data-performance-mode="trim"] .u332-plaza-reflection:not([data-primary="true"]) {
+  opacity: .14;
+}
+
+.webgl-village[data-performance-mode="reduce"] .u332-plaza-reflection:not([data-primary="true"]),
+.webgl-village[data-performance-mode="protect"] .u332-plaza-reflection:not([data-primary="true"]) {
+  opacity: 0 !important;
+}
+
+.webgl-village[data-webgl-quality="lite"] .u332-plaza-reflection:not([data-primary="true"]) {
+  display: none;
+}
+
+@media (max-width: 1050px) {
+  .u332-plaza-reflection {
+    width: 96px;
+    height: 28px;
+    opacity: .19;
+  }
+  .u332-plaza-reflection[data-primary="true"] {
+    width: 132px;
+    height: 39px;
+    opacity: .25;
+  }
+}
+
+@media (max-width: 760px) {
+  .u332-plaza-reflection {
+    filter: blur(4px) saturate(1.02);
+  }
+  .u332-plaza-reflection[data-primary="true"] {
+    width: 112px;
+    height: 34px;
+    opacity: .20;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .u332-plaza-reflection {
+    transition: none !important;
+    animation: none !important;
+  }
+}

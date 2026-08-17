@@ -1,0 +1,98 @@
+/* Atelier Lumière · U3.36 · feedback world-space premium */
+.u336-feedback-layer{
+  position:absolute;
+  inset:0;
+  z-index:10;
+  pointer-events:none;
+  overflow:hidden;
+}
+.u336-world-reticle,
+.u336-focus-pulse{
+  position:absolute;
+  left:0;
+  top:0;
+  transform:translate3d(calc(var(--u336-x,0px) - 50%),calc(var(--u336-y,0px) - 50%),0);
+  border-radius:999px;
+  pointer-events:none;
+}
+.u336-world-reticle{
+  width:54px;
+  height:54px;
+  opacity:0;
+  border:1px solid rgba(213,167,90,.58);
+  box-shadow:
+    0 0 0 6px rgba(83,19,34,.07),
+    0 0 22px rgba(213,167,90,.12),
+    inset 0 0 18px rgba(213,167,90,.06);
+  transition:opacity .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.u336-world-reticle::before,
+.u336-world-reticle::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  background:rgba(244,218,164,.74);
+  transform:translate(-50%,-50%);
+  border-radius:2px;
+}
+.u336-world-reticle::before{width:20px;height:1px;}
+.u336-world-reticle::after{width:1px;height:20px;}
+.u336-world-reticle>span{
+  position:absolute;
+  inset:9px;
+  border-radius:inherit;
+  border:1px solid rgba(244,218,164,.28);
+}
+.u336-world-reticle.is-visible{opacity:.72;}
+.u336-world-reticle.is-hover{
+  opacity:1;
+  border-color:rgba(233,190,110,.88);
+  box-shadow:
+    0 0 0 8px rgba(83,19,34,.11),
+    0 0 30px rgba(233,190,110,.20),
+    inset 0 0 18px rgba(233,190,110,.10);
+}
+.u336-world-reticle.is-selected{
+  width:46px;
+  height:46px;
+  opacity:.46;
+}
+.u336-world-reticle.is-arriving{animation:u336-reticle-arrive .34s cubic-bezier(.2,.8,.2,1);}
+
+.u336-focus-pulse{
+  width:36px;
+  height:36px;
+  border:1px solid rgba(244,212,148,.82);
+  opacity:calc(1 - var(--u336-life,0));
+  scale:var(--u336-scale,1);
+  box-shadow:0 0 28px rgba(226,176,91,.18);
+}
+
+[data-webgl-village].u336-has-hover canvas{cursor:pointer;}
+[data-webgl-village][data-map-dragging="true"] canvas,
+[data-webgl-village].is-map-dragging canvas{cursor:grabbing!important;}
+[data-webgl-village].u336-pointer-down .u336-world-reticle.is-hover{
+  scale:.92;
+  opacity:.86;
+}
+[data-webgl-village][data-game-inertia="true"] canvas{cursor:grabbing;}
+
+@keyframes u336-reticle-arrive{
+  0%{scale:1.32;opacity:.10;}
+  70%{scale:.96;opacity:1;}
+  100%{scale:1;opacity:1;}
+}
+
+@media (max-width:1050px){
+  .u336-world-reticle{width:48px;height:48px;}
+}
+@media (max-width:760px){
+  .u336-world-reticle{display:none;}
+  .u336-focus-pulse{width:30px;height:30px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .u336-world-reticle,
+  .u336-focus-pulse{animation:none!important;transition:none!important;}
+  .u336-focus-pulse{display:none;}
+}

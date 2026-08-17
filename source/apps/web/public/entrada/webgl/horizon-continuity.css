@@ -1,0 +1,48 @@
+/* Atelier Lumière · U3.30 · integración visual suelo ↔ horizonte */
+.webgl-village[data-horizon-continuity="u3.30"] .u330-horizon-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(7,5,6,.17) 0%, rgba(18,12,13,.035) 18%, transparent 43%),
+    radial-gradient(ellipse at 50% 64%, rgba(126,78,48,.055), transparent 43%),
+    linear-gradient(180deg, transparent 58%, rgba(8,6,7,.08) 82%, rgba(5,4,5,.17) 100%);
+  mix-blend-mode: multiply;
+  opacity: .78;
+}
+
+/* La atmósfera anterior era demasiado uniforme en panorámica; U3.30 deja respirar materiales y caminos. */
+.webgl-village[data-horizon-continuity="u3.30"] .p10-atmosphere-wash {
+  opacity: .11;
+}
+
+.webgl-village[data-horizon-continuity="u3.30"] .webgl-village-canvas {
+  transform: translateZ(0);
+}
+
+[data-webgl-quality="balanced"][data-horizon-continuity="u3.30"] .u330-horizon-veil {
+  opacity: .70;
+}
+
+[data-webgl-quality="lite"][data-horizon-continuity="u3.30"] .u330-horizon-veil {
+  opacity: .58;
+}
+[data-webgl-quality="lite"][data-horizon-continuity="u3.30"] .p10-atmosphere-wash {
+  opacity: .09;
+}
+
+@media (max-width: 760px) {
+  .webgl-village[data-horizon-continuity="u3.30"] .u330-horizon-veil {
+    opacity: .54;
+  }
+  .webgl-village[data-horizon-continuity="u3.30"] .p10-atmosphere-wash {
+    opacity: .085;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-village[data-horizon-continuity="u3.30"] .u330-horizon-veil {
+    opacity: .68;
+  }
+}

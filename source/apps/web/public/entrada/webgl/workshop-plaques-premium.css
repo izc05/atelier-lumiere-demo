@@ -1,0 +1,146 @@
+/* Atelier Lumière · U3.5F · placas maison premium */
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque {
+  --plaque-glow: rgba(214,172,92,.14);
+  opacity: .88;
+  filter: drop-shadow(0 10px 20px rgba(10,4,5,.20));
+  transition: opacity 260ms ease, filter 260ms ease, transform 260ms cubic-bezier(.22,.75,.25,1);
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-logo {
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(229,198,135,.72);
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255,247,222,.13), transparent 31%),
+    radial-gradient(circle at 68% 76%, rgba(164,105,45,.12), transparent 46%),
+    linear-gradient(145deg,#5b1929,#2d0d16);
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.30),
+    0 0 0 3px rgba(35,13,17,.74),
+    0 0 0 4px rgba(213,174,102,.22),
+    inset 0 1px rgba(255,255,255,.12),
+    inset 0 -8px 18px rgba(11,4,6,.16);
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-logo::after {
+  content:"";
+  position:absolute;
+  inset:4px;
+  border:1px solid rgba(236,210,155,.18);
+  border-radius:50%;
+  pointer-events:none;
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-logo img {
+  padding: 8px;
+  background:
+    radial-gradient(circle at 44% 35%,#fffdf7,#f2eadc 72%,#e3d4c0);
+  filter: saturate(.88) contrast(1.02);
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-copy {
+  gap: 4px;
+  padding: 22px 15px 12px;
+  border: 1px solid rgba(218,177,105,.45);
+  border-radius: 1px;
+  background:
+    linear-gradient(110deg,rgba(255,245,220,.035),transparent 22%,transparent 78%,rgba(255,230,185,.025)),
+    radial-gradient(circle at 50% 0%,rgba(192,121,77,.13),transparent 58%),
+    linear-gradient(145deg,rgba(87,23,38,.975),rgba(40,11,18,.97));
+  box-shadow:
+    0 16px 35px rgba(0,0,0,.27),
+    0 2px 5px rgba(0,0,0,.18),
+    inset 0 1px rgba(255,255,255,.045),
+    inset 0 0 0 3px rgba(18,5,8,.10);
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-copy::before,
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-copy::after {
+  content:"";
+  position:absolute;
+  top:7px;
+  width:18px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(226,192,122,.42));
+}
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-copy::before { left:9px; }
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-copy::after { right:9px; transform:scaleX(-1); }
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque strong {
+  color:#fff5e7;
+  font-size:.88rem;
+  line-height:1.08;
+  letter-spacing:.005em;
+  text-shadow:0 1px 8px rgba(0,0,0,.22);
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque small {
+  color:rgba(239,210,166,.70);
+  font-size:.47rem;
+  letter-spacing:.075em;
+  text-transform:uppercase;
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque::after {
+  width:1px;
+  height:25px;
+  background:linear-gradient(to bottom,rgba(226,190,116,.78),rgba(215,173,97,.20) 52%,transparent);
+  box-shadow:0 0 7px rgba(213,169,90,.15);
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque:hover,
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque:focus-visible {
+  opacity:1;
+  filter:brightness(1.055) drop-shadow(0 15px 28px rgba(10,4,5,.28));
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque.is-selected {
+  opacity:1;
+  filter:brightness(1.07) drop-shadow(0 17px 32px rgba(10,4,5,.32)) drop-shadow(0 0 14px var(--plaque-glow));
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque.is-selected .webgl-workshop-plaque-copy {
+  border-color:rgba(235,202,132,.68);
+  background:
+    linear-gradient(110deg,rgba(255,245,220,.055),transparent 25%,transparent 75%,rgba(255,230,185,.04)),
+    radial-gradient(circle at 50% 0%,rgba(207,139,82,.18),transparent 60%),
+    linear-gradient(145deg,rgba(99,28,43,.985),rgba(43,12,20,.98));
+  box-shadow:
+    0 20px 44px rgba(0,0,0,.32),
+    0 0 0 1px rgba(203,153,75,.06),
+    inset 0 1px rgba(255,255,255,.055);
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque.is-muted {
+  opacity:.19;
+  filter:saturate(.55) blur(.05px);
+}
+
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-enter-atelier {
+  border-color:rgba(220,181,108,.34);
+  background:
+    linear-gradient(135deg,rgba(91,27,38,.74),rgba(32,15,14,.76));
+  box-shadow:0 18px 44px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.04);
+}
+[data-webgl-village][data-plaque-polish="u3.5f"] .webgl-enter-atelier-mark {
+  border-color:rgba(225,188,113,.62);
+  box-shadow:inset 0 0 12px rgba(218,176,100,.07),0 0 0 3px rgba(42,15,18,.30);
+}
+
+@media (max-width:980px) {
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-logo { width:48px;height:48px; }
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-copy { padding:19px 11px 10px; }
+}
+
+@media (max-width:760px) {
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-logo { width:39px;height:39px; }
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-logo img { padding:5px; }
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque-copy { padding:15px 8px 7px; }
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque strong { font-size:.67rem; }
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque small { font-size:.39rem;letter-spacing:.045em; }
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque::after { height:14px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  [data-webgl-village][data-plaque-polish="u3.5f"] .webgl-workshop-plaque { transition:none!important; }
+}

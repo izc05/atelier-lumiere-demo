@@ -1,0 +1,140 @@
+/* Atelier Lumière · U3.3A · navegación espacial reversible */
+.webgl-spatial-controls {
+  position: absolute;
+  z-index: 32;
+  right: clamp(14px, 2vw, 28px);
+  top: 50%;
+  display: grid;
+  gap: 8px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+}
+
+.webgl-spatial-controls button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(238, 205, 132, .28);
+  border-radius: 50%;
+  color: #f3ddaa;
+  background: rgba(31, 16, 18, .72);
+  box-shadow: 0 10px 30px rgba(6, 3, 4, .18);
+  font: 700 .9rem/1 var(--v2-font-ui, Inter, sans-serif);
+  cursor: pointer;
+  backdrop-filter: blur(12px) saturate(1.05);
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.webgl-spatial-controls button:hover,
+.webgl-spatial-controls button:focus-visible {
+  outline: none;
+  transform: scale(1.06);
+  border-color: rgba(238, 205, 132, .65);
+  background: rgba(79, 16, 32, .9);
+}
+
+.webgl-spatial-controls button[data-spatial-action="back"] {
+  margin-bottom: 7px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(10px);
+  transition: opacity 180ms ease, transform 220ms ease, visibility 180ms ease, background 160ms ease;
+}
+
+.webgl-village[data-spatial-depth]:not([data-spatial-depth="0"]) .webgl-spatial-controls button[data-spatial-action="back"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.webgl-spatial-help {
+  position: absolute;
+  z-index: 30;
+  right: clamp(14px, 2vw, 28px);
+  top: calc(50% + 160px);
+  width: 152px;
+  color: rgba(255, 244, 221, .54);
+  font: 600 .47rem/1.55 var(--v2-font-ui, Inter, sans-serif);
+  letter-spacing: .08em;
+  text-align: right;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.webgl-spatial-back-hint {
+  position: absolute;
+  z-index: 28;
+  left: 50%;
+  top: clamp(84px, 11vh, 126px);
+  padding: 8px 13px;
+  border: 1px solid rgba(238, 205, 132, .16);
+  border-radius: 999px;
+  color: rgba(255, 244, 221, .68);
+  background: rgba(25, 12, 14, .58);
+  font: 700 .49rem/1 var(--v2-font-ui, Inter, sans-serif);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transform: translate(-50%, -8px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
+}
+
+.webgl-village[data-spatial-depth]:not([data-spatial-depth="0"]) .webgl-spatial-back-hint {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.webgl-village[data-spatial-orbit="true"] .webgl-village-canvas {
+  cursor: move;
+}
+
+@media (max-width: 980px) {
+  .webgl-spatial-controls {
+    top: auto;
+    right: 14px;
+    bottom: 82px;
+    grid-template-columns: repeat(4, 38px);
+    transform: none;
+  }
+  .webgl-spatial-controls button {
+    width: 38px;
+    height: 38px;
+  }
+  .webgl-spatial-controls button[data-spatial-action="back"] {
+    grid-column: 1 / -1;
+    justify-self: end;
+    margin: 0 0 2px;
+  }
+  .webgl-spatial-help { display: none; }
+  .webgl-spatial-back-hint { top: 78px; }
+}
+
+@media (max-width: 760px) {
+  .webgl-spatial-controls {
+    right: 10px;
+    bottom: 74px;
+    gap: 6px;
+  }
+  .webgl-spatial-controls button {
+    width: 36px;
+    height: 36px;
+    font-size: .82rem;
+    background: rgba(31, 16, 18, .82);
+  }
+  .webgl-spatial-back-hint {
+    top: 76px;
+    max-width: calc(100vw - 28px);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-spatial-controls button,
+  .webgl-spatial-back-hint { transition: none !important; }
+}

@@ -21,6 +21,7 @@ import { createPublicCatalogWebHandler } from "./public-catalog-proxy.mjs";
 import { createPublicErrorPagesWebHandler } from "./public-error-pages-handler.mjs";
 import { createRequestFilesWebHandler } from "./request-files-proxy.mjs";
 import { createShowcaseWebHandler } from "./showcase-proxy.mjs";
+import { createVillageZonesWebHandler } from "./village-zones-proxy.mjs";
 
 const host = process.env.WEB_HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.WEB_PORT ?? "3000", 10);
@@ -62,7 +63,11 @@ const showcaseHandler = createShowcaseWebHandler({
   baseHandler: adminProviderProfilesHandler,
   enableAdminUi
 });
-const publicErrorPagesHandler = createPublicErrorPagesWebHandler({ baseHandler: showcaseHandler });
+const villageZonesHandler = createVillageZonesWebHandler({
+  baseHandler: showcaseHandler,
+  enableAdminUi
+});
+const publicErrorPagesHandler = createPublicErrorPagesWebHandler({ baseHandler: villageZonesHandler });
 const legacyRouteRedirectHandler = createLegacyRouteRedirectWebHandler({ baseHandler: publicErrorPagesHandler });
 const server = createServer(legacyRouteRedirectHandler);
 

@@ -178,6 +178,14 @@
   }
 }
 
+/* styles.css oculta .main-nav hasta 1080 px. V2 recupera expresamente
+ * la navegación en la segunda fila de tablet; el overlay móvil empieza a 760 px. */
+@media (min-width: 761px) and (max-width: 1024px) {
+  .site-header .main-nav {
+    display: flex !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .site-header,
   .site-header .atelier-brand-link {

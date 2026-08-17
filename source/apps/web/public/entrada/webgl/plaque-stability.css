@@ -1,0 +1,55 @@
+/* Atelier Lumière · U3.19 · estabilidad visual de placas */
+.webgl-workshop-plaque-logo {
+  isolation: isolate;
+}
+
+.webgl-workshop-plaque-logo .u319-logo-fallback {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  padding: 4px;
+  color: #f2d18e;
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255,255,255,.09), transparent 42%),
+    #4b1421;
+  transition: opacity 140ms ease;
+}
+
+.webgl-workshop-plaque-logo img {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.webgl-workshop-plaque-logo.has-loaded-logo img {
+  opacity: 1;
+}
+
+.webgl-workshop-plaque-logo.has-loaded-logo .u319-logo-fallback {
+  opacity: 0;
+}
+
+.webgl-workshop-plaque.is-u319-stable {
+  transition: opacity 150ms ease, filter 150ms ease;
+}
+
+.webgl-workshop-plaque.is-edge-clamped::after {
+  opacity: .42;
+}
+
+.webgl-village[data-plaque-stability="u3.19"] .webgl-workshop-plaque[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-workshop-plaque-logo img,
+  .webgl-workshop-plaque-logo .u319-logo-fallback,
+  .webgl-workshop-plaque.is-u319-stable {
+    transition: none !important;
+  }
+}

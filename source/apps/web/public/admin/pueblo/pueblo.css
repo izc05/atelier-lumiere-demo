@@ -1,0 +1,107 @@
+.village-admin-shell { max-width: 1520px; padding-bottom: 80px; }
+.village-admin-head { align-items: start; }
+.village-admin-head h1 { max-width: 760px; }
+.village-admin-note {
+  width: min(100%, 360px);
+  padding: 22px;
+  border: 1px solid rgba(79,16,32,.14);
+  background: rgba(255,253,249,.76);
+}
+.village-admin-note strong { color: #4f1020; }
+.village-admin-note p { margin: 8px 0 0; color: #6f6466; line-height: 1.55; }
+.village-admin-legend {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 1px;
+  margin: 28px 0 34px;
+  border: 1px solid rgba(79,16,32,.1);
+  background: rgba(79,16,32,.1);
+}
+.village-admin-legend article { padding: 18px 20px; background: #fffdf9; }
+.village-admin-legend strong { display: block; color: #4f1020; font-family: Georgia,serif; font-weight: 400; font-size: 1.12rem; }
+.village-admin-legend span { display: block; margin-top: 5px; color: #776b67; font-size: .78rem; line-height: 1.5; }
+.village-zones-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
+.village-zone-card {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid rgba(79,16,32,.12);
+  background: #fffdf9;
+  box-shadow: 0 18px 46px rgba(49,7,18,.045);
+}
+.village-zone-card[data-status="ACTIVE"] { border-top: 3px solid #4f1020; }
+.village-zone-card[data-status="RESERVED"] { border-top: 3px solid #b28d4b; }
+.village-zone-card[data-status="HIDDEN"] { opacity: .64; border-top: 3px solid #a99f9b; }
+.village-zone-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
+.village-zone-head p { margin: 0 0 5px; color: #9d7b3f; font-size: .62rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.village-zone-head h2 { margin: 0; color: #3a0b16; font-family: Georgia,serif; font-size: 1.55rem; font-weight: 400; }
+.village-zone-family { padding: 7px 9px; border: 1px solid rgba(79,16,32,.1); color: #776b67; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; }
+.village-zone-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.village-zone-fields label { display: grid; gap: 7px; color: #55494b; font-size: .7rem; font-weight: 700; }
+.village-zone-fields label.wide { grid-column: 1 / -1; }
+.village-zone-fields input,
+.village-zone-fields select {
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 11px;
+  border: 1px solid rgba(79,16,32,.16);
+  border-radius: 2px;
+  color: #21181a;
+  background: #fff;
+  font: inherit;
+}
+.village-zone-fields input:focus,
+.village-zone-fields select:focus { outline: 2px solid rgba(157,123,63,.28); outline-offset: 1px; border-color: #9d7b3f; }
+.village-zone-architecture {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  column-gap: 12px;
+  row-gap: 3px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid rgba(157,123,63,.18);
+  background: linear-gradient(90deg, rgba(178,141,75,.08), rgba(255,253,249,.7));
+}
+.village-zone-architecture::before {
+  content: '';
+  grid-row: 1 / 4;
+  width: 9px;
+  height: 38px;
+  border-left: 2px solid #9d7b3f;
+  border-right: 1px solid rgba(79,16,32,.18);
+}
+.village-zone-architecture small {
+  color: #9d7b3f;
+  font-size: .54rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.village-zone-architecture strong {
+  color: #4f1020;
+  font-family: Georgia,serif;
+  font-size: 1.02rem;
+  font-weight: 400;
+}
+.village-zone-architecture span { color: #776b67; font-size: .64rem; line-height: 1.45; }
+.village-zone-architecture[data-architecture="CERAMICS"]::before { border-left-width: 5px; }
+.village-zone-architecture[data-architecture="TEXTILE"]::before { border-right-width: 3px; }
+.village-zone-architecture[data-architecture="FLORAL"]::before { border-style: double; }
+.village-zone-summary { display: flex; flex-wrap: wrap; gap: 8px; min-height: 26px; }
+.village-zone-summary span { padding: 6px 9px; background: #f4eee6; color: #6f6466; font-size: .62rem; }
+.village-zone-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.village-zone-status { margin: 0 0 0 auto; color: #776b67; font-size: .68rem; }
+.village-zone-status.error { color: #a11b32; }
+.village-zone-card[aria-busy="true"] { opacity: .68; pointer-events: none; }
+
+@media (max-width: 1000px) {
+  .village-zones-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .village-admin-legend { grid-template-columns: 1fr; }
+  .village-zone-card { padding: 18px; }
+  .village-zone-fields { grid-template-columns: 1fr; }
+  .village-zone-fields label.wide { grid-column: auto; }
+  .village-zone-status { width: 100%; margin: 2px 0 0; }
+}

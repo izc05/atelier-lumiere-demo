@@ -1,0 +1,353 @@
+/* Atelier Lumière · U2.1 · entrada cinematográfica unificada */
+.brand-entry.brand-entry--cinematic {
+  --entry-paper: #f7f3ee;
+  --entry-wine: #4b1022;
+  --entry-deep: #100a0b;
+  --entry-gold: #d8bf83;
+  --entry-muted: rgba(255, 247, 235, .68);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, .65fr);
+  place-items: stretch;
+  color: #fff8ea;
+  background:
+    radial-gradient(circle at var(--entry-light-x) var(--entry-light-y), rgba(119, 42, 57, .16), transparent 28rem),
+    linear-gradient(100deg, rgba(11, 7, 8, .12), rgba(11, 7, 8, .72) 58%, rgba(9, 7, 7, .94) 100%),
+    #140d0e;
+}
+
+.brand-entry.brand-entry--cinematic::before {
+  content: "";
+  inset: 0;
+  transform: none;
+  background:
+    linear-gradient(90deg, rgba(10, 7, 7, .08), rgba(10, 7, 7, .46) 48%, rgba(10, 7, 7, .8)),
+    url("/assets/brand/atelier-entry-embroidery.svg") left 9% center / min(64vw, 860px) min(82vh, 860px) no-repeat,
+    repeating-linear-gradient(96deg, rgba(255,255,255,.022) 0 1px, transparent 1px 5px),
+    linear-gradient(145deg, #1b1011 0%, #261416 35%, #110a0b 100%);
+  color: transparent;
+  font-size: 0;
+  -webkit-text-stroke: 0;
+  opacity: 1;
+  animation: atelierCinematicBackdrop 16s ease-in-out infinite alternate;
+}
+
+.brand-entry.brand-entry--cinematic::after {
+  inset: 0;
+  background:
+    radial-gradient(circle at 28% 54%, rgba(219, 186, 116, .13), transparent 15rem),
+    radial-gradient(circle at 66% 36%, rgba(98, 31, 46, .18), transparent 25rem),
+    linear-gradient(180deg, rgba(0,0,0,.16), transparent 20%, transparent 78%, rgba(0,0,0,.32));
+  mix-blend-mode: screen;
+  opacity: .72;
+  animation: atelierCinematicGlow 9s ease-in-out infinite alternate;
+}
+
+.brand-entry--cinematic .brand-entry-inner {
+  z-index: 2;
+  grid-column: 1;
+  align-self: center;
+  justify-self: center;
+  width: min(84%, 720px);
+  padding: clamp(92px, 12vh, 150px) 30px 90px;
+  text-align: center;
+}
+
+.brand-entry--cinematic .brand-entry-inner::before {
+  top: auto;
+  bottom: 54px;
+  width: min(68%, 430px);
+  background: linear-gradient(90deg, transparent, rgba(216,191,131,.18), rgba(216,191,131,.74), rgba(216,191,131,.18), transparent);
+}
+
+.brand-entry--cinematic .brand-entry-inner::after {
+  top: auto;
+  bottom: 51px;
+  background: var(--entry-gold);
+}
+
+.brand-entry--cinematic .brand-entry-logo {
+  width: min(39vw, 320px);
+  max-height: 24vh;
+  filter: drop-shadow(0 10px 24px rgba(0,0,0,.28));
+}
+
+.brand-entry-welcome {
+  margin: 34px 0 8px;
+  color: var(--entry-gold);
+  font: 700 .7rem/1.2 "Avenir Next", Avenir, Arial, sans-serif;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: atelierEntryFadeUpFast 420ms 180ms ease forwards;
+}
+
+.brand-entry-title {
+  max-width: 14ch;
+  margin: 0 auto;
+  color: #fff9ef;
+  font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  font-size: clamp(2.3rem, 5.1vw, 5.6rem);
+  font-weight: 400;
+  letter-spacing: -.035em;
+  line-height: .94;
+  text-wrap: balance;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: atelierEntryFadeUpFast 500ms 220ms ease forwards;
+}
+
+.brand-entry--cinematic .brand-entry-copy {
+  max-width: 520px;
+  margin-top: 18px;
+  color: rgba(255,248,235,.74);
+  font-family: "Avenir Next", Avenir, Arial, sans-serif;
+  font-size: clamp(.9rem, 1.1vw, 1.05rem);
+  letter-spacing: .02em;
+  line-height: 1.65;
+}
+
+.brand-entry--cinematic .brand-entry-action {
+  width: 116px;
+  min-width: 116px;
+  height: 116px;
+  min-height: 116px;
+  margin-top: 34px;
+  padding: 0;
+  border: 1px solid rgba(226, 197, 126, .78);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(216,191,131,.08), transparent 58%),
+    rgba(31,16,18,.3);
+  box-shadow:
+    0 0 0 6px rgba(216,191,131,.07),
+    0 0 0 18px rgba(216,191,131,.025),
+    0 18px 44px rgba(0,0,0,.22);
+  backdrop-filter: blur(8px);
+}
+
+.brand-entry--cinematic .brand-entry-action::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid rgba(216,191,131,.22);
+  border-radius: inherit;
+  transform: scale(.94);
+  opacity: .8;
+  transition: transform 260ms ease, opacity 260ms ease;
+}
+
+.brand-entry--cinematic .brand-entry-action:hover,
+.brand-entry--cinematic .brand-entry-action:focus-visible {
+  color: #fff9ef;
+  background: rgba(75,16,34,.58);
+  transform: translateY(-2px);
+}
+
+.brand-entry--cinematic .brand-entry-action:hover::after,
+.brand-entry--cinematic .brand-entry-action:focus-visible::after {
+  transform: scale(1.04);
+  opacity: 1;
+}
+
+.brand-entry-values {
+  z-index: 3;
+  grid-column: 2;
+  align-self: center;
+  justify-self: stretch;
+  display: grid;
+  gap: 0;
+  width: min(86%, 470px);
+  margin-right: clamp(26px, 4.5vw, 78px);
+  border-top: 1px solid rgba(216,191,131,.2);
+}
+
+.brand-entry-value {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 22px 0;
+  border-bottom: 1px solid rgba(216,191,131,.14);
+  opacity: 0;
+  transform: translateX(12px);
+  animation: atelierValueArrive 520ms ease forwards;
+}
+
+.brand-entry-value:nth-child(2) { animation-delay: 90ms; }
+.brand-entry-value:nth-child(3) { animation-delay: 150ms; }
+.brand-entry-value:nth-child(4) { animation-delay: 210ms; }
+
+.brand-entry-value-mark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(216,191,131,.32);
+  border-radius: 50%;
+  color: var(--entry-gold);
+  font-family: Georgia, serif;
+  font-size: .76rem;
+}
+
+.brand-entry-value strong {
+  display: block;
+  color: #f1d89c;
+  font: 800 .63rem/1.2 "Avenir Next", Avenir, Arial, sans-serif;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.brand-entry-value span {
+  display: block;
+  margin-top: 5px;
+  color: var(--entry-muted);
+  font: 400 .82rem/1.45 "Avenir Next", Avenir, Arial, sans-serif;
+}
+
+.brand-entry-skip {
+  position: absolute;
+  z-index: 4;
+  right: clamp(20px, 3vw, 46px);
+  top: clamp(18px, 3vw, 40px);
+  color: rgba(255,248,235,.66);
+  font: 800 .57rem/1 "Avenir Next", Avenir, Arial, sans-serif;
+  letter-spacing: .16em;
+  text-decoration: none;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(216,191,131,.24);
+  padding-bottom: 6px;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.brand-entry-skip:hover,
+.brand-entry-skip:focus-visible {
+  color: #fff8ea;
+  border-color: var(--entry-gold);
+}
+
+.brand-entry--cinematic .brand-entry-hint {
+  left: clamp(26px, 4vw, 60px);
+  transform: none;
+  color: rgba(255,248,235,.5);
+}
+
+.brand-entry--cinematic.is-opening {
+  animation: atelierCinematicExit 780ms cubic-bezier(.2,.72,.18,1) forwards;
+}
+
+.brand-entry--cinematic.is-opening .brand-entry-inner {
+  transform: translate3d(-2vw,-2vh,0) scale(.94);
+}
+
+.brand-entry--cinematic.is-opening .brand-entry-values {
+  opacity: 0;
+  transform: translateX(2vw);
+  transition: opacity 320ms ease, transform 620ms cubic-bezier(.2,.72,.18,1);
+}
+
+@keyframes atelierValueArrive {
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes atelierCinematicBackdrop {
+  0% { transform: scale(1.01) translate3d(-.4%, .2%, 0); }
+  100% { transform: scale(1.045) translate3d(.8%, -.6%, 0); }
+}
+
+@keyframes atelierCinematicGlow {
+  0% { opacity: .48; transform: scale(.98); }
+  100% { opacity: .82; transform: scale(1.04); }
+}
+
+@keyframes atelierCinematicExit {
+  0% { opacity: 1; }
+  68% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@media (max-width: 980px) {
+  .brand-entry.brand-entry--cinematic {
+    grid-template-columns: 1fr;
+  }
+  .brand-entry--cinematic .brand-entry-inner {
+    grid-column: 1;
+    width: min(92%, 650px);
+    padding-top: 86px;
+    padding-bottom: 170px;
+  }
+  .brand-entry-values {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    bottom: 58px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: min(92%, 760px);
+    margin: 0;
+    border-top: 1px solid rgba(216,191,131,.18);
+    transform: translateX(-50%);
+  }
+  .brand-entry-value {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    justify-items: center;
+    padding: 15px 10px;
+    text-align: center;
+    border-right: 1px solid rgba(216,191,131,.12);
+  }
+  .brand-entry-value:last-child { border-right: 0; }
+  .brand-entry-value-mark { width: 30px; height: 30px; }
+  .brand-entry-value span { display: none; }
+  .brand-entry--cinematic .brand-entry-hint { display: none; }
+}
+
+@media (max-width: 640px) {
+  .brand-entry.brand-entry--cinematic::before {
+    background:
+      linear-gradient(180deg, rgba(10,7,7,.18), rgba(10,7,7,.62)),
+      url("/assets/brand/atelier-entry-embroidery.svg") center 23% / 120vw auto no-repeat,
+      linear-gradient(150deg, #1b1011, #100a0b 78%);
+  }
+  .brand-entry--cinematic .brand-entry-inner {
+    align-self: start;
+    width: 100%;
+    padding: 78px 18px 210px;
+  }
+  .brand-entry--cinematic .brand-entry-logo { width: min(56vw, 230px); }
+  .brand-entry-welcome { margin-top: 22px; }
+  .brand-entry-title { font-size: clamp(2.25rem, 12vw, 3.8rem); }
+  .brand-entry--cinematic .brand-entry-copy { max-width: 310px; font-size: .85rem; }
+  .brand-entry--cinematic .brand-entry-action {
+    width: 96px;
+    min-width: 96px;
+    height: 96px;
+    min-height: 96px;
+    margin-top: 28px;
+  }
+  .brand-entry-values {
+    bottom: max(18px, env(safe-area-inset-bottom));
+    grid-template-columns: repeat(2, 1fr);
+    width: calc(100% - 28px);
+    border: 1px solid rgba(216,191,131,.14);
+    background: rgba(15,9,10,.46);
+    backdrop-filter: blur(12px);
+  }
+  .brand-entry-value {
+    padding: 12px 8px;
+    border-bottom: 1px solid rgba(216,191,131,.1);
+  }
+  .brand-entry-value:nth-child(odd) { border-right: 1px solid rgba(216,191,131,.1); }
+  .brand-entry-value:nth-last-child(-n+2) { border-bottom: 0; }
+  .brand-entry-value strong { font-size: .54rem; }
+  .brand-entry-skip { top: 16px; right: 16px; font-size: .52rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-entry--cinematic::before,
+  .brand-entry--cinematic::after,
+  .brand-entry-value,
+  .brand-entry-welcome,
+  .brand-entry-title { animation: none !important; }
+  .brand-entry-value,
+  .brand-entry-welcome,
+  .brand-entry-title { opacity: 1; transform: none; }
+}

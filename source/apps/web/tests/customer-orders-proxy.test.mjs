@@ -7,6 +7,7 @@ import { createCustomerOrdersWebHandler } from "../src/customer-orders-proxy.mjs
 const ACCESS="customer_access_token_1234567890abcdef1234567890abcdef";
 const SESSION="customer_session_token_1234567890abcdef1234567890abcdef";
 const REQUEST_ID="53000000-0000-4000-8000-000000000001";
+const RECOVERY_MESSAGE="Si los datos corresponden a un pedido, enviaremos un nuevo enlace privado al correo de compra.";
 async function read(stream){if(!stream)return"";const chunks=[];for await(const chunk of stream)chunks.push(Buffer.from(chunk));return Buffer.concat(chunks).toString("utf8")}
 async function start(handler){const server=createServer(handler);server.listen(0,"127.0.0.1");await once(server,"listening");const address=server.address();return{baseUrl:`http://127.0.0.1:${address.port}`,close:()=>new Promise((resolve,reject)=>server.close(error=>error?reject(error):resolve()))}}
 
@@ -25,4 +26,28 @@ test("el proxy convierte el enlace en cookie HttpOnly y no filtra la sesión",as
  const privatePage=await fetch(`${server.baseUrl}/mis-pedidos/`,{headers:{Cookie:`atelier_customer_session=${SESSION}`}});assert.equal(privatePage.status,200);assert.equal(await privatePage.text(),"PRIVATE");assert.equal(calls.at(-1).authorization,`Bearer ${SESSION}`);
  const approveBody=JSON.stringify({expectedVersion:2});const approve=await fetch(`${server.baseUrl}/internal/customer/custom-requests/${REQUEST_ID}/approve`,{method:"POST",headers:{Cookie:`atelier_customer_session=${SESSION}`,"Content-Type":"application/json"},body:approveBody});assert.equal(approve.status,200);assert.equal(calls.at(-1).body,approveBody);assert.equal(calls.at(-1).authorization,`Bearer ${SESSION}`);assert.equal((await approve.text()).includes(SESSION),false);
  const logout=await fetch(`${server.baseUrl}/internal/customer/session`,{method:"DELETE",headers:{Cookie:`atelier_customer_session=${SESSION}`}});assert.equal(logout.status,200);assert.match(logout.headers.get("set-cookie"),/Max-Age=0/);assert.match(logout.headers.get("set-cookie"),/HttpOnly/);
+});
+
+test("la recuperación pública responde de forma genérica y limita por IP antes de saturar la API",async t=>{
+ let recoveryCalls=0;
+ const fetchImpl=async(target,options={})=>{
+  const url=new URL(target);
+  if(url.pathname==="/api/pilot-checkout/access-recovery"){
+   recoveryCalls+=1;
+   const body=JSON.parse(await read(options.body));
+   assert.equal(body.email,"cliente@example.test");
+   assert.equal(body.orderNumber,"AL-2026-PRUEBA");
+   return new Response(JSON.stringify({accepted:true,message:RECOVERY_MESSAGE}),{status:202,headers:{"Content-Type":"application/json"}});
+  }
+  return new Response("{}",{status:404,headers:{"Content-Type":"application/json"}});
+ };
+ const handler=createCustomerOrdersWebHandler({baseHandler:(_req,res)=>{res.writeHead(404);res.end()},apiInternalUrl:"http://api.internal:4000",fetchImpl,logger:{error(){}}});
+ const server=await start(handler);t.after(server.close);
+ const payload=JSON.stringify({email:"cliente@example.test",orderNumber:"AL-2026-PRUEBA"});
+ for(let index=0;index<7;index+=1){
+  const response=await fetch(`${server.baseUrl}/internal/customer/access/request`,{method:"POST",headers:{"Content-Type":"application/json","CF-Connecting-IP":"203.0.113.10"},body:payload});
+  assert.equal(response.status,202);
+  assert.deepEqual(await response.json(),{accepted:true,message:RECOVERY_MESSAGE});
+ }
+ assert.equal(recoveryCalls,6);
 });

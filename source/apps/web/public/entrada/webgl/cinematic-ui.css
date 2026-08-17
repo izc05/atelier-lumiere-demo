@@ -1,0 +1,180 @@
+/* Pueblo Atelier · P9.7 · scene first: la interfaz acompaña, no tapa el territorio */
+
+.webgl-village[data-scene-ui] .webgl-village-header {
+  min-height: 78px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background: linear-gradient(to bottom, rgba(247,241,231,.90), rgba(247,241,231,.34) 68%, transparent);
+  transition: opacity 420ms ease, background 420ms ease, min-height 420ms ease;
+}
+
+.webgl-village[data-scene-ui] .webgl-village-brand {
+  width: clamp(185px,14vw,245px);
+  min-height: 48px;
+}
+
+.webgl-village[data-scene-ui] .webgl-village-heading {
+  gap: 2px;
+  opacity: .78;
+  transition: opacity 420ms ease, transform 480ms cubic-bezier(.22,.7,.2,1);
+}
+.webgl-village[data-scene-ui] .webgl-village-heading > span { font-size: .42rem; letter-spacing: .15em; }
+.webgl-village[data-scene-ui] .webgl-village-heading strong { font-size: .88rem; }
+.webgl-village[data-scene-ui] .webgl-village-heading small { font-size: .42rem; opacity: .72; }
+
+.webgl-village[data-scene-ui] .webgl-village-fallback {
+  padding: 8px 10px;
+  border-color: rgba(79,16,32,.09);
+  background: rgba(255,253,248,.48);
+  font-size: .43rem;
+  backdrop-filter: blur(8px);
+}
+
+/* Vista general: el territorio ocupa la pantalla; el texto se vuelve una firma editorial. */
+.webgl-village[data-scene-ui="overview"] .webgl-village-caption {
+  top: auto;
+  bottom: 104px;
+  width: min(330px,31vw);
+  gap: 5px;
+  transform: none;
+  opacity: .82;
+}
+.webgl-village[data-scene-ui="overview"] .webgl-village-caption p { font-size: .45rem; letter-spacing: .18em; }
+.webgl-village[data-scene-ui="overview"] .webgl-village-caption h1 {
+  max-width: 16ch;
+  font-size: clamp(1.35rem,2.1vw,2.15rem);
+  line-height: .98;
+  letter-spacing: -.035em;
+}
+.webgl-village[data-scene-ui="overview"] .webgl-village-caption > span { max-width: 34ch; font-size: .51rem; line-height: 1.45; }
+.webgl-village[data-scene-ui="overview"] .webgl-village-caption [data-place-context] { display: none; }
+.webgl-village[data-scene-ui="overview"] .webgl-place-enter { display: none !important; }
+
+/* Tras unos segundos desaparece casi todo el texto de laboratorio sin esconder navegación real. */
+.webgl-village[data-scene-ui="overview"][data-ui-settled="true"] .webgl-village-heading { opacity: .28; transform: translateY(-2px); }
+.webgl-village[data-scene-ui="overview"][data-ui-settled="true"] .webgl-village-caption { opacity: .62; }
+
+/* Foco: la información vuelve con jerarquía, pero sin recuperar el hero gigante anterior. */
+.webgl-village[data-scene-ui="focus"] .webgl-village-caption {
+  top: 51%;
+  bottom: auto;
+  width: min(365px,31vw);
+  gap: 8px;
+  transform: translateY(-46%);
+  opacity: .96;
+}
+.webgl-village[data-scene-ui="focus"] .webgl-village-caption h1 {
+  max-width: 10ch;
+  font-size: clamp(2.35rem,3.4vw,4.25rem);
+  line-height: .91;
+}
+.webgl-village[data-scene-ui="focus"] .webgl-village-caption > span { font-size: .58rem; }
+
+/* Navegación territorial: deja de parecer una barra de aplicación. */
+.webgl-village[data-scene-ui] .webgl-village-legend,
+.webgl-village[data-scene-ui] .webgl-village-legend.has-dynamic-providers {
+  width: auto;
+  max-width: min(920px,calc(100% - 210px));
+  border-color: rgba(79,16,32,.09);
+  background: rgba(255,253,248,.56);
+  box-shadow: 0 9px 28px rgba(49,7,18,.045);
+  backdrop-filter: blur(10px) saturate(.98);
+}
+.webgl-village[data-scene-ui] .webgl-village-legend button,
+.webgl-village[data-scene-ui] .webgl-village-legend.has-dynamic-providers button {
+  flex: 0 0 auto;
+  min-width: 120px;
+  min-height: 44px;
+  padding: 7px 11px;
+  border-right-color: rgba(79,16,32,.065);
+}
+.webgl-village[data-scene-ui] .webgl-village-legend b { font-size: .68rem; }
+.webgl-village[data-scene-ui] .webgl-village-legend span { max-width: 155px; font-size: .66rem; }
+.webgl-village[data-scene-ui] .webgl-village-legend button:hover,
+.webgl-village[data-scene-ui] .webgl-village-legend button:focus-visible,
+.webgl-village[data-scene-ui] .webgl-village-legend button.is-active { background: rgba(255,252,246,.86); }
+
+/* Los indicadores técnicos dejan de competir con la escena. */
+.webgl-village[data-scene-ui] .webgl-village-status { opacity: 0 !important; pointer-events: none; }
+.webgl-village[data-webgl-error="true"] .webgl-village-status { opacity: 1 !important; }
+.webgl-village[data-scene-ui] .webgl-quality-badge { opacity: .38; transform: scale(.88); transform-origin: right center; }
+
+/* La ficha del taller se siente más editorial y menos modal. */
+.webgl-village[data-scene-ui="focus"] .webgl-provider-card {
+  top: 104px;
+  right: clamp(18px,3.2vw,52px);
+  width: min(306px,calc(100vw - 36px));
+  border-color: rgba(79,16,32,.10);
+  background: rgba(255,253,248,.88);
+  box-shadow: 0 18px 46px rgba(49,7,18,.075);
+  backdrop-filter: blur(12px) saturate(.98);
+}
+.webgl-village[data-scene-ui="overview"] .webgl-provider-card { display: none !important; }
+
+@media (max-width: 980px) and (min-width: 761px) {
+  .webgl-village[data-scene-ui] .webgl-village-header { grid-template-columns: 200px 1fr auto; padding-inline: 20px; }
+  .webgl-village[data-scene-ui="overview"] .webgl-village-caption { left: 24px; bottom: 90px; width: 34vw; }
+  .webgl-village[data-scene-ui="focus"] .webgl-village-caption { left: 24px; width: 34vw; }
+  .webgl-village[data-scene-ui] .webgl-village-legend,
+  .webgl-village[data-scene-ui] .webgl-village-legend.has-dynamic-providers { left: 18px; right: 18px; max-width: none; width: auto; }
+}
+
+@media (max-width: 760px) {
+  .webgl-village[data-scene-ui] .webgl-village-header {
+    min-height: 64px;
+    padding: 6px 11px;
+    background: linear-gradient(to bottom, rgba(247,241,231,.92), rgba(247,241,231,.30) 76%, transparent);
+  }
+  .webgl-village[data-scene-ui] .webgl-village-brand { width: 166px; min-height: 42px; }
+  .webgl-village[data-scene-ui] .webgl-village-fallback { padding: 7px 8px; font-size: .39rem; }
+
+  .webgl-village[data-scene-ui="overview"] .webgl-village-caption {
+    left: 14px;
+    right: auto;
+    top: auto;
+    bottom: 68px;
+    width: min(245px,68vw);
+  }
+  .webgl-village[data-scene-ui="overview"] .webgl-village-caption h1 { max-width: 14ch; font-size: 1.35rem; }
+  .webgl-village[data-scene-ui="overview"] .webgl-village-caption > span { display: none; }
+
+  .webgl-village[data-scene-ui="focus"] .webgl-village-caption {
+    left: 14px;
+    right: 14px;
+    top: 78px;
+    width: auto;
+    transform: none;
+  }
+  .webgl-village[data-scene-ui="focus"] .webgl-village-caption h1 { max-width: 8ch; font-size: clamp(2.05rem,10vw,3.15rem); }
+  .webgl-village[data-scene-ui="focus"] .webgl-village-caption > span { display: none; }
+
+  .webgl-village[data-scene-ui] .webgl-village-legend,
+  .webgl-village[data-scene-ui] .webgl-village-legend.has-dynamic-providers {
+    left: 7px;
+    right: 7px;
+    bottom: max(7px,env(safe-area-inset-bottom));
+    width: auto;
+    max-width: none;
+    background: rgba(255,253,248,.68);
+  }
+  .webgl-village[data-scene-ui] .webgl-village-legend button,
+  .webgl-village[data-scene-ui] .webgl-village-legend.has-dynamic-providers button {
+    flex-basis: 122px;
+    min-width: 122px;
+    min-height: 46px;
+  }
+  .webgl-village[data-scene-ui] .webgl-village-legend span { font-size: .58rem; }
+
+  .webgl-village[data-scene-ui="focus"] .webgl-provider-card {
+    left: 8px;
+    right: 8px;
+    bottom: 61px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-village[data-scene-ui] .webgl-village-header,
+  .webgl-village[data-scene-ui] .webgl-village-heading,
+  .webgl-village[data-scene-ui] .webgl-village-caption { transition: none !important; }
+}

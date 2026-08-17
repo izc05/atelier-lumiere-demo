@@ -1,96 +1,54 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import vm from "node:vm";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(HERE, "..", "apps", "web", "public");
-const SESSION_KEY = "atelier_brand_entry_seen";
+const ROOT = join(HERE, "..", "..", "tools", "preview-local");
 
 async function text(...parts) {
   return readFile(join(PUBLIC, ...parts), "utf8");
 }
 
-function runBrandEntry(script, { search = "", referrer = "", seen = false } = {}) {
-  const storage = new Map(seen ? [[SESSION_KEY, "1"]] : []);
-  const redirects = [];
-  const entry = {
-    hidden: false,
-    style: { setProperty() {} },
-    addEventListener() {}
-  };
-
-  const location = {
-    origin: "https://atelier.example",
-    pathname: "/",
-    search,
-    href: "https://atelier.example/" + search,
-    replace(value) { redirects.push(["replace", value]); }
-  };
-
-  const context = {
-    URL,
-    URLSearchParams,
-    Math,
-    window: {
-      location,
-      innerWidth: 1440,
-      innerHeight: 900
-    },
-    document: {
-      referrer,
-      getElementById(id) { return id === "brand-entry" ? entry : null; }
-    },
-    sessionStorage: {
-      getItem(key) { return storage.get(key) ?? null; },
-      setItem(key, value) { storage.set(key, String(value)); }
-    }
-  };
-
-  vm.runInNewContext(script, context, { filename: "brand-entry.js" });
-  return { redirects, storage, entry };
+async function previewText(file) {
+  return readFile(join(ROOT, file), "utf8");
 }
 
-test("una visita nueva y directa a Home entra por Pueblo Atelier", async () => {
+test("la Home contiene una entrada cinematográfica que conduce al Pueblo WebGL", async () => {
   const script = await text("brand-entry.js");
-  const result = runBrandEntry(script);
-  assert.deepEqual(result.redirects, [["replace", "/entrada/"]]);
-  assert.equal(result.entry.hidden, true);
+  const css = await text("visual-unified-entry.css");
+  const responsive = await text("visual-unified-entry-responsive.css");
+
+  assert.match(script, /const VILLAGE_URL = "\/entrada\/webgl\/"/);
+  assert.match(script, /window\.location\.assign\(VILLAGE_URL\)/);
+  assert.match(script, /brand-entry--cinematic/);
+  assert.match(script, /visual-unified-entry-responsive\.css/);
+  assert.match(script, /Artesanía para momentos que permanecen/);
+  assert.match(script, /Ir directamente a la web/);
+  assert.match(css, /brand-entry--cinematic/);
+  assert.match(css, /max-width:\s*980px/);
+  assert.match(css, /max-width:\s*640px/);
+  assert.match(responsive, /max-height:\s*720px/);
+  assert.match(responsive, /max-height:\s*680px/);
+  assert.match(responsive, /safe-area-inset/);
+  assert.match(responsive, /prefers-reduced-motion:\s*reduce/);
 });
 
-test("intro=0 salta el Pueblo, marca la sesión y no redirige", async () => {
+test("la entrada conserva sesión, forzado, retorno interno y marca de llegada", async () => {
   const script = await text("brand-entry.js");
-  const result = runBrandEntry(script, { search: "?intro=0" });
-  assert.deepEqual(result.redirects, []);
-  assert.equal(result.storage.get(SESSION_KEY), "1");
+
+  assert.match(script, /atelier_brand_entry_seen/);
+  assert.match(script, /atelier_arrival_from_entry/);
+  assert.match(script, /params\.get\("intro"\) === "1"/);
+  assert.match(script, /params\.get\("intro"\) === "0"/);
+  assert.match(script, /cameFromInternalPage/);
+  assert.match(script, /markArrival\(\)/);
+  assert.match(script, /referrer\.origin === window\.location\.origin/);
 });
 
-test("una sesión que ya vio la entrada abre Home directamente", async () => {
-  const script = await text("brand-entry.js");
-  const result = runBrandEntry(script, { seen: true });
-  assert.deepEqual(result.redirects, []);
-});
-
-test("volver a Home desde una ruta interna no crea un bucle con el Pueblo", async () => {
-  const script = await text("brand-entry.js");
-  const result = runBrandEntry(script, { referrer: "https://atelier.example/entrada/" });
-  assert.deepEqual(result.redirects, []);
-  assert.equal(result.storage.get(SESSION_KEY), "1");
-});
-
-test("intro=1 fuerza el Pueblo incluso desde una ruta interna", async () => {
-  const script = await text("brand-entry.js");
-  const result = runBrandEntry(script, {
-    search: "?intro=1",
-    referrer: "https://atelier.example/talleres/",
-    seen: true
-  });
-  assert.deepEqual(result.redirects, [["replace", "/entrada/"]]);
-});
-
-test("el Pueblo ofrece salida explícita, fallback en lista y acabado responsive", async () => {
+test("el Pueblo ligero mantiene salida explícita, talleres dinámicos y modo responsive", async () => {
   const html = await text("entrada", "index.html");
   const village = await text("entrada", "village.js");
   const workshops = await text("entrada", "village-workshops.js");
@@ -107,4 +65,34 @@ test("el Pueblo ofrece salida explícita, fallback en lista y acabado responsive
   assert.match(workshopCss, /village-premium\.css/);
   assert.match(premiumCss, /max-width:\s*760px/);
   assert.match(premiumCss, /data-village-mode="lite"/);
+});
+
+test("el WebGL conserva fallback, capas cinematográficas y llegada desde la entrada", async () => {
+  const html = await text("entrada", "webgl", "index.html");
+  const bootstrap = await text("entrada", "webgl", "bootstrap.js");
+  const arrival = await text("entrada", "webgl", "arrival-transition.js");
+  const arrivalCss = await text("entrada", "webgl", "arrival-transition.css");
+
+  assert.match(html, /premium-ui\.css/);
+  assert.match(html, /arrival-transition\.css/);
+  assert.match(html, /Atelier Lumière · Pueblo interactivo/);
+  assert.match(bootstrap, /WebGL2|webgl2/i);
+  assert.match(bootstrap, /scene\.js/);
+  assert.match(bootstrap, /distant-depth\.js/);
+  assert.match(bootstrap, /world-signage\.js/);
+  assert.match(bootstrap, /arrival-transition\.js/);
+  assert.match(arrival, /atelier_arrival_from_entry/);
+  assert.match(arrival, /data.*arrival|dataset\.arrival/);
+  assert.match(arrivalCss, /prefers-reduced-motion:\s*reduce/);
+});
+
+test("la preview completa arranca desde la entrada cinematográfica", async () => {
+  const server = await previewText("preview-server.cjs");
+  const readme = await previewText("LEEME_PRIMERO.txt");
+
+  assert.match(server, /\?intro=1/);
+  assert.match(server, /Entrada cinematográfica → Pueblo WebGL → Visual V2/);
+  assert.match(readme, /ENTRADA CINEMATOGRÁFICA/);
+  assert.match(readme, /\?intro=1/);
+  assert.match(readme, /390 px/);
 });

@@ -1,0 +1,23 @@
+BEGIN;
+
+ALTER TABLE site_showcase_media
+  DROP CONSTRAINT IF EXISTS site_showcase_media_slot_key_check;
+
+ALTER TABLE site_showcase_media
+  ADD CONSTRAINT site_showcase_media_slot_key_check
+  CHECK (slot_key IN (
+    'ENTRY_HERO_DESKTOP',
+    'ENTRY_HERO_MOBILE',
+    'HOME_HERO_DESKTOP',
+    'HOME_HERO_MOBILE',
+    'STORE_HERO_DESKTOP',
+    'STORE_HERO_MOBILE',
+    'WORKSHOPS_HERO_DESKTOP',
+    'WORKSHOPS_HERO_MOBILE',
+    'STORIES_HERO_DESKTOP',
+    'STORIES_HERO_MOBILE',
+    'COMMISSIONS_HERO_DESKTOP',
+    'COMMISSIONS_HERO_MOBILE'
+  ));
+
+COMMIT;

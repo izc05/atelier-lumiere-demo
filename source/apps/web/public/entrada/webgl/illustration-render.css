@@ -1,0 +1,60 @@
+/* Pueblo Atelier · P9.2 · papel, tinta y atmósfera sobre el canvas */
+
+.webgl-village[data-illustration-render="true"] {
+  background:
+    radial-gradient(circle at 24% 14%, rgba(255,255,255,.95), transparent 31rem),
+    radial-gradient(circle at 78% 68%, rgba(181,145,91,.055), transparent 34rem),
+    linear-gradient(138deg, #fbf7ef 0%, #f1e7d8 58%, #e8dac8 100%);
+}
+
+.webgl-village[data-illustration-render="true"]::after {
+  background:
+    radial-gradient(ellipse at 50% 42%, transparent 34%, rgba(79,16,32,.013) 70%, rgba(49,7,18,.042) 100%),
+    repeating-linear-gradient(7deg, rgba(91,72,57,.010) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(94deg, rgba(91,72,57,.007) 0 1px, transparent 1px 7px);
+  opacity: .86;
+}
+
+.webgl-village[data-illustration-render="true"]::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+  opacity: .038;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.72'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.webgl-village[data-illustration-render="true"] .webgl-village-canvas {
+  filter: saturate(.91) contrast(.985) brightness(1.008);
+}
+
+.webgl-village[data-illustration-render="true"] .webgl-village-header {
+  background: linear-gradient(to bottom, rgba(247,241,231,.97), rgba(247,241,231,.70) 72%, transparent);
+}
+
+.webgl-village[data-illustration-render="true"] .webgl-village-caption h1 {
+  text-shadow: 0 1px 0 rgba(255,255,255,.30);
+}
+
+.webgl-village[data-illustration-render="true"] .webgl-village-legend {
+  background: rgba(255,252,246,.86);
+  box-shadow: 0 18px 52px rgba(49,7,18,.072);
+}
+
+.webgl-village[data-webgl-quality="lite"]::before {
+  display: none;
+}
+
+.webgl-village[data-webgl-quality="lite"] .webgl-village-canvas {
+  filter: none;
+}
+
+@media (max-width: 760px) {
+  .webgl-village[data-illustration-render="true"]::before { opacity: .024; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-village[data-illustration-render="true"] .webgl-village-canvas { filter: saturate(.94); }
+}

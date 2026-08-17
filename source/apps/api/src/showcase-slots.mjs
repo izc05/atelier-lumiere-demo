@@ -1,4 +1,6 @@
 export const SHOWCASE_SLOTS = Object.freeze([
+  "ENTRY_HERO_DESKTOP",
+  "ENTRY_HERO_MOBILE",
   "HOME_HERO_DESKTOP",
   "HOME_HERO_MOBILE",
   "STORE_HERO_DESKTOP",
@@ -14,6 +16,8 @@ export const SHOWCASE_SLOTS = Object.freeze([
 export const SHOWCASE_SLOT_SET = new Set(SHOWCASE_SLOTS);
 
 export const SHOWCASE_SLOT_META = Object.freeze({
+  ENTRY_HERO_DESKTOP: { label: "Entrada cinematográfica · escritorio", page: "ENTRY", viewport: "DESKTOP" },
+  ENTRY_HERO_MOBILE: { label: "Entrada cinematográfica · móvil", page: "ENTRY", viewport: "MOBILE" },
   HOME_HERO_DESKTOP: { label: "Home · Hero escritorio", page: "HOME", viewport: "DESKTOP" },
   HOME_HERO_MOBILE: { label: "Home · Hero móvil", page: "HOME", viewport: "MOBILE" },
   STORE_HERO_DESKTOP: { label: "Tienda · Hero escritorio", page: "STORE", viewport: "DESKTOP" },

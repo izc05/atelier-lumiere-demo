@@ -1,0 +1,44 @@
+/* Pueblo Atelier · P8.2E · calidad adaptativa y fallback */
+
+.webgl-quality-badge {
+  position: absolute;
+  z-index: 24;
+  left: clamp(18px,3vw,42px);
+  bottom: max(24px, env(safe-area-inset-bottom));
+  padding: 8px 10px;
+  border: 1px solid rgba(79,16,32,.1);
+  border-radius: 999px;
+  color: var(--webgl-muted);
+  background: rgba(255,253,248,.78);
+  font-size: .43rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.webgl-village[data-webgl-quality="lite"] .webgl-watercolor-layer { display: none; }
+.webgl-village[data-webgl-quality="lite"]::after { display: none; }
+.webgl-village[data-webgl-quality="lite"] .webgl-provider-card,
+.webgl-village[data-webgl-quality="lite"] .webgl-village-header,
+.webgl-village[data-webgl-quality="lite"] .webgl-village-legend,
+.webgl-village[data-webgl-quality="lite"] .webgl-village-fallback { backdrop-filter: none !important; }
+.webgl-village[data-webgl-quality="lite"] .webgl-provider-card,
+.webgl-village[data-webgl-quality="lite"] .webgl-village-legend { box-shadow: 0 10px 28px rgba(49,7,18,.08); }
+.webgl-village[data-webgl-quality="balanced"] .webgl-watercolor-particle:nth-of-type(n+21) { display: none; }
+
+@media (max-width: 980px) {
+  .webgl-quality-badge { left: 18px; bottom: 88px; }
+}
+@media (max-width: 760px) {
+  .webgl-quality-badge {
+    left: 10px;
+    bottom: 70px;
+    max-width: 140px;
+    padding: 6px 8px;
+    font-size: .38rem;
+  }
+  .webgl-village[data-webgl-quality="lite"] .webgl-village-caption > span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .webgl-watercolor-layer { display: none !important; }
+}

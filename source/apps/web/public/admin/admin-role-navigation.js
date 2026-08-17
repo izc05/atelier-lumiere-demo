@@ -2,23 +2,30 @@ const currentPath = window.location.pathname;
 const isEditorialSection = currentPath.startsWith("/admin/articulos/")
   || currentPath.startsWith("/admin/publicaciones/")
   || currentPath.startsWith("/admin/talleres/");
-const isPlatformOwnerSection = currentPath.startsWith("/admin/escaparate/");
+const isPlatformOwnerSection = currentPath.startsWith("/admin/escaparate/")
+  || currentPath.startsWith("/admin/pueblo/");
 
 function hideLinks(path) {
   for (const link of document.querySelectorAll(`a[href="${path}"]`)) link.hidden = true;
 }
 
-function ensureShowcaseLink() {
+function ensureOwnerLink(actions, path, label) {
+  if (actions.querySelector(`a[href="${path}"]`)) return;
+  const link = document.createElement("a");
+  link.href = path;
+  link.textContent = label;
+  const active = currentPath.startsWith(path);
+  link.className = active ? "button secondary" : "button ghost";
+  if (active) link.setAttribute("aria-current", "page");
+  const logout = [...actions.querySelectorAll("button")]
+    .find((button) => button.textContent.trim().toLocaleLowerCase("es").includes("cerrar sesión"));
+  actions.insertBefore(link, logout || null);
+}
+
+function ensurePlatformOwnerLinks() {
   for (const actions of document.querySelectorAll(".top-actions")) {
-    if (actions.querySelector('a[href="/admin/escaparate/"]')) continue;
-    const link = document.createElement("a");
-    link.href = "/admin/escaparate/";
-    link.textContent = "Escaparate";
-    link.className = currentPath.startsWith("/admin/escaparate/") ? "button secondary" : "button ghost";
-    if (currentPath.startsWith("/admin/escaparate/")) link.setAttribute("aria-current", "page");
-    const logout = [...actions.querySelectorAll("button")]
-      .find((button) => button.textContent.trim().toLocaleLowerCase("es").includes("cerrar sesión"));
-    actions.insertBefore(link, logout || null);
+    ensureOwnerLink(actions, "/admin/escaparate/", "Escaparate");
+    ensureOwnerLink(actions, "/admin/pueblo/", "Pueblo");
   }
 }
 
@@ -44,7 +51,7 @@ async function applyAdminRoleNavigation() {
     document.body.dataset.adminRole = role || "UNKNOWN";
 
     if (role === "PLATFORM_OWNER") {
-      ensureShowcaseLink();
+      ensurePlatformOwnerLinks();
       return;
     }
     if (isPlatformOwnerSection) {

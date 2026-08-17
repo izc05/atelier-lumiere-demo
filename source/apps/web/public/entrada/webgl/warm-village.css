@@ -1,0 +1,111 @@
+/* Atelier Lumière · U3.1 · pueblo cálido, habitado y de atardecer */
+.webgl-village[data-webgl-warm-life="true"] {
+  --webgl-paper: #2b211c;
+  --webgl-paper-light: #f3e7d7;
+  --webgl-wine: #6d2636;
+  --webgl-wine-dark: #2a0b12;
+  --webgl-gold: #d5ad67;
+  --webgl-muted: #d0bda9;
+  --webgl-line: rgba(222,181,107,.22);
+  background:
+    radial-gradient(circle at 52% 42%, rgba(126,75,44,.26), transparent 30rem),
+    radial-gradient(circle at 76% 18%, rgba(91,42,35,.18), transparent 28rem),
+    linear-gradient(145deg, #2b201a, #171210 64%, #100d0c);
+}
+
+.webgl-village[data-webgl-warm-life="true"]::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 53% 48%, transparent 28%, rgba(29,16,13,.10) 52%, rgba(10,8,7,.52) 100%),
+    linear-gradient(180deg, rgba(20,12,10,.34), transparent 24%, transparent 66%, rgba(18,11,9,.32));
+  mix-blend-mode: multiply;
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-canvas {
+  filter: sepia(.14) saturate(1.08) brightness(.77) contrast(1.06);
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-header {
+  background: linear-gradient(to bottom, rgba(20,13,11,.92), rgba(20,13,11,.54) 68%, transparent);
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-heading strong,
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-caption h1 {
+  color: #fff3e2;
+  text-shadow: 0 10px 28px rgba(0,0,0,.24);
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-heading small,
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-caption > span {
+  color: rgba(242,222,198,.72);
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-fallback,
+.webgl-village[data-webgl-warm-life="true"] .webgl-quality-badge,
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-status {
+  color: #ead4b5;
+  border-color: rgba(216,174,104,.24);
+  background: rgba(31,18,15,.60);
+  box-shadow: 0 12px 30px rgba(0,0,0,.16);
+  backdrop-filter: blur(14px);
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-legend {
+  border-color: rgba(216,174,104,.23);
+  background: rgba(34,19,16,.76);
+  box-shadow: 0 20px 55px rgba(0,0,0,.24);
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-legend button {
+  color: #f5e6d1;
+  border-right-color: rgba(216,174,104,.14);
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-legend button:hover,
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-legend button:focus-visible,
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-legend button.is-active {
+  background: rgba(91,35,43,.55);
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-village-brand img {
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,.30));
+}
+
+.webgl-village[data-webgl-warm-life="true"] .webgl-place-tooltip,
+.webgl-village[data-webgl-warm-life="true"] .provider-focus-card {
+  border-color: rgba(216,174,104,.24);
+  background: rgba(42,21,18,.90);
+  color: #f6e7d3;
+  box-shadow: 0 24px 70px rgba(0,0,0,.30);
+  backdrop-filter: blur(18px);
+}
+
+@media (max-width: 980px) {
+  .webgl-village[data-webgl-warm-life="true"] .webgl-village-canvas {
+    filter: sepia(.12) saturate(1.05) brightness(.80) contrast(1.04);
+  }
+}
+
+@media (max-width: 760px) {
+  .webgl-village[data-webgl-warm-life="true"]::before {
+    background:
+      radial-gradient(ellipse at 50% 48%, transparent 20%, rgba(16,10,9,.22) 65%, rgba(10,8,7,.48) 100%),
+      linear-gradient(180deg, rgba(15,10,9,.28), transparent 34%, rgba(15,10,9,.18));
+  }
+
+  .webgl-village[data-webgl-warm-life="true"] .webgl-village-canvas {
+    filter: sepia(.10) saturate(1.04) brightness(.84) contrast(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-village[data-webgl-warm-life="true"] .webgl-village-canvas,
+  .webgl-village[data-webgl-warm-life="true"]::before {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,32 @@
+ATELIER LUMIÈRE · EXPERIENCIA UNIFICADA · CANDIDATO ACTUAL
+
+1. Descomprime todo el ZIP en una carpeta normal de Windows.
+2. Haz doble clic en ABRIR_ATELIER_V2.bat.
+3. Se abrirá automáticamente http://127.0.0.1:4177/?intro=1
+4. La prueba empieza en la ENTRADA CINEMATOGRÁFICA.
+5. Pulsa ENTRAR para pasar al Pueblo Atelier WebGL con la transición de llegada.
+6. En el pueblo puedes explorar Atelier Lumière, IZC y The Gentle Stitch.
+7. Desde Atelier puedes entrar a la Home V2 y recorrer Tienda, Talleres, Historias, Encargos y Carrito.
+
+IMPORTANTE
+- Es una preview local y aislada.
+- No modifica main.
+- No modifica el mini-PC.
+- No escribe datos reales.
+- El catálogo usa datos de demostración para que las pantallas públicas no aparezcan vacías.
+- Las funciones privadas, pagos, pedidos y administración no deben considerarse una prueba funcional en este paquete: aquí revisamos diseño público, navegación y responsive.
+
+CONTROLES DEL FLUJO
+- http://127.0.0.1:4177/?intro=1 → fuerza la entrada cinematográfica.
+- http://127.0.0.1:4177/?intro=0 → abre directamente la Home V2.
+- http://127.0.0.1:4177/entrada/webgl/ → abre directamente el Pueblo WebGL.
+
+RESPONSIVE
+En Chrome:
+- pulsa F12;
+- activa el icono móvil/tablet o Ctrl+Shift+M;
+- prueba 1440 px (PC), 1180 px (portátil), 820 px (tablet) y 390 px (móvil);
+- prueba también tablet/móvil horizontal para comprobar la entrada de poca altura.
+
+PARA CERRAR
+Vuelve a la ventana negra del lanzador y pulsa Ctrl+C.

@@ -1,0 +1,383 @@
+@import url("/visual-v2-tokens.css");
+
+/* Atelier Lumière · WEB V2 · FASE A1
+ * Cabecera pública compartida para la experiencia principal.
+ * Se aplica únicamente cuando premium-ui.js marca la cabecera con
+ * .atelier-global-header; Admin, proveedor privado, legal y Experience quedan fuera.
+ */
+
+.atelier-global-header {
+  position: sticky !important;
+  z-index: 180 !important;
+  top: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(190px, auto) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-height: 86px !important;
+  margin: 0 !important;
+  padding: 12px var(--v2-gutter) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--v2-line-soft) !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-950) !important;
+  background: rgba(255, 253, 249, .965) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) saturate(1.06) !important;
+  transition:
+    min-height var(--v2-duration-base) var(--v2-ease-standard),
+    background-color var(--v2-duration-base) ease,
+    border-color var(--v2-duration-base) ease,
+    box-shadow var(--v2-duration-base) var(--v2-ease-standard) !important;
+}
+
+.atelier-global-header.is-scrolled {
+  min-height: 72px !important;
+  border-bottom-color: var(--v2-line) !important;
+  background: rgba(255, 253, 249, .99) !important;
+  box-shadow: var(--v2-shadow-xs) !important;
+}
+
+.atelier-global-brand {
+  display: inline-flex !important;
+  width: clamp(184px, 14vw, 244px) !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  align-items: center !important;
+  justify-self: start !important;
+  padding: 0 !important;
+  border: 0 !important;
+  color: inherit !important;
+  background: none !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.atelier-global-brand img,
+.atelier-global-brand .atelier-global-logo {
+  display: block !important;
+  width: 100% !important;
+  max-width: 244px !important;
+  height: auto !important;
+  max-height: 56px !important;
+  opacity: 1 !important;
+  filter: none !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+}
+
+.atelier-global-nav {
+  display: flex !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(18px, 2.15vw, 38px) !important;
+  margin: 0 !important;
+  padding: 0 clamp(12px, 2vw, 32px) !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.atelier-global-nav a,
+.atelier-global-nav .button {
+  position: relative !important;
+  display: inline-flex !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-800) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: .78 !important;
+  font-family: var(--v2-font-ui) !important;
+  font-size: .66rem !important;
+  font-weight: 760 !important;
+  letter-spacing: .135em !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  transition:
+    color var(--v2-duration-fast) ease,
+    opacity var(--v2-duration-fast) ease !important;
+}
+
+.atelier-global-nav a::after {
+  position: absolute;
+  content: "";
+  right: 0;
+  bottom: 3px;
+  left: 0;
+  height: 1px;
+  background: var(--v2-wine-700);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform var(--v2-duration-base) var(--v2-ease-standard);
+}
+
+.atelier-global-nav a:hover,
+.atelier-global-nav a:focus-visible,
+.atelier-global-nav a[aria-current="page"] {
+  color: var(--v2-wine-950) !important;
+  opacity: 1 !important;
+}
+
+.atelier-global-nav a:hover::after,
+.atelier-global-nav a:focus-visible::after,
+.atelier-global-nav a[aria-current="page"]::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.atelier-global-actions {
+  display: flex !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  justify-self: end !important;
+}
+
+.atelier-global-cart {
+  display: inline-flex !important;
+  min-height: 42px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 4px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--v2-ink-950) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-family: var(--v2-font-ui) !important;
+  font-size: .65rem !important;
+  font-weight: 780 !important;
+  letter-spacing: .12em !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+.atelier-global-cart #cart-count,
+.atelier-global-cart .cart-count {
+  display: inline-grid !important;
+  min-width: 22px !important;
+  height: 22px !important;
+  place-items: center !important;
+  padding: 0 5px !important;
+  border: 1px solid var(--v2-wine-700) !important;
+  border-radius: 999px !important;
+  color: var(--v2-ivory-50) !important;
+  background: var(--v2-wine-800) !important;
+  font-size: .62rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+}
+
+.atelier-global-header .public-menu-toggle {
+  display: none !important;
+  min-width: 64px !important;
+  min-height: 42px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 11px !important;
+  border: 1px solid var(--v2-line) !important;
+  border-radius: 999px !important;
+  color: var(--v2-wine-950) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-family: var(--v2-font-ui) !important;
+  font-size: .65rem !important;
+  font-weight: 780 !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+}
+
+.atelier-global-header a:focus-visible,
+.atelier-global-header button:focus-visible {
+  outline: 3px solid rgba(198, 161, 93, .42) !important;
+  outline-offset: 4px !important;
+}
+
+/* Las páginas heredadas con .topbar imponían una cuadrícula de dos columnas.
+ * En escritorio la WEB V2 recupera las tres zonas: marca / navegación / carrito. */
+@media (min-width: 1025px) {
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header {
+    grid-template-columns: minmax(184px, 244px) minmax(0, 1fr) auto !important;
+    grid-template-rows: auto !important;
+    column-gap: clamp(18px, 2vw, 30px) !important;
+    row-gap: 0 !important;
+  }
+
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header .atelier-global-brand {
+    display: inline-flex !important;
+  }
+
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header .atelier-global-nav {
+    display: flex !important;
+  }
+
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header .atelier-global-actions {
+    display: flex !important;
+  }
+}
+
+/* Portátil: se conserva una sola línea, reduciendo ritmo antes que legibilidad. */
+@media (min-width: 1025px) and (max-width: 1240px) {
+  .atelier-global-header {
+    grid-template-columns: minmax(170px, auto) minmax(0, 1fr) auto !important;
+    padding-inline: 26px !important;
+  }
+
+  html[data-atelier-public-shell="v2"] .topbar.atelier-global-header {
+    grid-template-columns: minmax(170px, 210px) minmax(0, 1fr) auto !important;
+    column-gap: 18px !important;
+  }
+
+  .atelier-global-brand {
+    width: clamp(170px, 16vw, 210px) !important;
+  }
+
+  .atelier-global-nav {
+    gap: clamp(13px, 1.55vw, 22px) !important;
+    padding-inline: 18px !important;
+  }
+
+  .atelier-global-nav a,
+  .atelier-global-nav .button,
+  .atelier-global-cart {
+    font-size: .59rem !important;
+    letter-spacing: .105em !important;
+  }
+}
+
+/* Tablet: navegación editorial en segunda fila. */
+@media (min-width: 761px) and (max-width: 1024px) {
+  .atelier-global-header {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "brand actions"
+      "nav nav" !important;
+    row-gap: 6px !important;
+    min-height: 112px !important;
+    padding: 9px 22px 11px !important;
+  }
+
+  .atelier-global-brand {
+    grid-area: brand !important;
+    width: clamp(176px, 27vw, 218px) !important;
+  }
+
+  .atelier-global-nav {
+    grid-area: nav !important;
+    width: 100% !important;
+    justify-content: center !important;
+    gap: clamp(15px, 3vw, 30px) !important;
+    padding: 0 !important;
+  }
+
+  .atelier-global-actions {
+    grid-area: actions !important;
+  }
+
+  .atelier-global-nav a,
+  .atelier-global-nav .button,
+  .atelier-global-cart {
+    font-size: .58rem !important;
+    letter-spacing: .1em !important;
+  }
+}
+
+/* Móvil: public-shell mantiene el contrato hidden → overlay. V2 solo decide el aspecto. */
+@media (max-width: 760px) {
+  .atelier-global-header {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    min-height: 72px !important;
+    padding: 8px 13px !important;
+    gap: 8px !important;
+  }
+
+  .atelier-global-header.is-scrolled {
+    min-height: 66px !important;
+  }
+
+  .atelier-global-brand {
+    width: min(43vw, 166px) !important;
+    min-height: 44px !important;
+  }
+
+  .atelier-global-actions {
+    gap: 7px !important;
+  }
+
+  .atelier-global-cart {
+    min-height: 40px !important;
+    gap: 5px !important;
+    font-size: .56rem !important;
+    letter-spacing: .08em !important;
+  }
+
+  .atelier-global-cart .atelier-global-cart-label {
+    display: inline !important;
+  }
+
+  .atelier-global-header .public-menu-toggle {
+    display: inline-flex !important;
+  }
+
+  /* Sticky/backdrop crean un stacking context. Al abrir el panel se desactivan
+   * temporalmente para que el overlay fijo de public-shell ocupe todo el viewport. */
+  body.public-menu-open .atelier-global-header {
+    position: static !important;
+    z-index: auto !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  body.public-menu-open .atelier-global-nav a,
+  body.public-menu-open .atelier-global-nav .button {
+    width: 100% !important;
+    min-height: 60px !important;
+    justify-content: flex-start !important;
+    padding: 12px 0 !important;
+    border-bottom: 1px solid rgba(255, 250, 242, .13) !important;
+    color: var(--v2-ivory-50) !important;
+    opacity: 1 !important;
+    font-family: var(--v2-font-display) !important;
+    font-size: clamp(1.72rem, 8vw, 2.65rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: -.025em !important;
+    line-height: 1.05 !important;
+    text-transform: none !important;
+  }
+
+  body.public-menu-open .atelier-global-nav a::after {
+    display: none !important;
+  }
+
+  body.public-menu-open .atelier-global-nav a[aria-current="page"] {
+    color: #ddc894 !important;
+  }
+}
+
+/* Compatibilidad defensiva si otra capa mueve el panel móvil a body. */
+body.public-menu-open > [data-public-navigation].atelier-global-nav {
+  display: flex !important;
+  --atelier-global-overlay-ready: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atelier-global-header,
+  .atelier-global-nav a,
+  .atelier-global-nav a::after {
+    transition: none !important;
+  }
+}

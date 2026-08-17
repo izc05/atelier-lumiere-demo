@@ -1,0 +1,43 @@
+/* Atelier Lumière · U3.38 · bloom seleccionado muy contenido */
+.u338-dynamic-lighting{
+  position:absolute;
+  inset:0;
+  z-index:7;
+  pointer-events:none;
+  overflow:hidden;
+}
+.u338-selected-bloom{
+  position:absolute;
+  left:var(--u338-x,50%);
+  top:var(--u338-y,50%);
+  width:310px;
+  height:250px;
+  transform:translate3d(-50%,-54%,0) scale(calc(1 + var(--u338-pulse,0)));
+  border-radius:50%;
+  opacity:0;
+  background:radial-gradient(
+    ellipse at center,
+    rgba(239,177,83,.20) 0%,
+    rgba(183,102,36,.10) 30%,
+    rgba(83,19,34,.045) 52%,
+    rgba(0,0,0,0) 74%
+  );
+  filter:blur(10px);
+  mix-blend-mode:screen;
+  transition:opacity .32s ease;
+  will-change:transform,opacity,left,top;
+}
+.u338-selected-bloom.is-visible{opacity:.72;}
+
+[data-performance-mode="reduce"] .u338-selected-bloom,
+[data-performance-mode="protect"] .u338-selected-bloom{display:none;}
+
+@media (max-width:1050px){
+  .u338-selected-bloom{width:250px;height:205px;opacity:.58;}
+}
+@media (max-width:760px){
+  .u338-selected-bloom{display:none;}
+}
+@media (prefers-reduced-motion:reduce){
+  .u338-selected-bloom{transition:none;transform:translate3d(-50%,-54%,0);}
+}

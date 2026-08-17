@@ -1,0 +1,148 @@
+/* Atelier Lumière · U3.21 · luz ambiental nocturna proyectada */
+.u321-night-life {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.u321-night-life::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 52%, rgba(166,98,44,.055), transparent 33%),
+    linear-gradient(to bottom, rgba(12,7,8,.04), rgba(15,8,8,.18));
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.u321-world-light {
+  --u321-x: 50%;
+  --u321-y: 50%;
+  --u321-strength: 1;
+  position: absolute;
+  left: var(--u321-x);
+  top: var(--u321-y);
+  width: calc(150px * var(--u321-strength));
+  height: calc(92px * var(--u321-strength));
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center,
+      rgba(255,204,119,.29) 0%,
+      rgba(232,142,63,.17) 32%,
+      rgba(151,72,31,.07) 56%,
+      transparent 76%);
+  filter: blur(8px);
+  opacity: .76;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  mix-blend-mode: screen;
+  will-change: left, top, opacity;
+}
+
+.u321-world-light[data-light-kind="facade"] {
+  width: calc(104px * var(--u321-strength));
+  height: calc(76px * var(--u321-strength));
+  background:
+    radial-gradient(ellipse at center,
+      rgba(255,213,141,.30) 0%,
+      rgba(226,135,54,.13) 38%,
+      transparent 72%);
+  filter: blur(6px);
+  opacity: .68;
+}
+
+.u321-world-light[data-light-kind="street"] {
+  width: calc(136px * var(--u321-strength));
+  height: calc(74px * var(--u321-strength));
+  opacity: .62;
+}
+
+.u321-world-light[data-light-kind="plaza"] {
+  width: calc(250px * var(--u321-strength));
+  height: calc(142px * var(--u321-strength));
+  background:
+    radial-gradient(ellipse at center,
+      rgba(255,215,142,.24) 0%,
+      rgba(227,138,60,.14) 34%,
+      rgba(113,49,27,.055) 60%,
+      transparent 78%);
+  filter: blur(11px);
+  opacity: .70;
+}
+
+.u321-world-light[data-light-kind="workshop"] {
+  z-index: 2;
+  width: calc(280px * var(--u321-strength));
+  height: calc(178px * var(--u321-strength));
+  background:
+    radial-gradient(ellipse at center,
+      rgba(255,217,143,.36) 0%,
+      rgba(229,135,52,.19) 31%,
+      rgba(115,43,26,.08) 58%,
+      transparent 78%);
+  filter: blur(10px);
+  opacity: .82;
+}
+
+.u321-world-light[data-light-kind="workshop"].is-selected {
+  opacity: 1;
+  filter: blur(8px) brightness(1.16);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+[data-webgl-village][data-night-life-lighting="u3.21"] .webgl-workshop-plaque {
+  text-shadow: 0 1px 10px rgba(0,0,0,.32);
+}
+
+[data-webgl-village][data-night-life-lighting="u3.21"] .webgl-enter-atelier {
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.34),
+    0 0 36px rgba(178,102,48,.08),
+    inset 0 1px rgba(255,255,255,.035);
+}
+
+[data-webgl-village][data-night-life-lighting="u3.21"] .webgl-village-legend {
+  box-shadow: 0 18px 52px rgba(0,0,0,.32);
+}
+
+@media (max-width: 1050px) {
+  .u321-world-light { filter: blur(7px); }
+  .u321-world-light[data-light-kind="workshop"] {
+    width: calc(230px * var(--u321-strength));
+    height: calc(148px * var(--u321-strength));
+  }
+  .u321-world-light[data-light-kind="plaza"] {
+    width: calc(205px * var(--u321-strength));
+    height: calc(120px * var(--u321-strength));
+  }
+}
+
+@media (max-width: 760px) {
+  .u321-night-life::before { opacity: .72; }
+  .u321-world-light {
+    width: calc(104px * var(--u321-strength));
+    height: calc(62px * var(--u321-strength));
+    filter: blur(6px);
+    opacity: .58;
+  }
+  .u321-world-light[data-light-kind="facade"] { opacity: .48; }
+  .u321-world-light[data-light-kind="workshop"] {
+    width: calc(170px * var(--u321-strength));
+    height: calc(108px * var(--u321-strength));
+    opacity: .72;
+  }
+  .u321-world-light[data-light-kind="plaza"] {
+    width: calc(154px * var(--u321-strength));
+    height: calc(92px * var(--u321-strength));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .u321-world-light {
+    transition: none !important;
+    animation: none !important;
+  }
+}
