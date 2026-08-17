@@ -1,6 +1,7 @@
 import { ServiceError } from "./providers-service.mjs";
 
 const PATH = "/api/pilot-checkout/submit";
+const RECOVERY_PATH = "/api/pilot-checkout/access-recovery";
 const MAX_BODY_BYTES = 256 * 1024;
 const SINGLE_PROVIDER_CONSTRAINT = "provider_orders_single_provider_checkout";
 
@@ -67,7 +68,7 @@ function handleError(response, error, logger) {
   });
   sendJson(response, 500, {
     error: "INTERNAL_ERROR",
-    message: "No se ha podido registrar el pedido."
+    message: "No se ha podido completar la operación."
   });
 }
 
@@ -82,7 +83,8 @@ export function createPilotCheckoutApiHandler({
 
   return async function pilotCheckoutApiHandler(request, response) {
     const url = new URL(request.url ?? "/", "http://localhost");
-    if (url.pathname !== PATH) return baseHandler(request, response);
+    const recoveryRequest = url.pathname === RECOVERY_PATH;
+    if (url.pathname !== PATH && !recoveryRequest) return baseHandler(request, response);
 
     try {
       if (!pilotCheckoutService) {
@@ -99,6 +101,20 @@ export function createPilotCheckoutApiHandler({
         }, { Allow: "POST" });
         return;
       }
+
+      if (recoveryRequest) {
+        if (typeof pilotCheckoutService.requestCustomerAccessRecovery !== "function") {
+          throw new ServiceError(
+            "CUSTOMER_ACCESS_RECOVERY_UNAVAILABLE",
+            "La recuperación de acceso no está disponible.",
+            503
+          );
+        }
+        const result = await pilotCheckoutService.requestCustomerAccessRecovery(await readJson(request));
+        sendJson(response, 202, result);
+        return;
+      }
+
       const result = await pilotCheckoutService.submit(await readJson(request));
       sendJson(response, result.reused ? 200 : 201, result);
     } catch (error) {
