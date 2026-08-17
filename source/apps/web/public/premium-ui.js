@@ -17,6 +17,14 @@ if (!document.querySelector('link[data-atelier-global-shell]')) {
   document.head.append(globalShellStyles);
 }
 
+if (!document.querySelector('link[data-atelier-global-components]')) {
+  const globalComponentStyles = document.createElement("link");
+  globalComponentStyles.rel = "stylesheet";
+  globalComponentStyles.href = "/visual-v2-global-components.css";
+  globalComponentStyles.dataset.atelierGlobalComponents = "";
+  document.head.append(globalComponentStyles);
+}
+
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 const FINE_POINTER = "(pointer: fine)";
 const INTRO_KEY = "atelier-lumiere-opening-seen";
@@ -26,6 +34,34 @@ const PRIMARY_PUBLIC_NAVIGATION = Object.freeze([
   ["/blog/", "Historias"],
   ["/unete/", "Únete como taller"],
   ["/proveedor/acceso/", "Acceso talleres"]
+]);
+const GLOBAL_FOOTER_LINKS = Object.freeze([
+  ["/tienda/", "Tienda"],
+  ["/talleres/", "Talleres"],
+  ["/blog/", "Historias"],
+  ["/unete/", "Únete como taller"],
+  ["/proveedor/acceso/", "Acceso talleres"]
+]);
+const PRIMARY_ACTION_SELECTORS = Object.freeze([
+  "#home-hero .button-primary",
+  ".closing-section .button-primary",
+  ".workshops-closing .button.primary",
+  "#add-cart-button.button.primary",
+  "#checkout-button.button.primary",
+  ".checkout-success .button.primary",
+  ".empty .button.primary",
+  ".error .button.primary",
+  ".application-card .submit-button"
+]);
+const SECONDARY_ACTION_SELECTORS = Object.freeze([
+  ".closing-section .button-outline",
+  ".workshops-closing .button.secondary",
+  ".checkout-success .button.secondary"
+]);
+const LINK_ACTION_SELECTORS = Object.freeze([
+  "#home-hero .button-quiet",
+  ".workshops-closing .button.ghost",
+  ".checkout-success .button.ghost"
 ]);
 
 function pageType(pathname) {
@@ -129,6 +165,59 @@ function initializePublicIdentity() {
   actions.replaceChildren(cart);
   if (toggle) actions.append(toggle);
   if (navigation.nextElementSibling !== actions) header.insertBefore(navigation, actions);
+}
+
+function tagActions(selectors, roleClass) {
+  for (const selector of selectors) {
+    for (const element of document.querySelectorAll(selector)) {
+      element.classList.add("atelier-action", roleClass);
+    }
+  }
+}
+
+function initializePublicActions() {
+  if (!isPrimaryPublicExperience()) return;
+  tagActions(PRIMARY_ACTION_SELECTORS, "atelier-action-primary");
+  tagActions(SECONDARY_ACTION_SELECTORS, "atelier-action-secondary");
+  tagActions(LINK_ACTION_SELECTORS, "atelier-action-link");
+}
+
+function initializePublicFooter() {
+  if (!isPrimaryPublicExperience()) return;
+
+  const existingFooter = [...document.querySelectorAll("body > footer, body > .shell > footer")]
+    .find((element) => !element.closest("main"));
+  const footer = existingFooter || document.createElement("footer");
+  footer.className = "atelier-global-footer";
+  footer.setAttribute("aria-label", "Pie de Atelier Lumière");
+
+  const brand = createElement("div", "atelier-global-footer-brand");
+  const logo = createElement("img", "atelier-global-footer-logo");
+  logo.src = "/assets/brand/atelier-logo-official-light.svg";
+  logo.alt = "Atelier Lumière";
+  logo.decoding = "async";
+  brand.append(
+    logo,
+    createElement("p", "", "Artesanía para celebrar. Talleres independientes, piezas con oficio e historias que merecen tiempo.")
+  );
+
+  const navigation = createElement("nav", "");
+  navigation.setAttribute("aria-label", "Enlaces de Atelier Lumière");
+  for (const [href, label] of GLOBAL_FOOTER_LINKS) {
+    const link = createElement("a", "", label);
+    link.href = href;
+    navigation.append(link);
+  }
+
+  const meta = createElement("div", "atelier-global-footer-meta");
+  meta.append(createElement("p", "", "Selección cuidada de talleres y piezas artesanales."));
+  const legal = createElement("a", "", "Legal y privacidad");
+  legal.href = "/legal/";
+  meta.append(legal);
+
+  footer.replaceChildren(brand, navigation, meta);
+  if (footer.parentElement !== document.body) document.body.append(footer);
+  else if (!footer.isConnected) document.body.append(footer);
 }
 
 function initializeOpening() {
@@ -332,6 +421,8 @@ function initializeHeroDepth() {
 
 function initialize() {
   initializePublicIdentity();
+  initializePublicActions();
+  initializePublicFooter();
   initializeOpening();
   initializeHeader();
   initializeProgress();
