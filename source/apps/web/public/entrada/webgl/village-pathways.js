@@ -20,7 +20,7 @@
     if (!object) return object;
     object.u329PathRole = role;
     object.u329PathRoute = routeName;
-    object.materialKind = role === 'slab' || role === 'edge' ? 'stone-path-detail' : 'stone-path';
+    object.materialKind = 3; // U3.5A MATERIAL.STONE
     created.push(object);
     return object;
   }
