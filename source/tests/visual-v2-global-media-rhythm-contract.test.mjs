@@ -41,7 +41,7 @@ test("A3 conserva un único ritmo de movimiento editorial y reduced motion", asy
   const tokens = await text("visual-v2-tokens.css");
 
   assert.match(tokens, /--v2-image-saturation:\s*\.94/);
-  assert.match(tokens, /--v2-image-hover-scale:\s*1\.025/);
+  assert.match(tokens, /--v2-image-hover-scale:\s*1\.018/);
   assert.match(tokens, /--v2-section-y:/);
   assert.match(tokens, /--v2-duration-slow:/);
   assert.match(tokens, /--v2-ease-emphasis:/);
