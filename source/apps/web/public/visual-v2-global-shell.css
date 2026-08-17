@@ -330,6 +330,42 @@
   .atelier-global-header .public-menu-toggle {
     display: inline-flex !important;
   }
+
+  /* Sticky/backdrop crean un stacking context. Al abrir el panel se desactivan
+   * temporalmente para que el overlay fijo de public-shell ocupe todo el viewport. */
+  body.public-menu-open .atelier-global-header {
+    position: static !important;
+    z-index: auto !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  body.public-menu-open .atelier-global-nav a,
+  body.public-menu-open .atelier-global-nav .button {
+    width: 100% !important;
+    min-height: 60px !important;
+    justify-content: flex-start !important;
+    padding: 12px 0 !important;
+    border-bottom: 1px solid rgba(255, 250, 242, .13) !important;
+    color: var(--v2-ivory-50) !important;
+    opacity: 1 !important;
+    font-family: var(--v2-font-display) !important;
+    font-size: clamp(1.72rem, 8vw, 2.65rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: -.025em !important;
+    line-height: 1.05 !important;
+    text-transform: none !important;
+  }
+
+  body.public-menu-open .atelier-global-nav a::after {
+    display: none !important;
+  }
+
+  body.public-menu-open .atelier-global-nav a[aria-current="page"] {
+    color: #ddc894 !important;
+  }
 }
 
 /* Compatibilidad defensiva si otra capa mueve el panel móvil a body. */
