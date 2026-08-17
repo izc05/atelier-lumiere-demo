@@ -90,6 +90,7 @@
     '/entrada/webgl/path-surface-fidelity.js',
     '/entrada/webgl/architectural-realism.js',
     '/entrada/webgl/reference-shape-cleanup.js',
+    '/entrada/webgl/hero-house-fidelity.js',
     '/entrada/webgl/contact-shadows.js',
     '/entrada/webgl/cinematic-lighting.js',
     '/entrada/webgl/focus-atmosphere.js',
@@ -160,6 +161,7 @@
         root.dataset.architecturalRealismCheckpoint = 'u3.34';
         root.dataset.referenceShapeCleanupCheckpoint = 'u3.35';
         root.dataset.gameGradeInteractionCheckpoint = 'u3.36';
+        root.dataset.heroHouseFidelityCheckpoint = 'u3.37';
       }
       if (boot?.complete) await boot.complete();
     } catch (error) {
