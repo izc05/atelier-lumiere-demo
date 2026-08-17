@@ -142,7 +142,7 @@ void main(){
 
     const model=modelMatrix(object);
     const color=typeof p9ObjectColor==='function'?p9ObjectColor(object):(object.color||[1,1,1,1]);
-    const isWater=kind===MATERIAL.GLASS && (object?.position?.[1]??1)<.16 && (object?.scale?.[1]??1)<.08;
+    const isWater=kind===MATERIAL.GLASS && (object?.u332Water===true || ((object?.position?.[1]??1)<.16 && (object?.scale?.[1]??1)<.08));
     const time=reduced?0:performance.now()/1000;
 
     gl.useProgram(reflectiveProgram);
