@@ -46,6 +46,8 @@ test("FASE A1 comparte cabecera y navegación en la WEB V2 sin entrar en áreas 
   assert.match(globalShell, /@media \(min-width: 761px\) and \(max-width: 1024px\)/);
   assert.match(globalShell, /@media \(max-width: 760px\)/);
   assert.match(globalShell, /\.atelier-global-cart \.atelier-global-cart-label\s*\{[\s\S]*?display:\s*inline\s*!important;/);
+  assert.match(globalShell, /body\.public-menu-open \.atelier-global-header\s*\{[\s\S]*?position:\s*static\s*!important;[\s\S]*?backdrop-filter:\s*none\s*!important;/);
+  assert.match(globalShell, /body\.public-menu-open \.atelier-global-nav a,[\s\S]*?color:\s*var\(--v2-ivory-50\)\s*!important;[\s\S]*?font-family:\s*var\(--v2-font-display\)\s*!important;/);
   assert.match(globalShell, /prefers-reduced-motion:\s*reduce/);
 
   // La lógica móvil probada sigue siendo la fuente autoritativa: hidden al cerrar y overlay fijo al abrir.
