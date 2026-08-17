@@ -5,12 +5,14 @@
   const canvas = document.querySelector('[data-webgl-canvas]');
   const status = document.querySelector('[data-webgl-status]');
   const fallback = document.querySelector('.webgl-village-fallback');
+  const boot = window.AtelierVillageBoot || null;
 
   const failToFallback = (message = 'WebGL2 no disponible') => {
     if (root) {
       root.dataset.webglError = 'true';
       root.dataset.webglPhase = 'fallback';
     }
+    boot?.fail?.(message);
     if (status) status.textContent = `${message} · abriendo mapa ligero…`;
     if (fallback) fallback.textContent = 'Abrir mapa ligero';
     window.setTimeout(() => {
@@ -117,7 +119,11 @@
 
   (async () => {
     try {
-      for (const src of scripts) await loadScript(src);
+      boot?.progress?.(0, scripts.length);
+      for (let index = 0; index < scripts.length; index += 1) {
+        await loadScript(scripts[index]);
+        boot?.progress?.(index + 1, scripts.length);
+      }
       if (root) {
         root.dataset.webglBootstrapped = 'true';
         root.dataset.graphicsCheckpoint = 'u3.16';
@@ -134,7 +140,9 @@
         root.dataset.narrativeEntryCheckpoint = 'u3.26';
         root.dataset.graphicsFidelityCheckpoint = 'u3.27';
         root.dataset.workshopContinuityCheckpoint = 'u3.27';
+        root.dataset.bootCheckpoint = 'u3.28';
       }
+      if (boot?.complete) await boot.complete();
     } catch (error) {
       console.error(error);
       failToFallback('No se pudo iniciar la escena 3D');
