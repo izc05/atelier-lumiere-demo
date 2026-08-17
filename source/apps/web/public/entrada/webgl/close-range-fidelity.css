@@ -1,0 +1,88 @@
+/* Atelier Lumière · U3.31 · luz local de primer plano */
+.u331-local-lighting {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+.u331-light-pool {
+  --u331-x: 50%;
+  --u331-y: 50%;
+  --u331-size: 116px;
+  --u331-alpha: .095;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--u331-size);
+  height: calc(var(--u331-size) * .62);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 50%,
+      rgba(255, 188, 94, calc(var(--u331-alpha) * 1.22)) 0%,
+      rgba(223, 126, 53, var(--u331-alpha)) 31%,
+      rgba(123, 45, 31, calc(var(--u331-alpha) * .42)) 56%,
+      transparent 74%);
+  filter: blur(6px) saturate(1.12);
+  mix-blend-mode: screen;
+  opacity: 1;
+  transform: translate3d(calc(var(--u331-x) - 50%), calc(var(--u331-y) - 50%), 0) scale(1);
+  transform-origin: center;
+  transition: opacity 240ms ease, filter 260ms ease, transform 260ms ease;
+  will-change: transform, opacity;
+}
+
+.u331-light-pool[data-kind="landmark"] {
+  --u331-size: 170px;
+  --u331-alpha: .105;
+}
+
+.u331-light-pool[data-place="atelier"] {
+  --u331-size: 215px;
+  --u331-alpha: .125;
+}
+
+.u331-light-pool[data-kind="selected"],
+.u331-light-pool.is-selected {
+  --u331-alpha: .145;
+  filter: blur(7px) saturate(1.18);
+  transform: translate3d(calc(var(--u331-x) - 50%), calc(var(--u331-y) - 50%), 0) scale(1.10);
+}
+
+.webgl-village[data-close-range-fidelity="u3.31"] .webgl-village-canvas {
+  filter: saturate(1.19) contrast(1.145) brightness(1.005) sepia(.035);
+}
+
+.webgl-village[data-close-range-fidelity="u3.31"][data-performance-mode="protect"] .u331-light-pool[data-kind="threshold"],
+.webgl-village[data-close-range-fidelity="u3.31"][data-performance-mode="reduce"] .u331-light-pool[data-kind="threshold"] {
+  display: none;
+}
+
+.webgl-village[data-webgl-quality="balanced"] .u331-light-pool {
+  filter: blur(5px) saturate(1.08);
+}
+
+.webgl-village[data-webgl-quality="lite"] .u331-light-pool:not([data-kind="landmark"]) {
+  display: none;
+}
+
+@media (max-width: 1050px) {
+  .u331-light-pool { --u331-size: 104px; --u331-alpha: .082; }
+  .u331-light-pool[data-kind="landmark"] { --u331-size: 148px; }
+  .u331-light-pool[data-place="atelier"] { --u331-size: 180px; }
+}
+
+@media (max-width: 760px) {
+  .u331-light-pool { --u331-size: 86px; --u331-alpha: .070; filter: blur(4px); }
+  .u331-light-pool[data-kind="landmark"] { --u331-size: 122px; }
+  .u331-light-pool[data-place="atelier"] { --u331-size: 148px; }
+  .webgl-village[data-close-range-fidelity="u3.31"] .webgl-village-canvas {
+    filter: saturate(1.13) contrast(1.105) brightness(1.01) sepia(.025);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .u331-light-pool { transition: none !important; }
+}
