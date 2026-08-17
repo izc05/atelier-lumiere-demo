@@ -78,6 +78,7 @@
     '/entrada/webgl/roof-patina.js',
     '/entrada/webgl/landscape-details.js',
     '/entrada/webgl/premium-vegetation.js',
+    '/entrada/webgl/horizon-continuity.js',
     '/entrada/webgl/stone-boundaries.js',
     '/entrada/webgl/proximity-life.js',
     '/entrada/webgl/urban-density.js',
@@ -145,6 +146,8 @@
         root.dataset.bootCheckpoint = 'u3.28';
         root.dataset.pathwaysCheckpoint = 'u3.29';
         root.dataset.materialDepthCheckpoint = 'u3.29';
+        root.dataset.horizonCheckpoint = 'u3.30';
+        root.dataset.vegetationVarietyCheckpoint = 'u3.30';
       }
       if (boot?.complete) await boot.complete();
     } catch (error) {
