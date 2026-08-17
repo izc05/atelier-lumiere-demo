@@ -1,0 +1,144 @@
+/* Atelier Lumière · U3.28 · boot gate del Pueblo antes del primer frame visible */
+.webgl-village[data-boot-state="loading"] > *:not(.webgl-boot) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.webgl-boot {
+  position: absolute;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #f8f0e3;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(139, 83, 52, .24), transparent 24rem),
+    radial-gradient(circle at 22% 18%, rgba(120, 25, 46, .18), transparent 30rem),
+    linear-gradient(145deg, #160b0d 0%, #241015 42%, #11090b 100%);
+  transition: opacity 720ms cubic-bezier(.22,.72,.18,1), visibility 720ms linear;
+}
+
+.webgl-boot::before,
+.webgl-boot::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.webgl-boot::before {
+  inset: -12%;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.013) 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse at 50% 100%, rgba(171, 118, 66, .13), transparent 46%);
+  mix-blend-mode: screen;
+  opacity: .72;
+}
+
+.webgl-boot::after {
+  width: min(76vw, 980px);
+  aspect-ratio: 1.9;
+  border: 1px solid rgba(213, 177, 111, .08);
+  border-radius: 50%;
+  box-shadow: 0 0 130px rgba(173, 105, 61, .08), inset 0 0 90px rgba(255,255,255,.015);
+  transform: perspective(520px) rotateX(70deg) translateY(34%);
+}
+
+.webgl-boot-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  width: min(520px, calc(100vw - 48px));
+  text-align: center;
+}
+
+.webgl-boot-logo {
+  width: clamp(150px, 16vw, 245px);
+  height: auto;
+  margin-bottom: clamp(22px, 3vh, 36px);
+  filter: drop-shadow(0 18px 42px rgba(0,0,0,.28));
+}
+
+.webgl-boot-kicker {
+  margin-bottom: 10px;
+  color: #c9a86b;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+
+.webgl-boot-title {
+  margin: 0;
+  color: #fff9ef;
+  font-family: var(--v2-font-display, Georgia, serif);
+  font-size: clamp(2.1rem, 4.6vw, 4.4rem);
+  font-weight: 400;
+  line-height: .94;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+.webgl-boot-copy {
+  margin: 18px 0 0;
+  color: rgba(248,240,227,.72);
+  font-size: .72rem;
+  letter-spacing: .06em;
+}
+
+.webgl-boot-progress {
+  position: relative;
+  width: min(290px, 62vw);
+  height: 1px;
+  margin-top: 30px;
+  overflow: hidden;
+  background: rgba(255,255,255,.12);
+}
+
+.webgl-boot-progress > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(90deg, #8d5d37, #d7b674, #f5dfae);
+  box-shadow: 0 0 18px rgba(219,184,118,.38);
+  transform: scaleX(.04);
+  transform-origin: left center;
+  transition: transform 220ms ease-out;
+}
+
+.webgl-boot-stage {
+  min-height: 1.2em;
+  margin: 11px 0 0;
+  color: rgba(231,207,165,.6);
+  font-size: .52rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.webgl-village[data-boot-state="revealing"] .webgl-boot {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.webgl-village[data-boot-state="revealing"] > *:not(.webgl-boot),
+.webgl-village[data-boot-state="complete"] > *:not(.webgl-boot) {
+  opacity: revert-layer;
+}
+
+.webgl-village[data-webgl-error="true"] .webgl-boot-stage {
+  color: #f0c98a;
+}
+
+@media (max-width: 760px) {
+  .webgl-boot-inner { width: min(430px, calc(100vw - 38px)); }
+  .webgl-boot-logo { width: 152px; }
+  .webgl-boot-title { font-size: clamp(2.15rem, 12vw, 3.25rem); }
+  .webgl-boot-copy { max-width: 28ch; line-height: 1.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webgl-boot,
+  .webgl-boot-progress > i { transition-duration: 40ms; }
+}
