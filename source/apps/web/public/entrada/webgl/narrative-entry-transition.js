@@ -250,6 +250,15 @@
     if (currentStage === 'travel' || currentStage === 'approach') startProjection();
   });
 
+  /* Cualquier vuelta explícita a la vista general limpia también el estado narrativo. */
+  if (typeof webglFocusOverview === 'function') {
+    const narrativeBaseOverview = webglFocusOverview;
+    webglFocusOverview = function u326FocusOverview() {
+      narrativeBaseOverview();
+      reset('overview-focus');
+    };
+  }
+
   root.dataset.narrativeEntry = 'u3.26';
   root.dataset.narrativeQuality = quality;
   root.dataset.narrativeStage = 'idle';
