@@ -65,7 +65,7 @@
   height:36px;
   border:1px solid rgba(244,212,148,.82);
   opacity:calc(1 - var(--u336-life,0));
-  scale:calc(1 + var(--u336-life,0)*2.5);
+  scale:var(--u336-scale,1);
   box-shadow:0 0 28px rgba(226,176,91,.18);
 }
 
