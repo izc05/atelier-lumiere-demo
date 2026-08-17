@@ -113,6 +113,7 @@
     '/entrada/webgl/workshop-page-bridge.js',
     '/entrada/webgl/arrival-transition.js',
     '/entrada/webgl/map-drag-navigation.js',
+    '/entrada/webgl/game-grade-interaction.js',
     '/entrada/webgl/renderer-watchdog.js'
   ];
 
@@ -158,6 +159,7 @@
         root.dataset.pathSurfaceCheckpoint = 'u3.33';
         root.dataset.architecturalRealismCheckpoint = 'u3.34';
         root.dataset.referenceShapeCleanupCheckpoint = 'u3.35';
+        root.dataset.gameGradeInteractionCheckpoint = 'u3.36';
       }
       if (boot?.complete) await boot.complete();
     } catch (error) {
