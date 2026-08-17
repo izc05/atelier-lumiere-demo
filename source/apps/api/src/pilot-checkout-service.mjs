@@ -94,8 +94,15 @@ export function createPilotCheckoutService(options = {}) {
     ...options,
     database: publishedCheckoutDatabase(options.database)
   });
+  const recoveryPepper = options.loginPepper ?? process.env.AUTH_LOGIN_PEPPER;
 
-  if (!options.customerAuthService || !options.mailService || !options.systemContext) {
+  if (
+    !options.customerAuthService
+    || !options.mailService
+    || !options.systemContext
+    || typeof recoveryPepper !== "string"
+    || recoveryPepper.length < 32
+  ) {
     return checkoutService;
   }
 
@@ -108,7 +115,7 @@ export function createPilotCheckoutService(options = {}) {
     },
     customerAuthService: options.customerAuthService,
     mailService: options.mailService,
-    loginPepper: options.loginPepper ?? process.env.AUTH_LOGIN_PEPPER,
+    loginPepper: recoveryPepper,
     logger: options.logger
   });
 
