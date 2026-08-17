@@ -29,7 +29,7 @@ test("B2 conserva la narrativa Home en cinco actos y densidad editorial contenid
   assert.match(home, /Piezas recién salidas del taller/);
   assert.match(home, /Una idea también puede convertirse en pieza/);
   assert.match(home, /Historias desde los talleres/);
-  assert.match(home, /Elige algo hecho para durar/);
+  assert.match(home, /Encuentra una pieza que ya se sienta tuya/);
 
   // La Home enseña una selección, no un catálogo infinito.
   assert.match(homeLogic, /collectWorkshops\(products\)\.slice\(0, 3\)/);
