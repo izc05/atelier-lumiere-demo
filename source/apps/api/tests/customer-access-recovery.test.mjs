@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { createDatabase } from "../src/database.mjs";
 import { createCustomerAuthService } from "../src/customer-auth-service.mjs";
 import { createCustomerAccessRecoveryService } from "../src/customer-access-recovery-service.mjs";
@@ -8,6 +8,7 @@ import { createCustomerAccessRecoveryService } from "../src/customer-access-reco
 const connectionString = process.env.DATABASE_URL;
 const ADMIN = { role: "ADMIN", userId: "00000000-0000-4000-8000-000000000001", providerId: null };
 const PROVIDER = "00000000-0000-4000-8000-000000000201";
+const RECOVERY_PEPPER = "atelier-recovery-test-pepper-0123456789abcdef";
 const GENERIC = {
   accepted: true,
   message: "Si los datos corresponden a un pedido, enviaremos un nuevo enlace privado al correo de compra."
@@ -15,6 +16,12 @@ const GENERIC = {
 
 function address() {
   return { line1: "Calle privada 8", city: "Granada", postalCode: "18001", country: "ES" };
+}
+
+function recoveryThrottleKey(email, orderNumber) {
+  return createHmac("sha256", RECOVERY_PEPPER)
+    .update(`customer-order-access:${email}:${orderNumber}`)
+    .digest("hex");
 }
 
 test("la recuperación de pedidos no enumera clientes, aplica cooldown e invalida enlaces anteriores", { skip: !connectionString }, async (t) => {
@@ -32,6 +39,7 @@ test("la recuperación de pedidos no enumera clientes, aplica cooldown e invalid
   const orderId = randomUUID();
   const email = `recuperacion-${suffix.toLowerCase()}@example.test`;
   const orderNumber = `AL-REC-${suffix}`;
+  const throttleKey = recoveryThrottleKey(email, orderNumber);
 
   await database.withContext(ADMIN, async (tx) => {
     await tx.query(
@@ -79,7 +87,7 @@ test("la recuperación de pedidos no enumera clientes, aplica cooldown e invalid
     systemContext: ADMIN,
     customerAuthService: auth,
     mailService,
-    loginPepper: "atelier-recovery-test-pepper-0123456789abcdef",
+    loginPepper: RECOVERY_PEPPER,
     cooldownSeconds: 300,
     now: () => currentTime,
     logger: { error() {} }
@@ -103,6 +111,11 @@ test("la recuperación de pedidos no enumera clientes, aplica cooldown e invalid
       [original.accessId]
     );
     assert.ok(previous.rows[0].revoked_at);
+    const recoveryThrottles = await tx.query(
+      "SELECT COUNT(*)::int AS total FROM login_throttles WHERE key_hash=$1",
+      [throttleKey]
+    );
+    assert.equal(recoveryThrottles.rows[0].total, 1);
   });
 
   const repeated = await recovery.requestAccess({ email, orderNumber });
@@ -121,4 +134,9 @@ test("la recuperación de pedidos no enumera clientes, aplica cooldown e invalid
   );
   const consumed = await auth.consumeAccess(deliveries[1].token);
   assert.equal(consumed.user.id, customerId);
+
+  await database.withContext(ADMIN, (tx) => tx.query(
+    "DELETE FROM login_throttles WHERE key_hash=$1",
+    [throttleKey]
+  ));
 });
