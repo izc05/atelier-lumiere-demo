@@ -197,9 +197,11 @@
         pulses.splice(index, 1);
         continue;
       }
+      const life = clamp(age / pulse.life, 0, 1);
       pulse.node.style.setProperty('--u336-x', `${(screen.x - rect.left).toFixed(1)}px`);
       pulse.node.style.setProperty('--u336-y', `${(screen.y - rect.top).toFixed(1)}px`);
-      pulse.node.style.setProperty('--u336-life', String(clamp(age / pulse.life, 0, 1)));
+      pulse.node.style.setProperty('--u336-life', String(life));
+      pulse.node.style.setProperty('--u336-scale', (1 + life * 2.5).toFixed(3));
     }
   }
 
