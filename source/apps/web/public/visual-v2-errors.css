@@ -1,0 +1,242 @@
+/* Atelier Lumière · Visual V2 · páginas 404/500
+ * Refinamiento visual sobre error-pages.css. Sin lógica ni handlers.
+ */
+
+html {
+  background: var(--v2-ivory-100);
+}
+
+body {
+  color: var(--v2-text);
+  background:
+    radial-gradient(circle at 82% 16%, rgba(198, 161, 93, .13), transparent 30rem),
+    radial-gradient(circle at 7% 74%, rgba(101, 24, 43, .07), transparent 32rem),
+    var(--v2-ivory-100);
+  font-family: var(--v2-font-ui);
+}
+
+.error-shell {
+  width: min(var(--v2-shell), calc(100% - (2 * var(--v2-gutter))));
+}
+
+.error-topbar {
+  min-height: 104px;
+  border-bottom-color: var(--v2-line-soft);
+}
+
+.error-mark {
+  width: 44px;
+  height: 44px;
+  border-color: var(--v2-line-strong);
+  border-radius: 50%;
+  color: var(--v2-wine-800);
+  background: rgba(255, 253, 249, .66);
+  font-family: var(--v2-font-display);
+}
+
+.error-brand strong {
+  color: var(--v2-wine-950);
+  font-family: var(--v2-font-display);
+  font-weight: 500;
+}
+
+.error-brand small {
+  color: var(--v2-text-muted);
+  letter-spacing: .13em;
+}
+
+.error-nav a {
+  font-size: .76rem;
+  letter-spacing: .04em;
+}
+
+.error-nav .primary {
+  border: 1px solid var(--v2-wine-800);
+  color: #fff;
+  background: var(--v2-wine-800);
+  transition: transform var(--v2-duration-fast) var(--v2-ease-standard), background var(--v2-duration-fast) ease;
+}
+
+.error-nav .primary:hover {
+  transform: translateY(-1px);
+  background: var(--v2-wine-950);
+}
+
+.error-main {
+  min-height: calc(100vh - 105px);
+  grid-template-columns: minmax(0, 1.18fr) minmax(300px, .82fr);
+  gap: clamp(48px, 8vw, 124px);
+  padding: clamp(70px, 8vw, 126px) 0 clamp(84px, 9vw, 138px);
+}
+
+.error-eyebrow {
+  margin-bottom: 22px;
+  color: var(--v2-wine-600);
+  font-size: .68rem;
+  letter-spacing: .2em;
+}
+
+.error-code {
+  color: rgba(79, 16, 32, .075);
+  font-family: var(--v2-font-display);
+  font-size: clamp(9rem, 25vw, 20rem);
+  letter-spacing: -.075em;
+  line-height: .65;
+}
+
+.error-copy h1 {
+  margin-top: -.06em;
+  color: var(--v2-wine-950);
+  font-family: var(--v2-font-display);
+  font-size: clamp(3rem, 6.4vw, 6.15rem);
+  font-weight: 400;
+  letter-spacing: -.052em;
+  line-height: .92;
+  text-wrap: balance;
+}
+
+.error-lead {
+  color: var(--v2-text-muted);
+  line-height: 1.78;
+}
+
+.error-actions {
+  gap: 10px;
+  margin-top: 38px;
+}
+
+.error-button {
+  min-height: 50px;
+  border-color: var(--v2-line-strong);
+  color: var(--v2-wine-800);
+  background: rgba(255, 253, 249, .72);
+  font-size: .74rem;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+  transition: transform var(--v2-duration-fast) var(--v2-ease-standard), border-color var(--v2-duration-fast) ease, background var(--v2-duration-fast) ease;
+}
+
+.error-button:hover {
+  transform: translateY(-2px);
+  border-color: var(--v2-gold-700);
+  background: #fff;
+}
+
+.error-button.primary {
+  border-color: var(--v2-wine-800);
+  color: #fff;
+  background: var(--v2-wine-800);
+}
+
+.error-button.primary:hover {
+  border-color: var(--v2-wine-950);
+  background: var(--v2-wine-950);
+}
+
+.error-note {
+  padding: clamp(30px, 4vw, 48px);
+  border-color: var(--v2-line-soft);
+  border-radius: var(--v2-radius-lg);
+  background: rgba(255, 253, 249, .82);
+  box-shadow: var(--v2-shadow-md);
+  backdrop-filter: blur(10px);
+}
+
+.error-note::before {
+  width: 190px;
+  height: 190px;
+  top: -94px;
+  right: -58px;
+  border-color: rgba(178, 141, 75, .26);
+}
+
+.error-note strong {
+  color: var(--v2-wine-950);
+  font-family: var(--v2-font-display);
+  font-size: clamp(1.65rem, 2.3vw, 2.15rem);
+}
+
+.error-note p,
+.error-note li {
+  color: var(--v2-text-muted);
+}
+
+.error-note li::before {
+  color: var(--v2-gold-700);
+}
+
+.error-footer {
+  border-top-color: var(--v2-line-soft);
+  color: var(--v2-ink-500);
+}
+
+.error-button:focus-visible,
+.error-nav a:focus-visible,
+.error-brand:focus-visible,
+.error-note a:focus-visible {
+  outline: 3px solid rgba(198, 161, 93, .42);
+  outline-offset: 4px;
+}
+
+@media (max-width: 860px) {
+  .error-shell {
+    width: min(100% - 40px, 760px);
+  }
+
+  .error-main {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .error-note {
+    max-width: 620px;
+  }
+}
+
+@media (max-width: 620px) {
+  .error-shell {
+    width: min(100% - 28px, 680px);
+  }
+
+  .error-topbar {
+    min-height: 82px;
+  }
+
+  .error-main {
+    padding: 56px 0 76px;
+  }
+
+  .error-code {
+    font-size: clamp(8rem, 46vw, 11.5rem);
+  }
+
+  .error-copy h1 {
+    font-size: clamp(2.8rem, 14vw, 4.6rem);
+  }
+
+  .error-actions {
+    display: grid;
+  }
+
+  .error-button {
+    width: 100%;
+  }
+
+  .error-note {
+    padding: 28px 22px;
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .error-button,
+  .error-nav .primary {
+    transition: none;
+  }
+
+  .error-button:hover,
+  .error-nav .primary:hover {
+    transform: none;
+  }
+}
